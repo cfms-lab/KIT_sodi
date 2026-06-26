@@ -197,8 +197,31 @@ function authHeaders(useUser){
 }
 function isLoggedIn(){return !!(SESSION&&SESSION.access_token);}
 
+// 만료된 토큰을 refresh_token으로 갱신
+async function refreshToken(){
+  if(!(SESSION&&SESSION.refresh_token)) return false;
+  try{
+    const r=await fetch(CFG.url+'/auth/v1/token?grant_type=refresh_token',
+      {method:"POST",headers:{apikey:CFG.key,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:SESSION.refresh_token})});
+    if(!r.ok) return false;
+    const d=await r.json();
+    SESSION={access_token:d.access_token,refresh_token:d.refresh_token||SESSION.refresh_token,email:SESSION.email};
+    localStorage.setItem("cfms_session",JSON.stringify(SESSION));
+    return true;
+  }catch(e){ return false; }
+}
+
 async function api(path,opts={}){
-  const res=await fetch(CFG.url+path,opts);
+  let res=await fetch(CFG.url+path,opts);
+  // 토큰 만료(401)면 갱신 후 1회 재시도
+  if(res.status===401 && isLoggedIn() && opts.headers && /Bearer/.test(opts.headers.Authorization||"")){
+    if(await refreshToken()){
+      opts.headers.Authorization="Bearer "+SESSION.access_token;
+      res=await fetch(CFG.url+path,opts);
+    }else{
+      toast("세션이 만료되었습니다. 다시 로그인해 주세요."); logout();
+    }
+  }
   if(!res.ok){let t=await res.text();throw new Error(res.status+" "+t);}
   const txt=await res.text(); return txt?JSON.parse(txt):null;
 }
