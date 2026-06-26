@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CFMS 데이터 백업</title>
+<style>
+  body{margin:0;font-family:"Segoe UI","Malgun Gothic",sans-serif;background:#eef2f7;color:#1f2937;font-size:14px}
+  header{background:linear-gradient(135deg,#334155,#0f172a);color:#fff;padding:12px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  header h1{font-size:17px;margin:0}
+  a.home{color:#fff;text-decoration:none;font-size:13px;background:rgba(255,255,255,.18);padding:4px 11px;border-radius:12px}
+  .authbar{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:12px}
+  .authbar input{padding:5px 7px;border:1px solid rgba(255,255,255,.5);border-radius:5px;font-size:12px;background:rgba(255,255,255,.92)}
+  .pill{background:rgba(255,255,255,.15);padding:4px 10px;border-radius:12px}
+  .wrap{max-width:720px;margin:24px auto;padding:0 16px}
+  .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 4px 14px rgba(15,23,42,.06)}
+  .btn{background:#334155;color:#fff;border:none;padding:9px 16px;border-radius:7px;font-weight:600;cursor:pointer;font-size:14px}
+  .btn:hover{background:#0f172a} .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.g{background:#fff;color:#334155;border:1px solid #94a3b8}
+  .btn.sm{padding:6px 11px;font-size:12px}
+  label.chk{display:flex;align-items:center;gap:7px;font-size:13px;margin:10px 0}
+  .warn{background:#fff4e5;border:1px solid #ffd28a;color:#8a5a00;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.55;margin:12px 0}
+  .log{font-size:12px;color:#475569;white-space:pre-wrap;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;margin-top:12px;max-height:240px;overflow:auto}
+  table.t{border-collapse:collapse;width:100%;font-size:13px;margin-top:8px}
+  table.t td,table.t th{border:1px solid #e2e8f0;padding:5px 8px;text-align:left}
+  table.t th{background:#f1f5f9}
+  h2{font-size:15px;margin:0 0 8px}
+  .muted{color:#64748b;font-size:12.5px}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;opacity:0;transition:.3s}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <a class="home" href="index.html">← 홈</a>
+  <h1>CFMS 데이터 백업</h1>
+  <div class="authbar" id="authbar"></div>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <h2>전체 데이터 백업</h2>
+    <p class="muted">Supabase의 모든 테이블(논문·시간표·취업)을 한 번에 받아 <b>복원용 SQL</b> 또는 <b>JSON</b>으로 저장합니다.
+    받은 파일을 GitHub 리포(KIT_sodi)의 <code>backup/</code> 폴더에 올려 커밋하면 백업이 됩니다.</p>
+
+    <label class="chk"><input type="checkbox" id="mask" checked> 학생 이름 마스킹(<b>공개 리포용</b> — 권장)</label>
+
+    <div class="warn">⚠ KIT_sodi는 <b>공개 리포</b>입니다. 학생 실명이 들어간 파일을 그대로 커밋하면 이름이 공개로 노출됩니다.
+    공개 리포에 올릴 백업은 위 <b>이름 마스킹</b>을 켠 채로 받으세요. 실명이 포함된 전체 백업이 필요하면 마스킹을 끄고 받아 <b>개인 PC나 비공개 저장소</b>에만 보관하세요.</div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" id="btnSql" onclick="backup('sql')">복원용 SQL 받기</button>
+      <button class="btn g" id="btnJson" onclick="backup('json')">JSON 받기</button>
+      <button class="btn g sm" onclick="openConfig()" title="연결설정">⚙</button>
+    </div>
+    <div class="log" id="log" style="display:none"></div>
+  </div>
+
+  <div class="card">
+    <h2>복원 방법</h2>
+    <p class="muted">받은 <b>복원용 SQL</b>을 Supabase의 <b>SQL Editor</b>에 붙여넣고 Run 하면, 각 테이블을 비우고 백업 시점 데이터로 되돌립니다.
+    (스키마(테이블 구조)는 기존 <code>schema_*.sql</code>로 먼저 만들어져 있어야 합니다.)</p>
+  </div>
+</div>
+
+<!-- 설정 모달 -->
+<div class="card" id="cfgBox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);margin:0;border-radius:0;display:none;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:10px;padding:18px;width:520px;max-width:94vw">
+    <h2>Supabase 연결 설정</h2>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <label style="font-size:11px;color:#555">Project URL<input id="cfgUrl" style="width:100%;padding:7px;border:1px solid #cbd5e1;border-radius:6px"></label>
+      <label style="font-size:11px;color:#555">anon public key<input id="cfgKey" style="width:100%;padding:7px;border:1px solid #cbd5e1;border-radius:6px"></label>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px"><button class="btn" onclick="saveConfig()">저장</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function normUrl(u){return (u||"").trim().replace(/\/+$/,"").replace(/\/rest\/v1$/i,"").replace(/\/auth\/v1$/i,"").replace(/\/+$/,"");}
+const BAKED_URL="https://ijutjirouxgqcldjyhma.supabase.co";
+const BAKED_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdXRqaXJvdXhncWNsZGp5aG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDk4MDAsImV4cCI6MjA5Nzk4NTgwMH0.gIAwf6a2oY-DkTXaf5eM2L4ROMCKim5WsevGfjol7tE";
+let CFG={url:normUrl(localStorage.getItem("cfms_url")||BAKED_URL),key:(localStorage.getItem("cfms_key")||BAKED_KEY).trim()};
+let SESSION=JSON.parse(localStorage.getItem("cfms_session")||"null");
+function isIn(){return !!(SESSION&&SESSION.access_token);}
+function authHeaders(u){const h={apikey:CFG.key};h.Authorization="Bearer "+((u&&isIn())?SESSION.access_token:CFG.key);return h;}
+let tT;function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(tT);tT=setTimeout(()=>t.classList.remove("show"),2600);}
+
+// 백업 대상: jobgis_jobs 는 로그인 시 실명 테이블, 비로그인 시 마스킹 뷰
+const TABLES=[
+  {t:"papers"}, {t:"tt_courses"}, {t:"tt_professors"}, {t:"tt_rooms"},
+  {t:"jobgis_jobs", sensitive:true}, {t:"jobgis_office_types"}
+];
+
+async function fetchTable(t){
+  // 민감 테이블은 로그인 시 실명 테이블에서, 아니면 공개 뷰에서
+  let ep=t;
+  if(t==="jobgis_jobs" && !isIn()) ep="jobgis_jobs_public";
+  const r=await fetch(CFG.url+"/rest/v1/"+ep+"?select=*",{headers:authHeaders(t==="jobgis_jobs")});
+  if(!r.ok) throw new Error(t+": "+r.status);
+  return await r.json();
+}
+
+function sqlEsc(v){ if(v==null) return "NULL"; return "'"+String(v).replace(/'/g,"''")+"'"; }
+function tableToSQL(t, rows, mask){
+  if(!rows.length) return `-- ${t}: 0 rows\n`;
+  const cols=Object.keys(rows[0]).filter(c=>c!=="id");
+  let s=`\n-- ===== ${t} (${rows.length} rows) =====\ntruncate table public.${t} restart identity;\n`;
+  for(const r of rows){
+    const vals=cols.map(c=>{
+      let v=r[c];
+      if(mask && t==="jobgis_jobs" && c==="sStudentName") v="OOO";
+      return sqlEsc(v);
+    });
+    s+=`insert into public.${t} (${cols.map(c=>'"'+c+'"').join(",")}) values (${vals.join(",")});\n`;
+  }
+  return s;
+}
+function maskRows(t, rows, mask){
+  if(!(mask && t==="jobgis_jobs")) return rows;
+  return rows.map(r=>({...r, sStudentName:"OOO"}));
+}
+
+function download(name, text){
+  const blob=new Blob([text],{type:"text/plain;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+}
+function today(){const d=new Date();const p=n=>("0"+n).slice(-2);return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate());}
+
+async function backup(fmt){
+  if(!CFG.url||!CFG.key){toast("연결설정(⚙)을 먼저 입력하세요");return;}
+  const mask=document.getElementById("mask").checked;
+  if(!mask && !confirm("학생 실명이 포함된 전체 백업입니다.\n공개 리포(KIT_sodi)에는 올리지 마세요. 계속할까요?")) return;
+  if(!isIn() && !mask){ toast("실명 백업은 로그인이 필요합니다(비로그인은 자동 마스킹)."); }
+  const log=document.getElementById("log"); log.style.display="block"; log.textContent="";
+  const ln=s=>{log.textContent+=s+"\n";};
+  document.getElementById("btnSql").disabled=document.getElementById("btnJson").disabled=true;
+  try{
+    const data={}; let sql="-- CFMS 데이터 백업 "+new Date().toISOString()+(mask?" (이름 마스킹)":" (실명 포함)")+"\n";
+    for(const {t} of TABLES){
+      ln("받는 중: "+t+" …");
+      const rows=await fetchTable(t);
+      data[t]=maskRows(t,rows,mask);
+      sql+=tableToSQL(t,rows,mask);
+      ln("  "+t+": "+rows.length+"건");
+    }
+    const suffix=(mask?"_masked":"_FULL")+"_"+today();
+    if(fmt==="sql"){ download("cfms_restore"+suffix+".sql", sql); ln("→ SQL 다운로드 완료"); }
+    else { download("cfms_backup"+suffix+".json", JSON.stringify(data,null,1)); ln("→ JSON 다운로드 완료"); }
+    toast("백업 완료");
+  }catch(e){ ln("오류: "+e.message); toast("실패: "+e.message.slice(0,80)); }
+  finally{ document.getElementById("btnSql").disabled=document.getElementById("btnJson").disabled=false; }
+}
+
+/* 로그인 (포털과 공유) */
+async function login(){
+  const email=document.getElementById("liEmail").value.trim(),pw=document.getElementById("liPw").value;
+  if(!email||!pw){toast("이메일/비밀번호 입력");return;}
+  try{const r=await fetch(CFG.url+"/auth/v1/token?grant_type=password",{method:"POST",headers:{apikey:CFG.key,"Content-Type":"application/json"},body:JSON.stringify({email,password:pw})});
+    if(!r.ok)throw 0; const d=await r.json(); SESSION={access_token:d.access_token,email};
+    localStorage.setItem("cfms_session",JSON.stringify(SESSION)); toast("로그인됨(실명 백업 가능)"); renderAuth();
+  }catch(e){toast("로그인 실패");}
+}
+function logout(){SESSION=null;localStorage.removeItem("cfms_session");renderAuth();}
+function renderAuth(){const bar=document.getElementById("authbar");
+  if(isIn()) bar.innerHTML=`<span class="pill">✔ ${SESSION.email}</span><button class="btn g sm" onclick="logout()">로그아웃</button>`;
+  else bar.innerHTML=`<input id="liEmail" placeholder="이메일" style="width:140px"><input id="liPw" type="password" placeholder="비밀번호" style="width:110px"><button class="btn sm" onclick="login()">로그인</button>`;
+}
+function openConfig(){document.getElementById("cfgUrl").value=CFG.url;document.getElementById("cfgKey").value=CFG.key;document.getElementById("cfgBox").style.display="flex";}
+function saveConfig(){CFG={url:normUrl(document.getElementById("cfgUrl").value),key:document.getElementById("cfgKey").value.trim()};
+  localStorage.setItem("cfms_url",CFG.url);localStorage.setItem("cfms_key",CFG.key);document.getElementById("cfgBox").style.display="none";toast("저장됨");}
+renderAuth();
+</script>
+</body>
+</html>
