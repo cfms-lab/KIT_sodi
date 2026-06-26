@@ -303,7 +303,7 @@ function renderPaper(p,i){const st=p.PrintStatus;let x=[];
   const doiLink=p.DOI?`<a class="doi" href="https://dx.doi.org/${esc(p.DOI)}" target="_blank">DOI</a>`:"";
   let access="";
   if(isLoggedIn()){
-    if(p.PDF) access=`<button class="pdf" onclick="openPdf('${esc(p.PDF).replace(/'/g,"\\'")}')">PDF</button>`;
+    if(p.PDF) access=`<button class="pdf" onclick="openPdf(${p.ID},'${esc(p.PDF).replace(/'/g,"\\'")}')">PDF</button>`;
     else if(p.DOI) access=doiLink;
   }else{
     access=doiLink; // 비로그인: DOI 링크만 (PDF 비공개)
@@ -373,17 +373,21 @@ async function deletePaper(){
   catch(e){document.getElementById("editErr").textContent="삭제 실패: "+e.message.slice(0,160);}
 }
 
-/* ===== PDF (Supabase Storage, 비공개 버킷 'pdfs') ===== */
+/* ===== PDF (Supabase Storage, 비공개 버킷 'pdfs') =====
+   저장 키는 한글/특수문자 문제를 피하기 위해 '논문ID.확장자' (ASCII) 로 통일.
+   원본 파일명은 DB의 PDF 필드에 그대로 유지되고, 매칭은 ID로 함.            */
 const PDF_BUCKET="pdfs";
-async function openPdf(name){
+function fileExt(name){const m=(name||"").match(/\.([A-Za-z0-9]+)$/);return m?m[1].toLowerCase():"pdf";}
+function pdfKey(id,name){return id+"."+fileExt(name);}   // 예: 968.pdf
+async function openPdf(id,name){
   if(!isLoggedIn()){toast("PDF는 로그인 후 볼 수 있습니다.");return;}
+  const key=pdfKey(id,name);
   try{
-    const r=await api('/storage/v1/object/sign/'+PDF_BUCKET+'/'+encodeURIComponent(name),
+    const r=await api('/storage/v1/object/sign/'+PDF_BUCKET+'/'+encodeURIComponent(key),
       {method:"POST",headers:authHeaders(true),body:JSON.stringify({expiresIn:300})});
-    // r.signedURL 예: "/object/sign/pdfs/<file>?token=..."
     window.open(CFG.url+'/storage/v1'+r.signedURL,"_blank");
   }catch(e){
-    if(/not.*found|404/i.test(e.message)) toast("이 PDF는 아직 클라우드에 업로드되지 않았습니다: "+name);
+    if(/not.*found|404/i.test(e.message)) toast("아직 업로드되지 않은 PDF입니다: "+name);
     else toast("PDF 열기 실패: "+e.message.slice(0,120));
   }
 }
@@ -396,29 +400,35 @@ async function uploadPdfs(){
   const files=[...document.getElementById("upFiles").files];
   if(!files.length){toast("PDF 폴더 또는 파일을 선택하세요.");return;}
   const onlyMissing=document.getElementById("upMissing").checked;
-  // DB에서 참조하는 PDF 파일명 집합 (선택: 참조되는 것만 업로드)
-  const referenced=new Set(PAPERS.map(p=>p.PDF).filter(Boolean));
-  const log=document.getElementById("upLog"); const bar=document.getElementById("upBar");
-  const info=document.getElementById("upInfo");
-  let done=0,ok=0,skip=0,fail=0;
-  const targets=files.filter(f=>!onlyMissing || referenced.has(f.name));
-  info.textContent=`대상 ${targets.length}개 / 선택 ${files.length}개`;
+  // 원본 파일명 -> 이를 참조하는 논문들(ID 기준 저장키 생성)
+  const byName=new Map();
+  PAPERS.forEach(p=>{if(p.PDF){if(!byName.has(p.PDF))byName.set(p.PDF,[]);byName.get(p.PDF).push(p);}});
+  const log=document.getElementById("upLog"),bar=document.getElementById("upBar"),info=document.getElementById("upInfo");
   const logln=s=>{log.textContent+=s+"\n";log.scrollTop=log.scrollHeight;};
-  document.getElementById("upGo").disabled=true;
-  async function one(f){
-    try{
-      const res=await fetch(CFG.url+'/storage/v1/object/'+PDF_BUCKET+'/'+encodeURIComponent(f.name),
-        {method:"POST",headers:{apikey:CFG.key,Authorization:"Bearer "+SESSION.access_token,"x-upsert":"true"},body:f});
-      if(res.ok){ok++;}
-      else{const t=await res.text(); if(/exists/i.test(t)){skip++;} else {fail++;logln("실패: "+f.name+" ("+res.status+")");}}
-    }catch(e){fail++;logln("실패: "+f.name+" "+e.message.slice(0,60));}
-    done++; bar.style.width=Math.round(done/targets.length*100)+"%";
-    info.textContent=`진행 ${done}/${targets.length}  ·  성공 ${ok}  건너뜀 ${skip}  실패 ${fail}`;
+  let done=0,ok=0,skip=0,fail=0;
+  // 업로드 작업 목록: (파일, 저장키) 쌍 — 한 파일이 여러 논문에 연결되면 각각 저장
+  const jobs=[];
+  for(const f of files){
+    const ps=byName.get(f.name);
+    if(ps&&ps.length){ for(const p of ps) jobs.push({f,key:pdfKey(p.ID,f.name)}); }
+    else if(!onlyMissing){ skip++; }   // 참조 없는 파일은 ID 키를 만들 수 없어 건너뜀
   }
-  // 동시 4개씩
-  const q=[...targets]; const workers=Array.from({length:4},async()=>{while(q.length)await one(q.shift());});
+  if(!jobs.length){toast("업로드할 (논문에 연결된) PDF가 없습니다. 폴더 선택을 확인하세요.");return;}
+  info.textContent=`업로드 대상 ${jobs.length}건`;
+  document.getElementById("upGo").disabled=true;
+  async function one(job){
+    try{
+      const res=await fetch(CFG.url+'/storage/v1/object/'+PDF_BUCKET+'/'+encodeURIComponent(job.key),
+        {method:"POST",headers:{apikey:CFG.key,Authorization:"Bearer "+SESSION.access_token,"x-upsert":"true"},body:job.f});
+      if(res.ok){ok++;}
+      else{const t=await res.text();fail++;logln("실패: "+job.f.name+" → "+job.key+" ("+res.status+") "+t.slice(0,80));}
+    }catch(e){fail++;logln("실패: "+job.f.name+" "+e.message.slice(0,60));}
+    done++;bar.style.width=Math.round(done/jobs.length*100)+"%";
+    info.textContent=`진행 ${done}/${jobs.length}  ·  성공 ${ok}  실패 ${fail}  (참조없음 건너뜀 ${skip})`;
+  }
+  const q=[...jobs];const workers=Array.from({length:4},async()=>{while(q.length)await one(q.shift());});
   await Promise.all(workers);
-  logln(`완료: 성공 ${ok}, 건너뜀 ${skip}, 실패 ${fail}`);
+  logln(`완료: 성공 ${ok}, 실패 ${fail}, 참조없음 건너뜀 ${skip}`);
   document.getElementById("upGo").disabled=false;
   toast(`업로드 완료 (성공 ${ok}, 실패 ${fail})`);
 }
