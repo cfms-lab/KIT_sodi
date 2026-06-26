@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수업 시간표 (Cloud)</title>
+<style>
+  :root{--blue:#1565c0;--blue-d:#0d47a1;--bg:#eef1f5;--line:#cbd5e1;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI","Malgun Gothic",sans-serif;background:var(--bg);color:#1f2937;font-size:13px}
+  header{background:linear-gradient(135deg,var(--blue),var(--blue-d));color:#fff;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  header h1{font-size:17px;margin:0;font-weight:600}
+  .authbar{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px}
+  .authbar input{padding:5px 7px;border:1px solid rgba(255,255,255,.5);border-radius:5px;font-size:12px;background:rgba(255,255,255,.92)}
+  .pill{background:rgba(255,255,255,.15);padding:4px 10px;border-radius:12px}
+  .toolbar{background:#fff;border-bottom:1px solid var(--line);padding:8px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .toolbar label{font-size:12px;color:#555;display:flex;gap:5px;align-items:center}
+  select,.btn{font-size:13px}
+  select{padding:5px 7px;border:1px solid var(--line);border-radius:6px;background:#fff}
+  .btn{background:var(--blue);color:#fff;border:none;padding:7px 13px;border-radius:6px;cursor:pointer;font-weight:600}
+  .btn:hover{background:var(--blue-d)} .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.secondary{background:#fff;color:var(--blue);border:1px solid var(--blue)}
+  .btn.sm{padding:5px 9px;font-size:12px}
+  .banner{background:#fff8e1;border-bottom:1px solid #ffe082;padding:8px 16px;font-size:13px;color:#795548;display:none}
+  .wrap{padding:12px;overflow:auto}
+  table.tt{border-collapse:collapse;width:100%;min-width:880px;background:#fff}
+  table.tt th,table.tt td{border:1px solid var(--line);padding:2px;text-align:center;vertical-align:top}
+  table.tt th{background:#f1f5f9;font-weight:600;font-size:12px;position:sticky;top:0;z-index:2}
+  table.tt th.corner{left:0;z-index:3}
+  .rowlabel{background:#f8fafc;font-weight:600;white-space:nowrap;font-size:12px;min-width:84px;position:sticky;left:0;z-index:1}
+  .dayfirst{border-top:2px solid #475569 !important}
+  td.cell{height:34px;min-width:58px}
+  td.cell.drop{outline:3px solid var(--blue);outline-offset:-3px;background:#e3f2fd}
+  .course{border:1px solid rgba(0,0,0,.35);border-radius:5px;padding:2px 4px;margin:1px;font-size:11px;line-height:1.25;cursor:grab;user-select:none;touch-action:none;word-break:break-all}
+  .course small{opacity:.8}
+  .course.dim{opacity:.18}
+  .course.hl{outline:2px solid #d32f2f;box-shadow:0 0 0 2px rgba(211,47,47,.25)}
+  .course.sel{outline:2px solid #1565c0;box-shadow:0 0 0 2px rgba(21,101,192,.45)}
+  .dragclone{position:fixed;z-index:999;pointer-events:none;opacity:.92;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+  .dragclone.copying{outline:2px dashed #2e7d32}
+  .dragclone.copying::after{content:"＋복사";position:absolute;top:-9px;right:-9px;background:#2e7d32;color:#fff;font-size:10px;padding:1px 5px;border-radius:8px}
+  .legend{display:flex;flex-wrap:wrap;gap:6px;padding:6px 16px;background:#fff;border-bottom:1px solid var(--line)}
+  .legend .lg{font-size:11px;padding:2px 8px;border-radius:10px;border:1px solid rgba(0,0,0,.25);cursor:pointer}
+  .legend .lg.off{opacity:.35}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:50}
+  .modal{background:#fff;border-radius:10px;padding:18px;width:460px;max-width:94vw;max-height:90vh;overflow:auto}
+  .modal h2{margin:0 0 12px;font-size:16px;color:var(--blue-d)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .grid label{display:flex;flex-direction:column;font-size:11px;color:#555;gap:3px}
+  .grid label.full{grid-column:1/3}
+  .grid input,.grid select{padding:6px;border:1px solid var(--line);border-radius:6px;font-size:13px}
+  .modal-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:14px}
+  .err{color:#c62828;font-size:12px;margin-top:6px}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;opacity:0;transition:.3s;z-index:99}
+  .toast.show{opacity:1}
+  .hintbar{font-size:11px;color:#777;padding:4px 16px}
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html" style="color:#fff;text-decoration:none;font-size:13px;background:rgba(255,255,255,.18);padding:4px 11px;border-radius:12px">← 홈</a>
+  <h1>수업 시간표</h1>
+  <span style="font-size:12px;opacity:.85">클라우드 · 드래그 배정</span>
+  <div class="authbar" id="authbar"></div>
+</header>
+<div class="banner" id="banner"></div>
+
+<div class="toolbar">
+  <label>학기 <select id="semSel" onchange="render()"></select></label>
+  <label>필터 <select id="filterType" onchange="onFilterTypeChange()">
+    <option value="none">없음(전체)</option>
+    <option value="prof">교수별</option>
+    <option value="year">학년별</option>
+    <option value="room">강의실별</option>
+  </select></label>
+  <select id="filterVal" onchange="render()" style="display:none"></select>
+  <button class="btn secondary sm" id="btnAdd" onclick="openEdit(null)" disabled>＋ 과목 추가</button>
+  <button class="btn secondary sm" id="btnClone" onclick="openClone()" disabled>학기 복제</button>
+  <button class="btn secondary sm" onclick="reload()">새로고침</button>
+</div>
+<div class="legend" id="legend"></div>
+<div class="hintbar" id="hintbar"></div>
+
+<div class="wrap"><div id="gridArea">데이터 로딩 중…</div></div>
+
+<!-- 편집 모달 -->
+<div class="modal-bg" id="modalBg"><div class="modal">
+  <h2 id="modalTitle">과목 추가</h2>
+  <input type="hidden" id="eId">
+  <div class="grid">
+    <label class="full">과목명<input id="eName"></label>
+    <label>교수<select id="eProf"></select></label>
+    <label>분류<select id="eType"></select></label>
+    <label>학년<select id="eYear"></select></label>
+    <label>강의실<select id="eRoom"></select></label>
+    <label>요일<select id="eDay"></select></label>
+    <label>교시<select id="eTime"></select></label>
+  </div>
+  <div class="err" id="editErr"></div>
+  <div class="modal-actions">
+    <button class="btn" style="background:#c62828" id="eDelete" onclick="deleteCourse()">삭제</button>
+    <button class="btn secondary" onclick="closeEdit()">취소</button>
+    <button class="btn" id="eSave" onclick="saveCourse()">저장</button>
+  </div>
+</div></div>
+
+<!-- 학기 복제 모달 -->
+<div class="modal-bg" id="cloneBg"><div class="modal" style="width:480px">
+  <h2>학기 복제 · 새 학기 만들기</h2>
+  <p style="font-size:12px;color:#666">이전 학기를 복제해 새 학기를 만듭니다. 만든 뒤 드래그로 자리만 조정하면 됩니다.</p>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <label style="font-size:12px;color:#555">원본 학기 (복제할 학기)
+      <select id="clSrc" style="width:100%;padding:6px;border:1px solid var(--line);border-radius:6px"></select></label>
+    <label style="font-size:12px;color:#555">대상 학기 (새로 만들/채울 학기, 예: 2026-2)
+      <input id="clTgt" style="width:100%;padding:6px;border:1px solid var(--line);border-radius:6px"></label>
+    <label style="font-size:12px;color:#555">복제 범위
+      <select id="clMode" style="width:100%;padding:6px;border:1px solid var(--line);border-radius:6px">
+        <option value="full">과목 + 교수 + 강의실 전체 복제</option>
+        <option value="meta">교수·강의실만 (과목은 직접 추가)</option>
+      </select></label>
+    <label style="font-size:12px;color:#555;display:flex;align-items:center;gap:6px">
+      <input type="checkbox" id="clClear"> 대상 학기에 이미 있는 데이터를 먼저 비우기(삭제)</label>
+  </div>
+  <div id="clLog" style="font-size:11px;color:#666;margin-top:8px;white-space:pre-wrap"></div>
+  <div class="err" id="clErr"></div>
+  <div class="modal-actions">
+    <button class="btn secondary" onclick="closeClone()">취소</button>
+    <button class="btn" id="clGo" onclick="runClone()">복제 실행</button>
+  </div>
+</div></div>
+
+<!-- 설정 모달 -->
+<div class="modal-bg" id="cfgBg"><div class="modal" style="width:520px">
+  <h2>Supabase 연결 설정</h2>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <label style="font-size:11px;color:#555">Project URL<input id="cfgUrl" placeholder="https://xxxxx.supabase.co" style="width:100%;padding:7px;border:1px solid var(--line);border-radius:6px"></label>
+    <label style="font-size:11px;color:#555">anon public key<input id="cfgKey" placeholder="eyJhbGciOi..." style="width:100%;padding:7px;border:1px solid var(--line);border-radius:6px"></label>
+  </div>
+  <div class="err" id="cfgErr"></div>
+  <div class="modal-actions"><button class="btn" onclick="saveConfig()">저장 후 연결</button></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== 상수 ===== */
+const DAYS=["월","화","수","목","금"];
+const YEARS=["1학년","2학년","3학년","4학년","대학원"];
+const PERIODS=["1","2","3","4","5","6","7","8","9","A","B","C"];
+const TYPES=["전필","전선","교양","전문교양","MSC","전공","대학원"];
+const periodLabel=p=>p+"교시";
+
+/* ===== Supabase 설정 (UPJUK과 같은 프로젝트) ===== */
+function normUrl(u){return (u||"").trim().replace(/\/+$/,"").replace(/\/rest\/v1$/i,"").replace(/\/auth\/v1$/i,"").replace(/\/+$/,"");}
+const BAKED_URL="https://ijutjirouxgqcldjyhma.supabase.co";
+const BAKED_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdXRqaXJvdXhncWNsZGp5aG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDk4MDAsImV4cCI6MjA5Nzk4NTgwMH0.gIAwf6a2oY-DkTXaf5eM2L4ROMCKim5WsevGfjol7tE";
+let CFG={url:normUrl(localStorage.getItem("cfms_url")||BAKED_URL),key:(localStorage.getItem("cfms_key")||BAKED_KEY).trim()};
+let SESSION=JSON.parse(localStorage.getItem("cfms_session")||"null");
+let COURSES=[],PROFS=[],ROOMS=[];
+
+function isLoggedIn(){return !!(SESSION&&SESSION.access_token);}
+function authHeaders(useUser){const h={apikey:CFG.key,"Content-Type":"application/json"};
+  h.Authorization="Bearer "+((useUser&&isLoggedIn())?SESSION.access_token:CFG.key);return h;}
+async function api(path,opts={}){const r=await fetch(CFG.url+path,opts);
+  if(!r.ok){throw new Error(r.status+" "+await r.text());}const t=await r.text();return t?JSON.parse(t):null;}
+
+/* ===== 로드 ===== */
+async function reload(){await loadAll();}
+async function loadAll(){
+  try{
+    const [c,p,rm]=await Promise.all([
+      api('/rest/v1/tt_courses?select=*',{headers:authHeaders(false)}),
+      api('/rest/v1/tt_professors?select=*',{headers:authHeaders(false)}),
+      api('/rest/v1/tt_rooms?select=*',{headers:authHeaders(false)})
+    ]);
+    COURSES=c;PROFS=p;ROOMS=rm;
+    document.getElementById("banner").style.display="none";
+    initUI();
+  }catch(e){showBanner("불러오기 실패. 스키마/설정 확인. ("+e.message.slice(0,120)+")");}
+}
+function semesters(){return [...new Set(COURSES.map(c=>c.semester))].sort().reverse();}
+function profColor(sem,name){const p=PROFS.find(x=>x.semester===sem&&x.sProfName===name);return p&&p.sProfColor?p.sProfColor:"#ffffff";}
+
+function initUI(){
+  const sems=semesters();
+  const semSel=document.getElementById("semSel");
+  if(!semSel.value||!sems.includes(semSel.value))
+    semSel.innerHTML=sems.map(s=>`<option value="${s}">${s.replace('-','년 ')}학기</option>`).join("");
+  renderAuthbar(); render();
+}
+
+/* ===== 렌더 ===== */
+function curSem(){return document.getElementById("semSel").value;}
+function curCourses(){return COURSES.filter(c=>c.semester===curSem());}
+function periodsInUse(){
+  const set=new Set(PERIODS);
+  curCourses().forEach(c=>{if(c.sClassTime)set.add(c.sClassTime);});
+  return PERIODS.filter(p=>set.has(p));
+}
+function getFilter(){return {type:document.getElementById("filterType").value, val:document.getElementById("filterVal").value};}
+function onFilterTypeChange(){
+  const t=document.getElementById("filterType").value, fv=document.getElementById("filterVal");
+  if(t==="none"){fv.style.display="none";render();return;}
+  let opts=[];
+  if(t==="prof") opts=[...new Set(curCourses().map(c=>c.sClassProfName).filter(Boolean))];
+  if(t==="year") opts=YEARS;
+  if(t==="room") opts=[...new Set(curCourses().map(c=>c.sClassRoom).filter(Boolean))];
+  fv.innerHTML=opts.map(o=>`<option value="${o}">${o}</option>`).join("");
+  fv.style.display=""; render();
+}
+function matchFilter(c){
+  const f=getFilter(); if(f.type==="none")return true;
+  if(f.type==="prof")return c.sClassProfName===f.val;
+  if(f.type==="year")return c.sClassYear===f.val;
+  if(f.type==="room")return c.sClassRoom===f.val;
+  return true;
+}
+function esc(s){return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+function render(){
+  const sem=curSem(); const periods=periodsInUse();
+  const courses=curCourses();
+  let h='<table class="tt"><thead><tr><th class="corner rowlabel">요일 / 학년</th>';
+  for(const p of periods) h+=`<th>${periodLabel(p)}</th>`;
+  h+='</tr></thead><tbody>';
+  for(let di=0;di<DAYS.length;di++){
+    const day=DAYS[di];
+    for(let yi=0;yi<YEARS.length;yi++){
+      const year=YEARS[yi];
+      const first=yi===0?' dayfirst':'';
+      h+=`<tr><td class="rowlabel${first}">${yi===0?'<b>'+day+'</b> ':''}${year}</td>`;
+      for(const p of periods){
+        const cell=courses.filter(c=>c.sClassDay===day&&c.sClassYear===year&&c.sClassTime===p);
+        h+=`<td class="cell${first}" data-day="${day}" data-year="${year}" data-period="${p}">`;
+        for(const c of cell){
+          const col=profColor(sem,c.sClassProfName);
+          const dim=matchFilter(c)?'':' dim';
+          const sel=c.id===selectId?' sel':'';
+          h+=`<div class="course${dim}${sel}" data-id="${c.id}" style="background:${esc(col)}" title="${esc(c.sClassProfName)} · ${esc(c.sClassType)}" `+
+             `onpointerdown="dragStart(event)" ondblclick="openEdit(${c.id})">`+
+             `${esc(c.sClassName)}<br><small>${esc(c.sClassRoom||'')}</small></div>`;
+        }
+        h+=`</td>`;
+      }
+      h+=`</tr>`;
+    }
+  }
+  h+='</tbody></table>';
+  document.getElementById("gridArea").innerHTML=h;
+  renderLegend();
+  document.getElementById("hintbar").textContent = isLoggedIn()
+    ? "드래그=이동 · Alt+드래그=복사 · 클릭 후 Delete=삭제 · 더블클릭=수정"
+    : "보기 전용입니다. 편집하려면 우측 상단에서 로그인하세요.";
+}
+function renderLegend(){
+  const sem=curSem();
+  const names=[...new Set(curCourses().map(c=>c.sClassProfName).filter(Boolean))];
+  document.getElementById("legend").innerHTML=names.map(n=>
+    `<span class="lg" style="background:${esc(profColor(sem,n))}">${esc(n)}</span>`).join("");
+}
+
+/* ===== 선택 / 드래그 (포인터 기반, 마우스+터치) =====
+   드래그=이동, Alt+드래그=복사, 안 움직이면 클릭=선택(이후 Delete로 삭제) */
+let drag=null, selectId=null;
+function dragStart(ev){
+  if(!isLoggedIn())return;
+  const el=ev.currentTarget; ev.preventDefault();
+  const id=+el.dataset.id;
+  const rect=el.getBoundingClientRect();
+  const clone=el.cloneNode(true);
+  clone.classList.add("dragclone");
+  clone.style.width=rect.width+"px";
+  document.body.appendChild(clone);
+  drag={id,el,clone,ox:ev.clientX-rect.left,oy:ev.clientY-rect.top,sx:ev.clientX,sy:ev.clientY,
+        lastCell:null,moved:false,alt:ev.altKey};
+  clone.style.display="none"; // 움직이기 전엔 숨김(클릭과 구분)
+  el.setPointerCapture&&el.setPointerCapture(ev.pointerId);
+  window.addEventListener("pointermove",dragMove);
+  window.addEventListener("pointerup",dragEnd);
+}
+function moveClone(x,y){drag.clone.style.left=(x-drag.ox)+"px";drag.clone.style.top=(y-drag.oy)+"px";}
+function cellAt(x,y){const dsp=drag.clone.style.display;drag.clone.style.display="none";
+  const t=document.elementFromPoint(x,y);drag.clone.style.display=dsp;return t?t.closest("td.cell"):null;}
+function dragMove(ev){
+  if(!drag)return;
+  drag.alt=ev.altKey;
+  if(!drag.moved && Math.hypot(ev.clientX-drag.sx,ev.clientY-drag.sy)>5){
+    drag.moved=true; drag.clone.style.display=""; // 실제 드래그 시작 → 클론 표시
+  }
+  if(!drag.moved)return;
+  drag.clone.classList.toggle("copying",drag.alt);
+  moveClone(ev.clientX,ev.clientY);
+  const cell=cellAt(ev.clientX,ev.clientY);
+  if(drag.lastCell&&drag.lastCell!==cell)drag.lastCell.classList.remove("drop");
+  if(cell)cell.classList.add("drop");
+  drag.lastCell=cell;
+}
+async function dragEnd(ev){
+  window.removeEventListener("pointermove",dragMove);
+  window.removeEventListener("pointerup",dragEnd);
+  const d=drag; drag=null; if(!d)return;
+  d.clone.remove();
+  const cell=d.lastCell; if(cell)cell.classList.remove("drop");
+  const c=COURSES.find(x=>x.id===d.id);
+  if(!c)return;
+  // 안 움직였으면 클릭 = 선택 토글
+  if(!d.moved){ selectId=(selectId===d.id?null:d.id); render(); return; }
+  if(!cell)return; // 그리드 밖에 떨굼
+  const day=cell.dataset.day, year=cell.dataset.year, period=cell.dataset.period;
+  const alt=d.alt||(ev&&ev.altKey);
+  if(alt){
+    // 복사: 새 과목 생성
+    const obj={semester:c.semester,sClassProfName:c.sClassProfName,sClassYear:year,sClassName:c.sClassName,
+      sClassDay:day,sClassTime:period,sClassRoom:c.sClassRoom,sClassType:c.sClassType};
+    try{
+      const r=await api('/rest/v1/tt_courses',{method:"POST",headers:Object.assign(authHeaders(true),{Prefer:"return=representation"}),body:JSON.stringify(obj)});
+      COURSES.push(r[0]); render(); toast(`복사됨: ${c.sClassName} → ${day} ${year} ${period}교시`);
+    }catch(e){toast("복사 실패: "+e.message.slice(0,80));}
+    return;
+  }
+  // 이동
+  if(c.sClassDay===day&&c.sClassYear===year&&c.sClassTime===period)return;
+  const patch={sClassDay:day,sClassYear:year,sClassTime:period};
+  Object.assign(c,patch); render();
+  try{
+    await api('/rest/v1/tt_courses?id=eq.'+d.id,{method:"PATCH",headers:authHeaders(true),body:JSON.stringify(patch)});
+    toast(`${c.sClassName} → ${day} ${year} ${period}교시`);
+  }catch(e){toast("저장 실패: "+e.message.slice(0,80)); reload();}
+}
+// 선택된 과목을 Delete/Backspace 로 삭제
+window.addEventListener("keydown",function(e){
+  if((e.key==="Delete"||e.key==="Backspace") && selectId!=null && isLoggedIn()){
+    const tag=(e.target.tagName||"").toLowerCase();
+    if(tag==="input"||tag==="select"||tag==="textarea")return;
+    e.preventDefault();
+    const c=COURSES.find(x=>x.id===selectId);
+    if(c && confirm(`'${c.sClassName}' 과목을 삭제할까요?`)) doDeleteId(selectId);
+  }
+});
+async function doDeleteId(id){
+  try{
+    await api('/rest/v1/tt_courses?id=eq.'+id,{method:"DELETE",headers:authHeaders(true)});
+    COURSES=COURSES.filter(x=>x.id!=id);
+    if(selectId===id) selectId=null;
+    render(); toast("삭제되었습니다.");
+  }catch(e){toast("삭제 실패: "+e.message.slice(0,90));}
+}
+
+/* ===== CRUD ===== */
+function requireLogin(){if(!isLoggedIn()){toast("로그인 후 편집할 수 있습니다.");return false;}return true;}
+function fillSelect(id,opts,val){document.getElementById(id).innerHTML=opts.map(o=>`<option ${o===val?'selected':''}>${esc(o)}</option>`).join("");}
+function openEdit(id){
+  if(!requireLogin())return;
+  const sem=curSem();
+  const c=id!=null?COURSES.find(x=>x.id===id):null;
+  document.getElementById("modalTitle").textContent=c?"과목 수정":"과목 추가";
+  document.getElementById("eDelete").style.display=c?"inline-block":"none";
+  document.getElementById("editErr").textContent="";
+  document.getElementById("eId").value=c?c.id:"";
+  document.getElementById("eName").value=c?c.sClassName:"";
+  const profNames=[...new Set(PROFS.filter(p=>p.semester===sem&&p.sProfName).map(p=>p.sProfName))];
+  const roomNames=[...new Set(ROOMS.filter(r=>r.semester===sem&&r.sRoomName).map(r=>r.sRoomName))];
+  const typeOpts=[...new Set([...TYPES, ...COURSES.map(x=>x.sClassType).filter(Boolean), c&&c.sClassType].filter(Boolean))];
+  fillSelect("eType",typeOpts,c?c.sClassType:TYPES[0]);
+  fillSelect("eProf",profNames,c?c.sClassProfName:profNames[0]);
+  fillSelect("eRoom",roomNames,c?c.sClassRoom:roomNames[0]);
+  fillSelect("eYear",YEARS,c?c.sClassYear:YEARS[0]);
+  fillSelect("eDay",DAYS,c?c.sClassDay:DAYS[0]);
+  fillSelect("eTime",PERIODS,c?c.sClassTime:PERIODS[0]);
+  document.getElementById("modalBg").style.display="flex";
+}
+function closeEdit(){document.getElementById("modalBg").style.display="none";}
+function formObj(){const v=id=>document.getElementById(id).value;
+  return{semester:curSem(),sClassName:v("eName"),sClassProfName:v("eProf"),sClassType:v("eType"),
+    sClassYear:v("eYear"),sClassRoom:v("eRoom"),sClassDay:v("eDay"),sClassTime:v("eTime")};}
+async function saveCourse(){
+  if(!requireLogin())return;
+  const idv=document.getElementById("eId").value, obj=formObj();
+  document.getElementById("eSave").disabled=true;
+  try{
+    if(idv!==""){
+      await api('/rest/v1/tt_courses?id=eq.'+idv,{method:"PATCH",headers:Object.assign(authHeaders(true),{Prefer:"return=representation"}),body:JSON.stringify(obj)});
+      Object.assign(COURSES.find(x=>x.id==idv),obj);
+      toast("수정되었습니다.");
+    }else{
+      const r=await api('/rest/v1/tt_courses',{method:"POST",headers:Object.assign(authHeaders(true),{Prefer:"return=representation"}),body:JSON.stringify(obj)});
+      COURSES.push(r[0]); toast("추가되었습니다.");
+    }
+    closeEdit(); render();
+  }catch(e){document.getElementById("editErr").textContent="저장 실패: "+e.message.slice(0,140);}
+  finally{document.getElementById("eSave").disabled=false;}
+}
+async function deleteCourse(){
+  if(!requireLogin())return;
+  const idv=document.getElementById("eId").value; if(idv===""||!confirm("이 과목을 삭제할까요?"))return;
+  closeEdit(); await doDeleteId(+idv);
+}
+
+/* ===== 학기 복제 ===== */
+function openClone(){
+  if(!requireLogin())return;
+  const sems=semesters();
+  document.getElementById("clSrc").innerHTML=sems.map(s=>`<option ${s===curSem()?'':''}>${s}</option>`).join("");
+  // 원본 기본값: 대상과 다른 가장 최근 학기
+  const other=sems.find(s=>s!==curSem())||sems[0];
+  document.getElementById("clSrc").value=other;
+  document.getElementById("clTgt").value=curSem();
+  document.getElementById("clMode").value="full";
+  document.getElementById("clClear").checked=false;
+  document.getElementById("clLog").textContent="";document.getElementById("clErr").textContent="";
+  document.getElementById("cloneBg").style.display="flex";
+}
+function closeClone(){document.getElementById("cloneBg").style.display="none";}
+async function bulkInsert(table,rows){
+  if(!rows.length)return;
+  // 한 번에 최대 ~300건씩 나눠 전송
+  for(let i=0;i<rows.length;i+=300){
+    await api('/rest/v1/'+table,{method:"POST",
+      headers:Object.assign(authHeaders(true),{Prefer:"return=minimal"}),
+      body:JSON.stringify(rows.slice(i,i+300))});
+  }
+}
+async function runClone(){
+  if(!requireLogin())return;
+  const src=document.getElementById("clSrc").value;
+  const tgt=document.getElementById("clTgt").value.trim();
+  const mode=document.getElementById("clMode").value;
+  const clear=document.getElementById("clClear").checked;
+  const log=document.getElementById("clLog"); const errEl=document.getElementById("clErr"); errEl.textContent="";
+  if(!tgt){errEl.textContent="대상 학기를 입력하세요.";return;}
+  if(tgt===src){errEl.textContent="원본과 대상 학기가 같습니다.";return;}
+  document.getElementById("clGo").disabled=true;
+  const logln=s=>{log.textContent+=s+"\n";};
+  try{
+    if(clear){
+      logln("대상 학기 비우는 중…");
+      await api('/rest/v1/tt_courses?semester=eq.'+encodeURIComponent(tgt),{method:"DELETE",headers:authHeaders(true)});
+      await api('/rest/v1/tt_professors?semester=eq.'+encodeURIComponent(tgt),{method:"DELETE",headers:authHeaders(true)});
+      await api('/rest/v1/tt_rooms?semester=eq.'+encodeURIComponent(tgt),{method:"DELETE",headers:authHeaders(true)});
+    }
+    // 교수/강의실: 대상에 없는 이름만 복사 (비우기 시엔 모두 복사)
+    const tgtProf=clear?new Set():new Set(PROFS.filter(p=>p.semester===tgt).map(p=>p.sProfName));
+    const tgtRoom=clear?new Set():new Set(ROOMS.filter(r=>r.semester===tgt).map(r=>r.sRoomName));
+    const newProfs=PROFS.filter(p=>p.semester===src&&!tgtProf.has(p.sProfName))
+      .map(p=>({semester:tgt,sProfName:p.sProfName,sProfColor:p.sProfColor}));
+    const newRooms=ROOMS.filter(r=>r.semester===src&&!tgtRoom.has(r.sRoomName))
+      .map(r=>({semester:tgt,sRoomName:r.sRoomName}));
+    logln(`교수 ${newProfs.length} · 강의실 ${newRooms.length} 복사 중…`);
+    await bulkInsert("tt_professors",newProfs);
+    await bulkInsert("tt_rooms",newRooms);
+    let nC=0;
+    if(mode==="full"){
+      const newCourses=COURSES.filter(c=>c.semester===src).map(c=>({
+        semester:tgt,sClassProfName:c.sClassProfName,sClassYear:c.sClassYear,sClassName:c.sClassName,
+        sClassDay:c.sClassDay,sClassTime:c.sClassTime,sClassRoom:c.sClassRoom,sClassType:c.sClassType}));
+      nC=newCourses.length;
+      logln(`과목 ${nC}건 복사 중…`);
+      await bulkInsert("tt_courses",newCourses);
+    }
+    logln("완료! 새로고침합니다.");
+    toast(`${src} → ${tgt} 복제 완료 (과목 ${nC})`);
+    await loadAll();
+    const semSel=document.getElementById("semSel");
+    if(![...semSel.options].some(o=>o.value===tgt)){
+      // 옵션 목록 갱신
+      const sems=semesters(); semSel.innerHTML=sems.map(s=>`<option value="${s}">${s.replace('-','년 ')}학기</option>`).join("");
+    }
+    semSel.value=tgt; render(); closeClone();
+  }catch(e){errEl.textContent="복제 실패: "+e.message.slice(0,160);}
+  finally{document.getElementById("clGo").disabled=false;}
+}
+
+/* ===== 인증/설정 ===== */
+async function login(){
+  const email=document.getElementById("liEmail").value.trim(), pw=document.getElementById("liPw").value;
+  if(!email||!pw){toast("이메일/비밀번호 입력");return;}
+  try{const r=await api('/auth/v1/token?grant_type=password',{method:"POST",headers:{apikey:CFG.key,"Content-Type":"application/json"},body:JSON.stringify({email,password:pw})});
+    SESSION={access_token:r.access_token,email};localStorage.setItem("cfms_session",JSON.stringify(SESSION));
+    toast("로그인되었습니다.");renderAuthbar();render();
+  }catch(e){toast("로그인 실패: 이메일/비밀번호 확인");}
+}
+function logout(){SESSION=null;localStorage.removeItem("cfms_session");renderAuthbar();render();toast("로그아웃");}
+function renderAuthbar(){
+  const bar=document.getElementById("authbar");
+  document.getElementById("btnAdd").disabled=!isLoggedIn();
+  document.getElementById("btnClone").disabled=!isLoggedIn();
+  if(isLoggedIn()) bar.innerHTML=`<span class="pill">✔ ${esc(SESSION.email)}</span><button class="btn secondary sm" onclick="logout()">로그아웃</button>`;
+  else bar.innerHTML=`<input id="liEmail" placeholder="이메일" style="width:140px"><input id="liPw" type="password" placeholder="비밀번호" style="width:110px"><button class="btn sm" onclick="login()">로그인</button><button class="btn secondary sm" onclick="openConfig()" title="연결설정">⚙</button>`;
+}
+function openConfig(){document.getElementById("cfgUrl").value=CFG.url;document.getElementById("cfgKey").value=CFG.key;document.getElementById("cfgBg").style.display="flex";}
+function saveConfig(){const url=normUrl(document.getElementById("cfgUrl").value),key=document.getElementById("cfgKey").value.trim();
+  if(!url||!key){document.getElementById("cfgErr").textContent="URL/key 입력";return;}
+  CFG={url,key};localStorage.setItem("cfms_url",url);localStorage.setItem("cfms_key",key);document.getElementById("cfgBg").style.display="none";boot();}
+function showBanner(m){const b=document.getElementById("banner");b.textContent=m;b.style.display="block";}
+let tT;function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(tT);tT=setTimeout(()=>t.classList.remove("show"),2400);}
+
+function boot(){renderAuthbar();
+  if(!CFG.url||!CFG.key){showBanner("⚙ 버튼으로 Supabase 연결정보를 입력하세요.");openConfig();return;}
+  loadAll();
+}
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KIT CFMS 논문 리스트 (Cloud · CRUD)</title>
+<style>
+  :root{--green:#2e7d32;--green-d:#1b5e20;--bg:#f4f6f4;--line:#cfd8cf;
+    --pub:#fff;--inprint:#e8f5e9;--accept:#e0f7fa;--submit:#fffde7;--draft:#fbe9e7;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI","Malgun Gothic",sans-serif;background:var(--bg);color:#222;font-size:14px}
+  header{background:linear-gradient(135deg,var(--green),var(--green-d));color:#fff;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;font-weight:600}
+  header .sub{font-size:12px;opacity:.85}
+  .authbar{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px}
+  .authbar input{padding:5px 7px;border:1px solid rgba(255,255,255,.5);border-radius:5px;font-size:12px;background:rgba(255,255,255,.92)}
+  .pill{background:rgba(255,255,255,.15);padding:4px 10px;border-radius:12px}
+  .toolbar{background:#fff;border-bottom:1px solid var(--line);padding:12px 20px;display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+  .toolbar label{display:flex;flex-direction:column;font-size:11px;color:#555;gap:3px}
+  .toolbar select,.toolbar input{padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px;background:#fff}
+  .toolbar input[type=number]{width:80px}
+  .btn{background:var(--green);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600}
+  .btn:hover{background:var(--green-d)} .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.secondary{background:#fff;color:var(--green);border:1px solid var(--green)}
+  .btn.danger{background:#c62828}
+  .btn.sm{padding:5px 10px;font-size:12px}
+  .layout{display:flex} .sidebar{width:380px;min-width:380px;padding:16px;border-right:1px solid var(--line);background:#fafbfa;height:calc(100vh - 108px);overflow:auto}
+  .main{flex:1;padding:16px 22px;height:calc(100vh - 108px);overflow:auto}
+  .stats-table{border-collapse:collapse;width:100%;font-size:12px}
+  .stats-table th,.stats-table td{border:1px solid var(--line);padding:3px 4px;text-align:center}
+  .stats-table th{background:var(--green);color:#fff} .stats-table .yr{background:#eef3ee;font-weight:600}
+  .stats-table .sum td{background:#e8f5e9;font-weight:700}
+  .cnt{background:none;border:none;color:var(--green);cursor:pointer;font-weight:600;font-size:12px;text-decoration:underline}
+  .yearsep{display:flex;align-items:center;gap:10px;margin:18px 0 8px}
+  .yearsep .y{font-size:20px;font-weight:700;color:var(--green-d)} .yearsep .ln{flex:1;height:2px;background:var(--line)}
+  .paper{display:flex;gap:10px;padding:8px 10px;border-radius:6px;margin-bottom:6px;border:1px solid #eee}
+  .paper.st1{background:var(--pub)}.paper.st2{background:var(--inprint)}.paper.st3{background:var(--accept)}.paper.st4{background:var(--submit)}.paper.st5{background:var(--draft)}
+  .paper .num{font-weight:700;color:#888;min-width:34px;text-align:right}
+  .paper .body{flex:1;line-height:1.5}
+  .authors{font-weight:700}.title{color:#0d47a1;cursor:pointer}.title:hover{text-decoration:underline}
+  .journal{font-style:italic;font-weight:600}.vol{text-decoration:underline}
+  .badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;color:#fff;margin-right:6px}
+  .b1{background:#2e7d32}.b2{background:#00838f}.b3{background:#0277bd}.b4{background:#f9a825}.b5{background:#8d6e63}
+  .funding{color:#2e7d32;font-weight:700;font-size:12px}
+  .doi{color:#1565c0;font-weight:700;font-size:11px;text-decoration:none;border:1px solid #1565c0;border-radius:4px;padding:0 5px;margin-left:6px}
+  .pdf{color:#c62828;background:#fff;font-weight:700;font-size:11px;text-decoration:none;border:1px solid #c62828;border-radius:4px;padding:1px 6px;margin-left:6px;cursor:pointer}
+  .progress{height:10px;background:#eee;border-radius:5px;overflow:hidden;margin:8px 0}
+  .progress > div{height:100%;background:var(--green);width:0}
+  .uplog{font-size:11px;color:#666;max-height:160px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:6px;margin-top:8px;white-space:pre-wrap}
+  .rowtools button{font-size:11px;padding:2px 6px;border:1px solid var(--line);background:#fff;border-radius:4px;cursor:pointer}
+  .count-info{font-size:12px;color:#666;margin-bottom:8px}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:50}
+  .modal{background:#fff;border-radius:10px;padding:20px;width:580px;max-width:94vw;max-height:90vh;overflow:auto}
+  .modal h2{margin:0 0 12px;font-size:16px;color:var(--green-d)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid label{display:flex;flex-direction:column;font-size:11px;color:#555;gap:3px}
+  .grid label.full{grid-column:1/3}
+  .grid input,.grid select,.grid textarea{padding:6px;border:1px solid var(--line);border-radius:6px;font-size:13px;font-family:inherit}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+  .hint{font-size:11px;color:#999;margin-top:6px} .err{color:#c62828;font-size:12px;margin-top:6px}
+  .banner{background:#fff8e1;border-bottom:1px solid #ffe082;padding:8px 20px;font-size:13px;color:#795548;display:none}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;opacity:0;transition:.3s;z-index:99}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html" style="color:#fff;text-decoration:none;font-size:13px;background:rgba(255,255,255,.18);padding:4px 11px;border-radius:12px">← 홈</a>
+  <h1>KIT CFMS Journal List</h1>
+  <span class="sub">클라우드 · 종류별 검색 + 편집</span>
+  <div class="authbar" id="authbar"></div>
+</header>
+
+<div class="banner" id="banner"></div>
+
+<div class="toolbar">
+  <label>종류 (Category)<select id="fCateg"></select></label>
+  <label>저자 (Author)<select id="fAuthor"><option value="ALL">ALL</option></select></label>
+  <label>연도 From<input type="number" id="fFrom" value="1998"></label>
+  <label>연도 To<input type="number" id="fTo"></label>
+  <button class="btn" onclick="doSearch()">검색</button>
+  <button class="btn secondary" id="btnAdd" onclick="openEdit(null)" disabled>＋ 새 논문</button>
+  <button class="btn secondary sm" onclick="reload()">새로고침</button>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <h3 style="margin:4px 0 10px;color:var(--green-d);font-size:14px">통계 (Statistics)</h3>
+    <div id="statsArea"></div>
+  </aside>
+  <main class="main">
+    <div class="count-info" id="countInfo">데이터 로딩 중…</div>
+    <div id="listArea"></div>
+  </main>
+</div>
+
+<!-- 편집 모달 -->
+<div class="modal-bg" id="modalBg"><div class="modal">
+  <h2 id="modalTitle">논문 추가</h2>
+  <input type="hidden" id="eID">
+  <div class="grid">
+    <label>종류 (CATEG)<select id="eCateg"></select></label>
+    <label>출판상태<select id="ePrint">
+      <option value="1">1 - Published</option><option value="2">2 - In Print</option>
+      <option value="3">3 - Accepted</option><option value="4">4 - Submitted</option><option value="5">5 - Draft</option>
+    </select></label>
+    <label class="full">저자 (AUTHORS)<input id="eAuthors" placeholder="예: In Hwan Sul, Tae Jin Kang"></label>
+    <label class="full">제목 (TITLE)<input id="eTitle"></label>
+    <label class="full">저널/학회/발표처 (JOURNAL_NAME)<input id="eJournal"></label>
+    <label>권 (VOLUME)<input id="eVolume"></label>
+    <label>페이지 (PAGE)<input id="ePage"></label>
+    <label>연도 (P_YEAR)<input type="number" id="eYear"></label>
+    <label>월 (P_MONTH)<input type="number" id="eMonth"></label>
+    <label>일 (P_DAY)<input type="number" id="eDay"></label>
+    <label>Impact Factor<input id="eSci"></label>
+    <label>DOI<input id="eDOI"></label>
+    <label>PDF 파일명<input id="ePDF"></label>
+    <label class="full">지원/펀딩 (FUNDING)<input id="eFunding"></label>
+    <label class="full">메모 (MEMO)<textarea id="eMemo" rows="2"></textarea></label>
+  </div>
+  <div class="err" id="editErr"></div>
+  <div class="modal-actions">
+    <button class="btn danger" id="eDelete" onclick="deletePaper()">삭제</button>
+    <button class="btn secondary" onclick="closeEdit()">취소</button>
+    <button class="btn" id="eSave" onclick="savePaper()">저장</button>
+  </div>
+</div></div>
+
+<!-- 설정 모달 (Supabase 연결정보) -->
+<div class="modal-bg" id="cfgBg"><div class="modal" style="width:520px">
+  <h2>Supabase 연결 설정</h2>
+  <p style="font-size:12px;color:#666">Supabase 프로젝트의 <b>Project URL</b>과 <b>anon public key</b>를 붙여넣으세요. (Settings → API)</p>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <label style="font-size:11px;color:#555">Project URL
+      <input id="cfgUrl" placeholder="https://xxxxx.supabase.co" style="width:100%;padding:7px;border:1px solid var(--line);border-radius:6px">
+    </label>
+    <label style="font-size:11px;color:#555">anon public key
+      <input id="cfgKey" placeholder="eyJhbGciOi..." style="width:100%;padding:7px;border:1px solid var(--line);border-radius:6px">
+    </label>
+  </div>
+  <div class="err" id="cfgErr"></div>
+  <div class="modal-actions">
+    <button class="btn" onclick="saveConfig()">저장 후 연결</button>
+  </div>
+</div></div>
+
+<!-- PDF 업로드 모달 (관리자) -->
+<div class="modal-bg" id="upBg"><div class="modal" style="width:560px">
+  <h2>PDF 원문 업로드</h2>
+  <p style="font-size:12px;color:#666">기존 <b>PDF 폴더</b>를 통째로 선택하면, 논문에 연결된 PDF들이 클라우드(비공개 버킷)에 올라갑니다.
+  파일명은 그대로 유지되어 각 논문의 <b>PDF</b> 버튼과 자동 연결됩니다. (로그인한 사람만 열람 가능)</p>
+  <label style="font-size:12px;color:#555;display:block;margin-bottom:6px">PDF 폴더 또는 파일 선택
+    <input type="file" id="upFiles" webkitdirectory multiple style="display:block;margin-top:4px">
+  </label>
+  <label style="font-size:12px;color:#555;display:flex;align-items:center;gap:6px">
+    <input type="checkbox" id="upMissing" checked> 논문에 연결된 파일만 업로드 (불필요한 파일 제외)
+  </label>
+  <div class="progress"><div id="upBar"></div></div>
+  <div id="upInfo" style="font-size:12px;color:#666"></div>
+  <div class="uplog" id="upLog"></div>
+  <div class="modal-actions">
+    <button class="btn secondary" onclick="closeUpload()">닫기</button>
+    <button class="btn" id="upGo" onclick="uploadPdfs()">업로드 시작</button>
+  </div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== 카테고리 ===== */
+const CATEG_ORDER=["IJ","DJ","IC","DC","IL","PT","AW","PB","ETC","TODO"];
+const CATEG_KOR={IJ:"SCIE",DJ:"국내논문",IC:"해외학회",DC:"국내학회",IL:"초청강연",PT:"특허",AW:"수상",PB:"저서",ETC:"기타",TODO:"할일"};
+const PRINT_SUFFIX={2:"(In Print)",3:"(Accepted)",4:"(Submitted)",5:"(draft)"};
+
+/* ===== 저자(드물게 변경 → 내장) ===== */
+const PEOPLE=[
+ {NAME:"설인환",ENGNAME_FIRST:"In",ENGNAME_SECOND:"Hwan",ENGNAME_LAST:"Sul"},
+ {NAME:"정진영",ENGNAME_FIRST:"Jin",ENGNAME_SECOND:"Young",ENGNAME_LAST:"Jung"},
+ {NAME:"김재룡",ENGNAME_FIRST:"Jae",ENGNAME_SECOND:"Ryoung",ENGNAME_LAST:"Kim"},
+ {NAME:"강지언",ENGNAME_FIRST:"Jieon",ENGNAME_SECOND:"",ENGNAME_LAST:"Kang"},
+ {NAME:"문선희",ENGNAME_FIRST:"Sun",ENGNAME_SECOND:"Hee",ENGNAME_LAST:"Moon"}
+];
+
+/* ===== Supabase 설정/세션 (localStorage) ===== */
+function normUrl(u){return (u||"").trim().replace(/\/+$/,"").replace(/\/rest\/v1$/i,"").replace(/\/auth\/v1$/i,"").replace(/\/+$/,"");}
+// 기본 연결정보 내장 (무설정 사용). ⚙ 로 언제든 변경 가능.
+const BAKED_URL="https://ijutjirouxgqcldjyhma.supabase.co";
+const BAKED_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdXRqaXJvdXhncWNsZGp5aG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDk4MDAsImV4cCI6MjA5Nzk4NTgwMH0.gIAwf6a2oY-DkTXaf5eM2L4ROMCKim5WsevGfjol7tE";
+let CFG={url:normUrl(localStorage.getItem("cfms_url")||BAKED_URL),key:(localStorage.getItem("cfms_key")||BAKED_KEY).trim()};
+let SESSION=JSON.parse(localStorage.getItem("cfms_session")||"null"); // {access_token,email}
+let PAPERS=[];
+
+function authHeaders(useUser){
+  const h={"apikey":CFG.key,"Content-Type":"application/json"};
+  h["Authorization"]="Bearer "+((useUser&&SESSION&&SESSION.access_token)?SESSION.access_token:CFG.key);
+  return h;
+}
+function isLoggedIn(){return !!(SESSION&&SESSION.access_token);}
+
+async function api(path,opts={}){
+  const res=await fetch(CFG.url+path,opts);
+  if(!res.ok){let t=await res.text();throw new Error(res.status+" "+t);}
+  const txt=await res.text(); return txt?JSON.parse(txt):null;
+}
+
+/* ===== 데이터 로드 ===== */
+async function reload(){ await loadPapers(); }
+async function loadPapers(){
+  try{
+    const data=await api('/rest/v1/papers?select=*',
+      {headers:authHeaders(false)});
+    PAPERS=data.map(normalizePaper);
+    document.getElementById("banner").style.display="none";
+    initUI();
+  }catch(e){
+    showBanner("데이터를 불러오지 못했습니다. 설정/스키마를 확인하세요. ("+e.message.slice(0,120)+")");
+    document.getElementById("countInfo").textContent="";
+  }
+}
+function normalizePaper(r){
+  const num=v=>{const n=parseInt(v,10);return isNaN(n)?0:n;};
+  return {ID:r.ID,P_YEAR:num(r.P_YEAR),P_MONTH:num(r.P_MONTH),P_DAY:num(r.P_DAY),
+    CATEG:(r.CATEG||"").trim().toUpperCase()==="ETC"?"ETC":(r.CATEG||"").trim(),
+    AUTHORS:r.AUTHORS||"",TITLE:r.TITLE||"",JOURNAL_NAME:r.JOURNAL_NAME||"",VOLUME:r.VOLUME||"",
+    PAGE:r.PAGE||"",DOI:r.DOI||"",MEMO:r.MEMO||"",PrintStatus:num(r.PrintStatus)||1,
+    SCIFACTOR:r.SCIFACTOR||"",PDF:r.PDF||"",COUNTRY:r.COUNTRY||"",SCISTATUS:num(r.SCISTATUS),FUNDING:r.FUNDING||""};
+}
+
+/* ===== CheckName (저자 매칭, 원본 이식) ===== */
+function instr(s,sub){const i=s.indexOf(sub);return i<0?0:i+1;}
+function instrRev(s,sub){const i=s.lastIndexOf(sub);return i<0?0:i+1;}
+function checkName(Str,author,first,second,last){
+  Str=(Str||"").toLowerCase();first=(first||"").toLowerCase();second=(second||"").toLowerCase();last=(last||"").toLowerCase();
+  if(author==="ALL")return true;
+  if(author&&instr(Str,author.toLowerCase())>0)return true;
+  if(!author)return false;
+  let nLast=instr(Str," "+last);if(nLast===0)nLast=instr(Str,"."+last);if(nLast===0)return false;
+  let temp=Str.substring(0,nLast-1).replace(/\s+$/,"");
+  let nFirst=0,nSecond=0,n1=instrRev(temp," "),n2=instrRev(temp,".");
+  if(n1!==0)nSecond=n1;
+  if(n2===temp.length){temp=temp.substring(0,n2-1);n2=instrRev(temp,".");}
+  if(n2!==0&&n2>nSecond)nSecond=n2;
+  let parsedSecond=temp.substring(nSecond);
+  if(nSecond>1){temp=temp.substring(0,nSecond-1).replace(/\s+$/,"");}
+  n1=instrRev(temp," ");n2=instrRev(temp,".");let n3=instrRev(temp,",");
+  if(n1!==0)nFirst=n1;
+  if(n2===temp.length){temp=temp.substring(0,n2-1);n2=instrRev(temp,".");}
+  if(n2!==0&&n2>nFirst)nFirst=n2;
+  if(n3!==0&&n3>nFirst)nFirst=n3;
+  let parsedFirst=temp.substring(nFirst);
+  if(parsedFirst===first&&parsedSecond===second)return true;
+  if(parsedSecond===first)return true;
+  if(parsedFirst.charAt(0)===first.charAt(0)&&parsedSecond.charAt(0)===second.charAt(0))return true;
+  if(parsedSecond.charAt(0)===first.charAt(0)&&second==="")return true;
+  return false;
+}
+
+/* ===== UI ===== */
+function presentCategs(){const set=new Set(PAPERS.map(p=>p.CATEG).filter(Boolean));
+  const o=CATEG_ORDER.filter(c=>set.has(c));for(const c of set)if(!o.includes(c))o.push(c);return o;}
+function initUI(){
+  const cats=presentCategs();
+  document.getElementById("fCateg").innerHTML='<option value="ALL">ALL (전체)</option>'+
+    cats.map(c=>`<option value="${c}">${CATEG_KOR[c]||c} (${c})</option>`).join("");
+  document.getElementById("eCateg").innerHTML=CATEG_ORDER.map(c=>`<option value="${c}">${CATEG_KOR[c]||c} (${c})</option>`).join("");
+  document.getElementById("fAuthor").innerHTML='<option value="ALL" selected>ALL</option>'+
+    PEOPLE.map(p=>`<option value="${p.NAME}">${p.NAME} (${[p.ENGNAME_FIRST,p.ENGNAME_SECOND,p.ENGNAME_LAST].filter(Boolean).join(" ")})</option>`).join("");
+  const maxY=Math.max(new Date().getFullYear(),...PAPERS.map(p=>p.P_YEAR));
+  document.getElementById("fTo").value=maxY; document.getElementById("eYear").value=maxY;
+  renderStats(); doSearch();
+}
+function getFilters(){return{categ:document.getElementById("fCateg").value,author:document.getElementById("fAuthor").value,
+  from:parseInt(document.getElementById("fFrom").value,10)||0,to:parseInt(document.getElementById("fTo").value,10)||9999};}
+function authorEng(n){const p=PEOPLE.find(x=>x.NAME===n);return p?{f:p.ENGNAME_FIRST||"",s:p.ENGNAME_SECOND||"",l:p.ENGNAME_LAST||""}:{f:"",s:"",l:""};}
+function searchPapers(f){const eng=f.author!=="ALL"?authorEng(f.author):{f:"",s:"",l:""};
+  let res=PAPERS.filter(p=>{if(p.P_YEAR<f.from||p.P_YEAR>f.to)return false;if(f.categ!=="ALL"&&p.CATEG!==f.categ)return false;
+    return checkName(p.AUTHORS,f.author,eng.f,eng.s,eng.l);});
+  res.sort((a,b)=>b.P_YEAR-a.P_YEAR||b.P_MONTH-a.P_MONTH||b.P_DAY-a.P_DAY||(a.JOURNAL_NAME||"").localeCompare(b.JOURNAL_NAME||""));
+  return res;}
+function doSearch(){const f=getFilters();renderList(searchPapers(f),f);}
+function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function renderList(res,f){
+  const info=document.getElementById("countInfo");
+  const label=(f.categ==="ALL"?"전체 종류":(CATEG_KOR[f.categ]||f.categ))+` · ${f.from}~${f.to}`+(f.author!=="ALL"?` · 저자: ${f.author}`:"");
+  info.textContent=`${label} — 총 ${res.length}건`;
+  const area=document.getElementById("listArea");
+  if(!res.length){area.innerHTML='<p style="color:#888">검색 결과가 없습니다.</p>';return;}
+  let html="",py=null,i=1;
+  for(const p of res){if(py!==p.P_YEAR){html+=`<div class="yearsep"><span class="y">${p.P_YEAR}</span><span class="ln"></span></div>`;py=p.P_YEAR;}html+=renderPaper(p,i++);}
+  area.innerHTML=html;
+}
+function renderPaper(p,i){const st=p.PrintStatus;let x=[];
+  if(p.FUNDING)x.push(`<span class="funding">[${esc(p.FUNDING)}]</span>`);
+  x.push(`<span class="badge b${st}">${["","Pub","InPrint","Accept","Submit","Draft"][st]||""}</span>`);
+  x.push(`<span class="authors">${esc(p.AUTHORS)}</span>, `);
+  x.push(`<span class="title" onclick="openEdit(${p.ID})">"${esc(p.TITLE)}"</span>`);
+  x.push(`, <span class="journal">${esc(p.JOURNAL_NAME)+(PRINT_SUFFIX[st]||"")}</span>, `);
+  if(p.CATEG==="IJ"||p.CATEG==="DJ"){
+    if(p.VOLUME&&p.VOLUME!=="TAG_NO_VOLUME")x.push(`<span class="vol">${esc(p.VOLUME)}</span>, `);
+    if(p.PAGE&&p.PAGE!=="TAG_NO_PAGE")x.push(`pp.${esc(p.PAGE)}, `);}
+  x.push(`(${p.P_YEAR})`);
+  if(p.CATEG==="IJ"&&p.SCIFACTOR)x.push(` <i>(IF=${esc(p.SCIFACTOR)})</i>`);
+  // 접근 링크: 로그인 시 PDF(원문), 비로그인 시 DOI 링크
+  const doiLink=p.DOI?`<a class="doi" href="https://dx.doi.org/${esc(p.DOI)}" target="_blank">DOI</a>`:"";
+  let access="";
+  if(isLoggedIn()){
+    if(p.PDF) access=`<button class="pdf" onclick="openPdf(${p.ID},'${esc(p.PDF).replace(/'/g,"\\'")}')">PDF</button>`;
+    else if(p.DOI) access=doiLink;
+  }else{
+    access=doiLink; // 비로그인: DOI 링크만 (PDF 비공개)
+  }
+  const edit=isLoggedIn()?`<div class="rowtools"><button onclick="openEdit(${p.ID})">수정</button></div>`:"";
+  return `<div class="paper st${st}"><div class="num">${i}.</div><div class="body">${x.join("")} ${access}</div>${edit}</div>`;
+}
+function renderStats(){const cats=presentCategs();
+  const years=[...new Set(PAPERS.map(p=>p.P_YEAR))].filter(Boolean).sort((a,b)=>b-a);
+  const sums={};cats.forEach(c=>sums[c]=0);let grand=0;
+  let h='<table class="stats-table"><tr><th>Year</th>'+cats.map(c=>`<th>${CATEG_KOR[c]||c}</th>`).join("")+'<th>계</th></tr>';
+  for(const y of years){let rt=0;h+=`<tr><td class="yr">${y}</td>`;
+    for(const c of cats){const n=PAPERS.filter(p=>p.P_YEAR===y&&p.CATEG===c).length;sums[c]+=n;rt+=n;
+      h+=`<td>${n>0?`<button class="cnt" onclick="quickFilter('${c}',${y})">${n}</button>`:""}</td>`;}
+    grand+=rt;h+=`<td><button class="cnt" onclick="quickFilter('ALL',${y})"><b>${rt}</b></button></td></tr>`;}
+  h+='<tr class="sum"><td>Sum</td>'+cats.map(c=>`<td>${sums[c]}</td>`).join("")+`<td>${grand}</td></tr></table>`;
+  document.getElementById("statsArea").innerHTML=h;
+}
+function quickFilter(c,y){document.getElementById("fCateg").value=(c==="ALL"||presentCategs().includes(c))?c:"ALL";
+  document.getElementById("fAuthor").value="ALL";document.getElementById("fFrom").value=y;document.getElementById("fTo").value=y;doSearch();}
+
+/* ===== CRUD (Supabase) ===== */
+function requireLogin(){if(!isLoggedIn()){toast("편집하려면 먼저 로그인하세요.");return false;}return true;}
+function openEdit(id){
+  if(!requireLogin())return;
+  document.getElementById("modalBg").style.display="flex";
+  const p=id!=null?PAPERS.find(x=>x.ID===id):null;
+  document.getElementById("modalTitle").textContent=p?"논문 수정":"논문 추가";
+  document.getElementById("eDelete").style.display=p?"inline-block":"none";
+  document.getElementById("editErr").textContent="";
+  const g=(k,v)=>document.getElementById(k).value=v;
+  g("eID",p?p.ID:"");g("eCateg",p?p.CATEG:"IJ");g("ePrint",p?p.PrintStatus:1);
+  g("eAuthors",p?p.AUTHORS:"");g("eTitle",p?p.TITLE:"");g("eJournal",p?p.JOURNAL_NAME:"");
+  g("eVolume",p?p.VOLUME:"");g("ePage",p?p.PAGE:"");g("eYear",p?p.P_YEAR:new Date().getFullYear());
+  g("eMonth",p?p.P_MONTH:0);g("eDay",p?p.P_DAY:0);g("eSci",p?p.SCIFACTOR:"");
+  g("eDOI",p?p.DOI:"");g("ePDF",p?p.PDF:"");g("eFunding",p?p.FUNDING:"");g("eMemo",p?p.MEMO:"");
+}
+function closeEdit(){document.getElementById("modalBg").style.display="none";}
+function formObj(){const v=k=>document.getElementById(k).value;
+  return{CATEG:v("eCateg"),PrintStatus:parseInt(v("ePrint"),10),AUTHORS:v("eAuthors"),TITLE:v("eTitle"),
+    JOURNAL_NAME:v("eJournal"),VOLUME:v("eVolume"),PAGE:v("ePage"),P_YEAR:parseInt(v("eYear"),10)||0,
+    P_MONTH:parseInt(v("eMonth"),10)||0,P_DAY:parseInt(v("eDay"),10)||0,SCIFACTOR:v("eSci"),
+    DOI:v("eDOI"),PDF:v("ePDF"),FUNDING:v("eFunding"),MEMO:v("eMemo"),COUNTRY:"",SCISTATUS:0};}
+async function savePaper(){
+  if(!requireLogin())return;
+  const idVal=document.getElementById("eID").value;const obj=formObj();
+  document.getElementById("eSave").disabled=true;
+  try{
+    if(idVal!==""){
+      await api('/rest/v1/papers?ID=eq.'+encodeURIComponent(idVal),
+        {method:"PATCH",headers:Object.assign(authHeaders(true),{Prefer:"return=representation"}),body:JSON.stringify(obj)});
+      toast("수정되었습니다.");
+    }else{
+      await api('/rest/v1/papers',
+        {method:"POST",headers:Object.assign(authHeaders(true),{Prefer:"return=representation"}),body:JSON.stringify(obj)});
+      toast("추가되었습니다.");
+    }
+    closeEdit();await loadPapers();
+  }catch(e){document.getElementById("editErr").textContent="저장 실패: "+e.message.slice(0,160);}
+  finally{document.getElementById("eSave").disabled=false;}
+}
+async function deletePaper(){
+  if(!requireLogin())return;
+  const idVal=document.getElementById("eID").value;if(idVal===""||!confirm("이 논문을 삭제할까요?"))return;
+  try{await api('/rest/v1/papers?ID=eq.'+encodeURIComponent(idVal),{method:"DELETE",headers:authHeaders(true)});
+    toast("삭제되었습니다.");closeEdit();await loadPapers();}
+  catch(e){document.getElementById("editErr").textContent="삭제 실패: "+e.message.slice(0,160);}
+}
+
+/* ===== PDF (Supabase Storage, 비공개 버킷 'pdfs') =====
+   저장 키는 한글/특수문자 문제를 피하기 위해 '논문ID.확장자' (ASCII) 로 통일.
+   원본 파일명은 DB의 PDF 필드에 그대로 유지되고, 매칭은 ID로 함.            */
+const PDF_BUCKET="pdfs";
+function fileExt(name){const m=(name||"").match(/\.([A-Za-z0-9]+)$/);return m?m[1].toLowerCase():"pdf";}
+function pdfKey(id,name){return id+"."+fileExt(name);}   // 예: 968.pdf
+async function openPdf(id,name){
+  if(!isLoggedIn()){toast("PDF는 로그인 후 볼 수 있습니다.");return;}
+  const key=pdfKey(id,name);
+  try{
+    const r=await api('/storage/v1/object/sign/'+PDF_BUCKET+'/'+encodeURIComponent(key),
+      {method:"POST",headers:authHeaders(true),body:JSON.stringify({expiresIn:300})});
+    window.open(CFG.url+'/storage/v1'+r.signedURL,"_blank");
+  }catch(e){
+    if(/not.*found|404/i.test(e.message)) toast("아직 업로드되지 않은 PDF입니다: "+name);
+    else toast("PDF 열기 실패: "+e.message.slice(0,120));
+  }
+}
+function openUpload(){if(!requireLogin())return;document.getElementById("upBg").style.display="flex";
+  document.getElementById("upLog").textContent="";document.getElementById("upBar").style.width="0";
+  document.getElementById("upInfo").textContent="";}
+function closeUpload(){document.getElementById("upBg").style.display="none";}
+async function uploadPdfs(){
+  if(!requireLogin())return;
+  const files=[...document.getElementById("upFiles").files];
+  if(!files.length){toast("PDF 폴더 또는 파일을 선택하세요.");return;}
+  const onlyMissing=document.getElementById("upMissing").checked;
+  // 원본 파일명 -> 이를 참조하는 논문들(ID 기준 저장키 생성)
+  const byName=new Map();
+  PAPERS.forEach(p=>{if(p.PDF){if(!byName.has(p.PDF))byName.set(p.PDF,[]);byName.get(p.PDF).push(p);}});
+  const log=document.getElementById("upLog"),bar=document.getElementById("upBar"),info=document.getElementById("upInfo");
+  const logln=s=>{log.textContent+=s+"\n";log.scrollTop=log.scrollHeight;};
+  let done=0,ok=0,skip=0,fail=0;
+  // 업로드 작업 목록: (파일, 저장키) 쌍 — 한 파일이 여러 논문에 연결되면 각각 저장
+  const jobs=[];
+  for(const f of files){
+    const ps=byName.get(f.name);
+    if(ps&&ps.length){ for(const p of ps) jobs.push({f,key:pdfKey(p.ID,f.name)}); }
+    else if(!onlyMissing){ skip++; }   // 참조 없는 파일은 ID 키를 만들 수 없어 건너뜀
+  }
+  if(!jobs.length){toast("업로드할 (논문에 연결된) PDF가 없습니다. 폴더 선택을 확인하세요.");return;}
+  info.textContent=`업로드 대상 ${jobs.length}건`;
+  document.getElementById("upGo").disabled=true;
+  async function one(job){
+    try{
+      const res=await fetch(CFG.url+'/storage/v1/object/'+PDF_BUCKET+'/'+encodeURIComponent(job.key),
+        {method:"POST",headers:{apikey:CFG.key,Authorization:"Bearer "+SESSION.access_token,"x-upsert":"true"},body:job.f});
+      if(res.ok){ok++;}
+      else{const t=await res.text();fail++;logln("실패: "+job.f.name+" → "+job.key+" ("+res.status+") "+t.slice(0,80));}
+    }catch(e){fail++;logln("실패: "+job.f.name+" "+e.message.slice(0,60));}
+    done++;bar.style.width=Math.round(done/jobs.length*100)+"%";
+    info.textContent=`진행 ${done}/${jobs.length}  ·  성공 ${ok}  실패 ${fail}  (참조없음 건너뜀 ${skip})`;
+  }
+  const q=[...jobs];const workers=Array.from({length:4},async()=>{while(q.length)await one(q.shift());});
+  await Promise.all(workers);
+  logln(`완료: 성공 ${ok}, 실패 ${fail}, 참조없음 건너뜀 ${skip}`);
+  document.getElementById("upGo").disabled=false;
+  toast(`업로드 완료 (성공 ${ok}, 실패 ${fail})`);
+}
+
+/* ===== 인증 ===== */
+async function login(){
+  const email=document.getElementById("liEmail").value.trim();
+  const pw=document.getElementById("liPw").value;
+  if(!email||!pw){toast("이메일과 비밀번호를 입력하세요.");return;}
+  try{
+    const r=await api('/auth/v1/token?grant_type=password',
+      {method:"POST",headers:{"apikey":CFG.key,"Content-Type":"application/json"},body:JSON.stringify({email,password:pw})});
+    SESSION={access_token:r.access_token,refresh_token:r.refresh_token,email:email};
+    localStorage.setItem("cfms_session",JSON.stringify(SESSION));
+    toast("로그인되었습니다.");renderAuthbar();doSearch();
+  }catch(e){toast("로그인 실패: 이메일/비밀번호 확인");}
+}
+function logout(){SESSION=null;localStorage.removeItem("cfms_session");renderAuthbar();doSearch();toast("로그아웃되었습니다.");}
+function renderAuthbar(){
+  const bar=document.getElementById("authbar");
+  document.getElementById("btnAdd").disabled=!isLoggedIn();
+  if(isLoggedIn()){
+    bar.innerHTML=`<span class="pill">✔ ${esc(SESSION.email)} (편집 가능)</span>
+      <button class="btn secondary sm" onclick="openUpload()" title="PDF 원문 업로드">PDF 업로드</button>
+      <button class="btn secondary sm" onclick="logout()">로그아웃</button>`;
+  }else{
+    bar.innerHTML=`<input id="liEmail" placeholder="이메일" style="width:150px">
+      <input id="liPw" type="password" placeholder="비밀번호" style="width:120px">
+      <button class="btn sm" onclick="login()">로그인</button>
+      <button class="btn secondary sm" onclick="openConfig()" title="Supabase 연결설정">⚙</button>`;
+  }
+}
+
+/* ===== 설정 ===== */
+function openConfig(){document.getElementById("cfgUrl").value=CFG.url;document.getElementById("cfgKey").value=CFG.key;
+  document.getElementById("cfgBg").style.display="flex";}
+function saveConfig(){
+  const url=normUrl(document.getElementById("cfgUrl").value);
+  const key=document.getElementById("cfgKey").value.trim();
+  if(!url||!key){document.getElementById("cfgErr").textContent="URL과 key를 모두 입력하세요.";return;}
+  CFG={url,key};localStorage.setItem("cfms_url",url);localStorage.setItem("cfms_key",key);
+  document.getElementById("cfgBg").style.display="none";boot();
+}
+function showBanner(msg){const b=document.getElementById("banner");b.textContent=msg;b.style.display="block";}
+let toastTimer;function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),2500);}
+
+/* ===== 부팅 ===== */
+function boot(){renderAuthbar();
+  if(!CFG.url||!CFG.key){showBanner("처음이신가요? 우측 상단 ⚙ 버튼으로 Supabase 연결정보를 입력하세요. (설정 안내 파일 참고)");openConfig();return;}
+  loadPapers();
+}
+boot();
+</script>
+</body>
+</html>
