@@ -41,8 +41,12 @@
   .journal{font-style:italic;font-weight:600}.vol{text-decoration:underline}
   .badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;color:#fff;margin-right:6px}
   .b1{background:#2e7d32}.b2{background:#00838f}.b3{background:#0277bd}.b4{background:#f9a825}.b5{background:#8d6e63}
-  .funding{color:#2e7d32;font-weight:700;font-size:12px}.doi a{color:#1565c0;font-size:12px}
-  .pdf{color:#c62828;font-weight:700;font-size:11px;text-decoration:none;border:1px solid #c62828;border-radius:4px;padding:0 4px;margin-left:6px}
+  .funding{color:#2e7d32;font-weight:700;font-size:12px}
+  .doi{color:#1565c0;font-weight:700;font-size:11px;text-decoration:none;border:1px solid #1565c0;border-radius:4px;padding:0 5px;margin-left:6px}
+  .pdf{color:#c62828;background:#fff;font-weight:700;font-size:11px;text-decoration:none;border:1px solid #c62828;border-radius:4px;padding:1px 6px;margin-left:6px;cursor:pointer}
+  .progress{height:10px;background:#eee;border-radius:5px;overflow:hidden;margin:8px 0}
+  .progress > div{height:100%;background:var(--green);width:0}
+  .uplog{font-size:11px;color:#666;max-height:160px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:6px;margin-top:8px;white-space:pre-wrap}
   .rowtools button{font-size:11px;padding:2px 6px;border:1px solid var(--line);background:#fff;border-radius:4px;cursor:pointer}
   .count-info{font-size:12px;color:#666;margin-bottom:8px}
   .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:50}
@@ -136,6 +140,26 @@
   <div class="err" id="cfgErr"></div>
   <div class="modal-actions">
     <button class="btn" onclick="saveConfig()">저장 후 연결</button>
+  </div>
+</div></div>
+
+<!-- PDF 업로드 모달 (관리자) -->
+<div class="modal-bg" id="upBg"><div class="modal" style="width:560px">
+  <h2>PDF 원문 업로드</h2>
+  <p style="font-size:12px;color:#666">기존 <b>PDF 폴더</b>를 통째로 선택하면, 논문에 연결된 PDF들이 클라우드(비공개 버킷)에 올라갑니다.
+  파일명은 그대로 유지되어 각 논문의 <b>PDF</b> 버튼과 자동 연결됩니다. (로그인한 사람만 열람 가능)</p>
+  <label style="font-size:12px;color:#555;display:block;margin-bottom:6px">PDF 폴더 또는 파일 선택
+    <input type="file" id="upFiles" webkitdirectory multiple style="display:block;margin-top:4px">
+  </label>
+  <label style="font-size:12px;color:#555;display:flex;align-items:center;gap:6px">
+    <input type="checkbox" id="upMissing" checked> 논문에 연결된 파일만 업로드 (불필요한 파일 제외)
+  </label>
+  <div class="progress"><div id="upBar"></div></div>
+  <div id="upInfo" style="font-size:12px;color:#666"></div>
+  <div class="uplog" id="upLog"></div>
+  <div class="modal-actions">
+    <button class="btn secondary" onclick="closeUpload()">닫기</button>
+    <button class="btn" id="upGo" onclick="uploadPdfs()">업로드 시작</button>
   </div>
 </div></div>
 
@@ -274,11 +298,18 @@ function renderPaper(p,i){const st=p.PrintStatus;let x=[];
     if(p.VOLUME&&p.VOLUME!=="TAG_NO_VOLUME")x.push(`<span class="vol">${esc(p.VOLUME)}</span>, `);
     if(p.PAGE&&p.PAGE!=="TAG_NO_PAGE")x.push(`pp.${esc(p.PAGE)}, `);}
   x.push(`(${p.P_YEAR})`);
-  if(p.DOI){const u="https://dx.doi.org/"+p.DOI;x.push(` <span class="doi"><a href="${esc(u)}" target="_blank">${esc(u)}</a></span>`);}
   if(p.CATEG==="IJ"&&p.SCIFACTOR)x.push(` <i>(IF=${esc(p.SCIFACTOR)})</i>`);
-  const pdf=p.PDF?`<a class="pdf" href="PDF/${encodeURIComponent(p.PDF)}" target="_blank">PDF</a>`:"";
+  // 접근 링크: 로그인 시 PDF(원문), 비로그인 시 DOI 링크
+  const doiLink=p.DOI?`<a class="doi" href="https://dx.doi.org/${esc(p.DOI)}" target="_blank">DOI</a>`:"";
+  let access="";
+  if(isLoggedIn()){
+    if(p.PDF) access=`<button class="pdf" onclick="openPdf('${esc(p.PDF).replace(/'/g,"\\'")}')">PDF</button>`;
+    else if(p.DOI) access=doiLink;
+  }else{
+    access=doiLink; // 비로그인: DOI 링크만 (PDF 비공개)
+  }
   const edit=isLoggedIn()?`<div class="rowtools"><button onclick="openEdit(${p.ID})">수정</button></div>`:"";
-  return `<div class="paper st${st}"><div class="num">${i}.</div><div class="body">${x.join("")} ${pdf}</div>${edit}</div>`;
+  return `<div class="paper st${st}"><div class="num">${i}.</div><div class="body">${x.join("")} ${access}</div>${edit}</div>`;
 }
 function renderStats(){const cats=presentCategs();
   const years=[...new Set(PAPERS.map(p=>p.P_YEAR))].filter(Boolean).sort((a,b)=>b-a);
@@ -342,6 +373,56 @@ async function deletePaper(){
   catch(e){document.getElementById("editErr").textContent="삭제 실패: "+e.message.slice(0,160);}
 }
 
+/* ===== PDF (Supabase Storage, 비공개 버킷 'pdfs') ===== */
+const PDF_BUCKET="pdfs";
+async function openPdf(name){
+  if(!isLoggedIn()){toast("PDF는 로그인 후 볼 수 있습니다.");return;}
+  try{
+    const r=await api('/storage/v1/object/sign/'+PDF_BUCKET+'/'+encodeURIComponent(name),
+      {method:"POST",headers:authHeaders(true),body:JSON.stringify({expiresIn:300})});
+    // r.signedURL 예: "/object/sign/pdfs/<file>?token=..."
+    window.open(CFG.url+'/storage/v1'+r.signedURL,"_blank");
+  }catch(e){
+    if(/not.*found|404/i.test(e.message)) toast("이 PDF는 아직 클라우드에 업로드되지 않았습니다: "+name);
+    else toast("PDF 열기 실패: "+e.message.slice(0,120));
+  }
+}
+function openUpload(){if(!requireLogin())return;document.getElementById("upBg").style.display="flex";
+  document.getElementById("upLog").textContent="";document.getElementById("upBar").style.width="0";
+  document.getElementById("upInfo").textContent="";}
+function closeUpload(){document.getElementById("upBg").style.display="none";}
+async function uploadPdfs(){
+  if(!requireLogin())return;
+  const files=[...document.getElementById("upFiles").files];
+  if(!files.length){toast("PDF 폴더 또는 파일을 선택하세요.");return;}
+  const onlyMissing=document.getElementById("upMissing").checked;
+  // DB에서 참조하는 PDF 파일명 집합 (선택: 참조되는 것만 업로드)
+  const referenced=new Set(PAPERS.map(p=>p.PDF).filter(Boolean));
+  const log=document.getElementById("upLog"); const bar=document.getElementById("upBar");
+  const info=document.getElementById("upInfo");
+  let done=0,ok=0,skip=0,fail=0;
+  const targets=files.filter(f=>!onlyMissing || referenced.has(f.name));
+  info.textContent=`대상 ${targets.length}개 / 선택 ${files.length}개`;
+  const logln=s=>{log.textContent+=s+"\n";log.scrollTop=log.scrollHeight;};
+  document.getElementById("upGo").disabled=true;
+  async function one(f){
+    try{
+      const res=await fetch(CFG.url+'/storage/v1/object/'+PDF_BUCKET+'/'+encodeURIComponent(f.name),
+        {method:"POST",headers:{apikey:CFG.key,Authorization:"Bearer "+SESSION.access_token,"x-upsert":"true"},body:f});
+      if(res.ok){ok++;}
+      else{const t=await res.text(); if(/exists/i.test(t)){skip++;} else {fail++;logln("실패: "+f.name+" ("+res.status+")");}}
+    }catch(e){fail++;logln("실패: "+f.name+" "+e.message.slice(0,60));}
+    done++; bar.style.width=Math.round(done/targets.length*100)+"%";
+    info.textContent=`진행 ${done}/${targets.length}  ·  성공 ${ok}  건너뜀 ${skip}  실패 ${fail}`;
+  }
+  // 동시 4개씩
+  const q=[...targets]; const workers=Array.from({length:4},async()=>{while(q.length)await one(q.shift());});
+  await Promise.all(workers);
+  logln(`완료: 성공 ${ok}, 건너뜀 ${skip}, 실패 ${fail}`);
+  document.getElementById("upGo").disabled=false;
+  toast(`업로드 완료 (성공 ${ok}, 실패 ${fail})`);
+}
+
 /* ===== 인증 ===== */
 async function login(){
   const email=document.getElementById("liEmail").value.trim();
@@ -361,6 +442,7 @@ function renderAuthbar(){
   document.getElementById("btnAdd").disabled=!isLoggedIn();
   if(isLoggedIn()){
     bar.innerHTML=`<span class="pill">✔ ${esc(SESSION.email)} (편집 가능)</span>
+      <button class="btn secondary sm" onclick="openUpload()" title="PDF 원문 업로드">PDF 업로드</button>
       <button class="btn secondary sm" onclick="logout()">로그아웃</button>`;
   }else{
     bar.innerHTML=`<input id="liEmail" placeholder="이메일" style="width:150px">
