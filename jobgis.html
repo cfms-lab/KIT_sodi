@@ -37,7 +37,8 @@
   table.st th{background:#e0f2f1;font-weight:600}
   .stwrap{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .avg{font-size:11px;color:#00695c;text-align:center;margin-top:2px}
-  .jgm{cursor:pointer;position:relative;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
+  .jgm{cursor:pointer}                       /* position은 MapLibre가 제어 — 건드리지 않음 */
+  .jgm-in{position:relative;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
   .jgm svg{display:block}
   .jgm .cnt{position:absolute;top:-5px;right:-6px;background:#222;color:#fff;font-size:10px;font-weight:700;border-radius:9px;padding:0 4px;border:1px solid #fff}
   .maplibregl-popup-content{font-size:12px;line-height:1.5}
@@ -312,8 +313,8 @@ function rebuildMarkers(list){
     const sym=symbolOf(modeType(g.items));
     const color=rainbow(avgOf(g.items.map(j=>num(j.sOfficeSalary))));
     const el=document.createElement("div"); el.className="jgm";
-    el.innerHTML=`<svg viewBox="0 0 24 24" width="30" height="30"><path d="${ICON[sym]||ICON._}" fill="${color}" stroke="#222" stroke-width="0.7"/></svg>`+
-      (g.items.length>1?`<span class="cnt">${g.items.length}</span>`:"");
+    el.innerHTML=`<div class="jgm-in"><svg viewBox="0 0 24 24" width="30" height="30"><path d="${ICON[sym]||ICON._}" fill="${color}" stroke="#222" stroke-width="0.7"/></svg>`+
+      (g.items.length>1?`<span class="cnt">${g.items.length}</span>`:"")+`</div>`;
     el.title=(g.items[0].sOfficeName||"")+" ["+(modeType(g.items)||"")+"]";
     el.addEventListener("click",()=>popupGroup(g));
     markers.push(new maplibregl.Marker({element:el,anchor:"center"}).setLngLat([g.lng,g.lat]).addTo(map));
