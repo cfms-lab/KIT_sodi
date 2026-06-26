@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>취업 현황 GIS (Cloud)</title>
+<link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+<style>
+  :root{--c:#00695c;--c2:#004d40;--line:#cbd5e1;--bg:#eef2f1;}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font-family:"Segoe UI","Malgun Gothic",sans-serif;font-size:13px;color:#1f2937}
+  body{display:flex;flex-direction:column}
+  header{background:linear-gradient(135deg,var(--c),var(--c2));color:#fff;padding:9px 14px;display:flex;align-items:center;gap:11px;flex-wrap:wrap;flex:0 0 auto}
+  header h1{font-size:16px;margin:0;font-weight:600}
+  .authbar{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:12px}
+  .authbar input{padding:5px 7px;border:1px solid rgba(255,255,255,.5);border-radius:5px;font-size:12px;background:rgba(255,255,255,.92)}
+  .pill{background:rgba(255,255,255,.15);padding:4px 9px;border-radius:12px}
+  .btn{background:var(--c);color:#fff;border:none;padding:6px 11px;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px}
+  .btn:hover{background:var(--c2)} .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.g{background:#fff;color:var(--c);border:1px solid var(--c)}
+  a.home{color:#fff;text-decoration:none;font-size:13px;background:rgba(255,255,255,.18);padding:4px 11px;border-radius:12px}
+  .body{flex:1;display:flex;min-height:0}
+  .side{width:330px;min-width:330px;border-right:1px solid var(--line);background:#fafbfb;overflow:auto;padding:12px}
+  #map{flex:1;min-width:0}
+  .banner{background:#fff8e1;border-bottom:1px solid #ffe082;padding:7px 14px;font-size:12px;color:#795548;display:none;flex:0 0 auto}
+  .grp{margin-bottom:14px}
+  .grp h3{margin:0 0 7px;font-size:13px;color:var(--c2)}
+  .slider{margin-bottom:9px}
+  .slider .lab{display:flex;justify-content:space-between;font-size:11px;color:#555;margin-bottom:2px}
+  .slider input[type=range]{width:100%}
+  .checks{max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:6px;background:#fff}
+  .checks label{display:flex;align-items:center;gap:6px;font-size:12px;padding:1px 0}
+  .checks .sw{width:11px;height:11px;border-radius:2px;border:1px solid #888}
+  table.st{border-collapse:collapse;width:100%;font-size:11px;margin-top:4px}
+  table.st td,table.st th{border:1px solid var(--line);padding:2px 4px;text-align:center}
+  table.st th{background:#e0f2f1;font-weight:600}
+  .stwrap{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .avg{font-size:11px;color:#00695c;text-align:center;margin-top:2px}
+  .maplibregl-popup-content{font-size:12px;line-height:1.5}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:50}
+  .modal{background:#fff;border-radius:10px;padding:18px;width:520px;max-width:94vw;max-height:90vh;overflow:auto}
+  .modal h2{margin:0 0 12px;font-size:16px;color:var(--c2)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .grid label{display:flex;flex-direction:column;font-size:11px;color:#555;gap:3px}
+  .grid label.full{grid-column:1/3}
+  .grid input,.grid select{padding:6px;border:1px solid var(--line);border-radius:6px;font-size:13px}
+  .modal-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:13px}
+  .err{color:#c62828;font-size:12px;margin-top:6px}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;opacity:0;transition:.3s;z-index:99}
+  .toast.show{opacity:1}
+  .hint{font-size:11px;color:#888;margin-top:3px}
+</style>
+</head>
+<body>
+<header>
+  <a class="home" href="index.html">← 홈</a>
+  <h1>금오공대 신소재공학부 취업 현황 GIS</h1>
+  <div class="authbar" id="authbar"></div>
+</header>
+<div class="banner" id="banner"></div>
+
+<div class="body">
+  <aside class="side">
+    <div class="grp">
+      <button class="btn g" id="btnAdd" onclick="openEdit(null)" disabled style="width:100%">＋ 취업 사례 추가</button>
+    </div>
+    <div class="grp">
+      <h3>필터</h3>
+      <div class="slider" data-k="toeic"><div class="lab"><span>토익</span><span><b class="lo"></b> ~ <b class="hi"></b></span></div>
+        <input type="range" class="rlo" min="0" max="1000" step="50" value="0"><input type="range" class="rhi" min="0" max="1000" step="50" value="1000"></div>
+      <div class="slider" data-k="grade"><div class="lab"><span>학점</span><span><b class="lo"></b> ~ <b class="hi"></b></span></div>
+        <input type="range" class="rlo" min="0" max="4.5" step="0.1" value="0"><input type="range" class="rhi" min="0" max="4.5" step="0.1" value="4.5"></div>
+      <div class="slider" data-k="salary"><div class="lab"><span>연봉(만원)</span><span><b class="lo"></b> ~ <b class="hi"></b></span></div>
+        <input type="range" class="rlo" min="1000" max="6000" step="100" value="1000"><input type="range" class="rhi" min="1000" max="6000" step="100" value="6000"></div>
+      <div class="slider" data-k="year"><div class="lab"><span>학번</span><span><b class="lo"></b> ~ <b class="hi"></b></span></div>
+        <input type="range" class="rlo" min="2006" max="2030" step="1" value="2006"><input type="range" class="rhi" min="2006" max="2030" step="1" value="2030"></div>
+    </div>
+    <div class="grp">
+      <h3>업종 <button class="btn g" style="font-size:10px;padding:2px 7px" onclick="toggleAllTypes()">전체 토글</button></h3>
+      <div class="checks" id="typeChecks"></div>
+    </div>
+    <div class="grp">
+      <h3>통계 <span id="statCount" style="font-weight:400;color:#777"></span></h3>
+      <div class="stwrap">
+        <div><table class="st" id="stToeic"></table></div>
+        <div><table class="st" id="stGrade"></table></div>
+        <div><table class="st" id="stSalary"></table></div>
+        <div><table class="st" id="stType"></table></div>
+      </div>
+    </div>
+  </aside>
+  <div id="map"></div>
+</div>
+
+<!-- 편집 모달 -->
+<div class="modal-bg" id="modalBg"><div class="modal">
+  <h2 id="modalTitle">취업 사례 추가</h2>
+  <input type="hidden" id="eId">
+  <div class="grid">
+    <label>학과<input id="eDpt"></label>
+    <label>학번(연도)<input id="eYear" type="number"></label>
+    <label>이름<input id="eName"></label>
+    <label>학점<input id="eGrade" type="number" step="0.01"></label>
+    <label>토익<input id="eToeic" type="number"></label>
+    <label>업종<select id="eType"></select></label>
+    <label class="full">회사명<input id="eOffice"></label>
+    <label>연봉(만원)<input id="eSalary" type="number"></label>
+    <label>회사 URL<input id="eURL"></label>
+    <label class="full">주소<input id="eAddr"></label>
+    <label>경도(Lng)<input id="eLng" type="number" step="any"></label>
+    <label>위도(Lat)<input id="eLat" type="number" step="any"></label>
+  </div>
+  <div class="hint">좌표를 모르면 주소로 검색해 경위도를 채워주세요(없으면 지도에 표시되지 않습니다).</div>
+  <div class="err" id="editErr"></div>
+  <div class="modal-actions">
+    <button class="btn" style="background:#c62828" id="eDelete" onclick="deleteJob()">삭제</button>
+    <button class="btn g" onclick="closeEdit()">취소</button>
+    <button class="btn" id="eSave" onclick="saveJob()">저장</button>
+  </div>
+</div></div>
+
+<!-- 설정 모달 -->
+<div class="modal-bg" id="cfgBg"><div class="modal" style="width:520px">
+  <h2>Supabase 연결 설정</h2>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <label style="font-size:11px;color:#555">Project URL<input id="cfgUrl" style="width:100%;padding:7px;border:1px solid var(--line);border-radius:6px"></label>
+    <label style="font-size:11px;color:#555">anon public key<input id="cfgKey" style="width:100%;padding:7px;border:1px solid var(--line);border-radius:6px"></label>
+  </div>
+  <div class="err" id="cfgErr"></div>
+  <div class="modal-actions"><button class="btn" onclick="saveConfig()">저장 후 연결</button></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== Supabase (UPJUK과 같은 프로젝트, 공유 로그인) ===== */
+function normUrl(u){return (u||"").trim().replace(/\/+$/,"").replace(/\/rest\/v1$/i,"").replace(/\/auth\/v1$/i,"").replace(/\/+$/,"");}
+const BAKED_URL="https://ijutjirouxgqcldjyhma.supabase.co";
+const BAKED_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdXRqaXJvdXhncWNsZGp5aG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDk4MDAsImV4cCI6MjA5Nzk4NTgwMH0.gIAwf6a2oY-DkTXaf5eM2L4ROMCKim5WsevGfjol7tE";
+let CFG={url:normUrl(localStorage.getItem("cfms_url")||BAKED_URL),key:(localStorage.getItem("cfms_key")||BAKED_KEY).trim()};
+let SESSION=JSON.parse(localStorage.getItem("cfms_session")||"null");
+function isIn(){return !!(SESSION&&SESSION.access_token);}
+function authHeaders(u){const h={apikey:CFG.key,"Content-Type":"application/json"};h.Authorization="Bearer "+((u&&isIn())?SESSION.access_token:CFG.key);return h;}
+async function api(path,opts={}){const r=await fetch(CFG.url+path,opts);if(!r.ok)throw new Error(r.status+" "+await r.text());const t=await r.text();return t?JSON.parse(t):null;}
+
+/* ===== 데이터 ===== */
+let JOBS=[], TYPES=[], map=null, mapReady=false;
+async function loadAll(){
+  try{
+    // 로그인 시 실명 테이블, 비로그인 시 이름 마스킹된 공개 뷰
+    const jt=isIn()?'jobgis_jobs':'jobgis_jobs_public';
+    const [j,t]=await Promise.all([
+      api('/rest/v1/'+jt+'?select=*',{headers:authHeaders(isIn())}),
+      api('/rest/v1/jobgis_office_types?select=*',{headers:authHeaders(false)})
+    ]);
+    JOBS=j; TYPES=t;
+    document.getElementById("banner").style.display="none";
+    initUI();
+  }catch(e){showBanner("불러오기 실패. 스키마/설정 확인. ("+e.message.slice(0,120)+")");}
+}
+const num=v=>{const n=parseFloat(v);return isNaN(n)?null:n;};
+
+/* ===== 연봉→무지개색 (원본 FloatToRainbow 이식) ===== */
+const COL=[[0,0,232],[0,93,232],[0,185,232],[0,255,232],[0,255,139],[0,255,46],[46,255,0],[139,255,0],[139,255,0],[255,185,0],[255,93,0],[255,0,0]];
+function hx(n){return ("0"+Math.round(n).toString(16)).slice(-2);}
+function rainbow(v){const min=0,max=4100; v=Math.max(min,Math.min(max,v||0));
+  let t=(v-min)/(max-min); if(t<0.001)return "#0000FF"; if(t>0.999)return "#FF0000";
+  let s=t*11,i=Math.floor(s),f=s-i; if(i>=11){i=10;f=1;}
+  return "#"+hx(COL[i][0]*(1-f)+COL[i+1][0]*f)+hx(COL[i][1]*(1-f)+COL[i+1][1]*f)+hx(COL[i][2]*(1-f)+COL[i+1][2]*f);}
+
+/* ===== UI 초기화 ===== */
+function initUI(){
+  // 업종 체크박스
+  const tNames=[...new Set([...TYPES.map(t=>t.sOfficeType), ...JOBS.map(j=>j.sOfficeType)].filter(Boolean))];
+  document.getElementById("typeChecks").innerHTML=tNames.map(n=>
+    `<label><input type="checkbox" class="tchk" value="${n}" checked onchange="apply()"><span class="sw" style="background:#bbb"></span>${n}</label>`).join("");
+  document.getElementById("eType").innerHTML=tNames.map(n=>`<option>${n}</option>`).join("");
+  // 슬라이더 이벤트 + 라벨
+  document.querySelectorAll(".slider").forEach(s=>{
+    const lo=s.querySelector(".rlo"), hi=s.querySelector(".rhi");
+    const upd=()=>{ if(+lo.value>+hi.value){const t=lo.value;lo.value=hi.value;hi.value=t;}
+      s.querySelector(".lo").textContent=lo.value; s.querySelector(".hi").textContent=hi.value; apply(); };
+    lo.oninput=upd; hi.oninput=upd;
+    s.querySelector(".lo").textContent=lo.value; s.querySelector(".hi").textContent=hi.value;
+  });
+  renderAuth();
+  if(!mapReady) initMap(); else apply();
+}
+function getRange(k){const s=document.querySelector(`.slider[data-k="${k}"]`);
+  const lo=s.querySelector(".rlo"),hi=s.querySelector(".rhi");
+  // 슬라이더가 양 끝이면 그 방향은 무제한(이상치·해외 포함)
+  return [(+lo.value<=+lo.min)?-Infinity:+lo.value, (+hi.value>=+hi.max)?Infinity:+hi.value];}
+function checkedTypes(){return [...document.querySelectorAll(".tchk:checked")].map(c=>c.value);}
+function toggleAllTypes(){const cs=[...document.querySelectorAll(".tchk")];const all=cs.every(c=>c.checked);cs.forEach(c=>c.checked=!all);apply();}
+
+/* ===== 필터 → GeoJSON + 통계 ===== */
+function filtered(){
+  const [tl,th]=getRange("toeic"),[gl,gh]=getRange("grade"),[sl,sh]=getRange("salary"),[yl,yh]=getRange("year");
+  const types=new Set(checkedTypes());
+  return JOBS.filter(j=>{
+    const t=num(j.sStudentTOEIC),g=num(j.sStudentGrade),s=num(j.sOfficeSalary),y=num(j.sStudentYear);
+    if(t!=null&&(t<tl||t>th))return false;
+    if(g!=null&&(g<gl||g>gh))return false;
+    if(s!=null&&(s<sl||s>sh))return false;
+    if(y!=null&&(y<yl||y>yh))return false;
+    if(j.sOfficeType&&!types.has(j.sOfficeType))return false;
+    return true;
+  });
+}
+function toGeoJSON(list){
+  const feats=[];
+  for(const j of list){
+    const lng=num(j.sOfficeLng), lat=num(j.sOfficeLat);
+    if(lng==null||lat==null||(lng===0&&lat===0))continue;
+    feats.push({type:"Feature",geometry:{type:"Point",coordinates:[lng,lat]},
+      properties:{id:j.id,color:rainbow(num(j.sOfficeSalary)),
+        name:(j.sStudentName||""),
+        year:(""+(j.sStudentYear||"")).slice(-2),
+        office:j.sOfficeName||"",url:j.sOfficeURL||"",addr:j.sOfficeAddress||"",
+        type:j.sOfficeType||"",salary:j.sOfficeSalary||""}});
+  }
+  return {type:"FeatureCollection",features:feats};
+}
+function apply(){
+  if(!mapReady)return;
+  const list=filtered();
+  map.getSource("jobs").setData(toGeoJSON(list));
+  renderStats(list);
+}
+
+/* ===== 통계 ===== */
+function bins(list,fn,labels){const c={};labels.forEach(l=>c[l]=0);let sum=0,cnt=0;
+  list.forEach(j=>{const b=fn(j);if(b!=null){c[b.k]++;if(b.v!=null){sum+=b.v;cnt++;}}});
+  return {c,avg:cnt?Math.round(sum/cnt*10)/10:0,total:Object.values(c).reduce((a,b)=>a+b,0)};}
+function tbl(el,title,labels,c,total,avgline){
+  document.getElementById(el).innerHTML=`<tr><th colspan="2">${title}</th></tr>`+
+    labels.map(l=>`<tr><td>${l}</td><td>${c[l]}</td></tr>`).join("")+
+    `<tr><th>합계</th><th>${total}</th></tr>`+(avgline?`<tr><td colspan="2" class="avg">${avgline}</td></tr>`:"");
+}
+function renderStats(list){
+  document.getElementById("statCount").textContent="("+list.length+"건)";
+  const tL=["900+","800+","700+","600+","500+","<500"];
+  const tb=bins(list,j=>{const t=num(j.sStudentTOEIC);if(t==null)return null;
+    return {k:t>=900?"900+":t>=800?"800+":t>=700?"700+":t>=600?"600+":t>=500?"500+":"<500",v:t};},tL);
+  tbl("stToeic","토익",tL,tb.c,tb.total,"평균 "+tb.avg);
+  const gL=["4.0+","3.5+","3.0+","2.5+","<2.5"];
+  const gb=bins(list,j=>{const g=num(j.sStudentGrade);if(g==null)return null;
+    return {k:g>=4?"4.0+":g>=3.5?"3.5+":g>=3?"3.0+":g>=2.5?"2.5+":"<2.5",v:g};},gL);
+  tbl("stGrade","학점",gL,gb.c,gb.total,"평균 "+(Math.round(gb.avg*100)/100));
+  const sL=["4000+","3500+","3000+","2500+","<2500"];
+  const sb=bins(list,j=>{const s=num(j.sOfficeSalary);if(s==null)return null;
+    return {k:s>=4000?"4000+":s>=3500?"3500+":s>=3000?"3000+":s>=2500?"2500+":"<2500",v:s};},sL);
+  tbl("stSalary","연봉",sL,sb.c,sb.total,"평균 "+sb.avg);
+  // 업종
+  const types=[...new Set(JOBS.map(j=>j.sOfficeType).filter(Boolean))];
+  const tc={};types.forEach(t=>tc[t]=0);list.forEach(j=>{if(j.sOfficeType&&tc[j.sOfficeType]!=null)tc[j.sOfficeType]++;});
+  document.getElementById("stType").innerHTML=`<tr><th colspan="2">업종</th></tr>`+
+    types.map(t=>`<tr><td>${t}</td><td>${tc[t]}</td></tr>`).join("")+
+    `<tr><th>합계</th><th>${Object.values(tc).reduce((a,b)=>a+b,0)}</th></tr>`;
+}
+
+/* ===== 지도 ===== */
+function initMap(){
+  map=new maplibregl.Map({container:"map",
+    style:{version:8,sources:{osm:{type:"raster",tiles:["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],tileSize:256,attribution:"© OpenStreetMap contributors"}},
+      layers:[{id:"osm",type:"raster",source:"osm"}]},
+    center:[127.885,36.238],zoom:6});
+  map.addControl(new maplibregl.NavigationControl());
+  map.on("load",()=>{
+    map.addSource("jobs",{type:"geojson",data:toGeoJSON(filtered()),cluster:true,clusterMaxZoom:11,clusterRadius:45});
+    map.addLayer({id:"clusters",type:"circle",source:"jobs",filter:["has","point_count"],
+      paint:{"circle-color":"#00897b","circle-opacity":.8,
+        "circle-radius":["step",["get","point_count"],15,10,20,50,27]}});
+    map.addLayer({id:"cluster-count",type:"symbol",source:"jobs",filter:["has","point_count"],
+      layout:{"text-field":["get","point_count_abbreviated"],"text-size":12},paint:{"text-color":"#fff"}});
+    map.addLayer({id:"points",type:"circle",source:"jobs",filter:["!",["has","point_count"]],
+      paint:{"circle-color":["get","color"],"circle-radius":8,"circle-stroke-width":1.5,"circle-stroke-color":"#333"}});
+    map.on("click","clusters",e=>{const f=map.queryRenderedFeatures(e.point,{layers:["clusters"]});
+      map.getSource("jobs").getClusterExpansionZoom(f[0].properties.cluster_id,(err,z)=>{if(err)return;
+        map.easeTo({center:f[0].geometry.coordinates,zoom:z});});});
+    map.on("click","points",e=>{const p=e.features[0].properties;
+      const html=`<b>${esc(p.year)}학번 ${esc(p.name)}</b><br>${esc(p.office)} <span style="color:#00695c">[${esc(p.type)}]</span><br>`+
+        `${esc(p.addr)}<br>연봉 ${esc(p.salary)}만원`+(p.url?`<br><a href="${esc(p.url)}" target="_blank">${esc(p.url)}</a>`:"")+
+        (isIn()?`<br><button onclick="openEdit(${p.id})" style="margin-top:4px">수정</button>`:"");
+      new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(html).addTo(map);});
+    map.on("mouseenter","points",()=>map.getCanvas().style.cursor="pointer");
+    map.on("mouseleave","points",()=>map.getCanvas().style.cursor="");
+    map.on("mouseenter","clusters",()=>map.getCanvas().style.cursor="pointer");
+    map.on("mouseleave","clusters",()=>map.getCanvas().style.cursor="");
+    mapReady=true; apply();
+    // 국내 좌표 기준으로 초기 화면 맞춤(해외 근무지는 줌아웃하면 보임)
+    const kor=toGeoJSON(filtered()).features.filter(f=>{const[x,y]=f.geometry.coordinates;return x>124&&x<132&&y>33&&y<39;});
+    if(kor.length){const b=new maplibregl.LngLatBounds();kor.forEach(f=>b.extend(f.geometry.coordinates));map.fitBounds(b,{padding:50,maxZoom:10});}
+  });
+}
+function esc(s){return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+/* ===== CRUD ===== */
+function requireLogin(){if(!isIn()){toast("로그인 후 편집할 수 있습니다.");return false;}return true;}
+function openEdit(id){
+  if(!requireLogin())return;
+  const j=id!=null?JOBS.find(x=>x.id===id):null;
+  document.getElementById("modalTitle").textContent=j?"취업 사례 수정":"취업 사례 추가";
+  document.getElementById("eDelete").style.display=j?"inline-block":"none";
+  document.getElementById("editErr").textContent="";
+  const g=(k,v)=>document.getElementById(k).value=v==null?"":v;
+  g("eId",j?j.id:"");g("eDpt",j&&j.sStudentDpt);g("eYear",j&&j.sStudentYear);g("eName",j&&j.sStudentName);
+  g("eGrade",j&&j.sStudentGrade);g("eToeic",j&&j.sStudentTOEIC);g("eOffice",j&&j.sOfficeName);
+  g("eSalary",j&&j.sOfficeSalary);g("eURL",j&&j.sOfficeURL);g("eAddr",j&&j.sOfficeAddress);
+  g("eLng",j&&j.sOfficeLng);g("eLat",j&&j.sOfficeLat);
+  document.getElementById("eType").value=j?j.sOfficeType:document.getElementById("eType").options[0]?.value;
+  document.getElementById("modalBg").style.display="flex";
+}
+function closeEdit(){document.getElementById("modalBg").style.display="none";}
+function formObj(){const v=k=>document.getElementById(k).value;
+  return{sStudentDpt:v("eDpt"),sStudentYear:v("eYear"),sStudentName:v("eName"),sStudentGrade:v("eGrade"),
+    sStudentTOEIC:v("eToeic"),sOfficeName:v("eOffice"),sOfficeType:v("eType"),sOfficeSalary:v("eSalary"),
+    sOfficeURL:v("eURL"),sOfficeAddress:v("eAddr"),sOfficeLng:v("eLng"),sOfficeLat:v("eLat")};}
+async function saveJob(){
+  if(!requireLogin())return;
+  const idv=document.getElementById("eId").value, obj=formObj();
+  document.getElementById("eSave").disabled=true;
+  try{
+    if(idv!==""){
+      await api('/rest/v1/jobgis_jobs?id=eq.'+idv,{method:"PATCH",headers:Object.assign(authHeaders(true),{Prefer:"return=representation"}),body:JSON.stringify(obj)});
+      Object.assign(JOBS.find(x=>x.id==idv),obj); toast("수정되었습니다.");
+    }else{
+      const r=await api('/rest/v1/jobgis_jobs',{method:"POST",headers:Object.assign(authHeaders(true),{Prefer:"return=representation"}),body:JSON.stringify(obj)});
+      JOBS.push(r[0]); toast("추가되었습니다.");
+    }
+    closeEdit(); apply();
+  }catch(e){document.getElementById("editErr").textContent="저장 실패: "+e.message.slice(0,140);}
+  finally{document.getElementById("eSave").disabled=false;}
+}
+async function deleteJob(){
+  if(!requireLogin())return;
+  const idv=document.getElementById("eId").value; if(idv===""||!confirm("이 사례를 삭제할까요?"))return;
+  try{await api('/rest/v1/jobgis_jobs?id=eq.'+idv,{method:"DELETE",headers:authHeaders(true)});
+    JOBS=JOBS.filter(x=>x.id!=idv); closeEdit(); apply(); toast("삭제되었습니다.");}
+  catch(e){document.getElementById("editErr").textContent="삭제 실패: "+e.message.slice(0,140);}
+}
+
+/* ===== 인증/설정 ===== */
+async function login(){
+  const email=document.getElementById("liEmail").value.trim(),pw=document.getElementById("liPw").value;
+  if(!email||!pw){toast("이메일/비밀번호 입력");return;}
+  try{const r=await api('/auth/v1/token?grant_type=password',{method:"POST",headers:{apikey:CFG.key,"Content-Type":"application/json"},body:JSON.stringify({email,password:pw})});
+    SESSION={access_token:r.access_token,email};localStorage.setItem("cfms_session",JSON.stringify(SESSION));
+    toast("로그인되었습니다. 학생 이름이 표시됩니다.");renderAuth();loadAll();
+  }catch(e){toast("로그인 실패: 이메일/비밀번호 확인");}
+}
+function logout(){SESSION=null;localStorage.removeItem("cfms_session");renderAuth();loadAll();toast("로그아웃");}
+function renderAuth(){
+  const bar=document.getElementById("authbar");
+  document.getElementById("btnAdd").disabled=!isIn();
+  if(isIn())bar.innerHTML=`<span class="pill">✔ ${esc(SESSION.email)}</span><button class="btn g" onclick="logout()">로그아웃</button>`;
+  else bar.innerHTML=`<input id="liEmail" placeholder="이메일" style="width:130px"><input id="liPw" type="password" placeholder="비밀번호" style="width:105px"><button class="btn" onclick="login()">로그인</button><button class="btn g" onclick="openConfig()" title="설정">⚙</button>`;
+}
+function openConfig(){document.getElementById("cfgUrl").value=CFG.url;document.getElementById("cfgKey").value=CFG.key;document.getElementById("cfgBg").style.display="flex";}
+function saveConfig(){const url=normUrl(document.getElementById("cfgUrl").value),key=document.getElementById("cfgKey").value.trim();
+  if(!url||!key){document.getElementById("cfgErr").textContent="입력하세요";return;}
+  CFG={url,key};localStorage.setItem("cfms_url",url);localStorage.setItem("cfms_key",key);document.getElementById("cfgBg").style.display="none";boot();}
+function showBanner(m){const b=document.getElementById("banner");b.textContent=m;b.style.display="block";}
+let tT;function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(tT);tT=setTimeout(()=>t.classList.remove("show"),2400);}
+
+function boot(){renderAuth();
+  if(!CFG.url||!CFG.key){showBanner("⚙ 버튼으로 Supabase 연결정보를 입력하세요.");openConfig();return;}
+  loadAll();
+}
+boot();
+</script>
+</body>
+</html>
