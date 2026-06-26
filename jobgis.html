@@ -32,11 +32,15 @@
   .checks{max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:6px;background:#fff}
   .checks label{display:flex;align-items:center;gap:6px;font-size:12px;padding:1px 0}
   .checks .sw{width:11px;height:11px;border-radius:2px;border:1px solid #888}
-  table.st{border-collapse:collapse;width:100%;font-size:11px;margin-top:4px}
-  table.st td,table.st th{border:1px solid var(--line);padding:2px 4px;text-align:center}
-  table.st th{background:#e0f2f1;font-weight:600}
-  .stwrap{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .avg{font-size:11px;color:#00695c;text-align:center;margin-top:2px}
+  table.st{border-collapse:collapse;width:100%;font-size:12px;margin-bottom:10px}
+  table.st td,table.st th{border:1px solid var(--line);padding:3px 6px}
+  table.st th{background:#00695c;color:#fff;font-weight:600}
+  table.st .cathead th{cursor:pointer}
+  table.st td.c{text-align:center;width:24px} table.st td.n{text-align:right;width:42px;color:#444}
+  table.st td.l{display:flex;align-items:center;gap:5px}
+  table.st tr.off td.l{color:#aaa} table.st tr.off td.n{color:#bbb}
+  table.st .avg{font-size:11px;color:#00695c;text-align:center}
+  table.st input{margin:0;vertical-align:middle}
   .jgm{cursor:pointer}                       /* position은 MapLibre가 제어 — 건드리지 않음 */
   .jgm-in{position:relative;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
   .jgm svg{display:block}
@@ -59,7 +63,7 @@
 <body>
 <header>
   <a class="home" href="index.html">← 홈</a>
-  <h1>금오공대 신소재공학부 취업 현황 GIS</h1>
+  <h1>금오공대 소재디자인공학과 취업 현황 GIS</h1>
   <div class="authbar" id="authbar"></div>
 </header>
 <div class="banner" id="banner"></div>
@@ -70,28 +74,9 @@
       <button class="btn g" id="btnAdd" onclick="openEdit(null)" disabled style="width:100%">＋ 취업 사례 추가</button>
     </div>
     <div class="grp">
-      <h3>필터</h3>
-      <div class="slider" data-k="toeic"><div class="lab"><span>토익</span><span><b class="lo"></b> ~ <b class="hi"></b></span></div>
-        <input type="range" class="rlo" min="0" max="1000" step="50" value="0"><input type="range" class="rhi" min="0" max="1000" step="50" value="1000"></div>
-      <div class="slider" data-k="grade"><div class="lab"><span>학점</span><span><b class="lo"></b> ~ <b class="hi"></b></span></div>
-        <input type="range" class="rlo" min="0" max="4.5" step="0.1" value="0"><input type="range" class="rhi" min="0" max="4.5" step="0.1" value="4.5"></div>
-      <div class="slider" data-k="salary"><div class="lab"><span>연봉(만원)</span><span><b class="lo"></b> ~ <b class="hi"></b></span></div>
-        <input type="range" class="rlo" min="1000" max="6000" step="100" value="1000"><input type="range" class="rhi" min="1000" max="6000" step="100" value="6000"></div>
-      <div class="slider" data-k="year"><div class="lab"><span>학번</span><span><b class="lo"></b> ~ <b class="hi"></b></span></div>
-        <input type="range" class="rlo" min="2006" max="2030" step="1" value="2006"><input type="range" class="rhi" min="2006" max="2030" step="1" value="2030"></div>
-    </div>
-    <div class="grp">
-      <h3>업종 <button class="btn g" style="font-size:10px;padding:2px 7px" onclick="toggleAllTypes()">전체 토글</button></h3>
-      <div class="checks" id="typeChecks"></div>
-    </div>
-    <div class="grp">
-      <h3>통계 <span id="statCount" style="font-weight:400;color:#777"></span></h3>
-      <div class="stwrap">
-        <div><table class="st" id="stToeic"></table></div>
-        <div><table class="st" id="stGrade"></table></div>
-        <div><table class="st" id="stSalary"></table></div>
-        <div><table class="st" id="stType"></table></div>
-      </div>
+      <h3>분류별 현황 <span id="statCount" style="font-weight:400;color:#777"></span>
+        <span style="font-weight:400;font-size:10px;color:#999">· 체크로 지도 필터</span></h3>
+      <div id="statTables"></div>
     </div>
   </aside>
   <div id="map"></div>
@@ -174,96 +159,70 @@ function rainbow(v){const min=0,max=4100; v=Math.max(min,Math.min(max,v||0));
   return "#"+hx(COL[i][0]*(1-f)+COL[i+1][0]*f)+hx(COL[i][1]*(1-f)+COL[i+1][1]*f)+hx(COL[i][2]*(1-f)+COL[i+1][2]*f);}
 
 /* ===== UI 초기화 ===== */
+/* ===== 분류(통계=필터) 정의 ===== */
+const CATS=[
+  {key:"toeic",title:"토익",buckets:["900+","800+","700+","600+","500+","<500"],
+    band:j=>{const t=num(j.sStudentTOEIC);return t==null?"<500":t>=900?"900+":t>=800?"800+":t>=700?"700+":t>=600?"600+":t>=500?"500+":"<500";},
+    val:j=>num(j.sStudentTOEIC)},
+  {key:"grade",title:"학점",buckets:["4.0+","3.5+","3.0+","2.5+","<2.5"],
+    band:j=>{const g=num(j.sStudentGrade);return g==null?"<2.5":g>=4?"4.0+":g>=3.5?"3.5+":g>=3?"3.0+":g>=2.5?"2.5+":"<2.5";},
+    val:j=>num(j.sStudentGrade)},
+  {key:"salary",title:"연봉(만원)",buckets:["4000+","3500+","3000+","2500+","<2500"],
+    band:j=>{const s=num(j.sOfficeSalary);return s==null?"<2500":s>=4000?"4000+":s>=3500?"3500+":s>=3000?"3000+":s>=2500?"2500+":"<2500";},
+    val:j=>num(j.sOfficeSalary)},
+  {key:"type",title:"업종",buckets:[],icon:true,
+    band:j=>j.sOfficeType||"(미지정)", val:()=>null}
+];
+const CATBY={}; CATS.forEach(c=>CATBY[c.key]=c);
+const CHECKED={};
+
 function initUI(){
-  // 업종 체크박스
   symbolByType={}; TYPES.forEach(t=>{if(t.sOfficeType)symbolByType[t.sOfficeType]=t.sOfficeSymbol;});
   const tNames=[...new Set([...TYPES.map(t=>t.sOfficeType), ...JOBS.map(j=>j.sOfficeType)].filter(Boolean))];
-  document.getElementById("typeChecks").innerHTML=tNames.map(n=>
-    `<label><input type="checkbox" class="tchk" value="${n}" checked onchange="apply()">`+
-    `<svg viewBox="0 0 24 24" width="16" height="16" style="flex:0 0 16px"><path d="${ICON[symbolByType[n]||'_']||ICON._}" fill="#555"/></svg>${n}</label>`).join("");
-  document.getElementById("eType").innerHTML=tNames.map(n=>`<option>${n}</option>`).join("");
-  // 슬라이더 이벤트 + 라벨
-  document.querySelectorAll(".slider").forEach(s=>{
-    const lo=s.querySelector(".rlo"), hi=s.querySelector(".rhi");
-    const upd=()=>{ if(+lo.value>+hi.value){const t=lo.value;lo.value=hi.value;hi.value=t;}
-      s.querySelector(".lo").textContent=lo.value; s.querySelector(".hi").textContent=hi.value; apply(); };
-    lo.oninput=upd; hi.oninput=upd;
-    s.querySelector(".lo").textContent=lo.value; s.querySelector(".hi").textContent=hi.value;
-  });
+  CATBY.type.buckets=tNames.concat(JOBS.some(j=>!j.sOfficeType)?["(미지정)"]:[]);
+  document.getElementById("eType").innerHTML=tNames.map(n=>`<option>${esc(n)}</option>`).join("");
+  CATS.forEach(c=>{CHECKED[c.key]=new Set(c.buckets);});
+  document.getElementById("statTables").innerHTML=CATS.map(c=>`<table class="st" id="st_${c.key}"></table>`).join("");
   renderAuth();
   if(!mapReady) initMap(); else apply();
 }
-function getRange(k){const s=document.querySelector(`.slider[data-k="${k}"]`);
-  const lo=s.querySelector(".rlo"),hi=s.querySelector(".rhi");
-  // 슬라이더가 양 끝이면 그 방향은 무제한(이상치·해외 포함)
-  return [(+lo.value<=+lo.min)?-Infinity:+lo.value, (+hi.value>=+hi.max)?Infinity:+hi.value];}
-function checkedTypes(){return [...document.querySelectorAll(".tchk:checked")].map(c=>c.value);}
-function toggleAllTypes(){const cs=[...document.querySelectorAll(".tchk")];const all=cs.every(c=>c.checked);cs.forEach(c=>c.checked=!all);apply();}
 
-/* ===== 필터 → GeoJSON + 통계 ===== */
-function filtered(){
-  const [tl,th]=getRange("toeic"),[gl,gh]=getRange("grade"),[sl,sh]=getRange("salary"),[yl,yh]=getRange("year");
-  const types=new Set(checkedTypes());
-  return JOBS.filter(j=>{
-    const t=num(j.sStudentTOEIC),g=num(j.sStudentGrade),s=num(j.sOfficeSalary),y=num(j.sStudentYear);
-    if(t!=null&&(t<tl||t>th))return false;
-    if(g!=null&&(g<gl||g>gh))return false;
-    if(s!=null&&(s<sl||s>sh))return false;
-    if(y!=null&&(y<yl||y>yh))return false;
-    if(j.sOfficeType&&!types.has(j.sOfficeType))return false;
-    return true;
-  });
+/* ===== 필터(체크된 버킷만 통과, 분류 간 AND) ===== */
+function passExcept(j,exceptKey){
+  for(const c of CATS){ if(c.key===exceptKey) continue;
+    if(!CHECKED[c.key].has(c.band(j))) return false; }
+  return true;
 }
-function toGeoJSON(list){
-  const feats=[];
-  for(const j of list){
-    const lng=num(j.sOfficeLng), lat=num(j.sOfficeLat);
-    if(lng==null||lat==null||(lng===0&&lat===0))continue;
-    feats.push({type:"Feature",geometry:{type:"Point",coordinates:[lng,lat]},
-      properties:{id:j.id,color:rainbow(num(j.sOfficeSalary)),
-        name:(j.sStudentName||""),
-        year:(""+(j.sStudentYear||"")).slice(-2),
-        office:j.sOfficeName||"",url:j.sOfficeURL||"",addr:j.sOfficeAddress||"",
-        type:j.sOfficeType||"",salary:j.sOfficeSalary||""}});
+function filtered(){ return JOBS.filter(j=>passExcept(j,null)); }
+function apply(){ if(!mapReady)return; rebuildMarkers(filtered()); renderStats(); }
+function tBucket(key,b){ const s=CHECKED[key]; if(s.has(b))s.delete(b); else s.add(b); apply(); }
+function tCat(key){ const c=CATBY[key],s=CHECKED[key]; if(c.buckets.every(b=>s.has(b))) s.clear(); else c.buckets.forEach(b=>s.add(b)); apply(); }
+
+/* ===== 통계 표 = 필터 (행마다 체크박스) ===== */
+function renderStats(){
+  document.getElementById("statCount").textContent="("+filtered().length+"건)";
+  const cur=filtered();
+  for(const c of CATS){
+    const base=JOBS.filter(j=>passExcept(j,c.key));   // 다른 분류 적용 후 facet 카운트
+    const cnt={}; c.buckets.forEach(b=>cnt[b]=0);
+    base.forEach(j=>{const b=c.band(j); if(cnt[b]!=null)cnt[b]++;});
+    const allOn=c.buckets.length>0 && c.buckets.every(b=>CHECKED[c.key].has(b));
+    let h=`<tr class="cathead"><th class="c"><input type="checkbox" ${allOn?"checked":""} onclick="tCat('${c.key}')"></th>`+
+          `<th>${esc(c.title)}</th><th class="n">건수</th></tr>`;
+    let sum=0;
+    for(const b of c.buckets){
+      const on=CHECKED[c.key].has(b); sum+=cnt[b];
+      const ic=c.icon?`<svg viewBox="0 0 24 24" width="15" height="15" style="flex:0 0 15px"><path d="${ICON[symbolByType[b]||'_']||ICON._}" fill="#555"/></svg>`:"";
+      h+=`<tr class="${on?"":"off"}"><td class="c"><input type="checkbox" ${on?"checked":""} onclick="tBucket('${c.key}','${(""+b).replace(/'/g,"\\'")}')"></td>`+
+         `<td class="l">${ic}${esc(b)}</td><td class="n">${cnt[b]}</td></tr>`;
+    }
+    let avgRow="";
+    if(c.val){ const vs=cur.map(c.val).filter(x=>x!=null);
+      if(vs.length){ const a=vs.reduce((p,q)=>p+q,0)/vs.length;
+        avgRow=`<tr><td></td><td class="avg" colspan="2">표시 ${cur.length}건 평균 ${Math.round(a*100)/100}</td></tr>`; } }
+    h+=`<tr><td></td><th>합계</th><th class="n">${sum}</th></tr>`+avgRow;
+    document.getElementById("st_"+c.key).innerHTML=h;
   }
-  return {type:"FeatureCollection",features:feats};
-}
-function apply(){
-  if(!mapReady)return;
-  const list=filtered();
-  rebuildMarkers(list);
-  renderStats(list);
-}
-
-/* ===== 통계 ===== */
-function bins(list,fn,labels){const c={};labels.forEach(l=>c[l]=0);let sum=0,cnt=0;
-  list.forEach(j=>{const b=fn(j);if(b!=null){c[b.k]++;if(b.v!=null){sum+=b.v;cnt++;}}});
-  return {c,avg:cnt?Math.round(sum/cnt*10)/10:0,total:Object.values(c).reduce((a,b)=>a+b,0)};}
-function tbl(el,title,labels,c,total,avgline){
-  document.getElementById(el).innerHTML=`<tr><th colspan="2">${title}</th></tr>`+
-    labels.map(l=>`<tr><td>${l}</td><td>${c[l]}</td></tr>`).join("")+
-    `<tr><th>합계</th><th>${total}</th></tr>`+(avgline?`<tr><td colspan="2" class="avg">${avgline}</td></tr>`:"");
-}
-function renderStats(list){
-  document.getElementById("statCount").textContent="("+list.length+"건)";
-  const tL=["900+","800+","700+","600+","500+","<500"];
-  const tb=bins(list,j=>{const t=num(j.sStudentTOEIC);if(t==null)return null;
-    return {k:t>=900?"900+":t>=800?"800+":t>=700?"700+":t>=600?"600+":t>=500?"500+":"<500",v:t};},tL);
-  tbl("stToeic","토익",tL,tb.c,tb.total,"평균 "+tb.avg);
-  const gL=["4.0+","3.5+","3.0+","2.5+","<2.5"];
-  const gb=bins(list,j=>{const g=num(j.sStudentGrade);if(g==null)return null;
-    return {k:g>=4?"4.0+":g>=3.5?"3.5+":g>=3?"3.0+":g>=2.5?"2.5+":"<2.5",v:g};},gL);
-  tbl("stGrade","학점",gL,gb.c,gb.total,"평균 "+(Math.round(gb.avg*100)/100));
-  const sL=["4000+","3500+","3000+","2500+","<2500"];
-  const sb=bins(list,j=>{const s=num(j.sOfficeSalary);if(s==null)return null;
-    return {k:s>=4000?"4000+":s>=3500?"3500+":s>=3000?"3000+":s>=2500?"2500+":"<2500",v:s};},sL);
-  tbl("stSalary","연봉",sL,sb.c,sb.total,"평균 "+sb.avg);
-  // 업종
-  const types=[...new Set(JOBS.map(j=>j.sOfficeType).filter(Boolean))];
-  const tc={};types.forEach(t=>tc[t]=0);list.forEach(j=>{if(j.sOfficeType&&tc[j.sOfficeType]!=null)tc[j.sOfficeType]++;});
-  document.getElementById("stType").innerHTML=`<tr><th colspan="2">업종</th></tr>`+
-    types.map(t=>`<tr><td>${t}</td><td>${tc[t]}</td></tr>`).join("")+
-    `<tr><th>합계</th><th>${Object.values(tc).reduce((a,b)=>a+b,0)}</th></tr>`;
 }
 
 /* ===== 지도 ===== */
