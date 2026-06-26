@@ -37,6 +37,9 @@
   table.st th{background:#e0f2f1;font-weight:600}
   .stwrap{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .avg{font-size:11px;color:#00695c;text-align:center;margin-top:2px}
+  .jgm{cursor:pointer;position:relative;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
+  .jgm svg{display:block}
+  .jgm .cnt{position:absolute;top:-5px;right:-6px;background:#222;color:#fff;font-size:10px;font-weight:700;border-radius:9px;padding:0 4px;border:1px solid #fff}
   .maplibregl-popup-content{font-size:12px;line-height:1.5}
   .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:50}
   .modal{background:#fff;border-radius:10px;padding:18px;width:520px;max-width:94vw;max-height:90vh;overflow:auto}
@@ -172,9 +175,11 @@ function rainbow(v){const min=0,max=4100; v=Math.max(min,Math.min(max,v||0));
 /* ===== UI 초기화 ===== */
 function initUI(){
   // 업종 체크박스
+  symbolByType={}; TYPES.forEach(t=>{if(t.sOfficeType)symbolByType[t.sOfficeType]=t.sOfficeSymbol;});
   const tNames=[...new Set([...TYPES.map(t=>t.sOfficeType), ...JOBS.map(j=>j.sOfficeType)].filter(Boolean))];
   document.getElementById("typeChecks").innerHTML=tNames.map(n=>
-    `<label><input type="checkbox" class="tchk" value="${n}" checked onchange="apply()"><span class="sw" style="background:#bbb"></span>${n}</label>`).join("");
+    `<label><input type="checkbox" class="tchk" value="${n}" checked onchange="apply()">`+
+    `<svg viewBox="0 0 24 24" width="16" height="16" style="flex:0 0 16px"><path d="${ICON[symbolByType[n]||'_']||ICON._}" fill="#555"/></svg>${n}</label>`).join("");
   document.getElementById("eType").innerHTML=tNames.map(n=>`<option>${n}</option>`).join("");
   // 슬라이더 이벤트 + 라벨
   document.querySelectorAll(".slider").forEach(s=>{
@@ -225,7 +230,7 @@ function toGeoJSON(list){
 function apply(){
   if(!mapReady)return;
   const list=filtered();
-  map.getSource("jobs").setData(toGeoJSON(list));
+  rebuildMarkers(list);
   renderStats(list);
 }
 
@@ -268,31 +273,59 @@ function initMap(){
     center:[127.885,36.238],zoom:6});
   map.addControl(new maplibregl.NavigationControl());
   map.on("load",()=>{
-    map.addSource("jobs",{type:"geojson",data:toGeoJSON(filtered()),cluster:true,clusterMaxZoom:11,clusterRadius:45});
-    map.addLayer({id:"clusters",type:"circle",source:"jobs",filter:["has","point_count"],
-      paint:{"circle-color":"#00897b","circle-opacity":.8,
-        "circle-radius":["step",["get","point_count"],15,10,20,50,27]}});
-    map.addLayer({id:"cluster-count",type:"symbol",source:"jobs",filter:["has","point_count"],
-      layout:{"text-field":["get","point_count_abbreviated"],"text-size":12},paint:{"text-color":"#fff"}});
-    map.addLayer({id:"points",type:"circle",source:"jobs",filter:["!",["has","point_count"]],
-      paint:{"circle-color":["get","color"],"circle-radius":8,"circle-stroke-width":1.5,"circle-stroke-color":"#333"}});
-    map.on("click","clusters",e=>{const f=map.queryRenderedFeatures(e.point,{layers:["clusters"]});
-      map.getSource("jobs").getClusterExpansionZoom(f[0].properties.cluster_id,(err,z)=>{if(err)return;
-        map.easeTo({center:f[0].geometry.coordinates,zoom:z});});});
-    map.on("click","points",e=>{const p=e.features[0].properties;
-      const html=`<b>${esc(p.year)}학번 ${esc(p.name)}</b><br>${esc(p.office)} <span style="color:#00695c">[${esc(p.type)}]</span><br>`+
-        `${esc(p.addr)}<br>연봉 ${esc(p.salary)}만원`+(p.url?`<br><a href="${esc(p.url)}" target="_blank">${esc(p.url)}</a>`:"")+
-        (isIn()?`<br><button onclick="openEdit(${p.id})" style="margin-top:4px">수정</button>`:"");
-      new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(html).addTo(map);});
-    map.on("mouseenter","points",()=>map.getCanvas().style.cursor="pointer");
-    map.on("mouseleave","points",()=>map.getCanvas().style.cursor="");
-    map.on("mouseenter","clusters",()=>map.getCanvas().style.cursor="pointer");
-    map.on("mouseleave","clusters",()=>map.getCanvas().style.cursor="");
     mapReady=true; apply();
     // 국내 좌표 기준으로 초기 화면 맞춤(해외 근무지는 줌아웃하면 보임)
-    const kor=toGeoJSON(filtered()).features.filter(f=>{const[x,y]=f.geometry.coordinates;return x>124&&x<132&&y>33&&y<39;});
-    if(kor.length){const b=new maplibregl.LngLatBounds();kor.forEach(f=>b.extend(f.geometry.coordinates));map.fitBounds(b,{padding:50,maxZoom:10});}
+    const kor=filtered().map(j=>[num(j.sOfficeLng),num(j.sOfficeLat)]).filter(([x,y])=>x>124&&x<132&&y>33&&y<39);
+    if(kor.length){const b=new maplibregl.LngLatBounds();kor.forEach(c=>b.extend(c));map.fitBounds(b,{padding:50,maxZoom:10});}
   });
+}
+
+/* ===== 업종별 아이콘(실루엣) — 색은 연봉(rainbow) ===== */
+const ICON={
+  car:"M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z",
+  chip:"M15 9H9v6h6V9zm-2 4h-2v-2h2v2zm8-2V9h-2V7c0-1.1-.9-2-2-2h-2V3h-2v2h-2V3H9v2H7c-1.1 0-2 .9-2 2v2H3v2h2v2H3v2h2v2c0 1.1.9 2 2 2h2v2h2v-2h2v2h2v-2h2c1.1 0 2-.9 2-2v-2h2v-2h-2v-2h2zm-4 6H7V7h10v10z",
+  lab:"M19.8 18.4L14 10.67V6.5l1.35-1.69c.26-.33.03-.81-.39-.81H9.04c-.42 0-.65.48-.39.81L10 6.5v4.17L4.2 18.4c-.49.66-.02 1.6.8 1.6h14c.82 0 1.29-.94.8-1.6z",
+  book:"M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H6V4h5v8l2.5-1.5L16 12V4h2v16z",
+  "clothing-store":"M21.6 18.2L13 11.75v-.91c1.65-.49 2.8-2.17 2.43-4.05-.26-1.31-1.3-2.4-2.61-2.7C10.54 3.57 8.5 5.3 8.5 7.5h2c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5c0 .84-.69 1.52-1.53 1.5-.54-.01-.97.45-.97.99v1.76L2.4 18.2c-.77.58-.36 1.8.6 1.8h18c.96 0 1.37-1.22.6-1.8z",
+  dollar:"M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z",
+  energy:"M11 21h-1l1-7H6.74c-.51 0-.41-.32-.21-.62.21-.3.05-.07.08-.12C8.1 10.55 9.9 7.42 13.16 2.99h1l-1 7h3.45c.49 0 .56.33.47.51l-.07.15C11.79 18.94 11 21 11 21z",
+  factory:"M22 22H2V11l5 3v-3l5 3V11l5 3 5-3v8zm0-13l-2.5 1.5L17 8V4h-3v2.5L11.5 5 9 6.5V4H4v3.5L2 9V4h20v5z",
+  "fire-station":"M19.8 18.4L14 10.67V6.5l1.35-1.69c.26-.33.03-.81-.39-.81H9.04c-.42 0-.65.48-.39.81L10 6.5v4.17L4.2 18.4c-.49.66-.02 1.6.8 1.6h14c.82 0 1.29-.94.8-1.6z",
+  garden:"M6.05 8.05c-2.73 2.73-2.73 7.15-.02 9.88 1.47-3.4 4.09-6.24 7.36-7.93-2.77 2.34-4.71 5.61-5.39 9.32 2.6 1.23 5.8.78 7.95-1.37C19.43 14.47 20 4 20 4S9.53 4.57 6.05 8.05z",
+  hammer:"M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z",
+  school:"M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z",
+  "town-hall":"M11.5 1L2 6v2h19V6l-9.5-5zM4 10v7H2v2h19v-2h-2v-7h-2v7h-3v-7h-2v7H9v-7H7v7H6v-7H4z",
+  _:"M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6 0h-4V4h4v2z"
+};
+let symbolByType={}, markers=[];
+function symbolOf(type){return symbolByType[type]||"_";}
+function avgOf(a){const v=a.filter(x=>x!=null);return v.length?v.reduce((p,c)=>p+c,0)/v.length:0;}
+function modeType(items){const c={};let best=null,bn=0;items.forEach(j=>{const t=j.sOfficeType||"";c[t]=(c[t]||0)+1;if(c[t]>bn){bn=c[t];best=t;}});return best;}
+function rebuildMarkers(list){
+  markers.forEach(m=>m.remove()); markers=[];
+  const groups={};
+  for(const j of list){const lng=num(j.sOfficeLng),lat=num(j.sOfficeLat);
+    if(lng==null||lat==null||(lng===0&&lat===0))continue;
+    const k=lng.toFixed(5)+","+lat.toFixed(5);
+    (groups[k]=groups[k]||{lng,lat,items:[]}).items.push(j);}
+  for(const k in groups){const g=groups[k];
+    const sym=symbolOf(modeType(g.items));
+    const color=rainbow(avgOf(g.items.map(j=>num(j.sOfficeSalary))));
+    const el=document.createElement("div"); el.className="jgm";
+    el.innerHTML=`<svg viewBox="0 0 24 24" width="30" height="30"><path d="${ICON[sym]||ICON._}" fill="${color}" stroke="#222" stroke-width="0.7"/></svg>`+
+      (g.items.length>1?`<span class="cnt">${g.items.length}</span>`:"");
+    el.title=(g.items[0].sOfficeName||"")+" ["+(modeType(g.items)||"")+"]";
+    el.addEventListener("click",()=>popupGroup(g));
+    markers.push(new maplibregl.Marker({element:el,anchor:"center"}).setLngLat([g.lng,g.lat]).addTo(map));
+  }
+}
+function popupGroup(g){
+  const head=`<b>${esc(g.items[0].sOfficeName||"")}</b> <span style="color:#00695c">[${esc(modeType(g.items)||"")}]</span><br>${esc(g.items[0].sOfficeAddress||"")}`;
+  const rows=g.items.map(j=>`<div style="border-top:1px solid #eee;padding-top:3px;margin-top:3px">`+
+    `${esc((""+(j.sStudentYear||"")).slice(-2))}학번 <b>${esc(j.sStudentName||"")}</b> · 연봉 ${esc(j.sOfficeSalary||"")}만원`+
+    (j.sOfficeURL?` · <a href="${esc(j.sOfficeURL)}" target="_blank">홈페이지</a>`:"")+
+    (isIn()?` · <a href="#" onclick="openEdit(${j.id});return false;">수정</a>`:"")+`</div>`).join("");
+  new maplibregl.Popup({maxWidth:"280px"}).setLngLat([g.lng,g.lat]).setHTML(head+rows).addTo(map);
 }
 function esc(s){return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 
