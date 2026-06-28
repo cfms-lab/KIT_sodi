@@ -1,0 +1,337 @@
+{
+  "kind": "vault-graph",
+  "generatedAt": "2026-06-28T14:29:49.543Z",
+  "vault": "_Research_Vault",
+  "nodes": [
+    {
+      "id": "_Experiments MOC",
+      "label": "_Experiments MOC",
+      "group": "Experiments",
+      "status": "",
+      "folder": "Experiments",
+      "type": "moc"
+    },
+    {
+      "id": "Home",
+      "label": "Home",
+      "group": "(root)",
+      "status": "",
+      "folder": "(root)",
+      "type": "moc"
+    },
+    {
+      "id": "Welcome 아이디어",
+      "label": "Welcome 아이디어",
+      "group": "Ideas",
+      "status": "",
+      "folder": "Ideas",
+      "type": "idea"
+    },
+    {
+      "id": "_Ideas MOC",
+      "label": "_Ideas MOC",
+      "group": "Ideas",
+      "status": "",
+      "folder": "Ideas",
+      "type": "moc"
+    },
+    {
+      "id": "_Papers MOC",
+      "label": "_Papers MOC",
+      "group": "Papers",
+      "status": "",
+      "folder": "Papers",
+      "type": "moc"
+    },
+    {
+      "id": "cfmsCAD",
+      "label": "cfmsCAD",
+      "group": "VSCode",
+      "status": "active",
+      "folder": "Projects",
+      "type": "project"
+    },
+    {
+      "id": "cfmsCAD_suite",
+      "label": "cfmsCAD_suite",
+      "group": "VSCode",
+      "status": "active",
+      "folder": "Projects",
+      "type": "project"
+    },
+    {
+      "id": "cfmsDispersity",
+      "label": "cfmsDispersity",
+      "group": "VSCode",
+      "status": "active",
+      "folder": "Projects",
+      "type": "project"
+    },
+    {
+      "id": "cfmsDrape",
+      "label": "cfmsDrape",
+      "group": "VSCode",
+      "status": "active",
+      "folder": "Projects",
+      "type": "project"
+    },
+    {
+      "id": "cfmsSew",
+      "label": "cfmsSew",
+      "group": "VSCode",
+      "status": "active",
+      "folder": "Projects",
+      "type": "project"
+    },
+    {
+      "id": "cfmsShared",
+      "label": "cfmsShared",
+      "group": "VSCode",
+      "status": "infra",
+      "folder": "Projects",
+      "type": "project"
+    },
+    {
+      "id": "Infrastructure",
+      "label": "Infrastructure",
+      "group": "VSCode",
+      "status": "infra",
+      "folder": "Projects",
+      "type": "project"
+    },
+    {
+      "id": "Lab_Web_Apps",
+      "label": "Lab_Web_Apps",
+      "group": "Web",
+      "status": "active",
+      "folder": "Projects",
+      "type": "project"
+    },
+    {
+      "id": "SFTF_Clustering",
+      "label": "SFTF_Clustering",
+      "group": "SFTF",
+      "status": "active",
+      "folder": "Projects",
+      "type": "project"
+    },
+    {
+      "id": "SFTF_Composite",
+      "label": "SFTF_Composite",
+      "group": "SFTF",
+      "status": "stub",
+      "folder": "Projects",
+      "type": "project"
+    },
+    {
+      "id": "SFTF_Derivative",
+      "label": "SFTF_Derivative",
+      "group": "SFTF",
+      "status": "active",
+      "folder": "Projects",
+      "type": "project"
+    },
+    {
+      "id": "SFTF_InjMold",
+      "label": "SFTF_InjMold",
+      "group": "SFTF",
+      "status": "stub",
+      "folder": "Projects",
+      "type": "project"
+    },
+    {
+      "id": "Tomo_SFTF",
+      "label": "Tomo_SFTF",
+      "group": "SFTF",
+      "status": "active",
+      "folder": "Projects",
+      "type": "project"
+    },
+    {
+      "id": "TSE_SEM",
+      "label": "TSE_SEM",
+      "group": "VSCode",
+      "status": "active",
+      "folder": "Projects",
+      "type": "project"
+    },
+    {
+      "id": "README",
+      "label": "README",
+      "group": "(root)",
+      "status": "",
+      "folder": "(root)",
+      "type": ""
+    },
+    {
+      "id": "SYNC",
+      "label": "SYNC",
+      "group": "(root)",
+      "status": "",
+      "folder": "(root)",
+      "type": ""
+    }
+  ],
+  "links": [
+    {
+      "source": "Home",
+      "target": "_Experiments MOC"
+    },
+    {
+      "source": "Home",
+      "target": "_Papers MOC"
+    },
+    {
+      "source": "Home",
+      "target": "_Ideas MOC"
+    },
+    {
+      "source": "Home",
+      "target": "Lab_Web_Apps"
+    },
+    {
+      "source": "Home",
+      "target": "Infrastructure"
+    },
+    {
+      "source": "Home",
+      "target": "Tomo_SFTF"
+    },
+    {
+      "source": "Home",
+      "target": "SFTF_Clustering"
+    },
+    {
+      "source": "Home",
+      "target": "SFTF_Derivative"
+    },
+    {
+      "source": "Home",
+      "target": "SFTF_Composite"
+    },
+    {
+      "source": "Home",
+      "target": "SFTF_InjMold"
+    },
+    {
+      "source": "Home",
+      "target": "cfmsCAD"
+    },
+    {
+      "source": "Home",
+      "target": "cfmsDrape"
+    },
+    {
+      "source": "Home",
+      "target": "cfmsSew"
+    },
+    {
+      "source": "Home",
+      "target": "cfmsShared"
+    },
+    {
+      "source": "Home",
+      "target": "cfmsDispersity"
+    },
+    {
+      "source": "Home",
+      "target": "TSE_SEM"
+    },
+    {
+      "source": "Welcome 아이디어",
+      "target": "SFTF_Derivative"
+    },
+    {
+      "source": "Welcome 아이디어",
+      "target": "cfmsDrape"
+    },
+    {
+      "source": "_Papers MOC",
+      "target": "SFTF_Clustering"
+    },
+    {
+      "source": "_Papers MOC",
+      "target": "SFTF_Derivative"
+    },
+    {
+      "source": "_Papers MOC",
+      "target": "cfmsDispersity"
+    },
+    {
+      "source": "_Papers MOC",
+      "target": "TSE_SEM"
+    },
+    {
+      "source": "cfmsCAD",
+      "target": "cfmsDrape"
+    },
+    {
+      "source": "cfmsCAD",
+      "target": "cfmsSew"
+    },
+    {
+      "source": "cfmsCAD",
+      "target": "cfmsShared"
+    },
+    {
+      "source": "cfmsCAD_suite",
+      "target": "cfmsCAD"
+    },
+    {
+      "source": "cfmsCAD_suite",
+      "target": "cfmsDrape"
+    },
+    {
+      "source": "cfmsCAD_suite",
+      "target": "cfmsSew"
+    },
+    {
+      "source": "cfmsCAD_suite",
+      "target": "cfmsShared"
+    },
+    {
+      "source": "cfmsDispersity",
+      "target": "cfmsDrape"
+    },
+    {
+      "source": "cfmsDrape",
+      "target": "cfmsSew"
+    },
+    {
+      "source": "cfmsDrape",
+      "target": "cfmsShared"
+    },
+    {
+      "source": "cfmsDrape",
+      "target": "SFTF_Derivative"
+    },
+    {
+      "source": "Infrastructure",
+      "target": "Tomo_SFTF"
+    },
+    {
+      "source": "Infrastructure",
+      "target": "Lab_Web_Apps"
+    },
+    {
+      "source": "SFTF_Clustering",
+      "target": "Tomo_SFTF"
+    },
+    {
+      "source": "SFTF_Clustering",
+      "target": "SFTF_Derivative"
+    },
+    {
+      "source": "SFTF_Composite",
+      "target": "Tomo_SFTF"
+    },
+    {
+      "source": "SFTF_Derivative",
+      "target": "Tomo_SFTF"
+    },
+    {
+      "source": "SFTF_InjMold",
+      "target": "Tomo_SFTF"
+    }
+  ]
+}
