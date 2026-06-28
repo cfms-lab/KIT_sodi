@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CFMS 프로젝트 관계도 (Mindmap · Cloud)</title>
+<style>
+  :root{--g:#2e7d32;--g2:#1b5e20;--line:#d6dde6;--panel:#fff;--bg:#eef2f7;}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:"Segoe UI","Malgun Gothic",sans-serif;color:#1f2937;background:var(--bg);
+    display:flex;flex-direction:column;height:100vh;overflow:hidden}
+  header{background:#fff;border-bottom:1px solid var(--line);padding:9px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  header a.home{color:#334155;text-decoration:none;background:#f1f5f9;border:1px solid var(--line);padding:4px 10px;border-radius:10px;font-size:13px}
+  header h1{font-size:16px;margin:0;font-weight:700;color:#0f172a}
+  header .sub{font-size:12px;color:#64748b}
+  .authbar{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px}
+  .authbar input{padding:5px 7px;border:1px solid var(--line);border-radius:6px;font-size:12px}
+  .pill{background:#e8f5e9;color:#1b5e20;padding:5px 10px;border-radius:12px;font-weight:600}
+  .tools{display:none;gap:6px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:#fff;color:#334155;border-radius:7px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer}
+  .btn:hover{background:#f1f5f9}
+  .btn.p{background:var(--g);color:#fff;border-color:var(--g)} .btn.p:hover{background:var(--g2)}
+  .btn.sm{padding:4px 8px;font-size:11px}
+  .search{padding:6px 9px;border:1px solid var(--line);border-radius:7px;font-size:12px;width:150px}
+  .wrap{flex:1;display:none;min-height:0}
+  .canvas{flex:1;position:relative;overflow:hidden;background:
+     radial-gradient(circle at 1px 1px,#dde5ee 1px,transparent 0) 0 0/22px 22px,var(--bg);cursor:grab}
+  .canvas.drag{cursor:grabbing}
+  svg{width:100%;height:100%;display:block;user-select:none}
+  .node rect{cursor:pointer}
+  .node text{pointer-events:none}
+  .node.sel rect.box{stroke-width:3px}
+  .node.dim{opacity:.25}
+  .node.match rect.box{stroke:#e65100;stroke-width:3px}
+  .edge{fill:none;stroke:#b6c2cf;stroke-width:1.6px}
+  .rel{fill:none;stroke:#c77;stroke-width:1.4px;stroke-dasharray:5 4}
+  .rel-lbl{font-size:10px;fill:#a55}
+  .toggle{cursor:pointer}
+  .panel{width:312px;min-width:312px;background:var(--panel);border-left:1px solid var(--line);
+    padding:14px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+  .panel h3{margin:0;font-size:13px;color:#0f172a}
+  .panel label{display:flex;flex-direction:column;gap:3px;font-size:11px;color:#555}
+  .panel input,.panel select,.panel textarea{padding:6px;border:1px solid var(--line);border-radius:6px;font-size:13px}
+  .row{display:flex;gap:6px;flex-wrap:wrap}
+  .row .btn{flex:1}
+  .muted{color:#94a3b8;font-size:11px;line-height:1.5}
+  .legend{display:flex;flex-wrap:wrap;gap:6px}
+  .lg{display:flex;align-items:center;gap:5px;font-size:11px;color:#555}
+  .lg i{width:12px;height:12px;border-radius:3px;border:2px solid #999;display:inline-block}
+  .sec{border-top:1px solid #eef2f6;padding-top:10px}
+  .links-list{display:flex;flex-direction:column;gap:4px;max-height:150px;overflow:auto;font-size:11px}
+  .links-list .li{display:flex;gap:6px;align-items:center;justify-content:space-between;background:#f8fafc;border:1px solid #eef2f6;border-radius:6px;padding:3px 6px}
+  .banner{background:#fff8e1;border-bottom:1px solid #ffe082;padding:7px 16px;font-size:12px;color:#795548;display:none}
+  .gate{flex:1;display:flex;align-items:center;justify-content:center;padding:30px}
+  .gatecard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:30px 34px;max-width:420px;text-align:center;box-shadow:0 6px 22px rgba(15,23,42,.08)}
+  .gatecard .lock{font-size:42px} .gatecard h2{margin:10px 0 6px;font-size:18px}
+  .gatecard p{color:#64748b;font-size:13px;line-height:1.6;margin:0 0 16px}
+  .gatecard .f{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+  .gatecard input{padding:8px;border:1px solid var(--line);border-radius:7px;font-size:13px}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;opacity:0;transition:.3s;z-index:50}
+  .toast.show{opacity:1}
+  .help{font-size:11px;color:#64748b;line-height:1.6}
+  #saveState{font-size:11px;color:#94a3b8;margin-left:4px}
+</style>
+</head>
+<body>
+<header>
+  <a class="home" href="index.html">← 홈</a>
+  <h1>CFMS 프로젝트 관계도</h1>
+  <span class="sub">마인드맵 · 클라우드(로그인 전용)</span>
+  <span id="saveState"></span>
+  <div class="tools" id="tools">
+    <input class="search" id="search" placeholder="검색 (제목/메모)">
+    <button class="btn sm" onclick="expandAll(true)">＋전체</button>
+    <button class="btn sm" onclick="expandAll(false)">－접기</button>
+    <button class="btn sm" id="relBtn" onclick="toggleRel()">관계선 ✓</button>
+    <button class="btn sm" onclick="fitView()">맞춤</button>
+    <button class="btn p sm" onclick="saveDoc(false)">저장</button>
+    <button class="btn sm" onclick="exportJSON()">백업(JSON)</button>
+    <button class="btn sm" onclick="document.getElementById('imp').click()">복원</button>
+    <input type="file" id="imp" accept=".json,application/json" style="display:none" onchange="importJSON(this)">
+  </div>
+  <div class="authbar" id="authbar"></div>
+</header>
+
+<div class="banner" id="banner"></div>
+
+<!-- 로그인 게이트 -->
+<div class="gate" id="gate">
+  <div class="gatecard">
+    <div class="lock">🔒</div>
+    <h2>로그인이 필요합니다</h2>
+    <p>이 프로젝트 관계도는 <b>로그인한 사용자에게만</b> 보입니다.<br>아래에 로그인하세요. (포털·논문관리와 같은 계정)</p>
+    <div class="f">
+      <input id="gEmail" placeholder="이메일" style="width:160px">
+      <input id="gPw" type="password" placeholder="비밀번호" style="width:130px">
+      <button class="btn p" onclick="login('g')">로그인</button>
+    </div>
+    <p class="muted" style="margin-top:14px" id="gateMsg"></p>
+  </div>
+</div>
+
+<!-- 편집기 -->
+<div class="wrap" id="wrap">
+  <div class="canvas" id="canvas">
+    <svg id="svg"><g id="viewport"></g></svg>
+  </div>
+  <aside class="panel">
+    <h3>노드 편집</h3>
+    <div id="editArea"><p class="muted">노드를 클릭해 선택하세요. 빈 곳 드래그=이동, 휠=확대/축소.</p></div>
+
+    <div class="sec">
+      <h3>관계선 (cross-link)</h3>
+      <div class="muted">선택 노드에서 다른 노드로 점선 관계를 추가합니다.</div>
+      <div class="row" style="margin-top:6px">
+        <select id="linkTo" style="flex:2"></select>
+        <input id="linkLbl" placeholder="라벨" style="flex:1;min-width:60px">
+      </div>
+      <button class="btn sm" style="margin-top:6px;width:100%" onclick="addLink()">＋ 관계 추가 (선택→대상)</button>
+      <div class="links-list" id="linksList" style="margin-top:8px"></div>
+    </div>
+
+    <div class="sec">
+      <h3>범례</h3>
+      <div class="legend" id="legend"></div>
+      <div class="help" style="margin-top:8px">
+        편집은 <b>클라우드(Supabase)에 자동 저장</b>되며 로그인한 사람만 보고/고칠 수 있습니다.
+        <br>백업이 필요하면 <b>백업(JSON)</b>으로 내려받고, <b>복원</b>으로 되돌릴 수 있습니다.
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ====================== 기본 데이터 (첫 실행 시드) ====================== */
+const DEFAULT_DATA = /*DATA_START*/{"version":1,"title":"CFMS 프로젝트 관계도 2026","showRel":true,"root":{"id":"root","title":"CFMS 연구실 2026","kind":"root","note":"두 워크스페이스의 세부 프로젝트 관계도","children":[{"id":"sftf","title":"__SFTF_Projects(2026)","kind":"group","note":"3D 프린팅 Support Flow Tensor Field 연구군 (D:\\__SFTF_Projects(2026))","children":[{"id":"tomo_sftf","title":"Tomo_SFTF_dev","kind":"core","status":"active","note":"SFTF 본체: 빌드방향 후보 생성(coarse-to-refine) + TOMO_CPU/GPU 엔진(DLL). 표준 템플릿의 기원."},{"id":"clustering","title":"SFTF_Clustering_dev","kind":"app","status":"active","note":"면별 SFTF 특징 → 출판지향 메쉬 분할(clustering). 한국섬유공학회지 투고."},{"id":"derivative","title":"SFTF_Derivative_dev","kind":"app","status":"active","note":"미분가능 SFTF 손실항 + GNN + 경사기반 빌드방향 최적화. TOMO 교차검증."},{"id":"composite","title":"SFTF_Composite_dev","kind":"app","status":"stub","note":"복합재 적용 (신규 스캐폴드)."},{"id":"injmold","title":"SFTF_InjMold_dev","kind":"app","status":"stub","note":"사출성형 적용 (신규 스캐폴드)."}]},{"id":"vscode","title":"__VSCode_Projects","kind":"group","note":"의복 CAD·영상계측·랩 웹앱·인프라 (D:\\__VSCode_Projects)","children":[{"id":"cadsuite","title":"의복 CAD 스위트","kind":"subgroup","note":"Clo3D 오픈소스 대안","children":[{"id":"cfmscad","title":"cfmsCAD2026_dev","kind":"app","status":"active","note":"3D 의복 CAD 에디터 (UI/패턴)."},{"id":"cfmsdrape","title":"cfmsDrape2026_dev","kind":"app","status":"active","note":"암시적 옷감 드레이프 솔버(DLL). SCAD/GarmentCode 입력, 인체 충돌·자기충돌."},{"id":"cfmssew","title":"cfmsSew2026_dev","kind":"app","status":"active","note":"2D 패턴 봉제대응 자동인식(휴리스틱→GNN). CAD/Drape에 병합 예정."},{"id":"cfmsshared","title":"cfmsShared2026_dev","kind":"infra","status":"infra","note":"CAD↔Drape 인터페이스 단일진실(contract/messages) 공유 git 채널."}]},{"id":"measure","title":"영상 계측","kind":"subgroup","children":[{"id":"dispersity","title":"cfmsDispersity2026_Dev","kind":"app","status":"active","note":"광학현미경 입자 분산도 정량화(정적 kNN 에너지). C++Builder(Baraff 클로스심) 포팅."},{"id":"sem","title":"TSE_SEM2026_dev","kind":"app","status":"active","note":"SEM 섬유 영상 정량화(반지름·배향·기공) + metaball 3D 재구성."}]},{"id":"webapps","title":"랩 웹앱 (cfms-lab/KIT_sodi · Supabase)","kind":"subgroup","children":[{"id":"upjuk","title":"논문관리 (upjuk)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/upjuk.html","note":"업적 리스트 CRUD + PDF. draft는 RLS로 비로그인 숨김."},{"id":"timetable","title":"수업시간표 (TimeTable)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/timetable.html","note":"학기별 시간표 드래그 편성."},{"id":"jobgis","title":"취업현황 (JobGIS)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/jobgis.html","note":"졸업생 취업처 지도."},{"id":"mindmap","title":"이 관계도 (Mindmap)","kind":"web","status":"active","note":"프로젝트 관계도 (이 페이지, 로그인 전용)."}]},{"id":"infra","title":"인프라/템플릿","kind":"subgroup","children":[{"id":"template","title":"__vscode_AI_template","kind":"infra","status":"infra","note":"표준 프로젝트 템플릿(코드+논문, uv/xelatex/훅). 모든 *_dev의 기반. Tomo_SFTF에서 기원."},{"id":"hooks","title":"__클로드코드_훅설정","kind":"infra","status":"infra","note":"Claude Code 전역 훅 설정."}]}]}]},"links":[{"from":"tomo_sftf","to":"clustering","label":"코어 분리"},{"from":"tomo_sftf","to":"derivative","label":"코어 재사용"},{"from":"tomo_sftf","to":"composite","label":"파생"},{"from":"tomo_sftf","to":"injmold","label":"파생"},{"from":"clustering","to":"derivative","label":"코드 재사용"},{"from":"tomo_sftf","to":"template","label":"템플릿 기원"},{"from":"cfmsshared","to":"cfmscad","label":"contract"},{"from":"cfmsshared","to":"cfmsdrape","label":"contract"},{"from":"cfmssew","to":"cfmscad","label":"병합 예정"},{"from":"cfmssew","to":"cfmsdrape","label":"병합 예정"},{"from":"derivative","to":"cfmsdrape","label":"드레이프 응용 연계"},{"from":"dispersity","to":"cfmsdrape","label":"클로스심 계보"}]}/*DATA_END*/;
+
+/* ====================== 순수 모델 함수 (DOM 비의존, 테스트 가능) ====================== */
+//==PURE_START
+function uid(){ return 'n' + Math.random().toString(36).slice(2,8) + (uid._c=(uid._c||0)+1); }
+function walk(node, fn, parent){ fn(node, parent); (node.children||[]).forEach(c=>walk(c, fn, node)); }
+function findNode(root, id){ let f=null; walk(root, n=>{ if(n.id===id) f=n; }); return f; }
+function findParent(root, id){ let p=null; walk(root, (n,par)=>{ if(n.id===id) p=par; }); return p; }
+function collectIds(root){ const ids=[]; walk(root, n=>ids.push(n.id)); return ids; }
+function addChild(root, parentId, node){
+  const p=findNode(root, parentId); if(!p) return null;
+  (p.children||(p.children=[])).push(node); p.collapsed=false; return node;
+}
+function addSibling(root, id, node){
+  const par=findParent(root, id); if(!par) return null;
+  const i=par.children.findIndex(c=>c.id===id); par.children.splice(i+1,0,node); return node;
+}
+function deleteNode(root, id){
+  const par=findParent(root, id); if(!par) return false;
+  const i=par.children.findIndex(c=>c.id===id); if(i<0) return false;
+  par.children.splice(i,1); return true;
+}
+function moveNode(root, id, dir){
+  const par=findParent(root, id); if(!par) return false;
+  const i=par.children.findIndex(c=>c.id===id); const j=i+dir;
+  if(j<0||j>=par.children.length) return false;
+  const t=par.children[i]; par.children[i]=par.children[j]; par.children[j]=t; return true;
+}
+function layout(root, opt){
+  opt=opt||{}; const xGap=opt.xGap||255, yGap=opt.yGap||44, nodeW=opt.nodeW||196, nodeH=opt.nodeH||34;
+  const placed=[]; let leaf=0;
+  (function rec(node, depth){
+    const kids = node.collapsed ? [] : (node.children||[]);
+    let y;
+    if(!kids.length){ y=leaf*yGap; leaf++; }
+    else { const cy=kids.map(k=>rec(k, depth+1)); y=(cy[0]+cy[cy.length-1])/2; }
+    placed.push({id:node.id, node, depth, x:depth*xGap, y});
+    return y;
+  })(root, 0);
+  const W=Math.max(...placed.map(p=>p.x))+nodeW, H=Math.max(...placed.map(p=>p.y))+nodeH;
+  return {placed, nodeW, nodeH, xGap, width:W+60, height:H+60};
+}
+function validate(data){
+  const errors=[];
+  if(!data||!data.root){ errors.push('root 없음'); return {ok:false, errors}; }
+  const ids=collectIds(data.root); const seen=new Set();
+  ids.forEach(id=>{ if(seen.has(id)) errors.push('중복 id: '+id); seen.add(id); });
+  (data.links||[]).forEach(l=>{
+    if(!seen.has(l.from)) errors.push('링크 from 없음: '+l.from);
+    if(!seen.has(l.to)) errors.push('링크 to 없음: '+l.to);
+  });
+  return {ok:errors.length===0, errors};
+}
+//==PURE_END
+
+/* ====================== Supabase 설정/세션 (upjuk과 공유) ====================== */
+function normUrl(u){return (u||"").trim().replace(/\/+$/,"").replace(/\/rest\/v1$/i,"").replace(/\/auth\/v1$/i,"").replace(/\/+$/,"");}
+const BAKED_URL="https://ijutjirouxgqcldjyhma.supabase.co";
+const BAKED_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdXRqaXJvdXhncWNsZGp5aG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDk4MDAsImV4cCI6MjA5Nzk4NTgwMH0.gIAwf6a2oY-DkTXaf5eM2L4ROMCKim5WsevGfjol7tE";
+let CFG={url:normUrl(localStorage.getItem("cfms_url")||BAKED_URL),key:(localStorage.getItem("cfms_key")||BAKED_KEY).trim()};
+let SESSION=JSON.parse(localStorage.getItem("cfms_session")||"null");
+function isLoggedIn(){return !!(SESSION&&SESSION.access_token);}
+function authHeaders(useUser){
+  const h={"apikey":CFG.key,"Content-Type":"application/json"};
+  h["Authorization"]="Bearer "+((useUser&&SESSION&&SESSION.access_token)?SESSION.access_token:CFG.key);
+  return h;
+}
+async function refreshToken(){
+  if(!(SESSION&&SESSION.refresh_token)) return false;
+  try{
+    const r=await fetch(CFG.url+'/auth/v1/token?grant_type=refresh_token',
+      {method:"POST",headers:{apikey:CFG.key,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:SESSION.refresh_token})});
+    if(!r.ok) return false;
+    const d=await r.json();
+    SESSION={access_token:d.access_token,refresh_token:d.refresh_token||SESSION.refresh_token,email:SESSION.email};
+    localStorage.setItem("cfms_session",JSON.stringify(SESSION));
+    return true;
+  }catch(e){ return false; }
+}
+async function api(path,opts={}){
+  let res=await fetch(CFG.url+path,opts);
+  if(res.status===401 && isLoggedIn() && opts.headers && /Bearer/.test(opts.headers.Authorization||"")){
+    if(await refreshToken()){ opts.headers.Authorization="Bearer "+SESSION.access_token; res=await fetch(CFG.url+path,opts); }
+    else { toast("세션이 만료되었습니다. 다시 로그인하세요."); logout(); throw new Error("401"); }
+  }
+  if(!res.ok){ let t=await res.text(); throw new Error(res.status+" "+t); }
+  const txt=await res.text(); return txt?JSON.parse(txt):null;
+}
+
+/* ====================== 렌더 ====================== */
+const KIND={
+  root:{fill:'#fff3e0',stroke:'#e65100',text:'#e65100',label:'루트'},
+  group:{fill:'#e8f5e9',stroke:'#1b5e20',text:'#1b5e20',label:'워크스페이스'},
+  subgroup:{fill:'#eef7ee',stroke:'#2e7d32',text:'#2e7d32',label:'그룹'},
+  core:{fill:'#e0f2f1',stroke:'#00695c',text:'#004d40',label:'코어'},
+  app:{fill:'#e3f2fd',stroke:'#1565c0',text:'#0d47a1',label:'앱/연구'},
+  web:{fill:'#f3e5f5',stroke:'#6a1b9a',text:'#4a148c',label:'웹앱'},
+  infra:{fill:'#f0f0f0',stroke:'#9e9e9e',text:'#555',label:'인프라'}
+};
+const STATUS={active:'',stub:'스텁',infra:'인프라',idea:'아이디어',done:'완료'};
+let DATA=JSON.parse(JSON.stringify(DEFAULT_DATA));
+let sel=null, view={tx:60,ty:30,s:1}, showRel=true;
+
+function esc(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function trunc(s,n){s=s||'';return s.length>n?s.slice(0,n-1)+'…':s;}
+function applyView(){const v=document.getElementById('viewport');if(v)v.setAttribute('transform',`translate(${view.tx},${view.ty}) scale(${view.s})`);}
+
+function render(){
+  const lay=layout(DATA.root), vp=document.getElementById('viewport');
+  const pos={}; lay.placed.forEach(p=>pos[p.id]=p);
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  let h='';
+  lay.placed.forEach(p=>{
+    const kids=p.node.collapsed?[]:(p.node.children||[]);
+    kids.forEach(k=>{ const c=pos[k.id]; if(!c)return;
+      const x1=p.x+lay.nodeW,y1=p.y+lay.nodeH/2,x2=c.x,y2=c.y+lay.nodeH/2,mx=(x1+x2)/2;
+      h+=`<path class="edge" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`;
+    });
+  });
+  if(showRel){ (DATA.links||[]).forEach(l=>{ const a=pos[l.from],b=pos[l.to]; if(!a||!b)return;
+    const x1=a.x+lay.nodeW/2,y1=a.y+lay.nodeH/2,x2=b.x+lay.nodeW/2,y2=b.y+lay.nodeH/2,mx=(x1+x2)/2,my=(y1+y2)/2-26;
+    h+=`<path class="rel" d="M${x1},${y1} Q${mx},${my} ${x2},${y2}"/>`;
+    if(l.label)h+=`<text class="rel-lbl" x="${mx}" y="${my+4}" text-anchor="middle">${esc(l.label)}</text>`;
+  });}
+  lay.placed.forEach(p=>{
+    const n=p.node, st=KIND[n.kind]||KIND.app;
+    const dash=(n.status==='stub'||n.status==='idea')?'stroke-dasharray="6 4"':'';
+    const faded=(n.status==='stub'||n.status==='idea')?'opacity:.7':'';
+    const isMatch=q&&((n.title||'').toLowerCase().includes(q)||(n.note||'').toLowerCase().includes(q));
+    const dim=q&&!isMatch;
+    const cls='node'+(n.id===sel?' sel':'')+(isMatch?' match':'')+(dim?' dim':'');
+    const hasKids=(n.children||[]).length>0;
+    const stat=STATUS[n.status]?`<text x="${lay.nodeW-6}" y="22" text-anchor="end" font-size="9" fill="${st.text}" opacity=".7">${esc(STATUS[n.status])}</text>`:'';
+    h+=`<g class="${cls}" data-id="${n.id}" transform="translate(${p.x},${p.y})" style="${faded}">`;
+    h+=`<rect class="box" width="${lay.nodeW}" height="${lay.nodeH}" rx="9" fill="${st.fill}" stroke="${st.stroke}" stroke-width="2" ${dash} data-act="sel" data-id="${n.id}"/>`;
+    h+=`<text x="11" y="21" font-size="12.5" font-weight="600" fill="${st.text}">${esc(trunc(n.title,n.url?22:24))}</text>`;
+    if(n.url)h+=`<text x="${lay.nodeW-6}" y="13" text-anchor="end" font-size="10">🔗</text>`;
+    h+=stat;
+    h+=`<title>${esc(n.title)}${n.note?'\n'+esc(n.note):''}${n.url?'\n'+esc(n.url):''}</title>`;
+    if(hasKids){ const tx=-9,ty=lay.nodeH/2;
+      h+=`<g class="toggle" data-act="toggle" data-id="${n.id}"><circle cx="${tx}" cy="${ty}" r="8" fill="#fff" stroke="${st.stroke}" stroke-width="1.5"/>`+
+         `<text x="${tx}" y="${ty+4}" text-anchor="middle" font-size="12" font-weight="700" fill="${st.stroke}">${n.collapsed?'+':'–'}</text></g>`;
+    }
+    h+=`</g>`;
+  });
+  vp.innerHTML=h; applyView(); renderLinksList(); renderLegend(); refreshLinkTargets();
+}
+function renderLegend(){
+  document.getElementById('legend').innerHTML=Object.keys(KIND).map(k=>
+    `<span class="lg"><i style="border-color:${KIND[k].stroke};background:${KIND[k].fill}"></i>${KIND[k].label}</span>`).join('')
+    +`<span class="lg"><i style="border-style:dashed;border-color:#999;background:#fff"></i>스텁/아이디어</span>`;
+}
+
+/* ====================== 편집 패널 ====================== */
+function selectNode(id){ sel=id; render(); renderEdit(); }
+function renderEdit(){
+  const area=document.getElementById('editArea');
+  if(!sel){ area.innerHTML='<p class="muted">노드를 클릭해 선택하세요.</p>'; return; }
+  const n=findNode(DATA.root, sel); if(!n){ sel=null; return renderEdit(); }
+  const kinds=Object.keys(KIND).map(k=>`<option value="${k}" ${n.kind===k?'selected':''}>${KIND[k].label} (${k})</option>`).join('');
+  const stats=Object.keys(STATUS).map(s=>`<option value="${s}" ${(n.status||'active')===s?'selected':''}>${s}${STATUS[s]?' · '+STATUS[s]:''}</option>`).join('');
+  area.innerHTML=`
+    <label>제목<input id="fTitle" value="${esc(n.title)}"></label>
+    <div class="row">
+      <label style="flex:1">종류<select id="fKind">${kinds}</select></label>
+      <label style="flex:1">상태<select id="fStatus">${stats}</select></label>
+    </div>
+    <label>링크 URL (선택)<input id="fUrl" value="${esc(n.url||'')}" placeholder="https://..."></label>
+    <label>메모<textarea id="fNote" rows="3">${esc(n.note||'')}</textarea></label>
+    <div class="row">
+      <button class="btn sm" onclick="addNodeRel('child')">＋자식</button>
+      <button class="btn sm" onclick="addNodeRel('sib')">＋형제</button>
+      <button class="btn sm" onclick="mv(-1)">▲위로</button>
+      <button class="btn sm" onclick="mv(1)">▼아래</button>
+    </div>
+    <div class="row">
+      ${n.url?`<button class="btn sm" onclick="window.open('${esc(n.url)}','_blank')">링크 열기</button>`:''}
+      <button class="btn sm" style="color:#c62828;border-color:#f1c0c0" onclick="del()">삭제</button>
+    </div>`;
+  ['fTitle','fKind','fStatus','fUrl','fNote'].forEach(idf=>{const el=document.getElementById(idf);if(el)el.addEventListener('input',commitEdit);});
+}
+function commitEdit(){
+  const n=findNode(DATA.root, sel); if(!n)return;
+  n.title=document.getElementById('fTitle').value;
+  n.kind=document.getElementById('fKind').value;
+  n.status=document.getElementById('fStatus').value;
+  n.url=document.getElementById('fUrl').value.trim()||undefined;
+  n.note=document.getElementById('fNote').value;
+  scheduleSave(); render();
+}
+function addNodeRel(how){
+  if(!sel)return;
+  const node={id:uid(),title:'새 노드',kind:'app',status:'idea',children:[]};
+  if(how==='child') addChild(DATA.root, sel, node);
+  else { if(sel==='root') addChild(DATA.root,'root',node); else addSibling(DATA.root, sel, node); }
+  scheduleSave(); selectNode(node.id);
+}
+function mv(d){ if(moveNode(DATA.root, sel, d)){ scheduleSave(); render(); } }
+function del(){
+  if(!sel||sel==='root') return toast('루트는 삭제할 수 없습니다.');
+  if(!confirm('이 노드와 하위 노드를 삭제할까요?')) return;
+  const ids=new Set(); const n=findNode(DATA.root,sel); if(n) walk(n,x=>ids.add(x.id));
+  deleteNode(DATA.root, sel);
+  DATA.links=(DATA.links||[]).filter(l=>!ids.has(l.from)&&!ids.has(l.to));
+  sel=null; scheduleSave(); render(); renderEdit();
+}
+
+/* ====================== 관계선 ====================== */
+function refreshLinkTargets(){
+  const sl=document.getElementById('linkTo'); if(!sl)return; const cur=sl.value;
+  const opts=[]; walk(DATA.root, n=>{ if(n.id!==sel) opts.push(`<option value="${n.id}">${esc(trunc(n.title,30))}</option>`); });
+  sl.innerHTML=opts.join(''); if(cur) sl.value=cur;
+}
+function addLink(){
+  if(!sel) return toast('먼저 출발 노드를 선택하세요.');
+  const to=document.getElementById('linkTo').value; if(!to||to===sel) return toast('대상 노드를 고르세요.');
+  const label=document.getElementById('linkLbl').value.trim();
+  DATA.links=DATA.links||[];
+  if(DATA.links.some(l=>l.from===sel&&l.to===to)) return toast('이미 있는 관계입니다.');
+  DATA.links.push({from:sel,to,label}); document.getElementById('linkLbl').value='';
+  scheduleSave(); render(); toast('관계 추가됨');
+}
+function renderLinksList(){
+  const box=document.getElementById('linksList'); if(!box)return;
+  const name=id=>{const n=findNode(DATA.root,id);return n?trunc(n.title,16):id;};
+  box.innerHTML=(DATA.links||[]).map((l,i)=>
+    `<div class="li"><span>${esc(name(l.from))} → ${esc(name(l.to))}${l.label?' · '+esc(l.label):''}</span>`+
+    `<button class="btn sm" onclick="delLink(${i})">×</button></div>`).join('')||'<span class="muted">관계 없음</span>';
+}
+function delLink(i){ DATA.links.splice(i,1); scheduleSave(); render(); }
+
+/* ====================== 보기 ====================== */
+function expandAll(open){ walk(DATA.root, n=>{ if((n.children||[]).length) n.collapsed=!open; }); scheduleSave(); render(); }
+function toggleRel(){ showRel=!showRel; DATA.showRel=showRel; document.getElementById('relBtn').textContent='관계선 '+(showRel?'✓':'✕'); scheduleSave(); render(); }
+function fitView(){
+  const lay=layout(DATA.root), cv=document.getElementById('canvas');
+  const sx=(cv.clientWidth-40)/lay.width, sy=(cv.clientHeight-40)/lay.height;
+  view.s=Math.max(.25,Math.min(1.4,Math.min(sx,sy))); view.tx=20; view.ty=20; applyView();
+}
+
+/* ====================== 클라우드 저장/불러오기 ====================== */
+const DOC_ID='cfms';
+function setSaveState(t){ const e=document.getElementById('saveState'); if(e) e.textContent=t; }
+let saveTimer;
+function scheduleSave(){ setSaveState('편집 중…'); clearTimeout(saveTimer); saveTimer=setTimeout(()=>saveDoc(true),1200); }
+async function loadDoc(){
+  try{
+    const rows=await api('/rest/v1/mindmaps?id=eq.'+DOC_ID+'&select=data',{headers:authHeaders(true)});
+    if(rows&&rows.length&&rows[0].data){ DATA=rows[0].data; }
+    else { DATA=JSON.parse(JSON.stringify(DEFAULT_DATA)); await saveDoc(true); toast('기본 관계도를 클라우드에 생성했습니다.'); }
+    showRel=DATA.showRel!==false; document.getElementById('relBtn').textContent='관계선 '+(showRel?'✓':'✕');
+    sel=null; render(); renderEdit(); fitView(); setSaveState('');
+  }catch(e){
+    const b=document.getElementById('banner'); b.style.display='block';
+    if(/relation|does not exist|42P01|PGRST205|404/i.test(e.message))
+      b.textContent='mindmaps 테이블이 없습니다. Supabase에서 enable_rls_mindmaps.sql 을 먼저 실행하세요.';
+    else b.textContent='데이터를 불러오지 못했습니다: '+e.message.slice(0,140);
+  }
+}
+async function saveDoc(silent){
+  if(!isLoggedIn()) return;
+  setSaveState('저장 중…');
+  try{
+    await api('/rest/v1/mindmaps',{method:'POST',
+      headers:Object.assign(authHeaders(true),{Prefer:'resolution=merge-duplicates,return=minimal'}),
+      body:JSON.stringify({id:DOC_ID,data:DATA,updated_at:new Date().toISOString()})});
+    setSaveState('저장됨 ✓'); if(!silent) toast('클라우드에 저장되었습니다.');
+  }catch(e){ setSaveState('저장 실패'); toast('저장 실패: '+e.message.slice(0,100)); }
+}
+function download(name,text,type){ const b=new Blob([text],{type:type||'application/json'}),u=URL.createObjectURL(b);
+  const a=document.createElement('a'); a.href=u; a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(u),1000); }
+function exportJSON(){ download('mindmap_backup.json', JSON.stringify(DATA,null,2)); toast('백업 JSON을 내려받았습니다.'); }
+function importJSON(input){
+  const f=input.files[0]; if(!f)return; const r=new FileReader();
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
+    if(!confirm('백업으로 현재 클라우드 관계도를 덮어쓸까요?'))return;
+    DATA=d; showRel=DATA.showRel!==false; sel=null; render(); renderEdit(); saveDoc(false);
+  }catch(e){ toast('JSON 파싱 실패'); } };
+  r.readAsText(f); input.value='';
+}
+
+let tT;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),2600);}
+
+/* ====================== 인증 / 게이트 ====================== */
+async function login(where){
+  const email=document.getElementById(where==='g'?'gEmail':'liEmail').value.trim();
+  const pw=document.getElementById(where==='g'?'gPw':'liPw').value;
+  if(!email||!pw){ toast('이메일과 비밀번호를 입력하세요.'); return; }
+  try{
+    const r=await api('/auth/v1/token?grant_type=password',
+      {method:"POST",headers:{"apikey":CFG.key,"Content-Type":"application/json"},body:JSON.stringify({email,password:pw})});
+    SESSION={access_token:r.access_token,refresh_token:r.refresh_token,email};
+    localStorage.setItem("cfms_session",JSON.stringify(SESSION));
+    toast('로그인되었습니다.'); renderAuthbar(); showApp(); await loadDoc();
+  }catch(e){ const m='로그인 실패: 이메일/비밀번호 확인'; toast(m); const g=document.getElementById('gateMsg'); if(g)g.textContent=m; }
+}
+function logout(){ SESSION=null; localStorage.removeItem("cfms_session"); renderAuthbar(); showGate(); }
+function renderAuthbar(){
+  const bar=document.getElementById('authbar');
+  if(isLoggedIn()){
+    bar.innerHTML=`<span class="pill">✔ ${esc(SESSION.email)}</span> <button class="btn sm" onclick="logout()">로그아웃</button>`;
+  }else{
+    bar.innerHTML=`<input id="liEmail" placeholder="이메일" style="width:140px">
+      <input id="liPw" type="password" placeholder="비밀번호" style="width:110px">
+      <button class="btn sm p" onclick="login('h')">로그인</button>`;
+  }
+}
+function showApp(){ document.getElementById('gate').style.display='none'; document.getElementById('wrap').style.display='flex'; document.getElementById('tools').style.display='flex'; }
+function showGate(){ document.getElementById('wrap').style.display='none'; document.getElementById('tools').style.display='none'; document.getElementById('gate').style.display='flex'; document.getElementById('banner').style.display='none'; }
+
+/* ====================== 캔버스 상호작용 ====================== */
+function bindCanvas(){
+  const cv=document.getElementById('canvas'), svg=document.getElementById('svg');
+  svg.addEventListener('click', e=>{
+    const g=e.target.closest('[data-act]'); if(!g)return;
+    const id=g.getAttribute('data-id'), act=g.getAttribute('data-act');
+    if(act==='toggle'){ const n=findNode(DATA.root,id); n.collapsed=!n.collapsed; scheduleSave(); render(); }
+    else if(act==='sel'){ selectNode(id); }
+  });
+  let drag=null;
+  cv.addEventListener('mousedown', e=>{ if(e.target.closest('[data-act]'))return; drag={x:e.clientX,y:e.clientY,tx:view.tx,ty:view.ty}; cv.classList.add('drag'); });
+  window.addEventListener('mousemove', e=>{ if(!drag)return; view.tx=drag.tx+(e.clientX-drag.x); view.ty=drag.ty+(e.clientY-drag.y); applyView(); });
+  window.addEventListener('mouseup', ()=>{ drag=null; cv.classList.remove('drag'); });
+  cv.addEventListener('wheel', e=>{ e.preventDefault();
+    const r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+    const f=e.deltaY<0?1.1:1/1.1, ns=Math.max(.2,Math.min(2.5,view.s*f));
+    view.tx=mx-(mx-view.tx)*(ns/view.s); view.ty=my-(my-view.ty)*(ns/view.s); view.s=ns; applyView();
+  }, {passive:false});
+  document.getElementById('search').addEventListener('input', ()=>{
+    const q=document.getElementById('search').value.trim().toLowerCase();
+    if(q){ walk(DATA.root, n=>{ if((n.title||'').toLowerCase().includes(q)||(n.note||'').toLowerCase().includes(q)){
+      let p=findParent(DATA.root,n.id); while(p){ p.collapsed=false; p=findParent(DATA.root,p.id);} } }); }
+    render();
+  });
+}
+
+/* ====================== 부팅 ====================== */
+async function boot(){
+  bindCanvas(); renderAuthbar();
+  if(isLoggedIn()){ showApp(); await loadDoc(); }
+  else { showGate(); }
+}
+boot();
+</script>
+</body>
+</html>

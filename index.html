@@ -30,6 +30,7 @@
   .upjuk .ico{background:linear-gradient(135deg,var(--g),var(--g2))} .upjuk .go{color:var(--g)}
   .tt .ico{background:linear-gradient(135deg,var(--b),var(--b2))} .tt .go{color:var(--b)}
   .jg .ico{background:linear-gradient(135deg,#00897b,#004d40)} .jg .go{color:#00695c}
+  .mm .ico{background:linear-gradient(135deg,#8e24aa,#4a148c)} .mm .go{color:#6a1b9a}
   footer{text-align:center;color:#94a3b8;font-size:12px;padding:14px}
   .note{font-size:12px;color:#64748b;text-align:center;margin-top:18px;max-width:680px}
   .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;opacity:0;transition:.3s}
@@ -62,6 +63,12 @@
         <div class="ico">🗺️</div>
         <h2>취업 현황 GIS (JobGIS)</h2>
         <p>졸업생 취업처를 지도에 표시. 연봉 색상 마커·클러스터, 토익/학점/연봉/업종 필터와 통계. (이름은 로그인 시 공개)</p>
+        <div class="go">열기 →</div>
+      </a>
+      <a class="card mm" id="mmCard" href="mindmap.html" style="display:none">
+        <div class="ico">🧠</div>
+        <h2>프로젝트 관계도 (Mindmap)</h2>
+        <p>연구·개발 세부 프로젝트의 관계를 마인드맵으로 한눈에. 노드 추가/수정/관계선 편집, 클라우드 저장. (🔒 로그인 후 열람)</p>
         <div class="go">열기 →</div>
       </a>
     </div>
@@ -98,6 +105,7 @@ function renderAuth(){
   const bar=document.getElementById("authbar");
   if(isIn()) bar.innerHTML=`<span class="pill">✔ ${SESSION.email}</span><button class="btn sm ghost" onclick="logout()">로그아웃</button>`;
   else bar.innerHTML=`<input id="liEmail" placeholder="이메일" style="width:150px"><input id="liPw" type="password" placeholder="비밀번호" style="width:120px"><button class="btn sm" onclick="login()">로그인</button>`;
+  const mm=document.getElementById("mmCard"); if(mm) mm.style.display=isIn()?"block":"none"; // 관계도는 로그인 시에만 노출
 }
 renderAuth();
 </script>
