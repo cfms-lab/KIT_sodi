@@ -230,9 +230,12 @@ async function api(path,opts={}){
 async function reload(){ await loadPapers(); }
 async function loadPapers(){
   try{
+    // 로그인 시 사용자 토큰으로 읽어야 RLS가 draft(5)를 내려준다. 비로그인은 anon 키로 fallback.
     const data=await api('/rest/v1/papers?select=*',
-      {headers:authHeaders(false)});
+      {headers:authHeaders(true)});
     PAPERS=data.map(normalizePaper);
+    // 방어적 클라이언트 필터: 비로그인은 draft 숨김. (실제 보안은 Supabase RLS가 담당)
+    if(!isLoggedIn()) PAPERS=PAPERS.filter(p=>p.PrintStatus!==5);
     document.getElementById("banner").style.display="none";
     initUI();
   }catch(e){
@@ -467,10 +470,10 @@ async function login(){
       {method:"POST",headers:{"apikey":CFG.key,"Content-Type":"application/json"},body:JSON.stringify({email,password:pw})});
     SESSION={access_token:r.access_token,refresh_token:r.refresh_token,email:email};
     localStorage.setItem("cfms_session",JSON.stringify(SESSION));
-    toast("로그인되었습니다.");renderAuthbar();doSearch();
+    toast("로그인되었습니다.");renderAuthbar();await loadPapers(); // 토큰으로 재조회 → draft 포함
   }catch(e){toast("로그인 실패: 이메일/비밀번호 확인");}
 }
-function logout(){SESSION=null;localStorage.removeItem("cfms_session");renderAuthbar();doSearch();toast("로그아웃되었습니다.");}
+function logout(){SESSION=null;localStorage.removeItem("cfms_session");renderAuthbar();loadPapers();toast("로그아웃되었습니다.");} // 재조회로 메모리의 draft 제거
 function renderAuthbar(){
   const bar=document.getElementById("authbar");
   document.getElementById("btnAdd").disabled=!isLoggedIn();
