@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CFMS 프로젝트 그래프 (Graph · Cloud)</title>
+<style>
+  :root{--g:#2e7d32;--g2:#1b5e20;--line:#d6dde6;--bg:#0f1420;}
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;font-family:"Segoe UI","Malgun Gothic",sans-serif;color:#1f2937;background:#eef2f7;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+  header{background:#fff;border-bottom:1px solid var(--line);padding:9px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  header a.home{color:#334155;text-decoration:none;background:#f1f5f9;border:1px solid var(--line);padding:4px 10px;border-radius:10px;font-size:13px}
+  header h1{font-size:16px;margin:0;font-weight:700;color:#0f172a}
+  header .sub{font-size:12px;color:#64748b}
+  .authbar{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px}
+  .authbar input{padding:5px 7px;border:1px solid var(--line);border-radius:6px;font-size:12px}
+  .pill{background:#e8f5e9;color:#1b5e20;padding:5px 10px;border-radius:12px;font-weight:600}
+  .tools{display:none;gap:6px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:#fff;color:#334155;border-radius:7px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer}
+  .btn:hover{background:#f1f5f9}.btn.p{background:var(--g);color:#fff;border-color:var(--g)}.btn.sm{padding:4px 8px;font-size:11px}
+  .search{padding:6px 9px;border:1px solid var(--line);border-radius:7px;font-size:12px;width:150px}
+  .wrap{flex:1;display:none;min-height:0;position:relative}
+  canvas{display:block;width:100%;height:100%;background:radial-gradient(circle at 50% 40%,#16213a,#0f1420)}
+  .legend{position:absolute;left:12px;bottom:12px;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:11px;display:flex;flex-direction:column;gap:3px;max-width:200px}
+  .legend .lg{display:flex;align-items:center;gap:6px}.legend i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .info{position:absolute;right:12px;top:12px;width:240px;background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12px;display:none}
+  .info h3{margin:0 0 4px;font-size:14px;color:#0f172a}.info .meta{color:#64748b;margin-bottom:6px}
+  .info ul{margin:6px 0 0;padding-left:16px} .info li{cursor:pointer;color:#1565c0}.info li:hover{text-decoration:underline}
+  .gate{flex:1;display:flex;align-items:center;justify-content:center;padding:30px}
+  .gatecard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:30px 34px;max-width:420px;text-align:center;box-shadow:0 6px 22px rgba(15,23,42,.08)}
+  .gatecard .lock{font-size:42px}.gatecard h2{margin:10px 0 6px;font-size:18px}.gatecard p{color:#64748b;font-size:13px;line-height:1.6;margin:0 0 16px}
+  .gatecard .f{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}.gatecard input{padding:8px;border:1px solid var(--line);border-radius:7px;font-size:13px}
+  .banner{background:#fff8e1;border-bottom:1px solid #ffe082;padding:7px 16px;font-size:12px;color:#795548;display:none}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;opacity:0;transition:.3s;z-index:50}.toast.show{opacity:1}
+  #saveState{font-size:11px;color:#94a3b8;margin-left:4px}
+</style>
+</head>
+<body>
+<header>
+  <a class="home" href="index.html">← 홈</a>
+  <h1>CFMS 프로젝트 그래프</h1>
+  <span class="sub">옵시디언 링크 기반 · 클라우드(로그인 전용)</span>
+  <span id="saveState"></span>
+  <div class="tools" id="tools">
+    <input class="search" id="search" placeholder="검색(노드)">
+    <button class="btn sm" onclick="toggleLabels()" id="lblBtn">라벨 ✓</button>
+    <button class="btn sm" onclick="reheat()">재배치</button>
+    <button class="btn sm" onclick="fitView()">맞춤</button>
+    <button class="btn p sm" onclick="document.getElementById('imp').click()">볼트에서 불러오기</button>
+    <button class="btn sm" onclick="exportJSON()">백업</button>
+    <input type="file" id="imp" accept=".json,application/json" style="display:none" onchange="importJSON(this)">
+  </div>
+  <div class="authbar" id="authbar"></div>
+</header>
+
+<div class="banner" id="banner"></div>
+
+<div class="gate" id="gate">
+  <div class="gatecard">
+    <div class="lock">🔒</div>
+    <h2>로그인이 필요합니다</h2>
+    <p>이 프로젝트 그래프는 <b>로그인한 사용자에게만</b> 보입니다.<br>포털·논문관리와 같은 계정으로 로그인하세요.</p>
+    <div class="f">
+      <input id="gEmail" placeholder="이메일" style="width:160px">
+      <input id="gPw" type="password" placeholder="비밀번호" style="width:130px">
+      <button class="btn p" onclick="login('g')">로그인</button>
+    </div>
+    <p id="gateMsg" style="color:#c62828;font-size:12px;margin-top:12px"></p>
+  </div>
+</div>
+
+<div class="wrap" id="wrap">
+  <canvas id="cv"></canvas>
+  <div class="legend" id="legend"></div>
+  <div class="info" id="info"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* 현재 볼트에서 생성한 기본 그래프(첫 표시용). scripts/build-vault-graph.mjs 산출물을
+   "볼트에서 불러오기"로 올리면 Supabase에 저장되어 그 이후로는 그게 표시됩니다. */
+const DEFAULT_GRAPH = /*DATA_START*/{"kind":"vault-graph","generatedAt":"2026-06-28T14:10:38.544Z","vault":"_Research_Vault","nodes":[{"id":"_Experiments MOC","label":"_Experiments MOC","group":"Experiments","status":"","folder":"Experiments","type":"moc"},{"id":"Home","label":"Home","group":"(root)","status":"","folder":"(root)","type":"moc"},{"id":"Welcome 아이디어","label":"Welcome 아이디어","group":"Ideas","status":"","folder":"Ideas","type":"idea"},{"id":"_Ideas MOC","label":"_Ideas MOC","group":"Ideas","status":"","folder":"Ideas","type":"moc"},{"id":"_Papers MOC","label":"_Papers MOC","group":"Papers","status":"","folder":"Papers","type":"moc"},{"id":"Infrastructure","label":"Infrastructure","group":"VSCode","status":"infra","folder":"Projects","type":"project"},{"id":"Lab_Web_Apps","label":"Lab_Web_Apps","group":"Web","status":"active","folder":"Projects","type":"project"},{"id":"SFTF_Clustering","label":"SFTF_Clustering","group":"SFTF","status":"active","folder":"Projects","type":"project"},{"id":"SFTF_Composite","label":"SFTF_Composite","group":"SFTF","status":"stub","folder":"Projects","type":"project"},{"id":"SFTF_Derivative","label":"SFTF_Derivative","group":"SFTF","status":"active","folder":"Projects","type":"project"},{"id":"SFTF_InjMold","label":"SFTF_InjMold","group":"SFTF","status":"stub","folder":"Projects","type":"project"},{"id":"TSE_SEM","label":"TSE_SEM","group":"VSCode","status":"active","folder":"Projects","type":"project"},{"id":"Tomo_SFTF","label":"Tomo_SFTF","group":"SFTF","status":"active","folder":"Projects","type":"project"},{"id":"cfmsCAD","label":"cfmsCAD","group":"VSCode","status":"active","folder":"Projects","type":"project"},{"id":"cfmsCAD_suite","label":"cfmsCAD_suite","group":"VSCode","status":"active","folder":"Projects","type":"project"},{"id":"cfmsDispersity","label":"cfmsDispersity","group":"VSCode","status":"active","folder":"Projects","type":"project"},{"id":"cfmsDrape","label":"cfmsDrape","group":"VSCode","status":"active","folder":"Projects","type":"project"},{"id":"cfmsSew","label":"cfmsSew","group":"VSCode","status":"active","folder":"Projects","type":"project"},{"id":"cfmsShared","label":"cfmsShared","group":"VSCode","status":"infra","folder":"Projects","type":"project"},{"id":"README","label":"README","group":"(root)","status":"","folder":"(root)","type":""}],"links":[{"source":"Home","target":"_Experiments MOC"},{"source":"Home","target":"_Papers MOC"},{"source":"Home","target":"_Ideas MOC"},{"source":"Home","target":"Lab_Web_Apps"},{"source":"Home","target":"Infrastructure"},{"source":"Home","target":"Tomo_SFTF"},{"source":"Home","target":"SFTF_Clustering"},{"source":"Home","target":"SFTF_Derivative"},{"source":"Home","target":"SFTF_Composite"},{"source":"Home","target":"SFTF_InjMold"},{"source":"Home","target":"cfmsCAD"},{"source":"Home","target":"cfmsDrape"},{"source":"Home","target":"cfmsSew"},{"source":"Home","target":"cfmsShared"},{"source":"Home","target":"cfmsDispersity"},{"source":"Home","target":"TSE_SEM"},{"source":"Welcome 아이디어","target":"SFTF_Derivative"},{"source":"Welcome 아이디어","target":"cfmsDrape"},{"source":"_Papers MOC","target":"SFTF_Clustering"},{"source":"_Papers MOC","target":"SFTF_Derivative"},{"source":"_Papers MOC","target":"cfmsDispersity"},{"source":"_Papers MOC","target":"TSE_SEM"},{"source":"Infrastructure","target":"Tomo_SFTF"},{"source":"Infrastructure","target":"Lab_Web_Apps"},{"source":"SFTF_Clustering","target":"Tomo_SFTF"},{"source":"SFTF_Clustering","target":"SFTF_Derivative"},{"source":"SFTF_Composite","target":"Tomo_SFTF"},{"source":"SFTF_Derivative","target":"Tomo_SFTF"},{"source":"SFTF_Derivative","target":"cfmsDrape"},{"source":"SFTF_InjMold","target":"Tomo_SFTF"},{"source":"cfmsCAD","target":"cfmsDrape"},{"source":"cfmsCAD","target":"cfmsSew"},{"source":"cfmsCAD","target":"cfmsShared"},{"source":"cfmsCAD_suite","target":"cfmsCAD"},{"source":"cfmsCAD_suite","target":"cfmsDrape"},{"source":"cfmsCAD_suite","target":"cfmsSew"},{"source":"cfmsCAD_suite","target":"cfmsShared"},{"source":"cfmsDispersity","target":"cfmsDrape"},{"source":"cfmsDrape","target":"cfmsSew"},{"source":"cfmsDrape","target":"cfmsShared"}]}/*DATA_END*/;
+
+/* ===== Supabase 인증 (upjuk/mindmap 과 세션 공유) ===== */
+function normUrl(u){return (u||"").trim().replace(/\/+$/,"").replace(/\/rest\/v1$/i,"").replace(/\/auth\/v1$/i,"").replace(/\/+$/,"");}
+const BAKED_URL="https://ijutjirouxgqcldjyhma.supabase.co";
+const BAKED_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdXRqaXJvdXhncWNsZGp5aG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDk4MDAsImV4cCI6MjA5Nzk4NTgwMH0.gIAwf6a2oY-DkTXaf5eM2L4ROMCKim5WsevGfjol7tE";
+let CFG={url:normUrl(localStorage.getItem("cfms_url")||BAKED_URL),key:(localStorage.getItem("cfms_key")||BAKED_KEY).trim()};
+let SESSION=JSON.parse(localStorage.getItem("cfms_session")||"null");
+function isLoggedIn(){return !!(SESSION&&SESSION.access_token);}
+function authHeaders(useUser){const h={"apikey":CFG.key,"Content-Type":"application/json"};h["Authorization"]="Bearer "+((useUser&&SESSION&&SESSION.access_token)?SESSION.access_token:CFG.key);return h;}
+async function refreshToken(){
+  if(!(SESSION&&SESSION.refresh_token))return false;
+  try{const r=await fetch(CFG.url+'/auth/v1/token?grant_type=refresh_token',{method:"POST",headers:{apikey:CFG.key,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:SESSION.refresh_token})});
+    if(!r.ok)return false;const d=await r.json();
+    SESSION={access_token:d.access_token,refresh_token:d.refresh_token||SESSION.refresh_token,email:SESSION.email};
+    localStorage.setItem("cfms_session",JSON.stringify(SESSION));return true;}catch(e){return false;}
+}
+async function api(path,opts={}){
+  let res=await fetch(CFG.url+path,opts);
+  if(res.status===401&&isLoggedIn()&&opts.headers&&/Bearer/.test(opts.headers.Authorization||"")){
+    if(await refreshToken()){opts.headers.Authorization="Bearer "+SESSION.access_token;res=await fetch(CFG.url+path,opts);}
+    else{toast("세션 만료 — 다시 로그인하세요.");logout();throw new Error("401");}
+  }
+  if(!res.ok){let t=await res.text();throw new Error(res.status+" "+t);}
+  const txt=await res.text();return txt?JSON.parse(txt):null;
+}
+
+/* ===== 그룹 색상 ===== */
+const PALETTE=["#1565c0","#2e7d32","#6a1b9a","#00838f","#e65100","#c2185b","#5d4037","#455a64","#9e9d24","#0277bd"];
+const groupColor={}; let palI=0;
+function colorOf(g){ if(!(g in groupColor)) groupColor[g]=PALETTE[palI++%PALETTE.length]; return groupColor[g]; }
+
+/* ===== 상태 ===== */
+let DATA={nodes:[],links:[]};
+let nodes=[], links=[], adj=new Map();
+let view={tx:0,ty:0,s:1}, alpha=0, showLabels=true, selected=null, hover=null, dragNode=null;
+const REP=5200, LINK_LEN=92, SPRING=0.035, GRAVITY=0.025, DAMP=0.86;
+let cv, ctx, DPR=1, raf=0;
+
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2500);}
+function setSave(t){document.getElementById("saveState").textContent=t;}
+
+/* ===== 시뮬레이션 ===== */
+function initSim(){
+  const N=DATA.nodes.length||1;
+  nodes=DATA.nodes.map((n,i)=>{const a=i/N*Math.PI*2;return {...n,x:Math.cos(a)*220+(i%7-3)*6,y:Math.sin(a)*220+(i%5-2)*6,vx:0,vy:0};});
+  const idx=new Map(nodes.map(n=>[n.id,n]));
+  links=(DATA.links||[]).map(l=>({source:idx.get(typeof l.source==='object'?l.source.id:l.source),target:idx.get(typeof l.target==='object'?l.target.id:l.target)})).filter(l=>l.source&&l.target);
+  adj=new Map(nodes.map(n=>[n.id,new Set()]));
+  links.forEach(l=>{adj.get(l.source.id).add(l.target.id);adj.get(l.target.id).add(l.source.id);});
+  nodes.forEach(n=>n.deg=adj.get(n.id).size);
+  reheat();
+  buildLegend();
+}
+function reheat(){alpha=0.9;if(!raf)loop();}
+function tick(){
+  const k=alpha;
+  for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){
+    const a=nodes[i],b=nodes[j];let dx=a.x-b.x,dy=a.y-b.y;let d2=dx*dx+dy*dy;if(d2<1)d2=1;const d=Math.sqrt(d2);
+    const rep=REP/d2;const fx=dx/d*rep,fy=dy/d*rep;a.vx+=fx*k;a.vy+=fy*k;b.vx-=fx*k;b.vy-=fy*k;
+  }
+  for(const l of links){const a=l.source,b=l.target;let dx=b.x-a.x,dy=b.y-a.y;let d=Math.hypot(dx,dy)||1;const f=(d-LINK_LEN)*SPRING;const fx=dx/d*f,fy=dy/d*f;a.vx+=fx*k;a.vy+=fy*k;b.vx-=fx*k;b.vy-=fy*k;}
+  for(const n of nodes){n.vx+=(-n.x)*GRAVITY*k;n.vy+=(-n.y)*GRAVITY*k;}
+  for(const n of nodes){if(n===dragNode)continue;n.vx*=DAMP;n.vy*=DAMP;n.x+=n.vx;n.y+=n.vy;}
+  alpha*=0.985;if(alpha<0.005)alpha=0;
+}
+function radius(n){return 5+Math.min(10,(n.deg||0)*1.6);}
+function loop(){
+  raf=requestAnimationFrame(loop);
+  if(alpha>0)tick();
+  draw();
+  if(alpha===0&&!dragNode){cancelAnimationFrame(raf);raf=0;draw();}
+}
+function draw(){
+  const w=cv.width/DPR,h=cv.height/DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,w,h);
+  ctx.save();ctx.translate(view.tx,view.ty);ctx.scale(view.s,view.s);
+  const q=document.getElementById("search").value.trim().toLowerCase();
+  const nbrs=selected?adj.get(selected):null;
+  // edges
+  ctx.lineWidth=1/view.s;
+  for(const l of links){
+    const on=selected&&(l.source.id===selected||l.target.id===selected);
+    ctx.strokeStyle=on?"rgba(120,180,255,.9)":(selected?"rgba(150,165,190,.12)":"rgba(150,165,190,.30)");
+    ctx.beginPath();ctx.moveTo(l.source.x,l.source.y);ctx.lineTo(l.target.x,l.target.y);ctx.stroke();
+  }
+  // nodes
+  for(const n of nodes){
+    const r=radius(n);
+    const dim=(selected&&n.id!==selected&&!(nbrs&&nbrs.has(n.id)))||(q&&!n.label.toLowerCase().includes(q));
+    ctx.globalAlpha=dim?0.25:1;
+    ctx.beginPath();ctx.arc(n.x,n.y,r,0,Math.PI*2);
+    ctx.fillStyle=colorOf(n.group);ctx.fill();
+    if(n.id===selected||n.id===hover){ctx.lineWidth=2/view.s;ctx.strokeStyle="#fff";ctx.stroke();}
+    if(showLabels&&(view.s>0.55||n.id===hover||n.id===selected||(q&&n.label.toLowerCase().includes(q)))){
+      ctx.globalAlpha=dim?0.3:0.95;ctx.fillStyle="#dce6f5";ctx.font="11px Segoe UI,Malgun Gothic";
+      ctx.save();ctx.translate(n.x+r+2,n.y+3);ctx.scale(1/view.s,1/view.s);ctx.fillText(n.label,0,0);ctx.restore();
+    }
+    ctx.globalAlpha=1;
+  }
+  ctx.restore();
+}
+
+/* ===== 좌표 변환 / 히트테스트 ===== */
+function toWorld(mx,my){return {x:(mx-view.tx)/view.s,y:(my-view.ty)/view.s};}
+function nodeAt(mx,my){
+  const p=toWorld(mx,my);let best=null,bd=1e9;
+  for(const n of nodes){const r=radius(n)+4;const d=Math.hypot(n.x-p.x,n.y-p.y);if(d<r&&d<bd){bd=d;best=n;}}
+  return best;
+}
+function fitView(){
+  if(!nodes.length)return;
+  let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
+  for(const n of nodes){minx=Math.min(minx,n.x);miny=Math.min(miny,n.y);maxx=Math.max(maxx,n.x);maxy=Math.max(maxy,n.y);}
+  const w=cv.width/DPR,h=cv.height/DPR,gw=maxx-minx||1,gh=maxy-miny||1;
+  view.s=Math.max(.3,Math.min(2,0.85*Math.min(w/gw,h/gh)));
+  view.tx=w/2-(minx+maxx)/2*view.s;view.ty=h/2-(miny+maxy)/2*view.s;
+  draw();
+}
+
+/* ===== 패널/범례 ===== */
+function buildLegend(){
+  const groups=[...new Set(nodes.map(n=>n.group))];
+  document.getElementById("legend").innerHTML=groups.map(g=>`<span class="lg"><i style="background:${colorOf(g)}"></i>${esc(g)} (${nodes.filter(n=>n.group===g).length})</span>`).join("");
+}
+function esc(s){return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function showInfo(n){
+  const box=document.getElementById("info");
+  if(!n){box.style.display="none";return;}
+  const nb=[...(adj.get(n.id)||[])];
+  box.style.display="block";
+  box.innerHTML=`<h3>${esc(n.label)}</h3><div class="meta">${esc(n.group)}${n.status?" · "+esc(n.status):""} · 연결 ${nb.length}</div>`+
+    (nb.length?`<div>연결:</div><ul>${nb.map(id=>`<li onclick="selectNode('${id.replace(/'/g,"\\'")}')">${esc(id)}</li>`).join("")}</ul>`:"<div style='color:#94a3b8'>연결 없음</div>");
+}
+function selectNode(id){selected=id;const n=nodes.find(x=>x.id===id);showInfo(n);draw();}
+
+/* ===== 클라우드 저장/불러오기 ===== */
+const DOC_ID='vault-graph';
+function validate(d){return d&&Array.isArray(d.nodes)&&Array.isArray(d.links);}
+async function loadDoc(){
+  try{
+    const rows=await api('/rest/v1/mindmaps?id=eq.'+DOC_ID+'&select=data',{headers:authHeaders(true)});
+    DATA=(rows&&rows.length&&validate(rows[0].data))?rows[0].data:JSON.parse(JSON.stringify(DEFAULT_GRAPH));
+    initSim();fitView();setSave("");
+    if(!(rows&&rows.length)){showBanner("아직 저장된 그래프가 없어 기본값을 표시합니다. 최신 볼트는 scripts/build-vault-graph.mjs 로 만들어 '볼트에서 불러오기' 하세요.");}
+  }catch(e){
+    const b=document.getElementById("banner");b.style.display="block";
+    if(/relation|does not exist|42P01|PGRST205|404/i.test(e.message)) b.textContent="mindmaps 테이블이 없습니다. enable_rls_mindmaps.sql 을 먼저 실행하세요.";
+    else { b.textContent="불러오기 실패: "+e.message.slice(0,120)+" — 기본값을 표시합니다."; DATA=JSON.parse(JSON.stringify(DEFAULT_GRAPH));initSim();fitView(); }
+  }
+}
+async function saveDoc(silent){
+  if(!isLoggedIn())return;setSave("저장 중…");
+  try{
+    await api('/rest/v1/mindmaps',{method:'POST',headers:Object.assign(authHeaders(true),{Prefer:'resolution=merge-duplicates,return=minimal'}),
+      body:JSON.stringify({id:DOC_ID,data:DATA,updated_at:new Date().toISOString()})});
+    setSave("저장됨 ✓");if(!silent)toast("그래프를 클라우드에 저장했습니다.");
+  }catch(e){setSave("저장 실패");toast("저장 실패: "+e.message.slice(0,100));}
+}
+function download(name,text){const b=new Blob([text],{type:"application/json"}),u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);}
+function exportJSON(){download("vault-graph.json",JSON.stringify(DATA,null,2));toast("백업 JSON을 내려받았습니다.");}
+function importJSON(input){
+  const f=input.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(!validate(d)){toast("형식 오류: nodes/links 필요");return;}
+    DATA=d;initSim();fitView();saveDoc(false);toast(`불러왔습니다 (노드 ${d.nodes.length}).`);
+  }catch(e){toast("JSON 파싱 실패");}};
+  r.readAsText(f);input.value="";
+}
+function showBanner(m){const b=document.getElementById("banner");b.textContent=m;b.style.display="block";}
+
+/* ===== 보기 토글 ===== */
+function toggleLabels(){showLabels=!showLabels;document.getElementById("lblBtn").textContent="라벨 "+(showLabels?"✓":"✕");draw();}
+
+/* ===== 인증/게이트 ===== */
+async function login(where){
+  const email=document.getElementById(where==='g'?'gEmail':'liEmail').value.trim();
+  const pw=document.getElementById(where==='g'?'gPw':'liPw').value;
+  if(!email||!pw){toast("이메일/비밀번호 입력");return;}
+  try{
+    const r=await api('/auth/v1/token?grant_type=password',{method:"POST",headers:{"apikey":CFG.key,"Content-Type":"application/json"},body:JSON.stringify({email,password:pw})});
+    SESSION={access_token:r.access_token,refresh_token:r.refresh_token,email};localStorage.setItem("cfms_session",JSON.stringify(SESSION));
+    toast("로그인되었습니다.");renderAuthbar();showApp();await loadDoc();
+  }catch(e){const m="로그인 실패: 이메일/비밀번호 확인";toast(m);document.getElementById("gateMsg").textContent=m;}
+}
+function logout(){SESSION=null;localStorage.removeItem("cfms_session");renderAuthbar();showGate();}
+function renderAuthbar(){
+  const bar=document.getElementById("authbar");
+  if(isLoggedIn())bar.innerHTML=`<span class="pill">✔ ${esc(SESSION.email)}</span> <button class="btn sm" onclick="logout()">로그아웃</button>`;
+  else bar.innerHTML=`<input id="liEmail" placeholder="이메일" style="width:140px"><input id="liPw" type="password" placeholder="비밀번호" style="width:110px"><button class="btn sm p" onclick="login('h')">로그인</button>`;
+}
+function showApp(){document.getElementById("gate").style.display="none";document.getElementById("wrap").style.display="block";document.getElementById("tools").style.display="flex";resize();}
+function showGate(){document.getElementById("wrap").style.display="none";document.getElementById("tools").style.display="none";document.getElementById("gate").style.display="flex";document.getElementById("banner").style.display="none";}
+
+/* ===== 캔버스 이벤트 ===== */
+function resize(){
+  DPR=window.devicePixelRatio||1;const w=cv.clientWidth,h=cv.clientHeight;
+  cv.width=w*DPR;cv.height=h*DPR;draw();
+}
+function bind(){
+  cv=document.getElementById("cv");ctx=cv.getContext("2d");
+  window.addEventListener("resize",()=>{if(document.getElementById("wrap").style.display!=="none")resize();});
+  let panning=false,last=null;
+  cv.addEventListener("mousedown",e=>{
+    const r=cv.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;
+    const n=nodeAt(mx,my);
+    if(n){dragNode=n;selectNode(n.id);reheat();}
+    else{panning=true;last={x:e.clientX,y:e.clientY};selected=null;showInfo(null);draw();}
+  });
+  window.addEventListener("mousemove",e=>{
+    const r=cv.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;
+    if(dragNode){const p=toWorld(mx,my);dragNode.x=p.x;dragNode.y=p.y;dragNode.vx=0;dragNode.vy=0;draw();return;}
+    if(panning){view.tx+=e.clientX-last.x;view.ty+=e.clientY-last.y;last={x:e.clientX,y:e.clientY};draw();return;}
+    const hv=nodeAt(mx,my);const id=hv?hv.id:null;if(id!==hover){hover=id;cv.style.cursor=hv?"pointer":"grab";draw();}
+  });
+  window.addEventListener("mouseup",()=>{if(dragNode){dragNode=null;reheat();}panning=false;});
+  cv.addEventListener("wheel",e=>{e.preventDefault();const r=cv.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;
+    const f=e.deltaY<0?1.1:1/1.1,ns=Math.max(.15,Math.min(4,view.s*f));
+    view.tx=mx-(mx-view.tx)*(ns/view.s);view.ty=my-(my-view.ty)*(ns/view.s);view.s=ns;draw();},{passive:false});
+  document.getElementById("search").addEventListener("input",draw);
+}
+
+/* ===== 부팅 ===== */
+async function boot(){bind();renderAuthbar();if(isLoggedIn()){showApp();await loadDoc();}else{showGate();}}
+boot();
+</script>
+</body>
+</html>

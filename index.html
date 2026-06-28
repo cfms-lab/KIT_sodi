@@ -31,6 +31,7 @@
   .tt .ico{background:linear-gradient(135deg,var(--b),var(--b2))} .tt .go{color:var(--b)}
   .jg .ico{background:linear-gradient(135deg,#00897b,#004d40)} .jg .go{color:#00695c}
   .mm .ico{background:linear-gradient(135deg,#8e24aa,#4a148c)} .mm .go{color:#6a1b9a}
+  .gr .ico{background:linear-gradient(135deg,#283593,#1a237e)} .gr .go{color:#283593}
   footer{text-align:center;color:#94a3b8;font-size:12px;padding:14px}
   .note{font-size:12px;color:#64748b;text-align:center;margin-top:18px;max-width:680px}
   .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;opacity:0;transition:.3s}
@@ -71,6 +72,12 @@
         <p>연구·개발 세부 프로젝트의 관계를 마인드맵으로 한눈에. 노드 추가/수정/관계선 편집, 클라우드 저장. (🔒 로그인 후 열람)</p>
         <div class="go">열기 →</div>
       </a>
+      <a class="card gr" id="graphCard" href="graph.html" style="display:none">
+        <div class="ico">🕸️</div>
+        <h2>프로젝트 그래프 (Graph)</h2>
+        <p>옵시디언 노트의 링크에서 자동 생성한 force-directed 그래프 뷰. 노드 드래그·확대·이웃 강조. (🔒 로그인 후 열람)</p>
+        <div class="go">열기 →</div>
+      </a>
     </div>
     <p class="note">두 시스템은 하나의 Supabase 프로젝트를 공유합니다. 여기서 한 번 로그인하면 양쪽 앱에서 편집이 가능합니다. (로그인 없이도 조회는 됩니다.)</p>
   </div>
@@ -106,6 +113,7 @@ function renderAuth(){
   if(isIn()) bar.innerHTML=`<span class="pill">✔ ${SESSION.email}</span><button class="btn sm ghost" onclick="logout()">로그아웃</button>`;
   else bar.innerHTML=`<input id="liEmail" placeholder="이메일" style="width:150px"><input id="liPw" type="password" placeholder="비밀번호" style="width:120px"><button class="btn sm" onclick="login()">로그인</button>`;
   const mm=document.getElementById("mmCard"); if(mm) mm.style.display=isIn()?"block":"none"; // 관계도는 로그인 시에만 노출
+  const gr=document.getElementById("graphCard"); if(gr) gr.style.display=isIn()?"block":"none"; // 그래프도 로그인 시에만 노출
 }
 renderAuth();
 </script>
