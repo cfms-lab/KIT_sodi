@@ -396,15 +396,14 @@ async function dragEnd(ev){
   if(alt){
     // 제약1: 다른 학년 행으로는 복사 불가
     if(year!==c.sClassYear){ toast("⚠ 다른 학년 행으로는 복사할 수 없습니다."); return; }
-    // 제약2·3·4: 강의실/학년/교수 충돌
+    // 제약2·3·4: 강의실/학년/교수 충돌 → 차단하지 않고 경고만 (겹친 상태 허용)
     const v=checkPlacement({day,year,time:period,room:c.sClassRoom,prof:c.sClassProfName,sem:c.semester,excludeId:null});
-    if(v){ toast("⚠ "+v); return; }
     // 복사: 새 과목 생성
     const obj={semester:c.semester,sClassProfName:c.sClassProfName,sClassYear:year,sClassName:c.sClassName,
       sClassDay:day,sClassTime:period,sClassRoom:c.sClassRoom,sClassType:c.sClassType};
     try{
       const r=await api('/rest/v1/tt_courses',{method:"POST",headers:Object.assign(authHeaders(true),{Prefer:"return=representation"}),body:JSON.stringify(obj)});
-      COURSES.push(r[0]); render(); toast(`복사됨: ${c.sClassName} → ${day} ${year} ${period}교시`);
+      COURSES.push(r[0]); render(); toast(v ? ("⚠ [경고] "+v) : `복사됨: ${c.sClassName} → ${day} ${year} ${period}교시`);
     }catch(e){toast("복사 실패: "+e.message.slice(0,80));}
     return;
   }
@@ -412,14 +411,13 @@ async function dragEnd(ev){
   if(c.sClassDay===day&&c.sClassYear===year&&c.sClassTime===period)return;
   // 제약1: 다른 학년 행으로는 이동 불가
   if(year!==c.sClassYear){ toast("⚠ 다른 학년 행으로는 이동할 수 없습니다."); return; }
-  // 제약2·3·4: 강의실/학년/교수 충돌
+  // 제약2·3·4: 강의실/학년/교수 충돌 → 차단하지 않고 경고만 (겹친 상태 허용)
   const vio=checkPlacement({day,year,time:period,room:c.sClassRoom,prof:c.sClassProfName,sem:c.semester,excludeId:c.id});
-  if(vio){ toast("⚠ "+vio); return; }
   const patch={sClassDay:day,sClassYear:year,sClassTime:period};
   Object.assign(c,patch); render();
   try{
     await api('/rest/v1/tt_courses?id=eq.'+d.id,{method:"PATCH",headers:authHeaders(true),body:JSON.stringify(patch)});
-    toast(`${c.sClassName} → ${day} ${year} ${period}교시`);
+    toast(vio ? ("⚠ [경고] "+vio) : `${c.sClassName} → ${day} ${year} ${period}교시`);
   }catch(e){toast("저장 실패: "+e.message.slice(0,80)); reload();}
 }
 // 선택된 과목을 Delete/Backspace 로 삭제
@@ -471,10 +469,9 @@ function formObj(){const v=id=>document.getElementById(id).value;
 async function saveCourse(){
   if(!requireLogin())return;
   const idv=document.getElementById("eId").value, obj=formObj();
-  // 제약2·3·4: 강의실/학년/교수 충돌 (모달은 학년을 직접 고르므로 제약1은 미적용)
-  const v=checkPlacement({day:obj.sClassDay,year:obj.sClassYear,time:obj.sClassTime,
+  // 제약2·3·4: 강의실/학년/교수 충돌 → 차단하지 않고 경고만 (겹친 상태 허용)
+  const warn=checkPlacement({day:obj.sClassDay,year:obj.sClassYear,time:obj.sClassTime,
     room:obj.sClassRoom,prof:obj.sClassProfName,sem:obj.semester,excludeId: idv!==""? +idv : null});
-  if(v){ document.getElementById("editErr").textContent="⚠ "+v; return; }
   document.getElementById("eSave").disabled=true;
   try{
     if(idv!==""){
@@ -486,6 +483,7 @@ async function saveCourse(){
       COURSES.push(r[0]); toast("추가되었습니다.");
     }
     closeEdit(); render();
+    if(warn) toast("⚠ [경고] "+warn);
   }catch(e){document.getElementById("editErr").textContent="저장 실패: "+e.message.slice(0,140);}
   finally{document.getElementById("eSave").disabled=false;}
 }
