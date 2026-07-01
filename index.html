@@ -79,7 +79,7 @@
         <div class="go">열기 →</div>
       </a>
     </div>
-    <p class="note">두 시스템은 하나의 Supabase 프로젝트를 공유합니다. 여기서 한 번 로그인하면 양쪽 앱에서 편집이 가능합니다. (로그인 없이도 조회는 됩니다.)</p>
+    <p class="note">각 앱은 하나의 Supabase 프로젝트를 공유합니다. 여기서 한 번 로그인하면 편집 권한이 필요한 앱에서 같은 세션을 사용합니다. (공개 데이터 조회는 로그인 없이도 가능합니다.)</p>
   </div>
 </main>
 
@@ -102,9 +102,9 @@ async function login(){
       headers:{apikey:CFG.key,"Content-Type":"application/json"},body:JSON.stringify({email,password:pw})});
     if(!r.ok)throw 0;
     const d=await r.json();
-    SESSION={access_token:d.access_token,email};
+    SESSION={access_token:d.access_token,refresh_token:d.refresh_token,email};
     localStorage.setItem("cfms_session",JSON.stringify(SESSION));
-    toast("로그인되었습니다. 양쪽 앱에서 편집할 수 있어요.");renderAuth();
+    toast("로그인되었습니다. 편집 권한이 필요한 앱에서 사용할 수 있어요.");renderAuth();
   }catch(e){toast("로그인 실패: 이메일/비밀번호 확인");}
 }
 function logout(){SESSION=null;localStorage.removeItem("cfms_session");renderAuth();toast("로그아웃");}

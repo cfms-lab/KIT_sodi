@@ -40,7 +40,7 @@
 <div class="wrap">
   <div class="card">
     <h2>전체 데이터 백업</h2>
-    <p class="muted">Supabase의 모든 테이블(논문·시간표·취업)을 한 번에 받아 <b>복원용 SQL</b> 또는 <b>JSON</b>으로 저장합니다.
+    <p class="muted">Supabase의 주요 테이블(논문·시간표·취업·관계도)을 한 번에 받아 <b>복원용 SQL</b> 또는 <b>JSON</b>으로 저장합니다.
     받은 파일을 GitHub 리포(KIT_sodi)의 <code>backup/</code> 폴더에 올려 커밋하면 백업이 됩니다.</p>
 
     <label class="chk"><input type="checkbox" id="mask" checked> 학생 이름 마스킹(<b>공개 리포용</b> — 권장)</label>
@@ -59,7 +59,7 @@
   <div class="card">
     <h2>복원 방법</h2>
     <p class="muted">받은 <b>복원용 SQL</b>을 Supabase의 <b>SQL Editor</b>에 붙여넣고 Run 하면, 각 테이블을 비우고 백업 시점 데이터로 되돌립니다.
-    (스키마(테이블 구조)는 기존 <code>schema_*.sql</code>로 먼저 만들어져 있어야 합니다.)</p>
+    (스키마(테이블 구조)는 <code>schema_cfms.sql</code>로 먼저 만들고, 권한 정책은 <code>enable_rls_cfms.sql</code>로 적용합니다.)</p>
   </div>
 </div>
 
@@ -89,8 +89,11 @@ let tT;function toast(m){const t=document.getElementById("toast");t.textContent=
 
 // 백업 대상: jobgis_jobs 는 로그인 시 실명 테이블, 비로그인 시 마스킹 뷰
 const TABLES=[
-  {t:"papers"}, {t:"tt_courses"}, {t:"tt_professors"}, {t:"tt_rooms"},
-  {t:"jobgis_jobs", sensitive:true}, {t:"jobgis_office_types"}
+  {t:"papers", userRead:true, sequenceColumn:"ID"},
+  {t:"tt_courses", dropId:true}, {t:"tt_professors", dropId:true}, {t:"tt_rooms", dropId:true},
+  {t:"jobgis_jobs", sensitive:true, dropId:true, publicView:"jobgis_jobs_public"},
+  {t:"jobgis_office_types", dropId:true},
+  {t:"mindmaps", userRead:true, loginOnly:true}
 ];
 
 async function refreshToken(){
@@ -105,23 +108,32 @@ async function refreshToken(){
     return true;
   }catch(e){ return false; }
 }
-async function fetchTable(t){
+async function fetchTable(meta){
+  const t=meta.t;
+  if(meta.loginOnly && !isIn()) return null;
   // 민감 테이블은 로그인 시 실명 테이블에서, 아니면 공개 뷰에서
   let ep=t;
-  if(t==="jobgis_jobs" && !isIn()) ep="jobgis_jobs_public";
-  let r=await fetch(CFG.url+"/rest/v1/"+ep+"?select=*",{headers:authHeaders(t==="jobgis_jobs")});
+  if(meta.publicView && !isIn()) ep=meta.publicView;
+  const useUser=!!((meta.sensitive || meta.userRead) && isIn());
+  let r=await fetch(CFG.url+"/rest/v1/"+ep+"?select=*",{headers:authHeaders(useUser)});
   if(r.status===401 && isIn() && await refreshToken()){
-    r=await fetch(CFG.url+"/rest/v1/"+ep+"?select=*",{headers:authHeaders(t==="jobgis_jobs")});
+    r=await fetch(CFG.url+"/rest/v1/"+ep+"?select=*",{headers:authHeaders(useUser)});
   }
   if(!r.ok) throw new Error(t+": "+r.status);
   return await r.json();
 }
 
-function sqlEsc(v){ if(v==null) return "NULL"; return "'"+String(v).replace(/'/g,"''")+"'"; }
-function tableToSQL(t, rows, mask){
-  if(!rows.length) return `-- ${t}: 0 rows\n`;
-  const cols=Object.keys(rows[0]).filter(c=>c!=="id");
+function sqlEsc(v){
+  if(v==null) return "NULL";
+  if(typeof v==="object") v=JSON.stringify(v);
+  return "'"+String(v).replace(/'/g,"''")+"'";
+}
+function tableToSQL(meta, rows, mask){
+  const t=meta.t;
   let s=`\n-- ===== ${t} (${rows.length} rows) =====\ntruncate table public.${t} restart identity;\n`;
+  if(!rows.length) return s;
+  const drop=new Set(meta.dropId?["id"]:[]);
+  const cols=Object.keys(rows[0]).filter(c=>!drop.has(c));
   for(const r of rows){
     const vals=cols.map(c=>{
       let v=r[c];
@@ -129,6 +141,10 @@ function tableToSQL(t, rows, mask){
       return sqlEsc(v);
     });
     s+=`insert into public.${t} (${cols.map(c=>'"'+c+'"').join(",")}) values (${vals.join(",")});\n`;
+  }
+  if(meta.sequenceColumn){
+    const maxId=Math.max(0,...rows.map(r=>Number(r[meta.sequenceColumn])).filter(Number.isFinite));
+    if(maxId>0) s+=`select setval(pg_get_serial_sequence('public.${t}','${meta.sequenceColumn}'), ${maxId}, true);\n`;
   }
   return s;
 }
@@ -148,17 +164,20 @@ async function backup(fmt){
   if(!CFG.url||!CFG.key){toast("연결설정(⚙)을 먼저 입력하세요");return;}
   const mask=document.getElementById("mask").checked;
   if(!mask && !confirm("학생 실명이 포함된 전체 백업입니다.\n공개 리포(KIT_sodi)에는 올리지 마세요. 계속할까요?")) return;
-  if(!isIn() && !mask){ toast("실명 백업은 로그인이 필요합니다(비로그인은 자동 마스킹)."); }
+  if(!isIn() && !mask){ toast("실명 백업은 로그인이 필요합니다."); return; }
   const log=document.getElementById("log"); log.style.display="block"; log.textContent="";
   const ln=s=>{log.textContent+=s+"\n";};
   document.getElementById("btnSql").disabled=document.getElementById("btnJson").disabled=true;
   try{
     const data={}; let sql="-- CFMS 데이터 백업 "+new Date().toISOString()+(mask?" (이름 마스킹)":" (실명 포함)")+"\n";
-    for(const {t} of TABLES){
+    for(const meta of TABLES){
+      const t=meta.t;
+      if(meta.loginOnly && !isIn()){ ln("건너뜀: "+t+" (로그인 필요)"); continue; }
       ln("받는 중: "+t+" …");
-      const rows=await fetchTable(t);
+      const rows=await fetchTable(meta);
+      if(rows==null){ ln("  "+t+": 로그인 필요로 건너뜀"); continue; }
       data[t]=maskRows(t,rows,mask);
-      sql+=tableToSQL(t,rows,mask);
+      sql+=tableToSQL(meta,rows,mask);
       ln("  "+t+": "+rows.length+"건");
     }
     const suffix=(mask?"_masked":"_FULL")+"_"+today();
