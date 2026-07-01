@@ -91,10 +91,10 @@
   <input type="hidden" id="eId">
   <div class="grid">
     <label class="full">과목명<input id="eName"></label>
-    <label>교수<select id="eProf"></select></label>
+    <label>교수<input id="eProf" autocomplete="off"></label>
     <label>분류<select id="eType"></select></label>
     <label>학년<select id="eYear"></select></label>
-    <label>강의실<select id="eRoom"></select></label>
+    <label>강의실<input id="eRoom" autocomplete="off"></label>
     <label>요일<select id="eDay"></select></label>
     <label>교시<select id="eTime"></select></label>
   </div>
@@ -461,12 +461,10 @@ function openEdit(id){
   document.getElementById("editErr").textContent="";
   document.getElementById("eId").value=c?c.id:"";
   document.getElementById("eName").value=c?c.sClassName:"";
-  const profNames=[...new Set(PROFS.filter(p=>p.semester===sem&&p.sProfName).map(p=>p.sProfName))];
-  const roomNames=[...new Set(ROOMS.filter(r=>r.semester===sem&&r.sRoomName).map(r=>r.sRoomName))];
   const typeOpts=[...new Set([...TYPES, ...COURSES.map(x=>x.sClassType).filter(Boolean), c&&c.sClassType].filter(Boolean))];
   fillSelect("eType",typeOpts,c?c.sClassType:TYPES[0]);
-  fillSelect("eProf",profNames,c?c.sClassProfName:profNames[0]);
-  fillSelect("eRoom",roomNames,c?c.sClassRoom:roomNames[0]);
+  document.getElementById("eProf").value=c?(c.sClassProfName||""):"";
+  document.getElementById("eRoom").value=c?(c.sClassRoom||""):"";
   fillSelect("eYear",YEARS,c?c.sClassYear:YEARS[0]);
   fillSelect("eDay",DAYS,c?c.sClassDay:DAYS[0]);
   fillSelect("eTime",PERIODS,c?c.sClassTime:PERIODS[0]);
