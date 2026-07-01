@@ -244,7 +244,10 @@ function onFilterTypeChange(){
 }
 function matchFilter(c){
   const f=getFilter(); if(f.type==="none")return true;
-  if(f.type==="prof")return c.sClassProfName===f.val;
+  if(f.type==="prof"){
+    const val=String(f.val||"").trim();
+    return val ? String(c.sClassProfName||"").includes(val) : true;
+  }
   if(f.type==="year")return c.sClassYear===f.val;
   if(f.type==="room")return c.sClassRoom===f.val;
   return true;
