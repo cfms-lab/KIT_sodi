@@ -189,12 +189,23 @@ async function api(path,opts={}){
 
 /* ===== 로드 ===== */
 async function reload(){await loadAll();}
+async function fetchAll(path){
+  const pageSize=1000;
+  const rows=[];
+  for(let offset=0;;offset+=pageSize){
+    const sep=path.includes("?")?"&":"?";
+    const chunk=await api(`${path}${sep}limit=${pageSize}&offset=${offset}`,{headers:authHeaders(false)});
+    rows.push(...chunk);
+    if(chunk.length<pageSize)break;
+  }
+  return rows;
+}
 async function loadAll(){
   try{
     const [c,p,rm]=await Promise.all([
-      api('/rest/v1/tt_courses?select=*',{headers:authHeaders(false)}),
-      api('/rest/v1/tt_professors?select=*',{headers:authHeaders(false)}),
-      api('/rest/v1/tt_rooms?select=*',{headers:authHeaders(false)})
+      fetchAll('/rest/v1/tt_courses?select=*&order=id.asc'),
+      fetchAll('/rest/v1/tt_professors?select=*&order=id.asc'),
+      fetchAll('/rest/v1/tt_rooms?select=*&order=id.asc')
     ]);
     COURSES=c;PROFS=p;ROOMS=rm;
     document.getElementById("banner").style.display="none";
