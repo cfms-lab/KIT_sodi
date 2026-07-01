@@ -76,8 +76,8 @@
     <option value="room">강의실별</option>
   </select></label>
   <select id="filterVal" onchange="render()" style="display:none"></select>
-  <button class="btn secondary sm" id="btnAdd" onclick="openEdit(null)" disabled>＋ 과목 추가</button>
-  <button class="btn secondary sm" id="btnClone" onclick="openClone()" disabled>학기 복제</button>
+  <button class="btn secondary sm" id="btnAdd" onclick="openEdit(null)">＋ 과목 추가</button>
+  <button class="btn secondary sm" id="btnClone" onclick="openClone()">학기 복제</button>
   <button class="btn secondary sm" onclick="reload()">새로고침</button>
 </div>
 <div class="legend" id="legend"></div>
@@ -493,14 +493,27 @@ async function deleteCourse(){
 }
 
 /* ===== 학기 복제 ===== */
+function prevSameTerm(sem){
+  const m=String(sem||"").match(/^(\d{4})-(\d)$/);
+  return m ? (parseInt(m[1],10)-1)+"-"+m[2] : "";
+}
+function defaultCloneSource(cur,sems){
+  const prev=prevSameTerm(cur);
+  if(prev && sems.includes(prev)) return prev;
+  return sems.find(s=>s!==cur)||sems[0]||"";
+}
+function courseCloneKey(c){
+  return [c.sClassProfName,c.sClassYear,c.sClassName,c.sClassDay,c.sClassTime,c.sClassRoom,c.sClassType]
+    .map(v=>String(v||"")).join("\u001f");
+}
 function openClone(){
   if(!requireLogin())return;
   const sems=semesters();
-  document.getElementById("clSrc").innerHTML=sems.map(s=>`<option ${s===curSem()?'':''}>${s}</option>`).join("");
-  // 원본 기본값: 대상과 다른 가장 최근 학기
-  const other=sems.find(s=>s!==curSem())||sems[0];
-  document.getElementById("clSrc").value=other;
-  document.getElementById("clTgt").value=curSem();
+  const cur=curSem();
+  const src=defaultCloneSource(cur,sems);
+  document.getElementById("clSrc").innerHTML=sems.map(s=>`<option value="${s}" ${s===src?'selected':''}>${s}</option>`).join("");
+  // 대상이 2026-2이면 원본 기본값은 전년도 같은 학기(2025-2)를 우선한다.
+  document.getElementById("clTgt").value=cur;
   document.getElementById("clMode").value="full";
   document.getElementById("clClear").checked=false;
   document.getElementById("clLog").textContent="";document.getElementById("clErr").textContent="";
@@ -546,10 +559,14 @@ async function runClone(){
     await bulkInsert("tt_rooms",newRooms);
     let nC=0;
     if(mode==="full"){
+      const existingCourses=clear?new Set():new Set(COURSES.filter(c=>c.semester===tgt).map(courseCloneKey));
+      let skipped=0;
       const newCourses=COURSES.filter(c=>c.semester===src).map(c=>({
         semester:tgt,sClassProfName:c.sClassProfName,sClassYear:c.sClassYear,sClassName:c.sClassName,
-        sClassDay:c.sClassDay,sClassTime:c.sClassTime,sClassRoom:c.sClassRoom,sClassType:c.sClassType}));
+        sClassDay:c.sClassDay,sClassTime:c.sClassTime,sClassRoom:c.sClassRoom,sClassType:c.sClassType}))
+        .filter(c=>{ if(existingCourses.has(courseCloneKey(c))){ skipped++; return false; } return true; });
       nC=newCourses.length;
+      if(skipped) logln(`이미 있는 과목 ${skipped}건은 건너뜀`);
       logln(`과목 ${nC}건 복사 중…`);
       await bulkInsert("tt_courses",newCourses);
     }
@@ -578,8 +595,8 @@ async function login(){
 function logout(){SESSION=null;localStorage.removeItem("cfms_session");renderAuthbar();render();toast("로그아웃");}
 function renderAuthbar(){
   const bar=document.getElementById("authbar");
-  document.getElementById("btnAdd").disabled=!isLoggedIn();
-  document.getElementById("btnClone").disabled=!isLoggedIn();
+  document.getElementById("btnAdd").title=isLoggedIn()?"":"로그인 후 과목을 추가할 수 있습니다.";
+  document.getElementById("btnClone").title=isLoggedIn()?"":"로그인 후 학기를 복제할 수 있습니다.";
   if(isLoggedIn()) bar.innerHTML=`<span class="pill">✔ ${esc(SESSION.email)}</span><button class="btn secondary sm" onclick="logout()">로그아웃</button>`;
   else bar.innerHTML=`<input id="liEmail" placeholder="이메일" style="width:140px"><input id="liPw" type="password" placeholder="비밀번호" style="width:110px"><button class="btn sm" onclick="login()">로그인</button><button class="btn secondary sm" onclick="openConfig()" title="연결설정">⚙</button>`;
 }
