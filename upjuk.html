@@ -274,10 +274,14 @@ function checkName(Str,author,first,second,last){
   if(n2!==0&&n2>nFirst)nFirst=n2;
   if(n3!==0&&n3>nFirst)nFirst=n3;
   let parsedFirst=temp.substring(nFirst);
-  if(parsedFirst===first&&parsedSecond===second)return true;
-  if(parsedSecond===first)return true;
-  if(parsedFirst.charAt(0)===first.charAt(0)&&parsedSecond.charAt(0)===second.charAt(0))return true;
-  if(parsedSecond.charAt(0)===first.charAt(0)&&second==="")return true;
+  // 토큰 일치: 완전 일치이거나, 파싱된 토큰이 '이니셜(한 글자)'일 때만 첫 글자 비교 허용.
+  // (기존 코드는 "Jin"처럼 온전한 이름도 첫 글자만 비교해 "Jieon"과 오매칭되는 버그가 있었음)
+  const tokMatch=(parsed,full)=>parsed===full||(parsed.length===1&&full!==""&&parsed===full.charAt(0));
+  if(tokMatch(parsedFirst,first)&&tokMatch(parsedSecond,second))return true;   // 예: "In Hwan Sul", "I. H. Sul", "In H. Sul"
+  if(parsedSecond===first)return true;                                          // 미들네임 없는 저자 완전 일치: "Jieon Kang"
+  // 미들네임 없는 저자 이니셜: "J. Kang" — 단, 앞에 다른 이니셜/이름이 붙은 "T. J. Kang" 형태는 제외
+  if(parsedSecond.length===1&&parsedSecond===first.charAt(0)&&second===""
+     &&(parsedFirst===parsedSecond||parsedFirst===""||parsedFirst==="and"||parsedFirst==="&"))return true;
   return false;
 }
 
