@@ -1,0 +1,163 @@
+{
+  "root": {
+    "id": "root",
+    "kind": "root",
+    "note": "두 워크스페이스의 세부 프로젝트 관계도",
+    "title": "CFMS 연구실 2026",
+    "children": [
+      {
+        "id": "sftf",
+        "kind": "web",
+        "note": "SFTF 본체: 빌드방향 후보 생성(coarse-to-refine) + TOMO_CPU/GPU 엔진(DLL). 표준 템플릿의 기원.",
+        "title": "SFTF (PiAM 투고)",
+        "status": "active",
+        "children": [
+          {
+            "id": "n8t2x7d2",
+            "kind": "app",
+            "note": "사출성형 적용 (신규 스캐폴드).",
+            "title": "SFTF_InjMold (27'가을?)",
+            "status": "idea",
+            "children": [
+              {
+                "id": "nca3mrq1",
+                "kind": "app",
+                "note": "",
+                "title": "BatteryThermal",
+                "status": "idea",
+                "children": []
+              }
+            ],
+            "collapsed": false
+          },
+          {
+            "id": "tomo_sftf",
+            "kind": "web",
+            "note": "SFTF 본체: 빌드방향 후보 생성(coarse-to-refine) + TOMO_CPU/GPU 엔진(DLL). 표준 템플릿의 기원.",
+            "title": "SFTF_Cluster (27'봄)",
+            "status": "active",
+            "children": [
+              {
+                "id": "nxt5kwi1",
+                "title": "SFTF_Composite (27' 가을)",
+                "kind": "app",
+                "status": "idea",
+                "children": [
+                  {
+                    "id": "n01wecm2",
+                    "title": "SewerPOC",
+                    "kind": "app",
+                    "status": "idea",
+                    "children": [],
+                    "note": ""
+                  }
+                ],
+                "note": "",
+                "collapsed": false
+              }
+            ],
+            "collapsed": false
+          }
+        ]
+      },
+      {
+        "id": "vscode",
+        "kind": "subgroup",
+        "note": "오픈소스 의복 CAD",
+        "title": "오픈소스 SCAD",
+        "status": "active",
+        "children": []
+      },
+      {
+        "id": "nffg4ou5",
+        "kind": "subgroup",
+        "note": "",
+        "title": "이미지 분석",
+        "status": "active",
+        "children": [
+          {
+            "id": "nc593kj6",
+            "kind": "app",
+            "note": "광학현미경 입자 분산도 정량화(정적 kNN 에너지). C++Builder(Baraff 클로스심) 포팅",
+            "title": "cfmsDispersity (2027?)",
+            "status": "idea",
+            "children": []
+          },
+          {
+            "id": "nuzx6yz7",
+            "kind": "app",
+            "note": "SEM 섬유 영상 정량화(반지름·배향·기공) + metaball 3D 재구성.",
+            "title": "TSE_SEM (2027?)",
+            "status": "idea",
+            "children": []
+          },
+          {
+            "id": "n1jeala5",
+            "kind": "app",
+            "note": "",
+            "title": "Tomo_Shell2026-dev",
+            "status": "idea",
+            "children": []
+          }
+        ],
+        "collapsed": false
+      },
+      {
+        "id": "ny0tqz74",
+        "kind": "web",
+        "note": "미분가능 SFTF 손실항 + GNN + 경사기반 빌드방향 최적화. TOMO 교차검증.",
+        "title": "SFTFsoft",
+        "status": "done",
+        "children": [
+          {
+            "id": "n8q2k963",
+            "kind": "app",
+            "note": "",
+            "title": "ThermalChip",
+            "status": "idea",
+            "children": []
+          },
+          {
+            "id": "nd8ctbq4",
+            "kind": "app",
+            "note": "",
+            "title": "PDNElectric",
+            "status": "idea",
+            "children": []
+          },
+          {
+            "id": "cadsuite",
+            "kind": "web",
+            "note": "2D 패턴 봉제대응 자동인식(휴리스틱→GNN). CAD/Drape에 병합 예정.",
+            "title": "SFTFsoft_Sewing",
+            "status": "idea",
+            "children": [
+              {
+                "id": "cfmscad",
+                "kind": "infra",
+                "note": "3D 의복 CAD 에디터 (UI/패턴).",
+                "title": "cfmsCAD (novelty X)",
+                "status": "infra",
+                "children": []
+              },
+              {
+                "id": "cfmsdrape",
+                "kind": "infra",
+                "note": "암시적 옷감 드레이프 솔버(DLL). SCAD/GarmentCode 입력, 인체 충돌·자기충돌.",
+                "title": "cfmsDrape (novelty X)",
+                "status": "infra",
+                "children": []
+              }
+            ]
+          }
+        ],
+        "collapsed": false
+      }
+    ],
+    "collapsed": false
+  },
+  "links": [],
+  "title": "CFMS 프로젝트 관계도 2026",
+  "showRel": true,
+  "version": 1
+}

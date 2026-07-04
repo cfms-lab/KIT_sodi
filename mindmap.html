@@ -20,6 +20,8 @@
   .tools{display:none;gap:6px;align-items:center;flex-wrap:wrap}
   .btn{border:1px solid var(--line);background:#fff;color:#334155;border-radius:7px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer}
   .btn:hover{background:#f1f5f9}
+  .btn:disabled{opacity:.35;cursor:default}
+  .btn:disabled:hover{background:#fff}
   .btn.p{background:var(--g);color:#fff;border-color:var(--g)} .btn.p:hover{background:var(--g2)}
   .btn.sm{padding:4px 8px;font-size:11px}
   .search{padding:6px 9px;border:1px solid var(--line);border-radius:7px;font-size:12px;width:150px}
@@ -37,6 +39,14 @@
   .rel{fill:none;stroke:#c77;stroke-width:1.4px;stroke-dasharray:5 4}
   .rel-lbl{font-size:10px;fill:#a55}
   .toggle{cursor:pointer}
+  .node.droptarget rect.box{stroke:#e65100;stroke-width:3.5px}
+  .node.dragging{opacity:.35}
+  #inlineEdit{position:absolute;display:none;z-index:20;border:2px solid var(--g);border-radius:8px;
+    padding:0 9px;font-weight:600;font-family:inherit;color:#1f2937;background:#fff;
+    box-shadow:0 4px 14px rgba(15,23,42,.2);outline:none}
+  #dragGhost{position:fixed;display:none;z-index:60;pointer-events:none;background:#fff;
+    border:2px solid var(--g);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:600;
+    color:#1b5e20;box-shadow:0 6px 16px rgba(0,0,0,.25);opacity:.92;white-space:nowrap}
   .panel{width:312px;min-width:312px;background:var(--panel);border-left:1px solid var(--line);
     padding:14px;overflow:auto;display:flex;flex-direction:column;gap:12px}
   .panel h3{margin:0;font-size:13px;color:#0f172a}
@@ -76,6 +86,8 @@
     <button class="btn sm" onclick="expandAll(false)">－접기</button>
     <button class="btn sm" id="relBtn" onclick="toggleRel()">관계선 ✓</button>
     <button class="btn sm" onclick="fitView()">맞춤</button>
+    <button class="btn sm" id="undoBtn" onclick="undo()" title="실행취소 (Ctrl+Z)" disabled>↶</button>
+    <button class="btn sm" id="redoBtn" onclick="redo()" title="다시실행 (Ctrl+Y)" disabled>↷</button>
     <button class="btn p sm" onclick="saveDoc(false)">저장</button>
     <button class="btn sm" onclick="exportJSON()">백업(JSON)</button>
     <button class="btn sm" onclick="document.getElementById('imp').click()">복원</button>
@@ -105,10 +117,12 @@
 <div class="wrap" id="wrap">
   <div class="canvas" id="canvas">
     <svg id="svg"><g id="viewport"></g></svg>
+    <input id="inlineEdit" autocomplete="off" spellcheck="false">
   </div>
   <aside class="panel">
     <h3>노드 편집</h3>
-    <div id="editArea"><p class="muted">노드를 클릭해 선택하세요. 빈 곳 드래그=이동, 휠=확대/축소.</p></div>
+    <div id="editArea"><p class="muted">노드를 클릭해 선택하세요. 빈 곳 드래그=화면 이동, 휠=확대/축소.<br>
+      노드를 <b>드래그해 다른 노드에 놓으면</b> 그 노드의 자식으로 이동합니다.</p></div>
 
     <div class="sec">
       <h3>관계선 (cross-link)</h3>
@@ -129,10 +143,22 @@
         <br>백업이 필요하면 <b>백업(JSON)</b>으로 내려받고, <b>복원</b>으로 되돌릴 수 있습니다.
       </div>
     </div>
+
+    <div class="sec">
+      <h3>단축키</h3>
+      <div class="help">
+        <b>Tab</b> 자식 추가 · <b>Enter</b> 형제 추가 · <b>Del</b> 삭제<br>
+        <b>F2</b>/더블클릭 이름 바로 변경 · <b>Space</b> 접기/펴기<br>
+        <b>←→↑↓</b> 노드 이동(선택) · <b>Ctrl+↑/↓</b> 순서 변경<br>
+        <b>Ctrl+Z / Ctrl+Y</b> 실행취소 / 다시실행<br>
+        노드 <b>드래그&드롭</b> = 다른 노드의 자식으로 이동
+      </div>
+    </div>
   </aside>
 </div>
 
 <div class="toast" id="toast"></div>
+<div id="dragGhost"></div>
 
 <script>
 /* ====================== 기본 데이터 (첫 실행 시드) ====================== */
@@ -163,6 +189,17 @@ function moveNode(root, id, dir){
   const i=par.children.findIndex(c=>c.id===id); const j=i+dir;
   if(j<0||j>=par.children.length) return false;
   const t=par.children[i]; par.children[i]=par.children[j]; par.children[j]=t; return true;
+}
+function reparentNode(root, id, newParentId){
+  if(id===newParentId || id===root.id) return false;
+  const node=findNode(root, id); if(!node) return false;
+  if(findNode(node, newParentId)) return false;            // 자기 하위로는 불가 (사이클 방지)
+  const np=findNode(root, newParentId); if(!np) return false;
+  const par=findParent(root, id); if(!par || par.id===newParentId) return false;
+  const i=par.children.findIndex(c=>c.id===id); if(i<0) return false;
+  par.children.splice(i,1);
+  (np.children||(np.children=[])).push(node); np.collapsed=false;
+  return true;
 }
 function layout(root, opt){
   opt=opt||{}; const xGap=opt.xGap||255, yGap=opt.yGap||44, nodeW=opt.nodeW||196, nodeH=opt.nodeH||34;
@@ -237,7 +274,33 @@ const KIND={
 };
 const STATUS={active:'',stub:'스텁',infra:'인프라',idea:'아이디어',done:'완료'};
 let DATA=JSON.parse(JSON.stringify(DEFAULT_DATA));
-let sel=null, view={tx:60,ty:30,s:1}, showRel=true;
+let sel=null, view={tx:60,ty:30,s:1}, showRel=true, LAY=null;
+
+/* ====================== 실행취소 / 다시실행 (undo/redo) ====================== */
+const HMAX=100;
+let UNDO=[], REDO=[], lastPush={tag:null,t:0};
+function pushHistory(tag){
+  const now=Date.now();
+  if(tag && lastPush.tag===tag && now-lastPush.t<900){ lastPush.t=now; return; }  // 타이핑 버스트 병합
+  UNDO.push(JSON.stringify(DATA)); if(UNDO.length>HMAX) UNDO.shift();
+  REDO.length=0; lastPush={tag:tag||null,t:now}; updateHistBtns();
+}
+function restoreSnapshot(json){
+  DATA=JSON.parse(json);
+  showRel=DATA.showRel!==false;
+  const rb=document.getElementById('relBtn'); if(rb) rb.textContent='관계선 '+(showRel?'✓':'✕');
+  if(sel && !findNode(DATA.root, sel)) sel=null;
+  lastPush={tag:null,t:0};
+  scheduleSave(); render(); renderEdit(); updateHistBtns();
+}
+function undo(){ if(!UNDO.length) return toast('되돌릴 내용이 없습니다.');
+  REDO.push(JSON.stringify(DATA)); restoreSnapshot(UNDO.pop()); }
+function redo(){ if(!REDO.length) return toast('다시 실행할 내용이 없습니다.');
+  UNDO.push(JSON.stringify(DATA)); restoreSnapshot(REDO.pop()); }
+function updateHistBtns(){
+  const u=document.getElementById('undoBtn'), r=document.getElementById('redoBtn');
+  if(u) u.disabled=!UNDO.length; if(r) r.disabled=!REDO.length;
+}
 
 function esc(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function trunc(s,n){s=s||'';return s.length>n?s.slice(0,n-1)+'…':s;}
@@ -245,6 +308,7 @@ function applyView(){const v=document.getElementById('viewport');if(v)v.setAttri
 
 function render(){
   const lay=layout(DATA.root), vp=document.getElementById('viewport');
+  LAY=lay;
   const pos={}; lay.placed.forEach(p=>pos[p.id]=p);
   const q=document.getElementById('search').value.trim().toLowerCase();
   let h='';
@@ -319,6 +383,7 @@ function renderEdit(){
 }
 function commitEdit(){
   const n=findNode(DATA.root, sel); if(!n)return;
+  pushHistory('edit:'+sel);
   n.title=document.getElementById('fTitle').value;
   n.kind=document.getElementById('fKind').value;
   n.status=document.getElementById('fStatus').value;
@@ -326,17 +391,25 @@ function commitEdit(){
   n.note=document.getElementById('fNote').value;
   scheduleSave(); render();
 }
-function addNodeRel(how){
+function addNodeRel(how, inline){
   if(!sel)return;
+  pushHistory();
   const node={id:uid(),title:'새 노드',kind:'app',status:'idea',children:[]};
   if(how==='child') addChild(DATA.root, sel, node);
   else { if(sel==='root') addChild(DATA.root,'root',node); else addSibling(DATA.root, sel, node); }
   scheduleSave(); selectNode(node.id);
+  if(inline) openInlineEdit(node.id);
 }
-function mv(d){ if(moveNode(DATA.root, sel, d)){ scheduleSave(); render(); } }
+function mv(d){
+  const par=findParent(DATA.root, sel); if(!par) return;
+  const i=par.children.findIndex(c=>c.id===sel);
+  if(i+d<0 || i+d>=par.children.length) return;
+  pushHistory(); moveNode(DATA.root, sel, d); scheduleSave(); render();
+}
 function del(){
   if(!sel||sel==='root') return toast('루트는 삭제할 수 없습니다.');
-  if(!confirm('이 노드와 하위 노드를 삭제할까요?')) return;
+  if(!confirm('이 노드와 하위 노드를 삭제할까요? (Ctrl+Z로 되돌릴 수 있습니다)')) return;
+  pushHistory();
   const ids=new Set(); const n=findNode(DATA.root,sel); if(n) walk(n,x=>ids.add(x.id));
   deleteNode(DATA.root, sel);
   DATA.links=(DATA.links||[]).filter(l=>!ids.has(l.from)&&!ids.has(l.to));
@@ -355,6 +428,7 @@ function addLink(){
   const label=document.getElementById('linkLbl').value.trim();
   DATA.links=DATA.links||[];
   if(DATA.links.some(l=>l.from===sel&&l.to===to)) return toast('이미 있는 관계입니다.');
+  pushHistory();
   DATA.links.push({from:sel,to,label}); document.getElementById('linkLbl').value='';
   scheduleSave(); render(); toast('관계 추가됨');
 }
@@ -365,7 +439,7 @@ function renderLinksList(){
     `<div class="li"><span>${esc(name(l.from))} → ${esc(name(l.to))}${l.label?' · '+esc(l.label):''}</span>`+
     `<button class="btn sm" onclick="delLink(${i})">×</button></div>`).join('')||'<span class="muted">관계 없음</span>';
 }
-function delLink(i){ DATA.links.splice(i,1); scheduleSave(); render(); }
+function delLink(i){ pushHistory(); DATA.links.splice(i,1); scheduleSave(); render(); }
 
 /* ====================== 보기 ====================== */
 function expandAll(open){ walk(DATA.root, n=>{ if((n.children||[]).length) n.collapsed=!open; }); scheduleSave(); render(); }
@@ -412,6 +486,7 @@ function importJSON(input){
   const f=input.files[0]; if(!f)return; const r=new FileReader();
   r.onload=()=>{ try{ const d=JSON.parse(r.result); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
     if(!confirm('백업으로 현재 클라우드 관계도를 덮어쓸까요?'))return;
+    pushHistory();
     DATA=d; showRel=DATA.showRel!==false; sel=null; render(); renderEdit(); saveDoc(false);
   }catch(e){ toast('JSON 파싱 실패'); } };
   r.readAsText(f); input.value='';
@@ -446,20 +521,161 @@ function renderAuthbar(){
 function showApp(){ document.getElementById('gate').style.display='none'; document.getElementById('wrap').style.display='flex'; document.getElementById('tools').style.display='flex'; }
 function showGate(){ document.getElementById('wrap').style.display='none'; document.getElementById('tools').style.display='none'; document.getElementById('gate').style.display='flex'; document.getElementById('banner').style.display='none'; }
 
-/* ====================== 캔버스 상호작용 ====================== */
+/* ====================== 인라인 이름변경 (더블클릭 / F2) ====================== */
+let inlineTarget=null;
+function openInlineEdit(id){
+  const n=findNode(DATA.root, id); if(!n) return;
+  if(!LAY) render();
+  const p=LAY.placed.find(x=>x.id===id); if(!p) return;
+  const ed=document.getElementById('inlineEdit');
+  inlineTarget=id;
+  ed.style.left=(view.tx+p.x*view.s)+'px';
+  ed.style.top =(view.ty+p.y*view.s)+'px';
+  ed.style.width =Math.max(120, LAY.nodeW*view.s)+'px';
+  ed.style.height=Math.max(24, LAY.nodeH*view.s)+'px';
+  ed.style.fontSize=Math.max(11, 12.5*view.s)+'px';
+  ed.value=n.title||'';
+  ed.style.display='block'; ed.focus(); ed.select();
+}
+function closeInlineEdit(commit){
+  const ed=document.getElementById('inlineEdit');
+  if(ed.style.display!=='block'){ inlineTarget=null; return; }
+  const id=inlineTarget; inlineTarget=null; ed.style.display='none';
+  if(commit && id){
+    const n=findNode(DATA.root, id);
+    if(n && ed.value.trim() && ed.value!==n.title){
+      pushHistory('edit:'+id); n.title=ed.value; scheduleSave();
+    }
+  }
+  render(); renderEdit();
+}
+function bindInline(){
+  const ed=document.getElementById('inlineEdit');
+  ed.addEventListener('keydown', e=>{
+    e.stopPropagation();
+    if(e.key==='Enter'){ e.preventDefault(); closeInlineEdit(true); }
+    else if(e.key==='Escape'){ e.preventDefault(); closeInlineEdit(false); }
+  });
+  ed.addEventListener('blur', ()=>closeInlineEdit(true));
+}
+
+/* ====================== 키보드 단축키 ====================== */
+function isTyping(){
+  const a=document.activeElement;
+  return a && (a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.tagName==='SELECT'||a.isContentEditable);
+}
+function bindKeys(){
+  window.addEventListener('keydown', e=>{
+    if(document.getElementById('wrap').style.display!=='flex') return;   // 로그인 전
+    if(isTyping()) return;                                               // 패널/검색 입력 중
+    const a=document.activeElement, k=e.key;
+    if(a && a.tagName==='BUTTON' && (k==='Enter'||k===' ')) return;      // 버튼 기본동작 존중
+    const ctrl=e.ctrlKey||e.metaKey;
+    if(ctrl && !e.shiftKey && k.toLowerCase()==='z'){ e.preventDefault(); undo(); return; }
+    if((ctrl && k.toLowerCase()==='y')||(ctrl && e.shiftKey && k.toLowerCase()==='z')){ e.preventDefault(); redo(); return; }
+    if(!sel){ if(k==='Tab'){ e.preventDefault(); selectNode('root'); } return; }
+    const n=findNode(DATA.root, sel); if(!n){ sel=null; return; }
+    if(k==='Tab'){ e.preventDefault(); addNodeRel('child', true); }
+    else if(k==='Enter'){ e.preventDefault(); addNodeRel('sib', true); }
+    else if(k==='Delete'||k==='Backspace'){ e.preventDefault(); del(); }
+    else if(k==='F2'){ e.preventDefault(); openInlineEdit(sel); }
+    else if(k==='Escape'){ sel=null; render(); renderEdit(); }
+    else if(k===' '){ e.preventDefault(); if((n.children||[]).length){ n.collapsed=!n.collapsed; scheduleSave(); render(); } }
+    else if(k==='ArrowLeft'){ e.preventDefault(); const p=findParent(DATA.root, sel); if(p) selectNode(p.id); }
+    else if(k==='ArrowRight'){ e.preventDefault();
+      if((n.children||[]).length){ if(n.collapsed){ n.collapsed=false; scheduleSave(); } selectNode(n.children[0].id); } }
+    else if(k==='ArrowUp'||k==='ArrowDown'){ e.preventDefault();
+      const d=(k==='ArrowUp')?-1:1;
+      if(ctrl){ mv(d); return; }                                         // Ctrl+↑/↓ = 형제간 순서이동
+      const p=findParent(DATA.root, sel); if(!p) return;
+      const i=p.children.findIndex(c=>c.id===sel), j=i+d;
+      if(j>=0 && j<p.children.length) selectNode(p.children[j].id);
+    }
+  });
+}
+
+/* ====================== 캔버스 상호작용 (선택/팬/줌/드래그 재배치) ====================== */
 function bindCanvas(){
   const cv=document.getElementById('canvas'), svg=document.getElementById('svg');
+  let lastClick={id:null,t:0};   // render()가 DOM을 재생성해 네이티브 dblclick이 안 오므로 직접 감지
   svg.addEventListener('click', e=>{
     const g=e.target.closest('[data-act]'); if(!g)return;
     const id=g.getAttribute('data-id'), act=g.getAttribute('data-act');
     if(act==='toggle'){ const n=findNode(DATA.root,id); n.collapsed=!n.collapsed; scheduleSave(); render(); }
-    else if(act==='sel'){ selectNode(id); }
+    else if(act==='sel'){
+      const now=Date.now(), isDbl=(lastClick.id===id && now-lastClick.t<400);
+      lastClick={id,t:now};
+      if(sel!==id) selectNode(id);
+      if(isDbl) openInlineEdit(id);
+    }
   });
-  let drag=null;
-  cv.addEventListener('mousedown', e=>{ if(e.target.closest('[data-act]'))return; drag={x:e.clientX,y:e.clientY,tx:view.tx,ty:view.ty}; cv.classList.add('drag'); });
-  window.addEventListener('mousemove', e=>{ if(!drag)return; view.tx=drag.tx+(e.clientX-drag.x); view.ty=drag.ty+(e.clientY-drag.y); applyView(); });
-  window.addEventListener('mouseup', ()=>{ drag=null; cv.classList.remove('drag'); });
+
+  let drag=null, ndrag=null;   // drag=캔버스 팬, ndrag=노드 드래그(부모 변경)
+  function clearDropHighlight(){ document.querySelectorAll('.node.droptarget').forEach(el=>el.classList.remove('droptarget')); }
+  function dropTargetAt(e){
+    const el=document.elementFromPoint(e.clientX, e.clientY);
+    const g=el && el.closest ? el.closest('.node[data-id]') : null;
+    if(!g) return null;
+    const id=g.getAttribute('data-id');
+    if(id===ndrag.id) return null;
+    const dragged=findNode(DATA.root, ndrag.id);
+    if(dragged && findNode(dragged, id)) return null;                    // 자기 하위 금지
+    const par=findParent(DATA.root, ndrag.id);
+    if(par && par.id===id) return null;                                  // 이미 그 부모의 자식
+    return {id, el:g};
+  }
+
+  cv.addEventListener('mousedown', e=>{
+    if(e.button!==0) return;
+    const g=e.target.closest('[data-act="sel"]');
+    if(g){
+      const id=g.getAttribute('data-id');
+      if(id!=='root') ndrag={id, x:e.clientX, y:e.clientY, active:false, over:null};
+      return;
+    }
+    if(e.target.closest('[data-act]')) return;                            // 접기/펴기 토글
+    closeInlineEdit(true);
+    drag={x:e.clientX,y:e.clientY,tx:view.tx,ty:view.ty}; cv.classList.add('drag');
+  });
+  window.addEventListener('mousemove', e=>{
+    if(ndrag){
+      if(!ndrag.active && Math.hypot(e.clientX-ndrag.x, e.clientY-ndrag.y)>6){
+        ndrag.active=true; closeInlineEdit(true);
+        const n=findNode(DATA.root, ndrag.id);
+        const gh=document.getElementById('dragGhost');
+        gh.textContent='↳ '+trunc(n?n.title:'', 28); gh.style.display='block';
+        const el=document.querySelector(`.node[data-id="${ndrag.id}"]`); if(el) el.classList.add('dragging');
+      }
+      if(ndrag.active){
+        const gh=document.getElementById('dragGhost');
+        gh.style.left=(e.clientX+12)+'px'; gh.style.top=(e.clientY+10)+'px';
+        clearDropHighlight();
+        const t=dropTargetAt(e);
+        if(t) t.el.classList.add('droptarget');
+        ndrag.over=t?t.id:null;
+      }
+      return;
+    }
+    if(!drag)return; view.tx=drag.tx+(e.clientX-drag.x); view.ty=drag.ty+(e.clientY-drag.y); applyView();
+  });
+  window.addEventListener('mouseup', ()=>{
+    if(ndrag){
+      const was=ndrag; ndrag=null;
+      document.getElementById('dragGhost').style.display='none';
+      clearDropHighlight();
+      document.querySelectorAll('.node.dragging').forEach(el=>el.classList.remove('dragging'));
+      if(was.active && was.over){
+        pushHistory();
+        if(reparentNode(DATA.root, was.id, was.over)){
+          scheduleSave(); selectNode(was.id); toast('노드를 이동했습니다. (Ctrl+Z로 취소)');
+        } else { UNDO.pop(); updateHistBtns(); }
+      }
+      return;
+    }
+    drag=null; cv.classList.remove('drag');
+  });
   cv.addEventListener('wheel', e=>{ e.preventDefault();
+    closeInlineEdit(true);
     const r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
     const f=e.deltaY<0?1.1:1/1.1, ns=Math.max(.2,Math.min(2.5,view.s*f));
     view.tx=mx-(mx-view.tx)*(ns/view.s); view.ty=my-(my-view.ty)*(ns/view.s); view.s=ns; applyView();
@@ -474,7 +690,7 @@ function bindCanvas(){
 
 /* ====================== 부팅 ====================== */
 async function boot(){
-  bindCanvas(); renderAuthbar();
+  bindCanvas(); bindInline(); bindKeys(); renderAuthbar();
   if(isLoggedIn()){ showApp(); await loadDoc(); }
   else { showGate(); }
 }
