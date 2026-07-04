@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CFMS 프로젝트 관계도 (Mindmap · Cloud)</title>
 <style>
-  :root{--g:#2e7d32;--g2:#1b5e20;--line:#d6dde6;--panel:#fff;--bg:#eef2f7;}
+  :root{--g:#2e7d32;--g2:#1b5e20;--line:#d6dde6;--panel:#fff;--bg:#f4f3f0;}
   *{box-sizing:border-box}
   html,body{height:100%}
   body{margin:0;font-family:"Segoe UI","Malgun Gothic",sans-serif;color:#1f2937;background:var(--bg);
@@ -27,17 +27,18 @@
   .search{padding:6px 9px;border:1px solid var(--line);border-radius:7px;font-size:12px;width:150px}
   .wrap{flex:1;display:none;min-height:0}
   .canvas{flex:1;position:relative;overflow:hidden;background:
-     radial-gradient(circle at 1px 1px,#dde5ee 1px,transparent 0) 0 0/22px 22px,var(--bg);cursor:grab}
+     radial-gradient(circle at 1px 1px,#e6e4dd 1px,transparent 0) 0 0/22px 22px,#fcfcfb;cursor:grab}
   .canvas.drag{cursor:grabbing}
   svg{width:100%;height:100%;display:block;user-select:none}
   .node rect{cursor:pointer}
   .node text{pointer-events:none}
-  .node.sel rect.box{stroke-width:3px}
-  .node.dim{opacity:.25}
-  .node.match rect.box{stroke:#e65100;stroke-width:3px}
-  .edge{fill:none;stroke:#b6c2cf;stroke-width:1.6px}
-  .rel{fill:none;stroke:#c77;stroke-width:1.4px;stroke-dasharray:5 4}
-  .rel-lbl{font-size:10px;fill:#a55}
+  .node.sel rect.box{stroke-width:3.5px}
+  .node.sel{filter:drop-shadow(0 3px 6px rgba(11,11,11,.18))}
+  .node.dim{opacity:.22}
+  .node.match rect.box{stroke:#eb6834;stroke-width:3.5px}
+  .edge{fill:none;stroke:#c3c2b7;stroke-width:1.6px}
+  .rel{fill:none;stroke:#898781;stroke-width:1.5px;stroke-dasharray:5 4}
+  .rel-lbl{font-size:10px;fill:#52514e}
   .toggle{cursor:pointer}
   .node.droptarget rect.box{stroke:#e65100;stroke-width:3.5px}
   .node.dragging{opacity:.35}
@@ -202,7 +203,7 @@ function reparentNode(root, id, newParentId){
   return true;
 }
 function layout(root, opt){
-  opt=opt||{}; const xGap=opt.xGap||255, yGap=opt.yGap||44, nodeW=opt.nodeW||196, nodeH=opt.nodeH||34;
+  opt=opt||{}; const xGap=opt.xGap||278, yGap=opt.yGap||56, nodeW=opt.nodeW||218, nodeH=opt.nodeH||46;
   const placed=[]; let leaf=0;
   (function rec(node, depth){
     const kids = node.collapsed ? [] : (node.children||[]);
@@ -262,16 +263,21 @@ async function api(path,opts={}){
   const txt=await res.text(); return txt?JSON.parse(txt):null;
 }
 
-/* ====================== 렌더 ====================== */
-const KIND={
-  root:{fill:'#fff3e0',stroke:'#e65100',text:'#e65100',label:'루트'},
-  group:{fill:'#e8f5e9',stroke:'#1b5e20',text:'#1b5e20',label:'워크스페이스'},
-  subgroup:{fill:'#eef7ee',stroke:'#2e7d32',text:'#2e7d32',label:'그룹'},
-  core:{fill:'#e0f2f1',stroke:'#00695c',text:'#004d40',label:'코어'},
-  app:{fill:'#e3f2fd',stroke:'#1565c0',text:'#0d47a1',label:'앱/연구'},
-  web:{fill:'#f3e5f5',stroke:'#6a1b9a',text:'#4a148c',label:'웹앱'},
-  infra:{fill:'#f0f0f0',stroke:'#9e9e9e',text:'#555',label:'인프라'}
-};
+/* ====================== 렌더 (DEPENDENCIES_map.png 디자인 언어) ====================== */
+const INK='#0b0b0b', INK2='#52514e', MUTED='#898781';
+function tintColor(c,a){ a=a||0.13;
+  const r=parseInt(c.slice(1,3),16), g=parseInt(c.slice(3,5),16), b=parseInt(c.slice(5,7),16);
+  const m=v=>Math.round(v*a+252*(1-a));
+  return 'rgb('+m(r)+','+m(g)+','+m(b)+')';
+}
+// 검증된 카테고리 팔레트(CVD-safe 순서): blue·aqua·yellow·green·violet·magenta
+const KIND_C={root:'#2a78d6',group:'#008300',subgroup:'#1baf7a',core:'#4a3aa7',
+              app:'#eda100',web:'#e87ba4',infra:'#898781'};
+const KIND_L={root:'루트',group:'워크스페이스',subgroup:'그룹',core:'코어',
+              app:'앱/연구',web:'웹앱',infra:'인프라'};
+const KIND={}; Object.keys(KIND_C).forEach(k=>{
+  KIND[k]={fill:tintColor(KIND_C[k]),stroke:KIND_C[k],text:INK,label:KIND_L[k]};
+});
 const STATUS={active:'',stub:'스텁',infra:'인프라',idea:'아이디어',done:'완료'};
 let DATA=JSON.parse(JSON.stringify(DEFAULT_DATA));
 let sel=null, view={tx:60,ty:30,s:1}, showRel=true, LAY=null;
@@ -327,20 +333,20 @@ function render(){
   lay.placed.forEach(p=>{
     const n=p.node, st=KIND[n.kind]||KIND.app;
     const dash=(n.status==='stub'||n.status==='idea')?'stroke-dasharray="6 4"':'';
-    const faded=(n.status==='stub'||n.status==='idea')?'opacity:.7':'';
     const isMatch=q&&((n.title||'').toLowerCase().includes(q)||(n.note||'').toLowerCase().includes(q));
     const dim=q&&!isMatch;
     const cls='node'+(n.id===sel?' sel':'')+(isMatch?' match':'')+(dim?' dim':'');
     const hasKids=(n.children||[]).length>0;
-    const stat=STATUS[n.status]?`<text x="${lay.nodeW-6}" y="22" text-anchor="end" font-size="9" fill="${st.text}" opacity=".7">${esc(STATUS[n.status])}</text>`:'';
-    h+=`<g class="${cls}" data-id="${n.id}" transform="translate(${p.x},${p.y})" style="${faded}">`;
-    h+=`<rect class="box" width="${lay.nodeW}" height="${lay.nodeH}" rx="9" fill="${st.fill}" stroke="${st.stroke}" stroke-width="2" ${dash} data-act="sel" data-id="${n.id}"/>`;
-    h+=`<text x="11" y="21" font-size="12.5" font-weight="600" fill="${st.text}">${esc(trunc(n.title,n.url?22:24))}</text>`;
-    if(n.url)h+=`<text x="${lay.nodeW-6}" y="13" text-anchor="end" font-size="10">🔗</text>`;
-    h+=stat;
+    const sub=[STATUS[n.status]||'', trunc(n.note||'',26)].filter(Boolean).join(' · ');
+    const titleY=sub?19:(lay.nodeH/2+4.5);
+    h+=`<g class="${cls}" data-id="${n.id}" transform="translate(${p.x},${p.y})">`;
+    h+=`<rect class="box" width="${lay.nodeW}" height="${lay.nodeH}" rx="10" fill="${st.fill}" stroke="${st.stroke}" stroke-width="2" ${dash} data-act="sel" data-id="${n.id}"/>`;
+    h+=`<text x="12" y="${titleY}" font-size="12.5" font-weight="700" fill="${INK}">${esc(trunc(n.title,n.url?23:25))}</text>`;
+    if(sub)h+=`<text x="12" y="${lay.nodeH-11}" font-size="10" fill="${INK2}">${esc(trunc(sub,32))}</text>`;
+    if(n.url)h+=`<text x="${lay.nodeW-7}" y="15" text-anchor="end" font-size="10">🔗</text>`;
     h+=`<title>${esc(n.title)}${n.note?'\n'+esc(n.note):''}${n.url?'\n'+esc(n.url):''}</title>`;
-    if(hasKids){ const tx=-9,ty=lay.nodeH/2;
-      h+=`<g class="toggle" data-act="toggle" data-id="${n.id}"><circle cx="${tx}" cy="${ty}" r="8" fill="#fff" stroke="${st.stroke}" stroke-width="1.5"/>`+
+    if(hasKids){ const tx=-10,ty=lay.nodeH/2;
+      h+=`<g class="toggle" data-act="toggle" data-id="${n.id}"><circle cx="${tx}" cy="${ty}" r="8.5" fill="#fcfcfb" stroke="${st.stroke}" stroke-width="1.6"/>`+
          `<text x="${tx}" y="${ty+4}" text-anchor="middle" font-size="12" font-weight="700" fill="${st.stroke}">${n.collapsed?'+':'–'}</text></g>`;
     }
     h+=`</g>`;
