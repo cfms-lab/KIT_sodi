@@ -166,7 +166,7 @@
 
 <script>
 /* ====================== 버전 (배포 확인용) ====================== */
-const APP_VERSION='v2026-07-04b';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
+const APP_VERSION='v2026-07-04d';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
 
 /* ====================== 기본 데이터 (첫 실행 시드) ====================== */
 const DEFAULT_DATA = /*DATA_START*/{"version":1,"title":"CFMS 프로젝트 관계도 2026","showRel":true,"root":{"id":"root","title":"CFMS 연구실 2026","kind":"root","note":"두 워크스페이스의 세부 프로젝트 관계도","children":[{"id":"sftf","title":"__SFTF_Projects(2026)","kind":"group","note":"3D 프린팅 Support Flow Tensor Field 연구군 (D:\\__SFTF_Projects(2026))","children":[{"id":"tomo_sftf","title":"Tomo_SFTF_dev","kind":"core","status":"active","note":"SFTF 본체: 빌드방향 후보 생성(coarse-to-refine) + TOMO_CPU/GPU 엔진(DLL). 표준 템플릿의 기원."},{"id":"clustering","title":"SFTF_Clustering_dev","kind":"app","status":"active","note":"면별 SFTF 특징 → 출판지향 메쉬 분할(clustering). 한국섬유공학회지 투고."},{"id":"derivative","title":"SFTF_Derivative_dev","kind":"app","status":"active","note":"미분가능 SFTF 손실항 + GNN + 경사기반 빌드방향 최적화. TOMO 교차검증."},{"id":"composite","title":"SFTF_Composite_dev","kind":"app","status":"stub","note":"복합재 적용 (신규 스캐폴드)."},{"id":"injmold","title":"SFTF_InjMold_dev","kind":"app","status":"stub","note":"사출성형 적용 (신규 스캐폴드)."}]},{"id":"vscode","title":"__VSCode_Projects","kind":"group","note":"의복 CAD·영상계측·랩 웹앱·인프라 (D:\\__VSCode_Projects)","children":[{"id":"cadsuite","title":"의복 CAD 스위트","kind":"subgroup","note":"Clo3D 오픈소스 대안","children":[{"id":"cfmscad","title":"cfmsCAD2026_dev","kind":"app","status":"active","note":"3D 의복 CAD 에디터 (UI/패턴)."},{"id":"cfmsdrape","title":"cfmsDrape2026_dev","kind":"app","status":"active","note":"암시적 옷감 드레이프 솔버(DLL). SCAD/GarmentCode 입력, 인체 충돌·자기충돌."},{"id":"cfmssew","title":"cfmsSew2026_dev","kind":"app","status":"active","note":"2D 패턴 봉제대응 자동인식(휴리스틱→GNN). CAD/Drape에 병합 예정."},{"id":"cfmsshared","title":"cfmsShared2026_dev","kind":"infra","status":"infra","note":"CAD↔Drape 인터페이스 단일진실(contract/messages) 공유 git 채널."}]},{"id":"measure","title":"영상 계측","kind":"subgroup","children":[{"id":"dispersity","title":"cfmsDispersity2026_Dev","kind":"app","status":"active","note":"광학현미경 입자 분산도 정량화(정적 kNN 에너지). C++Builder(Baraff 클로스심) 포팅."},{"id":"sem","title":"TSE_SEM2026_dev","kind":"app","status":"active","note":"SEM 섬유 영상 정량화(반지름·배향·기공) + metaball 3D 재구성."}]},{"id":"webapps","title":"랩 웹앱 (cfms-lab/KIT_sodi · Supabase)","kind":"subgroup","children":[{"id":"upjuk","title":"논문관리 (upjuk)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/upjuk.html","note":"업적 리스트 CRUD + PDF. draft는 RLS로 비로그인 숨김."},{"id":"timetable","title":"수업시간표 (TimeTable)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/timetable.html","note":"학기별 시간표 드래그 편성."},{"id":"jobgis","title":"취업현황 (JobGIS)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/jobgis.html","note":"졸업생 취업처 지도."},{"id":"mindmap","title":"이 관계도 (Mindmap)","kind":"web","status":"active","note":"프로젝트 관계도 (이 페이지, 로그인 전용)."}]},{"id":"infra","title":"인프라/템플릿","kind":"subgroup","children":[{"id":"template","title":"__vscode_AI_template","kind":"infra","status":"infra","note":"표준 프로젝트 템플릿(코드+논문, uv/xelatex/훅). 모든 *_dev의 기반. Tomo_SFTF에서 기원."},{"id":"hooks","title":"__클로드코드_훅설정","kind":"infra","status":"infra","note":"Claude Code 전역 훅 설정."}]}]}]},"links":[{"from":"tomo_sftf","to":"clustering","label":"코어 분리"},{"from":"tomo_sftf","to":"derivative","label":"코어 재사용"},{"from":"tomo_sftf","to":"composite","label":"파생"},{"from":"tomo_sftf","to":"injmold","label":"파생"},{"from":"clustering","to":"derivative","label":"코드 재사용"},{"from":"tomo_sftf","to":"template","label":"템플릿 기원"},{"from":"cfmsshared","to":"cfmscad","label":"contract"},{"from":"cfmsshared","to":"cfmsdrape","label":"contract"},{"from":"cfmssew","to":"cfmscad","label":"병합 예정"},{"from":"cfmssew","to":"cfmsdrape","label":"병합 예정"},{"from":"derivative","to":"cfmsdrape","label":"드레이프 응용 연계"},{"from":"dispersity","to":"cfmsdrape","label":"클로스심 계보"}]}/*DATA_END*/;
@@ -306,11 +306,11 @@ function tintColor(c,a){ a=a||0.13;
 const KIND_C={root:'#2a78d6',group:'#008300',subgroup:'#1baf7a',core:'#4a3aa7',
               app:'#eda100',web:'#e87ba4',infra:'#898781'};
 const KIND_L={root:'루트',group:'워크스페이스',subgroup:'그룹',core:'코어',
-              app:'앱/연구',web:'웹앱',infra:'인프라'};
+              app:'국내저널',web:'SCIE',infra:'인프라'};
 const KIND={}; Object.keys(KIND_C).forEach(k=>{
   KIND[k]={fill:tintColor(KIND_C[k]),stroke:KIND_C[k],text:INK,label:KIND_L[k]};
 });
-const STATUS={active:'',stub:'스텁',infra:'인프라',idea:'아이디어',done:'완료'};
+const STATUS={published:'published',inprint:'in print',accepted:'accepted',submitted:'submitted',draft:'draft'};
 let DATA=JSON.parse(JSON.stringify(DEFAULT_DATA));
 let sel=null, view={tx:60,ty:30,s:1}, showRel=true, LAY=null;
 
@@ -357,9 +357,15 @@ function render(){
       if(vert){ // 세로: ㄴ자 커넥터 (부모 하단에서 내려와 자식 왼쪽으로)
         const bx=p.x+18, by=p.y+lay.nodeH, cy=c.y+lay.nodeH/2, r=7;
         h+=`<path class="edge" d="M${bx},${by} L${bx},${cy-r} Q${bx},${cy} ${bx+r},${cy} L${c.x},${cy}"/>`;
-      } else {
-        const x1=p.x+lay.nodeW,y1=p.y+lay.nodeH/2,x2=c.x,y2=c.y+lay.nodeH/2,mx=(x1+x2)/2;
-        h+=`<path class="edge" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`;
+      } else { // 가로: 직각(엘보) 커넥터 — 부모 오른쪽 → 중간에서 수직 → 자식 왼쪽
+        const x1=p.x+lay.nodeW, y1=p.y+lay.nodeH/2, x2=c.x, y2=c.y+lay.nodeH/2, mx=(x1+x2)/2;
+        if(Math.abs(y2-y1)<0.5){
+          h+=`<path class="edge" d="M${x1},${y1} L${x2},${y2}"/>`;
+        } else {
+          const d=y2>y1?1:-1, r=Math.min(7, Math.abs(y2-y1)/2, mx-x1, x2-mx);
+          h+=`<path class="edge" d="M${x1},${y1} L${mx-r},${y1} Q${mx},${y1} ${mx},${y1+r*d} `+
+             `L${mx},${y2-r*d} Q${mx},${y2} ${mx+r},${y2} L${x2},${y2}"/>`;
+        }
       }
     });
   });
@@ -370,7 +376,7 @@ function render(){
   });}
   lay.placed.forEach(p=>{
     const n=p.node, st=KIND[n.kind]||KIND.app;
-    const dash=(n.status==='stub'||n.status==='idea')?'stroke-dasharray="6 4"':'';
+    const dash=(n.status==='draft')?'stroke-dasharray="6 4"':'';
     const isMatch=q&&((n.title||'').toLowerCase().includes(q)||(n.note||'').toLowerCase().includes(q));
     const cls='node'+(n.id===sel?' sel':'')+(isMatch?' match':'');
     const hasKids=(n.children||[]).length>0;
@@ -393,7 +399,7 @@ function render(){
 function renderLegend(){
   document.getElementById('legend').innerHTML=Object.keys(KIND).map(k=>
     `<span class="lg"><i style="border-color:${KIND[k].stroke};background:${KIND[k].fill}"></i>${KIND[k].label}</span>`).join('')
-    +`<span class="lg"><i style="border-style:dashed;border-color:#999;background:#fff"></i>스텁/아이디어</span>`;
+    +`<span class="lg"><i style="border-style:dashed;border-color:#999;background:#fff"></i>draft(초안)</span>`;
 }
 
 /* ====================== 편집 패널 ====================== */
@@ -403,7 +409,9 @@ function renderEdit(){
   if(!sel){ area.innerHTML='<p class="muted">노드를 클릭해 선택하세요.</p>'; return; }
   const n=findNode(DATA.root, sel); if(!n){ sel=null; return renderEdit(); }
   const kinds=Object.keys(KIND).map(k=>`<option value="${k}" ${n.kind===k?'selected':''}>${KIND[k].label} (${k})</option>`).join('');
-  const stats=Object.keys(STATUS).map(s=>`<option value="${s}" ${(n.status||'active')===s?'selected':''}>${s}${STATUS[s]?' · '+STATUS[s]:''}</option>`).join('');
+  const known=STATUS.hasOwnProperty(n.status);
+  let stats=Object.keys(STATUS).map(s=>`<option value="${s}" ${n.status===s?'selected':''}>${esc(STATUS[s])}</option>`).join('');
+  if(!known) stats=`<option value="${esc(n.status||'')}" selected>${n.status?esc(n.status)+' (이전값)':'(미지정)'}</option>`+stats;
   area.innerHTML=`
     <label>제목<input id="fTitle" value="${esc(n.title)}"></label>
     <div class="row">
@@ -442,7 +450,7 @@ function commitEdit(){
 function addNodeRel(how, inline){
   if(!sel)return;
   pushHistory();
-  const node={id:uid(),title:'새 노드',kind:'app',status:'idea',children:[]};
+  const node={id:uid(),title:'새 노드',kind:'app',status:'draft',children:[]};
   if(how==='child') addChild(DATA.root, sel, node);
   else { if(sel==='root') addChild(DATA.root,'root',node); else addSibling(DATA.root, sel, node); }
   scheduleSave(); selectNode(node.id);

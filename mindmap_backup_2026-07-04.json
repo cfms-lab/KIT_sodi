@@ -1,0 +1,170 @@
+{
+  "root": {
+    "id": "root",
+    "dir": "v",
+    "kind": "infra",
+    "note": "논문 투고 일정",
+    "title": "CFMS 연구실 2026",
+    "status": "active",
+    "children": [
+      {
+        "id": "nffg4ou5",
+        "kind": "infra",
+        "note": "",
+        "title": "기타",
+        "status": "active",
+        "children": [
+          {
+            "id": "nc593kj6",
+            "kind": "app",
+            "note": "박명진/이선빈",
+            "title": "cfmsDispersity",
+            "status": "idea",
+            "children": []
+          },
+          {
+            "id": "nuzx6yz7",
+            "kind": "app",
+            "note": "박명진/이선빈",
+            "title": "TSE_SEM",
+            "status": "idea",
+            "children": []
+          },
+          {
+            "id": "nowmyrt1",
+            "kind": "app",
+            "note": "강지언",
+            "title": "Tomo_Shell2026의 draft2/3",
+            "status": "idea",
+            "children": []
+          }
+        ],
+        "collapsed": false
+      },
+      {
+        "id": "n1jeala5",
+        "dir": "v",
+        "kind": "infra",
+        "note": "",
+        "title": "Tomo_Shell2026-dev",
+        "status": "done",
+        "children": [
+          {
+            "id": "sftf",
+            "dir": "v",
+            "kind": "web",
+            "note": "",
+            "title": "SFTF (PiAM 투고 중)",
+            "status": "active",
+            "children": [
+              {
+                "id": "ny0tqz74",
+                "kind": "web",
+                "note": "",
+                "title": "SFTFsoft (26'가을)",
+                "status": "done",
+                "children": [
+                  {
+                    "id": "cadsuite",
+                    "dir": "v",
+                    "kind": "web",
+                    "note": "강지언?",
+                    "title": "SFTFsoft_Sewing (26'겨울)",
+                    "status": "idea",
+                    "children": [
+                      {
+                        "id": "cfmsdrape",
+                        "kind": "infra",
+                        "note": "",
+                        "title": "cfmsDrape/CAD (novelty X)",
+                        "status": "infra",
+                        "children": []
+                      }
+                    ],
+                    "collapsed": false
+                  }
+                ],
+                "collapsed": false
+              },
+              {
+                "id": "tomo_sftf",
+                "kind": "web",
+                "note": "강지언?",
+                "title": "SFTF_Cluster (26'가을)",
+                "status": "active",
+                "children": [
+                  {
+                    "id": "nxt5kwi1",
+                    "dir": "v",
+                    "kind": "app",
+                    "note": "박명진/이선빈",
+                    "title": "SFTF_Composite (27' 봄)",
+                    "status": "done",
+                    "children": [
+                      {
+                        "id": "n8t2x7d2",
+                        "kind": "app",
+                        "note": "",
+                        "title": "SFTF_InjMold (27'봄)",
+                        "status": "idea",
+                        "children": [],
+                        "collapsed": false
+                      },
+                      {
+                        "id": "n01wecm2",
+                        "dir": "v",
+                        "kind": "app",
+                        "note": "토목공학회지?",
+                        "title": "SewerPOC",
+                        "status": "idea",
+                        "children": [],
+                        "collapsed": false
+                      },
+                      {
+                        "id": "nd8ctbq4",
+                        "dir": "v",
+                        "kind": "app",
+                        "note": "",
+                        "title": "PDNElectric",
+                        "status": "idea",
+                        "children": [],
+                        "collapsed": false
+                      },
+                      {
+                        "id": "n8q2k963",
+                        "dir": "v",
+                        "kind": "app",
+                        "note": "",
+                        "title": "ThermalChip",
+                        "status": "idea",
+                        "children": [],
+                        "collapsed": false
+                      },
+                      {
+                        "id": "nca3mrq1",
+                        "kind": "app",
+                        "note": "",
+                        "title": "BatteryThermal",
+                        "status": "idea",
+                        "children": []
+                      }
+                    ],
+                    "collapsed": false
+                  }
+                ],
+                "collapsed": false
+              }
+            ],
+            "collapsed": false
+          }
+        ],
+        "collapsed": false
+      }
+    ],
+    "collapsed": false
+  },
+  "links": [],
+  "title": "CFMS 프로젝트 관계도 2026",
+  "showRel": true,
+  "version": 1
+}
