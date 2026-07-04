@@ -19,15 +19,15 @@
             "kind": "app",
             "note": "박명진/이선빈",
             "title": "cfmsDispersity",
-            "status": "idea",
+            "status": "draft",
             "children": []
           },
           {
             "id": "nuzx6yz7",
             "kind": "app",
             "note": "박명진/이선빈",
-            "title": "TSE_SEM",
-            "status": "idea",
+            "title": "cfmsSEM",
+            "status": "draft",
             "children": []
           },
           {
@@ -35,7 +35,7 @@
             "kind": "app",
             "note": "강지언",
             "title": "Tomo_Shell2026의 draft2/3",
-            "status": "idea",
+            "status": "draft",
             "children": []
           }
         ],
@@ -55,14 +55,14 @@
             "kind": "web",
             "note": "",
             "title": "SFTF (PiAM 투고 중)",
-            "status": "active",
+            "status": "submitted",
             "children": [
               {
                 "id": "ny0tqz74",
                 "kind": "web",
                 "note": "",
                 "title": "SFTFsoft (26'가을)",
-                "status": "done",
+                "status": "draft",
                 "children": [
                   {
                     "id": "cadsuite",
@@ -70,7 +70,7 @@
                     "kind": "web",
                     "note": "강지언?",
                     "title": "SFTFsoft_Sewing (26'겨울)",
-                    "status": "idea",
+                    "status": "draft",
                     "children": [
                       {
                         "id": "cfmsdrape",
@@ -91,22 +91,32 @@
                 "kind": "web",
                 "note": "강지언?",
                 "title": "SFTF_Cluster (26'가을)",
-                "status": "active",
+                "status": "draft",
                 "children": [
                   {
                     "id": "nxt5kwi1",
                     "dir": "v",
                     "kind": "app",
-                    "note": "박명진/이선빈",
+                    "note": "박명진/이선빈?",
                     "title": "SFTF_Composite (27' 봄)",
-                    "status": "done",
+                    "status": "draft",
+                    "children": [],
+                    "collapsed": false
+                  },
+                  {
+                    "id": "nex1irc1",
+                    "dir": "v",
+                    "kind": "infra",
+                    "note": "",
+                    "title": "공저자 구함",
+                    "status": "published",
                     "children": [
                       {
                         "id": "n8t2x7d2",
                         "kind": "app",
-                        "note": "",
-                        "title": "SFTF_InjMold (27'봄)",
-                        "status": "idea",
+                        "note": "서영진 교수님?",
+                        "title": "InjectionMold (27'봄)",
+                        "status": "draft",
                         "children": [],
                         "collapsed": false
                       },
@@ -114,9 +124,9 @@
                         "id": "n01wecm2",
                         "dir": "v",
                         "kind": "app",
-                        "note": "토목공학회지?",
+                        "note": "토목 고규현 교수님?",
                         "title": "SewerPOC",
-                        "status": "idea",
+                        "status": "draft",
                         "children": [],
                         "collapsed": false
                       },
@@ -124,9 +134,9 @@
                         "id": "nd8ctbq4",
                         "dir": "v",
                         "kind": "app",
-                        "note": "",
+                        "note": "천지민 교수님?",
                         "title": "PDNElectric",
-                        "status": "idea",
+                        "status": "draft",
                         "children": [],
                         "collapsed": false
                       },
@@ -134,18 +144,18 @@
                         "id": "n8q2k963",
                         "dir": "v",
                         "kind": "app",
-                        "note": "",
+                        "note": "천지민 교수님?",
                         "title": "ThermalChip",
-                        "status": "idea",
+                        "status": "draft",
                         "children": [],
                         "collapsed": false
                       },
                       {
                         "id": "nca3mrq1",
                         "kind": "app",
-                        "note": "",
+                        "note": "서영진 교수님?",
                         "title": "BatteryThermal",
-                        "status": "idea",
+                        "status": "draft",
                         "children": []
                       }
                     ],
