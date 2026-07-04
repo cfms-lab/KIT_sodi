@@ -34,14 +34,13 @@
   .node text{pointer-events:none}
   .node.sel rect.box{stroke-width:3.5px}
   .node.sel{filter:drop-shadow(0 3px 6px rgba(11,11,11,.18))}
-  .node.dim{opacity:.22}
   .node.match rect.box{stroke:#eb6834;stroke-width:3.5px}
   .edge{fill:none;stroke:#c3c2b7;stroke-width:1.6px}
   .rel{fill:none;stroke:#898781;stroke-width:1.5px;stroke-dasharray:5 4}
   .rel-lbl{font-size:10px;fill:#52514e}
   .toggle{cursor:pointer}
   .node.droptarget rect.box{stroke:#e65100;stroke-width:3.5px}
-  .node.dragging{opacity:.35}
+  .node.dragging rect.box{stroke-dasharray:6 3}
   #inlineEdit{position:absolute;display:none;z-index:20;border:2px solid var(--g);border-radius:8px;
     padding:0 9px;font-weight:600;font-family:inherit;color:#1f2937;background:#fff;
     box-shadow:0 4px 14px rgba(15,23,42,.2);outline:none}
@@ -367,8 +366,7 @@ function render(){
     const n=p.node, st=KIND[n.kind]||KIND.app;
     const dash=(n.status==='stub'||n.status==='idea')?'stroke-dasharray="6 4"':'';
     const isMatch=q&&((n.title||'').toLowerCase().includes(q)||(n.note||'').toLowerCase().includes(q));
-    const dim=q&&!isMatch;
-    const cls='node'+(n.id===sel?' sel':'')+(isMatch?' match':'')+(dim?' dim':'');
+    const cls='node'+(n.id===sel?' sel':'')+(isMatch?' match':'');
     const hasKids=(n.children||[]).length>0;
     const sub=[STATUS[n.status]||'', trunc(n.note||'',26)].filter(Boolean).join(' · ');
     const titleY=sub?19:(lay.nodeH/2+4.5);
@@ -693,7 +691,7 @@ function bindCanvas(){
   });
   window.addEventListener('mousemove', e=>{
     if(ndrag){
-      if(!ndrag.active && Math.hypot(e.clientX-ndrag.x, e.clientY-ndrag.y)>6){
+      if(!ndrag.active && Math.hypot(e.clientX-ndrag.x, e.clientY-ndrag.y)>10){
         ndrag.active=true; closeInlineEdit(true);
         const n=findNode(DATA.root, ndrag.id);
         const gh=document.getElementById('dragGhost');
