@@ -150,6 +150,7 @@
       <div class="help">
         <b>Tab</b> 자식 추가 · <b>Enter</b> 형제 추가 · <b>Del</b> 삭제<br>
         <b>F2</b>/더블클릭 이름 바로 변경 · <b>Space</b> 접기/펴기<br>
+        <b>D</b> 하위 배치 가로→/세로↓ 전환<br>
         <b>←→↑↓</b> 노드 이동(선택) · <b>Ctrl+↑/↓</b> 순서 변경<br>
         <b>Ctrl+Z / Ctrl+Y</b> 실행취소 / 다시실행<br>
         노드 <b>드래그&드롭</b> = 다른 노드의 자식으로 이동
@@ -203,18 +204,44 @@ function reparentNode(root, id, newParentId){
   return true;
 }
 function layout(root, opt){
-  opt=opt||{}; const xGap=opt.xGap||278, yGap=opt.yGap||56, nodeW=opt.nodeW||218, nodeH=opt.nodeH||46;
-  const placed=[]; let leaf=0;
-  (function rec(node, depth){
+  // 노드별 dir('h'=자식을 오른쪽에, 'v'=자식을 아래에 들여쓰기)를 지원하는
+  // 서브트리 바운딩박스 레이아웃.
+  opt=opt||{}; const nodeW=opt.nodeW||218, nodeH=opt.nodeH||46;
+  const HGAP=opt.hGap||60,   // 가로 모드: 부모-자식 수평 간격
+        SGAP=opt.sGap||12,   // 형제 서브트리 사이 수직 간격
+        VGAP=opt.vGap||16,   // 세로 모드: 부모-자식 수직 간격
+        INDENT=opt.indent||36; // 세로 모드 들여쓰기
+  function rec(node){
     const kids = node.collapsed ? [] : (node.children||[]);
-    let y;
-    if(!kids.length){ y=leaf*yGap; leaf++; }
-    else { const cy=kids.map(k=>rec(k, depth+1)); y=(cy[0]+cy[cy.length-1])/2; }
-    placed.push({id:node.id, node, depth, x:depth*xGap, y});
-    return y;
-  })(root, 0);
-  const W=Math.max(...placed.map(p=>p.x))+nodeW, H=Math.max(...placed.map(p=>p.y))+nodeH;
-  return {placed, nodeW, nodeH, xGap, width:W+60, height:H+60};
+    const sub = kids.map(rec);
+    const dir = node.dir==='v' ? 'v' : 'h';
+    if(!sub.length) return {node, sub, dir, w:nodeW, h:nodeH, ny:0};
+    if(dir==='h'){
+      let H=0;
+      sub.forEach((s,i)=>{ s.ox=nodeW+HGAP; s.oy=H; H+=s.h+(i<sub.length-1?SGAP:0); });
+      const f=sub[0], l=sub[sub.length-1];
+      const c1=f.oy+f.ny+nodeH/2, c2=l.oy+l.ny+nodeH/2;
+      const ny=Math.max(0,(c1+c2)/2-nodeH/2);
+      return {node, sub, dir,
+              w:nodeW+HGAP+Math.max.apply(null,sub.map(s=>s.w)),
+              h:Math.max(H, ny+nodeH), ny};
+    }
+    let H=nodeH+VGAP, W=nodeW;
+    sub.forEach((s,i)=>{ s.ox=INDENT; s.oy=H; H+=s.h+(i<sub.length-1?SGAP:0); W=Math.max(W,INDENT+s.w); });
+    return {node, sub, dir, w:W, h:H, ny:0};
+  }
+  const tree=rec(root), placed=[];
+  (function abs(t,x,y,depth){
+    placed.push({id:t.node.id, node:t.node, depth, x, y:y+t.ny, dir:t.dir});
+    t.sub.forEach(s=>abs(s, x+s.ox, y+s.oy, depth+1));
+  })(tree, 0, 0, 0);
+  return {placed, nodeW, nodeH, width:tree.w+60, height:tree.h+60};
+}
+function setNodeDir(root, id, dir){
+  const n=findNode(root, id); if(!n) return false;
+  if(dir!=='h'&&dir!=='v') return false;
+  if((n.dir==='v'?'v':'h')===dir) return false;
+  n.dir=dir; return true;
 }
 function validate(data){
   const errors=[];
@@ -320,9 +347,15 @@ function render(){
   let h='';
   lay.placed.forEach(p=>{
     const kids=p.node.collapsed?[]:(p.node.children||[]);
+    const vert=p.node.dir==='v';
     kids.forEach(k=>{ const c=pos[k.id]; if(!c)return;
-      const x1=p.x+lay.nodeW,y1=p.y+lay.nodeH/2,x2=c.x,y2=c.y+lay.nodeH/2,mx=(x1+x2)/2;
-      h+=`<path class="edge" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`;
+      if(vert){ // 세로: ㄴ자 커넥터 (부모 하단에서 내려와 자식 왼쪽으로)
+        const bx=p.x+18, by=p.y+lay.nodeH, cy=c.y+lay.nodeH/2, r=7;
+        h+=`<path class="edge" d="M${bx},${by} L${bx},${cy-r} Q${bx},${cy} ${bx+r},${cy} L${c.x},${cy}"/>`;
+      } else {
+        const x1=p.x+lay.nodeW,y1=p.y+lay.nodeH/2,x2=c.x,y2=c.y+lay.nodeH/2,mx=(x1+x2)/2;
+        h+=`<path class="edge" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`;
+      }
     });
   });
   if(showRel){ (DATA.links||[]).forEach(l=>{ const a=pos[l.from],b=pos[l.to]; if(!a||!b)return;
@@ -375,6 +408,10 @@ function renderEdit(){
     </div>
     <label>링크 URL (선택)<input id="fUrl" value="${esc(n.url||'')}" placeholder="https://..."></label>
     <label>메모<textarea id="fNote" rows="3">${esc(n.note||'')}</textarea></label>
+    <label>하위 배치 (단축키 D)<select id="fDir">
+      <option value="h" ${n.dir!=='v'?'selected':''}>가로 → (자식을 오른쪽에)</option>
+      <option value="v" ${n.dir==='v'?'selected':''}>세로 ↓ (자식을 아래 들여쓰기)</option>
+    </select></label>
     <div class="row">
       <button class="btn sm" onclick="addNodeRel('child')">＋자식</button>
       <button class="btn sm" onclick="addNodeRel('sib')">＋형제</button>
@@ -385,7 +422,7 @@ function renderEdit(){
       ${n.url?`<button class="btn sm" onclick="window.open('${esc(n.url)}','_blank')">링크 열기</button>`:''}
       <button class="btn sm" style="color:#c62828;border-color:#f1c0c0" onclick="del()">삭제</button>
     </div>`;
-  ['fTitle','fKind','fStatus','fUrl','fNote'].forEach(idf=>{const el=document.getElementById(idf);if(el)el.addEventListener('input',commitEdit);});
+  ['fTitle','fKind','fStatus','fUrl','fNote','fDir'].forEach(idf=>{const el=document.getElementById(idf);if(el)el.addEventListener('input',commitEdit);});
 }
 function commitEdit(){
   const n=findNode(DATA.root, sel); if(!n)return;
@@ -395,6 +432,7 @@ function commitEdit(){
   n.status=document.getElementById('fStatus').value;
   n.url=document.getElementById('fUrl').value.trim()||undefined;
   n.note=document.getElementById('fNote').value;
+  const fd=document.getElementById('fDir'); if(fd) n.dir=(fd.value==='v'?'v':undefined);
   scheduleSave(); render();
 }
 function addNodeRel(how, inline){
@@ -411,6 +449,14 @@ function mv(d){
   const i=par.children.findIndex(c=>c.id===sel);
   if(i+d<0 || i+d>=par.children.length) return;
   pushHistory(); moveNode(DATA.root, sel, d); scheduleSave(); render();
+}
+function toggleDir(){
+  if(!sel) return;
+  const n=findNode(DATA.root, sel); if(!n) return;
+  pushHistory();
+  n.dir=(n.dir==='v')?undefined:'v';
+  scheduleSave(); render(); renderEdit();
+  toast('하위 배치: '+(n.dir==='v'?'세로 ↓':'가로 →'));
 }
 function del(){
   if(!sel||sel==='root') return toast('루트는 삭제할 수 없습니다.');
@@ -547,6 +593,7 @@ function closeInlineEdit(commit){
   const ed=document.getElementById('inlineEdit');
   if(ed.style.display!=='block'){ inlineTarget=null; return; }
   const id=inlineTarget; inlineTarget=null; ed.style.display='none';
+  ed.blur();   // 포커스를 즉시 해제 (직후 키 입력이 input으로 새는 레이스 방지)
   if(commit && id){
     const n=findNode(DATA.root, id);
     if(n && ed.value.trim() && ed.value!==n.title){
@@ -585,6 +632,7 @@ function bindKeys(){
     else if(k==='Enter'){ e.preventDefault(); addNodeRel('sib', true); }
     else if(k==='Delete'||k==='Backspace'){ e.preventDefault(); del(); }
     else if(k==='F2'){ e.preventDefault(); openInlineEdit(sel); }
+    else if(k==='d'||k==='D'){ e.preventDefault(); toggleDir(); }
     else if(k==='Escape'){ sel=null; render(); renderEdit(); }
     else if(k===' '){ e.preventDefault(); if((n.children||[]).length){ n.collapsed=!n.collapsed; scheduleSave(); render(); } }
     else if(k==='ArrowLeft'){ e.preventDefault(); const p=findParent(DATA.root, sel); if(p) selectNode(p.id); }
