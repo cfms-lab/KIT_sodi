@@ -49,7 +49,17 @@
     color:#1b5e20;box-shadow:0 6px 16px rgba(0,0,0,.25);opacity:.92;white-space:nowrap}
   .panel{width:312px;min-width:312px;background:var(--panel);border-left:1px solid var(--line);
     padding:14px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+  .panel.collapsed{display:none}
+  .panelhdr{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .panelclose{display:none}
   .panel h3{margin:0;font-size:13px;color:#0f172a}
+  @media (max-width:760px){
+    .wrap{position:relative}
+    .panel{position:absolute;top:0;right:0;height:100%;width:min(340px,86vw);min-width:0;
+      z-index:30;box-shadow:-6px 0 22px rgba(15,23,42,.22)}
+    .panelclose{display:inline-block}
+    #panelBtn{order:-1}
+  }
   .panel label{display:flex;flex-direction:column;gap:3px;font-size:11px;color:#555}
   .panel input,.panel select,.panel textarea{padding:6px;border:1px solid var(--line);border-radius:6px;font-size:13px}
   .row{display:flex;gap:6px;flex-wrap:wrap}
@@ -84,6 +94,7 @@
   <span class="ver" id="ver" title="현재 로드된 버전 (새로고침해도 이 값이 그대로면 캐시된 옛 파일입니다)"></span>
   <span id="saveState"></span>
   <div class="tools" id="tools">
+    <button class="btn sm" id="panelBtn" onclick="togglePanel()">편집 ▤</button>
     <input class="search" id="search" placeholder="검색 (제목/메모)">
     <button class="btn sm" onclick="expandAll(true)">＋전체</button>
     <button class="btn sm" onclick="expandAll(false)">－접기</button>
@@ -122,8 +133,9 @@
     <svg id="svg"><g id="viewport"></g></svg>
     <input id="inlineEdit" autocomplete="off" spellcheck="false">
   </div>
-  <aside class="panel">
-    <h3>노드 편집</h3>
+  <aside class="panel" id="panel">
+    <div class="panelhdr"><h3>노드 편집</h3>
+      <button class="btn sm panelclose" onclick="togglePanel(false)">✕ 닫기</button></div>
     <div id="editArea"><p class="muted">노드를 클릭해 선택하세요. 빈 곳 드래그=화면 이동, 휠=확대/축소.<br>
       노드를 <b>드래그해 다른 노드에 놓으면</b> 그 노드의 자식으로 이동합니다.</p></div>
 
@@ -136,7 +148,7 @@
       </div>
       <button class="btn sm" style="margin-top:6px;width:100%" onclick="addLink()">＋ 관계 추가 (선택→대상)</button>
       <div class="links-list" id="linksList" style="margin-top:8px"></div>
-    </div> 
+    </div>
 
     <div class="sec">
       <h3>범례</h3>
@@ -166,7 +178,7 @@
 
 <script>
 /* ====================== 버전 (배포 확인용) ====================== */
-const APP_VERSION='v2026-07-04d';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
+const APP_VERSION='v2026-07-04e';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
 
 /* ====================== 기본 데이터 (첫 실행 시드) ====================== */
 const DEFAULT_DATA = /*DATA_START*/{"version":1,"title":"CFMS 프로젝트 관계도 2026","showRel":true,"root":{"id":"root","title":"CFMS 연구실 2026","kind":"root","note":"두 워크스페이스의 세부 프로젝트 관계도","children":[{"id":"sftf","title":"__SFTF_Projects(2026)","kind":"group","note":"3D 프린팅 Support Flow Tensor Field 연구군 (D:\\__SFTF_Projects(2026))","children":[{"id":"tomo_sftf","title":"Tomo_SFTF_dev","kind":"core","status":"active","note":"SFTF 본체: 빌드방향 후보 생성(coarse-to-refine) + TOMO_CPU/GPU 엔진(DLL). 표준 템플릿의 기원."},{"id":"clustering","title":"SFTF_Clustering_dev","kind":"app","status":"active","note":"면별 SFTF 특징 → 출판지향 메쉬 분할(clustering). 한국섬유공학회지 투고."},{"id":"derivative","title":"SFTF_Derivative_dev","kind":"app","status":"active","note":"미분가능 SFTF 손실항 + GNN + 경사기반 빌드방향 최적화. TOMO 교차검증."},{"id":"composite","title":"SFTF_Composite_dev","kind":"app","status":"stub","note":"복합재 적용 (신규 스캐폴드)."},{"id":"injmold","title":"SFTF_InjMold_dev","kind":"app","status":"stub","note":"사출성형 적용 (신규 스캐폴드)."}]},{"id":"vscode","title":"__VSCode_Projects","kind":"group","note":"의복 CAD·영상계측·랩 웹앱·인프라 (D:\\__VSCode_Projects)","children":[{"id":"cadsuite","title":"의복 CAD 스위트","kind":"subgroup","note":"Clo3D 오픈소스 대안","children":[{"id":"cfmscad","title":"cfmsCAD2026_dev","kind":"app","status":"active","note":"3D 의복 CAD 에디터 (UI/패턴)."},{"id":"cfmsdrape","title":"cfmsDrape2026_dev","kind":"app","status":"active","note":"암시적 옷감 드레이프 솔버(DLL). SCAD/GarmentCode 입력, 인체 충돌·자기충돌."},{"id":"cfmssew","title":"cfmsSew2026_dev","kind":"app","status":"active","note":"2D 패턴 봉제대응 자동인식(휴리스틱→GNN). CAD/Drape에 병합 예정."},{"id":"cfmsshared","title":"cfmsShared2026_dev","kind":"infra","status":"infra","note":"CAD↔Drape 인터페이스 단일진실(contract/messages) 공유 git 채널."}]},{"id":"measure","title":"영상 계측","kind":"subgroup","children":[{"id":"dispersity","title":"cfmsDispersity2026_Dev","kind":"app","status":"active","note":"광학현미경 입자 분산도 정량화(정적 kNN 에너지). C++Builder(Baraff 클로스심) 포팅."},{"id":"sem","title":"TSE_SEM2026_dev","kind":"app","status":"active","note":"SEM 섬유 영상 정량화(반지름·배향·기공) + metaball 3D 재구성."}]},{"id":"webapps","title":"랩 웹앱 (cfms-lab/KIT_sodi · Supabase)","kind":"subgroup","children":[{"id":"upjuk","title":"논문관리 (upjuk)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/upjuk.html","note":"업적 리스트 CRUD + PDF. draft는 RLS로 비로그인 숨김."},{"id":"timetable","title":"수업시간표 (TimeTable)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/timetable.html","note":"학기별 시간표 드래그 편성."},{"id":"jobgis","title":"취업현황 (JobGIS)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/jobgis.html","note":"졸업생 취업처 지도."},{"id":"mindmap","title":"이 관계도 (Mindmap)","kind":"web","status":"active","note":"프로젝트 관계도 (이 페이지, 로그인 전용)."}]},{"id":"infra","title":"인프라/템플릿","kind":"subgroup","children":[{"id":"template","title":"__vscode_AI_template","kind":"infra","status":"infra","note":"표준 프로젝트 템플릿(코드+논문, uv/xelatex/훅). 모든 *_dev의 기반. Tomo_SFTF에서 기원."},{"id":"hooks","title":"__클로드코드_훅설정","kind":"infra","status":"infra","note":"Claude Code 전역 훅 설정."}]}]}]},"links":[{"from":"tomo_sftf","to":"clustering","label":"코어 분리"},{"from":"tomo_sftf","to":"derivative","label":"코어 재사용"},{"from":"tomo_sftf","to":"composite","label":"파생"},{"from":"tomo_sftf","to":"injmold","label":"파생"},{"from":"clustering","to":"derivative","label":"코드 재사용"},{"from":"tomo_sftf","to":"template","label":"템플릿 기원"},{"from":"cfmsshared","to":"cfmscad","label":"contract"},{"from":"cfmsshared","to":"cfmsdrape","label":"contract"},{"from":"cfmssew","to":"cfmscad","label":"병합 예정"},{"from":"cfmssew","to":"cfmsdrape","label":"병합 예정"},{"from":"derivative","to":"cfmsdrape","label":"드레이프 응용 연계"},{"from":"dispersity","to":"cfmsdrape","label":"클로스심 계보"}]}/*DATA_END*/;
@@ -403,7 +415,7 @@ function renderLegend(){
 }
 
 /* ====================== 편집 패널 ====================== */
-function selectNode(id){ sel=id; render(); renderEdit(); }
+function selectNode(id){ sel=id; render(); renderEdit(); updatePanelBtn(); }
 function renderEdit(){
   const area=document.getElementById('editArea');
   if(!sel){ area.innerHTML='<p class="muted">노드를 클릭해 선택하세요.</p>'; return; }
@@ -512,6 +524,21 @@ function fitView(){
   const lay=layout(DATA.root), cv=document.getElementById('canvas');
   const sx=(cv.clientWidth-40)/lay.width, sy=(cv.clientHeight-40)/lay.height;
   view.s=Math.max(.25,Math.min(1.4,Math.min(sx,sy))); view.tx=20; view.ty=20; applyView();
+}
+/* ====================== 편집 패널 접기/펴기 (모바일 대응) ====================== */
+function isNarrow(){ return window.innerWidth<=760; }
+function togglePanel(force){
+  const pnl=document.getElementById('panel'); if(!pnl) return;
+  const willOpen=(typeof force==='boolean')?force:pnl.classList.contains('collapsed');
+  pnl.classList.toggle('collapsed', !willOpen);
+  if(willOpen) pnl.scrollTop=0;
+  updatePanelBtn();
+}
+function updatePanelBtn(){
+  const b=document.getElementById('panelBtn'), pnl=document.getElementById('panel'); if(!b||!pnl) return;
+  const collapsed=pnl.classList.contains('collapsed');
+  b.textContent = collapsed ? (sel?'편집 ●':'편집 ▤') : '편집 ✕';
+  b.title = collapsed ? (sel?'선택된 노드 편집 열기':'편집 패널 열기') : '편집 패널 닫기';
 }
 
 /* ====================== 클라우드 저장/불러오기 ====================== */
@@ -757,6 +784,8 @@ function bindCanvas(){
 /* ====================== 부팅 ====================== */
 async function boot(){
   const vEl=document.getElementById('ver'); if(vEl) vEl.textContent=APP_VERSION;
+  if(isNarrow()){ const pnl=document.getElementById('panel'); if(pnl) pnl.classList.add('collapsed'); }
+  updatePanelBtn();
   bindCanvas(); bindInline(); bindKeys(); renderAuthbar();
   if(isLoggedIn()){ showApp(); await loadDoc(); }
   else { showGate(); }
