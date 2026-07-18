@@ -80,7 +80,7 @@ const POS = {"Tomo_SFTF": {"x": -480, "y": 0}, "PFTF": {"x": 480, "y": 40}, "Tom
 const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
   ...(POS[n.id] ? { x: POS[n.id].x, y: POS[n.id].y, fixed: { x: true, y: true } } : {}),
   id: n.id, label: n.label, color: n.color, size: n.size,
-  font: n.font, title: n.title,
+  font: { ...(n.font || {}), size: Math.max(12, (n.font && n.font.size) || 0) }, title: n.title,
   _community: n.community, _community_name: n.community_name,
   _source_file: n.source_file, _file_type: n.file_type, _degree: n.degree,
 })));
