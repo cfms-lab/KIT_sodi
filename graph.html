@@ -76,7 +76,7 @@ function esc(s) {
 }
 
 // Build vis datasets (deterministic radial layout: apps ring around their base hub)
-const POS = {"Tomo_SFTF": {"x": -130, "y": -40}, "PFTF": {"x": 130, "y": -40}, "Tomo_SFTFSoft": {"x": -130, "y": 110}, "SFTF_Clustering": {"x": 140, "y": -190}, "Tomo_DiffSupport": {"x": -90, "y": 255}, "PFTF_GNN": {"x": -330, "y": -60}, "SFTF_InjMold": {"x": -675, "y": -150}, "SFTF_SewerPOC": {"x": -620, "y": -390}, "SFTF_PDNElectric": {"x": -380, "y": -230}, "SFTF_ThermalChip": {"x": -610, "y": -268}, "SFTF_BatteryThermal": {"x": -790, "y": -320}, "PFTF_CNC": {"x": -455, "y": -325}, "SFTF_Composite": {"x": 400, "y": -240}, "PFTF_Compression": {"x": 585, "y": -215}, "PFTF_Mold": {"x": 790, "y": -320}, "PFTF_Radiotherapy": {"x": 665, "y": -150}, "SFTF_WarehouseAGV": {"x": -790, "y": 180}, "PFTF_AssetShock": {"x": -650, "y": 300}, "SFTF_UrbanTraffic": {"x": -510, "y": 185}, "SFTF_DataCenterTraffic": {"x": -330, "y": 370}, "PFTF_subMarine": {"x": -200, "y": 430}, "PFTF_Assembly": {"x": -70, "y": 380}, "PFTF_RainNowcast": {"x": 60, "y": 430}, "PFTF_Terrain": {"x": 190, "y": 380}, "PFTF_Solar": {"x": 320, "y": 430}, "PFTF_FXShock": {"x": 435, "y": 355}, "PFTF_kDop": {"x": 560, "y": 130}, "PFTF_VisCull": {"x": 770, "y": 130}, "PFTF_Inspection": {"x": 665, "y": 265}};
+const POS = {"Tomo_SFTF": {"x": -130, "y": -40}, "PFTF": {"x": 130, "y": -40}, "Tomo_SFTFSoft": {"x": -130, "y": 110}, "SFTF_Clustering": {"x": 140, "y": -190}, "Tomo_DiffSupport": {"x": -90, "y": 255}, "PFTF_GNN": {"x": -330, "y": -60}, "SFTF_InjMold": {"x": -675, "y": -150}, "SFTF_SewerPOC": {"x": -620, "y": -390}, "SFTF_PDNElectric": {"x": -380, "y": -230}, "SFTF_ThermalChip": {"x": -610, "y": -268}, "SFTF_BatteryThermal": {"x": -790, "y": -320}, "PFTF_CNC": {"x": -455, "y": -325}, "SFTF_Composite": {"x": 400, "y": -240}, "PFTF_Compression": {"x": 665, "y": -150}, "PFTF_Mold": {"x": 790, "y": -320}, "PFTF_Radiotherapy": {"x": 585, "y": -215}, "SFTF_WarehouseAGV": {"x": -790, "y": 180}, "PFTF_AssetShock": {"x": -650, "y": 300}, "SFTF_UrbanTraffic": {"x": -510, "y": 185}, "SFTF_DataCenterTraffic": {"x": -330, "y": 370}, "PFTF_subMarine": {"x": -200, "y": 430}, "PFTF_Assembly": {"x": -70, "y": 380}, "PFTF_RainNowcast": {"x": 60, "y": 430}, "PFTF_Terrain": {"x": 190, "y": 380}, "PFTF_Solar": {"x": 320, "y": 430}, "PFTF_FXShock": {"x": 435, "y": 355}, "PFTF_kDop": {"x": 560, "y": 130}, "PFTF_VisCull": {"x": 770, "y": 130}, "PFTF_Inspection": {"x": 665, "y": 265}};
 const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
   ...(POS[n.id] ? { x: POS[n.id].x, y: POS[n.id].y, fixed: { x: true, y: true } } : {}),
   id: n.id, label: n.label, color: n.color, size: n.size,
@@ -380,6 +380,65 @@ function _regionCentroid(h) {
     ctx.fillText(dp.label, x1+(x2-x1)*t, y1+(y2-y1)*t - 6);
   });
   ctx.restore();
+})(ctx);
+// 발견 영역 라벨 왼쪽에 사다리 글리프(0차·1차·2차·topology) — 시그니처 다이어그램과 동일 모티프
+const REGION_GLYPHS = [
+  [["m0", 0], ["topo", -34]],      // 발견1: 0차 + 연결지도
+  [["F", 0]],                       // 발견2: 2차
+  [["m", 0], ["kill", 0]],          // 발견3: 1차 소거(빨간 사선)
+  [["m", 0]],                       // 발견3': 1차 생존
+  [["gate", 0]],                    // 발견4·5·6: 게이트(체크)
+];
+function _glyph(ctx, type, x, y) {
+  ctx.save();
+  ctx.strokeStyle = "#4f46e5"; ctx.fillStyle = "#4f46e5"; ctx.lineWidth = 2;
+  if (type === "m0") { ctx.beginPath(); ctx.arc(x, y, 7, 0, 6.2832); ctx.fill(); }
+  else if (type === "m") {
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(x - 9, y + 7); ctx.lineTo(x + 5, y - 3); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + 10, y - 7);
+    ctx.lineTo(x + 1, y - 6); ctx.lineTo(x + 6, y + 2); ctx.closePath(); ctx.fill();
+  } else if (type === "F") {
+    ctx.translate(x, y); ctx.rotate(-0.42);
+    ctx.beginPath(); ctx.ellipse(0, 0, 12, 6.5, 0, 0, 6.2832); ctx.stroke();
+    ctx.lineWidth = 1.1;
+    ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(12, 0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, -6.5); ctx.lineTo(0, 6.5); ctx.stroke();
+  } else if (type === "topo") {
+    ctx.fillStyle = "#666666"; ctx.strokeStyle = "#666666"; ctx.lineWidth = 1.4;
+    [[-8, -8], [0, -10], [8, -7]].forEach(p => {
+      ctx.beginPath(); ctx.arc(x + p[0], y + p[1], 2.6, 0, 6.2832); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x + p[0], y + p[1]); ctx.lineTo(x, y + 5); ctx.stroke();
+    });
+    ctx.fillStyle = "#4f46e5"; ctx.fillRect(x - 4, y + 4, 8, 7);
+    ctx.strokeStyle = "#4f46e5"; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.moveTo(x - 6, y + 14); ctx.lineTo(x + 6, y + 14); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - 3.5, y + 17); ctx.lineTo(x + 3.5, y + 17); ctx.stroke();
+  } else if (type === "kill") {
+    ctx.strokeStyle = "#c04040"; ctx.lineWidth = 2.6;
+    ctx.beginPath(); ctx.moveTo(x - 11, y + 10); ctx.lineTo(x + 11, y - 10); ctx.stroke();
+  } else if (type === "gate") {
+    ctx.strokeStyle = "#2e9e44"; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(x - 8, y); ctx.lineTo(x - 2, y + 7); ctx.lineTo(x + 9, y - 8);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+(function(ctx) {
+  hyperedges.forEach((h, i) => {
+    const glyphs = REGION_GLYPHS[i] || [];
+    if (!glyphs.length) return;
+    const ps = h.nodes.map(nid => network.getPositions([nid])[nid]).filter(p => p);
+    if (ps.length < 2) return;
+    const cy = ps.reduce((s, p) => s + p.y, 0) / ps.length;
+    const cx = ps.reduce((s, p) => s + p.x, 0) / ps.length;
+    const minY = Math.min.apply(null, ps.map(p => p.y));
+    const topY = cy + (minY - cy) * 1.25;          // hull 라벨과 동일한 확장 규칙
+    ctx.font = "bold 20px sans-serif";
+    const w = ctx.measureText(h.label).width;
+    const gx = cx - w / 2 - 26, gy = topY - 23;    // 라벨 baseline(topY-16) 좌측
+    glyphs.forEach(g => _glyph(ctx, g[0], gx + g[1], gy));
+  });
 })(ctx);
 // FINDING_DEPS_END
 });
