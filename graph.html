@@ -1,309 +1,388 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CFMS 프로젝트 그래프 (Graph · Cloud)</title>
+<title>SFTF/PFTF — 발견 1~6 기준 배치</title>
+<script src="https://unpkg.com/vis-network@9.1.6/standalone/umd/vis-network.min.js"
+        integrity="sha384-Ux6phic9PEHJ38YtrijhkzyJ8yQlH8i/+buBR8s3mAZOJrP1gwyvAcIYl3GWtpX1"
+        crossorigin="anonymous"></script>
 <style>
-  :root{--g:#2e7d32;--g2:#1b5e20;--line:#d6dde6;--bg:#0f1420;}
-  *{box-sizing:border-box} html,body{height:100%}
-  body{margin:0;font-family:"Segoe UI","Malgun Gothic",sans-serif;color:#1f2937;background:#eef2f7;display:flex;flex-direction:column;height:100vh;overflow:hidden}
-  header{background:#fff;border-bottom:1px solid var(--line);padding:9px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  header a.home{color:#334155;text-decoration:none;background:#f1f5f9;border:1px solid var(--line);padding:4px 10px;border-radius:10px;font-size:13px}
-  header h1{font-size:16px;margin:0;font-weight:700;color:#0f172a}
-  header .sub{font-size:12px;color:#64748b}
-  .authbar{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px}
-  .authbar input{padding:5px 7px;border:1px solid var(--line);border-radius:6px;font-size:12px}
-  .pill{background:#e8f5e9;color:#1b5e20;padding:5px 10px;border-radius:12px;font-weight:600}
-  .tools{display:none;gap:6px;align-items:center;flex-wrap:wrap}
-  .btn{border:1px solid var(--line);background:#fff;color:#334155;border-radius:7px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer}
-  .btn:hover{background:#f1f5f9}.btn.p{background:var(--g);color:#fff;border-color:var(--g)}.btn.sm{padding:4px 8px;font-size:11px}
-  .search{padding:6px 9px;border:1px solid var(--line);border-radius:7px;font-size:12px;width:150px}
-  .wrap{flex:1;display:none;min-height:0;position:relative}
-  canvas{display:block;width:100%;height:100%;background:radial-gradient(circle at 50% 40%,#16213a,#0f1420)}
-  .legend{position:absolute;left:12px;bottom:12px;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:11px;display:flex;flex-direction:column;gap:3px;max-width:200px}
-  .legend .lg{display:flex;align-items:center;gap:6px}.legend i{width:11px;height:11px;border-radius:50%;display:inline-block}
-  .info{position:absolute;right:12px;top:12px;width:240px;background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12px;display:none}
-  .info h3{margin:0 0 4px;font-size:14px;color:#0f172a}.info .meta{color:#64748b;margin-bottom:6px}
-  .info ul{margin:6px 0 0;padding-left:16px} .info li{cursor:pointer;color:#1565c0}.info li:hover{text-decoration:underline}
-  .gate{flex:1;display:flex;align-items:center;justify-content:center;padding:30px}
-  .gatecard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:30px 34px;max-width:420px;text-align:center;box-shadow:0 6px 22px rgba(15,23,42,.08)}
-  .gatecard .lock{font-size:42px}.gatecard h2{margin:10px 0 6px;font-size:18px}.gatecard p{color:#64748b;font-size:13px;line-height:1.6;margin:0 0 16px}
-  .gatecard .f{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}.gatecard input{padding:8px;border:1px solid var(--line);border-radius:7px;font-size:13px}
-  .banner{background:#fff8e1;border-bottom:1px solid #ffe082;padding:7px 16px;font-size:12px;color:#795548;display:none}
-  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;opacity:0;transition:.3s;z-index:50}.toast.show{opacity:1}
-  #saveState{font-size:11px;color:#94a3b8;margin-left:4px}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #ffffff; color: #333333; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; height: 100vh; overflow: hidden; }
+  #graph { flex: 1; }
+  #sidebar { width: 280px; background: #f5f5f5; border-left: 1px solid #dddddd; display: flex; flex-direction: column; overflow: hidden; }
+  #search-wrap { padding: 12px; border-bottom: 1px solid #dddddd; }
+  #search { width: 100%; background: #ffffff; border: 1px solid #bbbbbb; color: #333333; padding: 7px 10px; border-radius: 6px; font-size: 13px; outline: none; }
+  #search:focus { border-color: #4E79A7; }
+  #search-results { max-height: 140px; overflow-y: auto; padding: 4px 12px; border-bottom: 1px solid #dddddd; display: none; }
+  .search-item { padding: 4px 6px; cursor: pointer; border-radius: 4px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .search-item:hover { background: #dddddd; }
+  #info-panel { padding: 14px; border-bottom: 1px solid #dddddd; min-height: 140px; }
+  #info-panel h3 { font-size: 13px; color: #777777; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  #info-content { font-size: 13px; color: #444444; line-height: 1.6; }
+  #info-content .field { margin-bottom: 5px; }
+  #info-content .field b { color: #222222; }
+  #info-content .empty { color: #999999; font-style: italic; }
+  .neighbor-link { display: block; padding: 2px 6px; margin: 2px 0; border-radius: 3px; cursor: pointer; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid #cccccc; }
+  .neighbor-link:hover { background: #dddddd; }
+  #neighbors-list { max-height: 160px; overflow-y: auto; margin-top: 4px; }
+  #legend-wrap { flex: 1; overflow-y: auto; padding: 12px; }
+  #legend-wrap h3 { font-size: 13px; color: #777777; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .legend-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; border-radius: 4px; font-size: 12px; }
+  .legend-item:hover { background: #dddddd; padding-left: 4px; }
+  .legend-item.dimmed { opacity: 0.35; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .legend-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .legend-count { color: #666; font-size: 11px; }
+  #stats { padding: 10px 14px; border-top: 1px solid #dddddd; font-size: 11px; color: #999999; }
+  #legend-controls { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 4px 0; }
+  #legend-controls label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: #777777; user-select: none; }
+  #legend-controls label:hover { color: #222222; }
+  .legend-cb, #select-all-cb { appearance: none; -webkit-appearance: none; width: 14px; height: 14px; border: 1.5px solid #bbbbbb; border-radius: 3px; background: #ffffff; cursor: pointer; position: relative; flex-shrink: 0; }
+  .legend-cb:checked, #select-all-cb:checked { background: #4E79A7; border-color: #4E79A7; }
+  .legend-cb:checked::after, #select-all-cb:checked::after { content: ''; position: absolute; left: 3.5px; top: 1px; width: 4px; height: 7px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  #select-all-cb:indeterminate { background: #4E79A7; border-color: #4E79A7; }
+  #select-all-cb:indeterminate::after { content: ''; position: absolute; left: 2px; top: 5px; width: 8px; height: 2px; background: #fff; border: none; transform: none; }
 </style>
 </head>
 <body>
-<header>
-  <a class="home" href="index.html">← 홈</a>
-  <h1>CFMS 프로젝트 그래프</h1>
-  <span class="sub">옵시디언 링크 기반 · 클라우드(로그인 전용)</span>
-  <span id="saveState"></span>
-  <div class="tools" id="tools">
-    <input class="search" id="search" placeholder="검색(노드)">
-    <button class="btn sm" onclick="toggleLabels()" id="lblBtn">라벨 ✓</button>
-    <button class="btn sm" onclick="reheat()">재배치</button>
-    <button class="btn sm" onclick="fitView()">맞춤</button>
-    <button class="btn p sm" onclick="document.getElementById('imp').click()">볼트에서 불러오기</button>
-    <button class="btn sm" onclick="exportJSON()">백업</button>
-    <input type="file" id="imp" accept=".json,application/json" style="display:none" onchange="importJSON(this)">
+<div id="graph"></div>
+<div id="sidebar">
+  <div id="search-wrap">
+    <input id="search" type="text" placeholder="Search nodes..." autocomplete="off">
+    <div id="search-results"></div>
   </div>
-  <div class="authbar" id="authbar"></div>
-</header>
-
-<div class="banner" id="banner"></div>
-
-<div class="gate" id="gate">
-  <div class="gatecard">
-    <div class="lock">🔒</div>
-    <h2>로그인이 필요합니다</h2>
-    <p>이 프로젝트 그래프는 <b>로그인한 사용자에게만</b> 보입니다.<br>포털·논문관리와 같은 계정으로 로그인하세요.</p>
-    <div class="f">
-      <input id="gEmail" placeholder="이메일" style="width:160px">
-      <input id="gPw" type="password" placeholder="비밀번호" style="width:130px">
-      <button class="btn p" onclick="login('g')">로그인</button>
+  <div id="info-panel">
+    <h3>Node Info</h3>
+    <div id="info-content"><span class="empty">Click a node to inspect it</span></div>
+  </div>
+  <div id="legend-wrap">
+    <h3>Communities</h3>
+    <div id="legend-controls">
+      <label><input type="checkbox" id="select-all-cb" checked onchange="toggleAllCommunities(!this.checked)">Select All</label>
     </div>
-    <p id="gateMsg" style="color:#c62828;font-size:12px;margin-top:12px"></p>
+    <div id="legend"></div>
   </div>
+  <div id="stats">29 nodes &middot; 34 edges &middot; 5 communities</div>
 </div>
-
-<div class="wrap" id="wrap">
-  <canvas id="cv"></canvas>
-  <div class="legend" id="legend"></div>
-  <div class="info" id="info"></div>
-</div>
-
-<div class="toast" id="toast"></div>
-
 <script>
-/* 현재 볼트에서 생성한 기본 그래프(첫 표시용). scripts/build-vault-graph.mjs 산출물을
-   "볼트에서 불러오기"로 올리면 Supabase에 저장되어 그 이후로는 그게 표시됩니다. */
-const DEFAULT_GRAPH = /*DATA_START*/{"kind":"vault-graph","generatedAt":"2026-06-28T14:29:49.543Z","vault":"_Research_Vault","nodes":[{"id":"_Experiments MOC","label":"_Experiments MOC","group":"Experiments","status":"","folder":"Experiments","type":"moc"},{"id":"Home","label":"Home","group":"(root)","status":"","folder":"(root)","type":"moc"},{"id":"Welcome 아이디어","label":"Welcome 아이디어","group":"Ideas","status":"","folder":"Ideas","type":"idea"},{"id":"_Ideas MOC","label":"_Ideas MOC","group":"Ideas","status":"","folder":"Ideas","type":"moc"},{"id":"_Papers MOC","label":"_Papers MOC","group":"Papers","status":"","folder":"Papers","type":"moc"},{"id":"cfmsCAD","label":"cfmsCAD","group":"VSCode","status":"active","folder":"Projects","type":"project"},{"id":"cfmsCAD_suite","label":"cfmsCAD_suite","group":"VSCode","status":"active","folder":"Projects","type":"project"},{"id":"cfmsDispersity","label":"cfmsDispersity","group":"VSCode","status":"active","folder":"Projects","type":"project"},{"id":"cfmsDrape","label":"cfmsDrape","group":"VSCode","status":"active","folder":"Projects","type":"project"},{"id":"cfmsSew","label":"cfmsSew","group":"VSCode","status":"active","folder":"Projects","type":"project"},{"id":"cfmsShared","label":"cfmsShared","group":"VSCode","status":"infra","folder":"Projects","type":"project"},{"id":"Infrastructure","label":"Infrastructure","group":"VSCode","status":"infra","folder":"Projects","type":"project"},{"id":"Lab_Web_Apps","label":"Lab_Web_Apps","group":"Web","status":"active","folder":"Projects","type":"project"},{"id":"SFTF_Clustering","label":"SFTF_Clustering","group":"SFTF","status":"active","folder":"Projects","type":"project"},{"id":"SFTF_Composite","label":"SFTF_Composite","group":"SFTF","status":"stub","folder":"Projects","type":"project"},{"id":"SFTF_Derivative","label":"SFTF_Derivative","group":"SFTF","status":"active","folder":"Projects","type":"project"},{"id":"SFTF_InjMold","label":"SFTF_InjMold","group":"SFTF","status":"stub","folder":"Projects","type":"project"},{"id":"Tomo_SFTF","label":"Tomo_SFTF","group":"SFTF","status":"active","folder":"Projects","type":"project"},{"id":"TSE_SEM","label":"TSE_SEM","group":"VSCode","status":"active","folder":"Projects","type":"project"},{"id":"README","label":"README","group":"(root)","status":"","folder":"(root)","type":""},{"id":"SYNC","label":"SYNC","group":"(root)","status":"","folder":"(root)","type":""}],"links":[{"source":"Home","target":"_Experiments MOC"},{"source":"Home","target":"_Papers MOC"},{"source":"Home","target":"_Ideas MOC"},{"source":"Home","target":"Lab_Web_Apps"},{"source":"Home","target":"Infrastructure"},{"source":"Home","target":"Tomo_SFTF"},{"source":"Home","target":"SFTF_Clustering"},{"source":"Home","target":"SFTF_Derivative"},{"source":"Home","target":"SFTF_Composite"},{"source":"Home","target":"SFTF_InjMold"},{"source":"Home","target":"cfmsCAD"},{"source":"Home","target":"cfmsDrape"},{"source":"Home","target":"cfmsSew"},{"source":"Home","target":"cfmsShared"},{"source":"Home","target":"cfmsDispersity"},{"source":"Home","target":"TSE_SEM"},{"source":"Welcome 아이디어","target":"SFTF_Derivative"},{"source":"Welcome 아이디어","target":"cfmsDrape"},{"source":"_Papers MOC","target":"SFTF_Clustering"},{"source":"_Papers MOC","target":"SFTF_Derivative"},{"source":"_Papers MOC","target":"cfmsDispersity"},{"source":"_Papers MOC","target":"TSE_SEM"},{"source":"cfmsCAD","target":"cfmsDrape"},{"source":"cfmsCAD","target":"cfmsSew"},{"source":"cfmsCAD","target":"cfmsShared"},{"source":"cfmsCAD_suite","target":"cfmsCAD"},{"source":"cfmsCAD_suite","target":"cfmsDrape"},{"source":"cfmsCAD_suite","target":"cfmsSew"},{"source":"cfmsCAD_suite","target":"cfmsShared"},{"source":"cfmsDispersity","target":"cfmsDrape"},{"source":"cfmsDrape","target":"cfmsSew"},{"source":"cfmsDrape","target":"cfmsShared"},{"source":"cfmsDrape","target":"SFTF_Derivative"},{"source":"Infrastructure","target":"Tomo_SFTF"},{"source":"Infrastructure","target":"Lab_Web_Apps"},{"source":"SFTF_Clustering","target":"Tomo_SFTF"},{"source":"SFTF_Clustering","target":"SFTF_Derivative"},{"source":"SFTF_Composite","target":"Tomo_SFTF"},{"source":"SFTF_Derivative","target":"Tomo_SFTF"},{"source":"SFTF_InjMold","target":"Tomo_SFTF"}]}/*DATA_END*/;
+const RAW_NODES = [{"id": "Tomo_SFTF", "label": "Tomo_SFTF", "color": {"background": "#c8c8c8", "border": "#bbbbbb", "highlight": {"background": "#c8c8c8", "border": "#c8c8c8"}}, "size": 31.4, "font": {"size": 12, "color": "#333333"}, "title": "Tomo_SFTF", "community": 0, "community_name": "베이스 (이론·투고 트랙)", "source_file": "Tomo_SFTF.md", "file_type": "concept", "degree": 10}, {"id": "Tomo_SFTFSoft", "label": "Tomo_SFTFSoft", "color": {"background": "#c8c8c8", "border": "#bbbbbb", "highlight": {"background": "#c8c8c8", "border": "#c8c8c8"}}, "size": 16.4, "font": {"size": 12, "color": "#333333"}, "title": "Tomo_SFTFSoft", "community": 0, "community_name": "베이스 (이론·투고 트랙)", "source_file": "Tomo_SFTFSoft.md", "file_type": "concept", "degree": 3}, {"id": "SFTF_Clustering", "label": "SFTF_Clustering", "color": {"background": "#c8c8c8", "border": "#bbbbbb", "highlight": {"background": "#c8c8c8", "border": "#c8c8c8"}}, "size": 16.4, "font": {"size": 12, "color": "#333333"}, "title": "SFTF_Clustering", "community": 0, "community_name": "베이스 (이론·투고 트랙)", "source_file": "SFTF_Clustering.md", "file_type": "concept", "degree": 3}, {"id": "PFTF", "label": "PFTF", "color": {"background": "#c8c8c8", "border": "#bbbbbb", "highlight": {"background": "#c8c8c8", "border": "#c8c8c8"}}, "size": 40.0, "font": {"size": 12, "color": "#333333"}, "title": "PFTF", "community": 0, "community_name": "베이스 (이론·투고 트랙)", "source_file": "PFTF.md", "file_type": "concept", "degree": 14}, {"id": "SFTF_Composite", "label": "SFTF_Composite", "color": {"background": "#e02020", "border": "#8f1414", "highlight": {"background": "#c8c8c8", "border": "#e02020"}}, "size": 14.3, "font": {"size": 0, "color": "#333333"}, "title": "SFTF_Composite", "community": 1, "community_name": "上 SCI-E", "source_file": "SFTF_Composite.md", "file_type": "concept", "degree": 2}, {"id": "SFTF_InjMold", "label": "SFTF_InjMold", "color": {"background": "#e02020", "border": "#8f1414", "highlight": {"background": "#c8c8c8", "border": "#e02020"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "SFTF_InjMold", "community": 1, "community_name": "上 SCI-E", "source_file": "SFTF_InjMold.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_Compression", "label": "PFTF_Compression", "color": {"background": "#f28e2b", "border": "#a35e1a", "highlight": {"background": "#c8c8c8", "border": "#f28e2b"}}, "size": 14.3, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_Compression", "community": 2, "community_name": "中~上", "source_file": "PFTF_Compression.md", "file_type": "concept", "degree": 2}, {"id": "SFTF_ThermalChip", "label": "SFTF_ThermalChip", "color": {"background": "#f28e2b", "border": "#a35e1a", "highlight": {"background": "#c8c8c8", "border": "#f28e2b"}}, "size": 14.3, "font": {"size": 0, "color": "#333333"}, "title": "SFTF_ThermalChip", "community": 2, "community_name": "中~上", "source_file": "SFTF_ThermalChip.md", "file_type": "concept", "degree": 2}, {"id": "PFTF_Mold", "label": "PFTF_Mold", "color": {"background": "#f28e2b", "border": "#a35e1a", "highlight": {"background": "#c8c8c8", "border": "#f28e2b"}}, "size": 14.3, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_Mold", "community": 2, "community_name": "中~上", "source_file": "PFTF_Mold.md", "file_type": "concept", "degree": 2}, {"id": "Tomo_DiffSupport", "label": "Tomo_DiffSupport", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "Tomo_DiffSupport", "community": 3, "community_name": "中 SCOPUS", "source_file": "Tomo_DiffSupport.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_kDop", "label": "PFTF_kDop", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 18.6, "font": {"size": 12, "color": "#333333"}, "title": "PFTF_kDop", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_kDop.md", "file_type": "concept", "degree": 4}, {"id": "PFTF_VisCull", "label": "PFTF_VisCull", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 16.4, "font": {"size": 12, "color": "#333333"}, "title": "PFTF_VisCull", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_VisCull.md", "file_type": "concept", "degree": 3}, {"id": "SFTF_SewerPOC", "label": "SFTF_SewerPOC", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 16.4, "font": {"size": 12, "color": "#333333"}, "title": "SFTF_SewerPOC", "community": 3, "community_name": "中 SCOPUS", "source_file": "SFTF_SewerPOC.md", "file_type": "concept", "degree": 3}, {"id": "PFTF_FXShock", "label": "PFTF_FXShock", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_FXShock", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_FXShock.md", "file_type": "concept", "degree": 1}, {"id": "SFTF_BatteryThermal", "label": "SFTF_BatteryThermal", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 14.3, "font": {"size": 0, "color": "#333333"}, "title": "SFTF_BatteryThermal", "community": 3, "community_name": "中 SCOPUS", "source_file": "SFTF_BatteryThermal.md", "file_type": "concept", "degree": 2}, {"id": "SFTF_PDNElectric", "label": "SFTF_PDNElectric", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 14.3, "font": {"size": 0, "color": "#333333"}, "title": "SFTF_PDNElectric", "community": 3, "community_name": "中 SCOPUS", "source_file": "SFTF_PDNElectric.md", "file_type": "concept", "degree": 2}, {"id": "PFTF_Inspection", "label": "PFTF_Inspection", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_Inspection", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_Inspection.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_RainNowcast", "label": "PFTF_RainNowcast", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_RainNowcast", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_RainNowcast.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_Terrain", "label": "PFTF_Terrain", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_Terrain", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_Terrain.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_Solar", "label": "PFTF_Solar", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_Solar", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_Solar.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_subMarine", "label": "PFTF_subMarine", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_subMarine", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_subMarine.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_Assembly", "label": "PFTF_Assembly", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_Assembly", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_Assembly.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_CNC", "label": "PFTF_CNC", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_CNC", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_CNC.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_Radiotherapy", "label": "PFTF_Radiotherapy", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_Radiotherapy", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_Radiotherapy.md", "file_type": "concept", "degree": 1}, {"id": "SFTF_DataCenterTraffic", "label": "SFTF_DataCenterTraffic", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "SFTF_DataCenterTraffic", "community": 3, "community_name": "中 SCOPUS", "source_file": "SFTF_DataCenterTraffic.md", "file_type": "concept", "degree": 1}, {"id": "SFTF_UrbanTraffic", "label": "SFTF_UrbanTraffic", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "SFTF_UrbanTraffic", "community": 3, "community_name": "中 SCOPUS", "source_file": "SFTF_UrbanTraffic.md", "file_type": "concept", "degree": 1}, {"id": "SFTF_WarehouseAGV", "label": "SFTF_WarehouseAGV", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "SFTF_WarehouseAGV", "community": 3, "community_name": "中 SCOPUS", "source_file": "SFTF_WarehouseAGV.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_AssetShock", "label": "PFTF_AssetShock", "color": {"background": "#2a78d6", "border": "#1b4e8c", "highlight": {"background": "#c8c8c8", "border": "#2a78d6"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_AssetShock", "community": 4, "community_name": "下", "source_file": "PFTF_AssetShock.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_GNN", "label": "PFTF_GNN", "color": {"background": "#2a78d6", "border": "#1b4e8c", "highlight": {"background": "#c8c8c8", "border": "#2a78d6"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_GNN", "community": 4, "community_name": "下", "source_file": "PFTF_GNN.md", "file_type": "concept", "degree": 1}];
+const RAW_EDGES = [{"from": "Tomo_SFTF", "to": "PFTF", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "Tomo_SFTF", "to": "PFTF_GNN", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "Tomo_SFTF", "to": "SFTF_Clustering", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "Tomo_SFTF", "to": "SFTF_DataCenterTraffic", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "Tomo_SFTF", "to": "SFTF_InjMold", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "Tomo_SFTF", "to": "SFTF_PDNElectric", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "Tomo_SFTF", "to": "SFTF_SewerPOC", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "Tomo_SFTF", "to": "SFTF_UrbanTraffic", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "Tomo_SFTF", "to": "SFTF_WarehouseAGV", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "Tomo_SFTF", "to": "Tomo_SFTFSoft", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "Tomo_SFTFSoft", "to": "PFTF_kDop", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "Tomo_SFTFSoft", "to": "Tomo_DiffSupport", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "SFTF_Clustering", "to": "SFTF_Composite", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "SFTF_Clustering", "to": "SFTF_SewerPOC", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "PFTF", "to": "PFTF_Assembly", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "PFTF", "to": "PFTF_AssetShock", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "PFTF", "to": "PFTF_CNC", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "PFTF", "to": "PFTF_Compression", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "PFTF", "to": "PFTF_FXShock", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "PFTF", "to": "PFTF_Mold", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "PFTF", "to": "PFTF_Radiotherapy", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "PFTF", "to": "PFTF_RainNowcast", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "PFTF", "to": "PFTF_Solar", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "PFTF", "to": "PFTF_Terrain", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "PFTF", "to": "PFTF_VisCull", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "PFTF", "to": "PFTF_kDop", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "PFTF", "to": "PFTF_subMarine", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "SFTF_Composite", "to": "PFTF_Mold", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "PFTF_kDop", "to": "PFTF_Compression", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "SFTF_PDNElectric", "to": "SFTF_ThermalChip", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "SFTF_ThermalChip", "to": "SFTF_BatteryThermal", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "PFTF_kDop", "to": "PFTF_VisCull", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "PFTF_VisCull", "to": "PFTF_Inspection", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "SFTF_SewerPOC", "to": "SFTF_BatteryThermal", "label": "depends_on", "title": "depends_on [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}];
+const LEGEND = [{"cid": 0, "color": "#c8c8c8", "label": "베이스 (이론·투고 트랙)", "count": 4}, {"cid": 1, "color": "#e02020", "label": "上 SCI-E", "count": 2}, {"cid": 2, "color": "#f28e2b", "label": "中~上", "count": 3}, {"cid": 3, "color": "#2e9e44", "label": "中 SCOPUS", "count": 18}, {"cid": 4, "color": "#2a78d6", "label": "下", "count": 2}];
 
-/* ===== Supabase 인증 (upjuk/mindmap 과 세션 공유) ===== */
-function normUrl(u){return (u||"").trim().replace(/\/+$/,"").replace(/\/rest\/v1$/i,"").replace(/\/auth\/v1$/i,"").replace(/\/+$/,"");}
-const BAKED_URL="https://ijutjirouxgqcldjyhma.supabase.co";
-const BAKED_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdXRqaXJvdXhncWNsZGp5aG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDk4MDAsImV4cCI6MjA5Nzk4NTgwMH0.gIAwf6a2oY-DkTXaf5eM2L4ROMCKim5WsevGfjol7tE";
-let CFG={url:normUrl(localStorage.getItem("cfms_url")||BAKED_URL),key:(localStorage.getItem("cfms_key")||BAKED_KEY).trim()};
-let SESSION=JSON.parse(localStorage.getItem("cfms_session")||"null");
-function isLoggedIn(){return !!(SESSION&&SESSION.access_token);}
-function authHeaders(useUser){const h={"apikey":CFG.key,"Content-Type":"application/json"};h["Authorization"]="Bearer "+((useUser&&SESSION&&SESSION.access_token)?SESSION.access_token:CFG.key);return h;}
-async function refreshToken(){
-  if(!(SESSION&&SESSION.refresh_token))return false;
-  try{const r=await fetch(CFG.url+'/auth/v1/token?grant_type=refresh_token',{method:"POST",headers:{apikey:CFG.key,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:SESSION.refresh_token})});
-    if(!r.ok)return false;const d=await r.json();
-    SESSION={access_token:d.access_token,refresh_token:d.refresh_token||SESSION.refresh_token,email:SESSION.email};
-    localStorage.setItem("cfms_session",JSON.stringify(SESSION));return true;}catch(e){return false;}
+// HTML-escape helper — prevents XSS when injecting graph data into innerHTML
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
-async function api(path,opts={}){
-  let res=await fetch(CFG.url+path,opts);
-  if(res.status===401&&isLoggedIn()&&opts.headers&&/Bearer/.test(opts.headers.Authorization||"")){
-    if(await refreshToken()){opts.headers.Authorization="Bearer "+SESSION.access_token;res=await fetch(CFG.url+path,opts);}
-    else{toast("세션 만료 — 다시 로그인하세요.");logout();throw new Error("401");}
+
+// Build vis datasets (deterministic radial layout: apps ring around their base hub)
+const POS = {"Tomo_SFTF": {"x": -130, "y": -40}, "PFTF": {"x": 130, "y": -40}, "Tomo_SFTFSoft": {"x": -130, "y": 110}, "SFTF_Clustering": {"x": 140, "y": -190}, "Tomo_DiffSupport": {"x": -90, "y": 255}, "PFTF_GNN": {"x": -330, "y": -60}, "SFTF_InjMold": {"x": -675, "y": -150}, "SFTF_SewerPOC": {"x": -620, "y": -390}, "SFTF_PDNElectric": {"x": -380, "y": -230}, "SFTF_ThermalChip": {"x": -610, "y": -268}, "SFTF_BatteryThermal": {"x": -790, "y": -320}, "PFTF_CNC": {"x": -455, "y": -325}, "SFTF_Composite": {"x": 400, "y": -240}, "PFTF_Compression": {"x": 665, "y": -150}, "PFTF_Mold": {"x": 790, "y": -320}, "PFTF_Radiotherapy": {"x": 585, "y": -215}, "SFTF_WarehouseAGV": {"x": -790, "y": 180}, "PFTF_AssetShock": {"x": -650, "y": 300}, "SFTF_UrbanTraffic": {"x": -510, "y": 185}, "SFTF_DataCenterTraffic": {"x": -330, "y": 370}, "PFTF_subMarine": {"x": -200, "y": 430}, "PFTF_Assembly": {"x": -70, "y": 380}, "PFTF_RainNowcast": {"x": 60, "y": 430}, "PFTF_Terrain": {"x": 190, "y": 380}, "PFTF_Solar": {"x": 320, "y": 430}, "PFTF_FXShock": {"x": 435, "y": 355}, "PFTF_kDop": {"x": 560, "y": 130}, "PFTF_VisCull": {"x": 770, "y": 130}, "PFTF_Inspection": {"x": 665, "y": 265}};
+const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
+  ...(POS[n.id] ? { x: POS[n.id].x, y: POS[n.id].y, fixed: { x: true, y: true } } : {}),
+  id: n.id, label: n.label, color: n.color, size: n.size,
+  font: { ...(n.font || {}), size: Math.max(22, (n.font && n.font.size) || 0) }, title: n.title,
+  _community: n.community, _community_name: n.community_name,
+  _source_file: n.source_file, _file_type: n.file_type, _degree: n.degree,
+})));
+
+const edgesDS = new vis.DataSet(RAW_EDGES.map((e, i) => ({
+  id: i, from: e.from, to: e.to,
+  label: '',
+  title: e.title,
+  dashes: e.dashes,
+  width: e.width,
+  color: e.color,
+  arrows: { to: { enabled: true, scaleFactor: 1.0 } },
+})));
+
+const container = document.getElementById('graph');
+const network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
+  physics: {
+    enabled: false,
+    solver: 'forceAtlas2Based',
+    forceAtlas2Based: {
+      gravitationalConstant: -60,
+      centralGravity: 0.005,
+      springLength: 120,
+      springConstant: 0.08,
+      damping: 0.4,
+      avoidOverlap: 0.8,
+    },
+    stabilization: { iterations: 200, fit: true },
+  },
+  interaction: {
+    hover: true,
+    tooltipDelay: 100,
+    hideEdgesOnDrag: true,
+    navigationButtons: false,
+    keyboard: false,
+  },
+  nodes: { shape: 'dot', borderWidth: 1.5 },
+  edges: { smooth: { type: 'continuous', roundness: 0.2 }, selectionWidth: 3 },
+});
+
+network.once('stabilizationIterationsDone', () => {
+  network.setOptions({ physics: { enabled: false } });
+});
+
+function showInfo(nodeId) {
+  const n = nodesDS.get(nodeId);
+  if (!n) return;
+  const neighborIds = network.getConnectedNodes(nodeId);
+  const neighborItems = neighborIds.map(nid => {
+    const nb = nodesDS.get(nid);
+    const color = nb ? nb.color.background : '#555';
+    return `<span class="neighbor-link" style="border-left-color:${esc(color)}" data-nid="${esc(nid)}">${esc(nb ? nb.label : nid)}</span>`;
+  }).join('');
+  document.getElementById('info-content').innerHTML = `
+    <div class="field"><b>${esc(n.label)}</b></div>
+    <div class="field">Type: ${esc(n._file_type || 'unknown')}</div>
+    <div class="field">Community: ${esc(n._community_name)}</div>
+    <div class="field">Source: ${esc(n._source_file || '-')}</div>
+    <div class="field">Degree: ${n._degree}</div>
+    ${neighborIds.length ? `<div class="field" style="margin-top:8px;color:#aaa;font-size:11px">Neighbors (${neighborIds.length})</div><div id="neighbors-list">${neighborItems}</div>` : ''}
+  `;
+}
+
+function focusNode(nodeId) {
+  network.focus(nodeId, { scale: 1.4, animation: true });
+  network.selectNodes([nodeId]);
+  showInfo(nodeId);
+}
+
+// Neighbor links use a data attribute + one delegated listener rather than an
+// inline onclick. A node id/label sourced from a document or a scraped URL
+// (graphify add) can contain a double-quote; dropping the stringified id
+// unescaped into a quoted onclick both broke every link and allowed a hostile
+// source to inject an event handler into the local report (stored XSS, #1838).
+// esc() on data-nid keeps the value inside the attribute; the listener reads it
+// back verbatim. Bound to document so it survives the innerHTML rebuild that
+// recreates #neighbors-list on each showInfo().
+document.addEventListener('click', e => {
+  const el = e.target.closest('.neighbor-link');
+  if (el && el.dataset.nid !== undefined) focusNode(el.dataset.nid);
+});
+
+// Track hovered node — hover detection is more reliable than click params
+let hoveredNodeId = null;
+network.on('hoverNode', params => {
+  hoveredNodeId = params.node;
+  container.style.cursor = 'pointer';
+});
+network.on('blurNode', () => {
+  hoveredNodeId = null;
+  container.style.cursor = 'default';
+});
+container.addEventListener('click', () => {
+  if (hoveredNodeId !== null) {
+    showInfo(hoveredNodeId);
+    network.selectNodes([hoveredNodeId]);
   }
-  if(!res.ok){let t=await res.text();throw new Error(res.status+" "+t);}
-  const txt=await res.text();return txt?JSON.parse(txt):null;
-}
-
-/* ===== 그룹 색상 ===== */
-const PALETTE=["#1565c0","#2e7d32","#6a1b9a","#00838f","#e65100","#c2185b","#5d4037","#455a64","#9e9d24","#0277bd"];
-const groupColor={}; let palI=0;
-function colorOf(g){ if(!(g in groupColor)) groupColor[g]=PALETTE[palI++%PALETTE.length]; return groupColor[g]; }
-
-/* ===== 상태 ===== */
-let DATA={nodes:[],links:[]};
-let nodes=[], links=[], adj=new Map();
-let view={tx:0,ty:0,s:1}, alpha=0, showLabels=true, selected=null, hover=null, dragNode=null;
-const REP=5200, LINK_LEN=92, SPRING=0.035, GRAVITY=0.025, DAMP=0.86;
-let cv, ctx, DPR=1, raf=0;
-
-function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2500);}
-function setSave(t){document.getElementById("saveState").textContent=t;}
-
-/* ===== 시뮬레이션 ===== */
-function initSim(){
-  const N=DATA.nodes.length||1;
-  nodes=DATA.nodes.map((n,i)=>{const a=i/N*Math.PI*2;return {...n,x:Math.cos(a)*220+(i%7-3)*6,y:Math.sin(a)*220+(i%5-2)*6,vx:0,vy:0};});
-  const idx=new Map(nodes.map(n=>[n.id,n]));
-  links=(DATA.links||[]).map(l=>({source:idx.get(typeof l.source==='object'?l.source.id:l.source),target:idx.get(typeof l.target==='object'?l.target.id:l.target)})).filter(l=>l.source&&l.target);
-  adj=new Map(nodes.map(n=>[n.id,new Set()]));
-  links.forEach(l=>{adj.get(l.source.id).add(l.target.id);adj.get(l.target.id).add(l.source.id);});
-  nodes.forEach(n=>n.deg=adj.get(n.id).size);
-  reheat();
-  buildLegend();
-}
-function reheat(){alpha=0.9;if(!raf)loop();}
-function tick(){
-  const k=alpha;
-  for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){
-    const a=nodes[i],b=nodes[j];let dx=a.x-b.x,dy=a.y-b.y;let d2=dx*dx+dy*dy;if(d2<1)d2=1;const d=Math.sqrt(d2);
-    const rep=REP/d2;const fx=dx/d*rep,fy=dy/d*rep;a.vx+=fx*k;a.vy+=fy*k;b.vx-=fx*k;b.vy-=fy*k;
+});
+network.on('click', params => {
+  if (params.nodes.length > 0) {
+    showInfo(params.nodes[0]);
+  } else if (hoveredNodeId === null) {
+    document.getElementById('info-content').innerHTML = '<span class="empty">Click a node to inspect it</span>';
   }
-  for(const l of links){const a=l.source,b=l.target;let dx=b.x-a.x,dy=b.y-a.y;let d=Math.hypot(dx,dy)||1;const f=(d-LINK_LEN)*SPRING;const fx=dx/d*f,fy=dy/d*f;a.vx+=fx*k;a.vy+=fy*k;b.vx-=fx*k;b.vy-=fy*k;}
-  for(const n of nodes){n.vx+=(-n.x)*GRAVITY*k;n.vy+=(-n.y)*GRAVITY*k;}
-  for(const n of nodes){if(n===dragNode)continue;n.vx*=DAMP;n.vy*=DAMP;n.x+=n.vx;n.y+=n.vy;}
-  alpha*=0.985;if(alpha<0.005)alpha=0;
+});
+
+const searchInput = document.getElementById('search');
+const searchResults = document.getElementById('search-results');
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.toLowerCase().trim();
+  searchResults.innerHTML = '';
+  if (!q) { searchResults.style.display = 'none'; return; }
+  const matches = RAW_NODES.filter(n => n.label.toLowerCase().includes(q)).slice(0, 20);
+  if (!matches.length) { searchResults.style.display = 'none'; return; }
+  searchResults.style.display = 'block';
+  matches.forEach(n => {
+    const el = document.createElement('div');
+    el.className = 'search-item';
+    el.textContent = n.label;
+    el.style.borderLeft = `3px solid ${n.color.background}`;
+    el.style.paddingLeft = '8px';
+    el.onclick = () => {
+      network.focus(n.id, { scale: 1.5, animation: true });
+      network.selectNodes([n.id]);
+      showInfo(n.id);
+      searchResults.style.display = 'none';
+      searchInput.value = '';
+    };
+    searchResults.appendChild(el);
+  });
+});
+document.addEventListener('click', e => {
+  if (!searchResults.contains(e.target) && e.target !== searchInput)
+    searchResults.style.display = 'none';
+});
+
+const hiddenCommunities = new Set();
+
+const selectAllCb = document.getElementById('select-all-cb');
+
+function updateSelectAllState() {
+  const total = LEGEND.length;
+  const hidden = hiddenCommunities.size;
+  selectAllCb.checked = hidden === 0;
+  selectAllCb.indeterminate = hidden > 0 && hidden < total;
 }
-function radius(n){return 5+Math.min(10,(n.deg||0)*1.6);}
-function loop(){
-  raf=requestAnimationFrame(loop);
-  if(alpha>0)tick();
-  draw();
-  if(alpha===0&&!dragNode){cancelAnimationFrame(raf);raf=0;draw();}
+
+function toggleAllCommunities(hide) {
+  document.querySelectorAll('.legend-item').forEach(item => {
+    hide ? item.classList.add('dimmed') : item.classList.remove('dimmed');
+  });
+  document.querySelectorAll('.legend-cb').forEach(cb => {
+    cb.checked = !hide;
+  });
+  LEGEND.forEach(c => {
+    if (hide) hiddenCommunities.add(c.cid); else hiddenCommunities.delete(c.cid);
+  });
+  const updates = RAW_NODES.map(n => ({ id: n.id, hidden: hide }));
+  nodesDS.update(updates);
+  updateSelectAllState();
 }
-function draw(){
-  const w=cv.width/DPR,h=cv.height/DPR;
-  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,w,h);
-  ctx.save();ctx.translate(view.tx,view.ty);ctx.scale(view.s,view.s);
-  const q=document.getElementById("search").value.trim().toLowerCase();
-  const nbrs=selected?adj.get(selected):null;
-  // edges
-  ctx.lineWidth=1/view.s;
-  for(const l of links){
-    const on=selected&&(l.source.id===selected||l.target.id===selected);
-    ctx.strokeStyle=on?"rgba(120,180,255,.9)":(selected?"rgba(150,165,190,.12)":"rgba(150,165,190,.30)");
-    ctx.beginPath();ctx.moveTo(l.source.x,l.source.y);ctx.lineTo(l.target.x,l.target.y);ctx.stroke();
-  }
-  // nodes
-  for(const n of nodes){
-    const r=radius(n);
-    const dim=(selected&&n.id!==selected&&!(nbrs&&nbrs.has(n.id)))||(q&&!n.label.toLowerCase().includes(q));
-    ctx.globalAlpha=dim?0.25:1;
-    ctx.beginPath();ctx.arc(n.x,n.y,r,0,Math.PI*2);
-    ctx.fillStyle=colorOf(n.group);ctx.fill();
-    if(n.id===selected||n.id===hover){ctx.lineWidth=2/view.s;ctx.strokeStyle="#fff";ctx.stroke();}
-    if(showLabels&&(view.s>0.55||n.id===hover||n.id===selected||(q&&n.label.toLowerCase().includes(q)))){
-      ctx.globalAlpha=dim?0.3:0.95;ctx.fillStyle="#dce6f5";ctx.font="11px Segoe UI,Malgun Gothic";
-      ctx.save();ctx.translate(n.x+r+2,n.y+3);ctx.scale(1/view.s,1/view.s);ctx.fillText(n.label,0,0);ctx.restore();
+
+const legendEl = document.getElementById('legend');
+LEGEND.forEach(c => {
+  const item = document.createElement('div');
+  item.className = 'legend-item';
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.className = 'legend-cb';
+  cb.checked = true;
+  cb.addEventListener('change', (e) => {
+    e.stopPropagation();
+    if (cb.checked) {
+      hiddenCommunities.delete(c.cid);
+      item.classList.remove('dimmed');
+    } else {
+      hiddenCommunities.add(c.cid);
+      item.classList.add('dimmed');
     }
-    ctx.globalAlpha=1;
-  }
+    const updates = RAW_NODES
+      .filter(n => n.community === c.cid)
+      .map(n => ({ id: n.id, hidden: !cb.checked }));
+    nodesDS.update(updates);
+    updateSelectAllState();
+  });
+  item.innerHTML = `<div class="legend-dot" style="background:${c.color}"></div>
+    <span class="legend-label">${c.label}</span>
+    <span class="legend-count">${c.count}</span>`;
+  item.prepend(cb);
+  item.onclick = (e) => {
+    if (e.target === cb) return;
+    cb.checked = !cb.checked;
+    cb.dispatchEvent(new Event('change'));
+  };
+  legendEl.appendChild(item);
+});
+</script>
+<script>
+// Render hyperedges as shaded regions
+const hyperedges = [{"label": "발견1 줄 세우기는 0차+연결지도 (랭킹 마진 +0.01)", "nodes": ["SFTF_InjMold", "SFTF_SewerPOC", "SFTF_PDNElectric", "SFTF_ThermalChip", "SFTF_BatteryThermal", "PFTF_CNC"]}, {"label": "발견2 2차는 크기·보정 (RMSE 4x, 잔차 0%)", "nodes": ["SFTF_Composite", "PFTF_Compression", "PFTF_Mold", "PFTF_Radiotherapy"]}, {"label": "발견3 1차를 죽이는 범인들 (보존칙·제곱식·강한 solver)", "nodes": ["SFTF_WarehouseAGV", "PFTF_AssetShock", "SFTF_UrbanTraffic"]}, {"label": "발견3' 대조: 1차가 사는 곳 (부호 결정적·1차 주연)", "nodes": ["SFTF_DataCenterTraffic", "PFTF_subMarine", "PFTF_Assembly", "PFTF_RainNowcast", "PFTF_Terrain", "PFTF_Solar", "PFTF_FXShock"]}, {"label": "발견4·5·6 보수성 게이트: 경계 vs 모멘트 · 양화사 · ±d", "nodes": ["PFTF_kDop", "PFTF_VisCull", "PFTF_Inspection"]}];
+// afterDrawing passes ctx already transformed to network coordinate space.
+// Draw node positions raw — no manual pan/zoom/DPR math needed.
+network.on('afterDrawing', function(ctx) {
+    hyperedges.forEach(h => {
+        const positions = h.nodes
+            .map(nid => network.getPositions([nid])[nid])
+            .filter(p => p !== undefined);
+        if (positions.length < 2) return;
+        ctx.save();
+        ctx.globalAlpha = 0.12;
+        ctx.fillStyle = '#6366f1';
+        ctx.strokeStyle = '#6366f1';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        // CONVEX hull (Andrew monotone chain), then expand from centroid
+        const pts = positions.slice().sort((a, b) => a.x - b.x || a.y - b.y);
+        const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+        const lower = [];
+        for (const p of pts) {
+            while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop();
+            lower.push(p);
+        }
+        const upper = [];
+        for (let i = pts.length - 1; i >= 0; i--) {
+            const p = pts[i];
+            while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop();
+            upper.push(p);
+        }
+        const hull = lower.slice(0, -1).concat(upper.slice(0, -1));
+        const cx = hull.reduce((s, p) => s + p.x, 0) / hull.length;
+        const cy = hull.reduce((s, p) => s + p.y, 0) / hull.length;
+        const expanded = hull.map(p => ({
+            x: cx + (p.x - cx) * 1.25,
+            y: cy + (p.y - cy) * 1.25
+        }));
+        ctx.moveTo(expanded[0].x, expanded[0].y);
+        expanded.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 0.4;
+        ctx.stroke();
+        // Label
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = '#4f46e5';
+        ctx.font = 'bold 20px sans-serif';
+        ctx.textAlign = 'center';
+        const topY = Math.min.apply(null, expanded.map(p => p.y)); ctx.fillText(h.label, cx, topY - 16);
+        ctx.restore();
+    });
+// FINDING_DEPS_BEGIN — 발견 간 의존성 (분류표 노트의 DAG, layout_findings.py 정본)
+const FINDING_DEPS = [
+  {from:0, to:1, style:"solid",    label:"전제(사다리·레이스)"},
+  {from:0, to:2, style:"solid",    label:"전제"},
+  {from:0, to:4, style:"solid",    label:"전제", labelT:0.22},
+  {from:2, to:1, style:"dotted",   label:"\u2124\u2082 보조정리", labelT:0.78},
+  {from:2, to:4, style:"double",   label:"\u2124\u2082 쌍대(\u00b1d)"},
+  {from:2, to:3, style:"contrast", label:"소거 \u2194 생존 대비"},
+];
+function _regionCentroid(h) {
+  const ps = h.nodes.map(nid => network.getPositions([nid])[nid]).filter(p => p);
+  return {x: ps.reduce((s,p)=>s+p.x,0)/ps.length,
+          y: ps.reduce((s,p)=>s+p.y,0)/ps.length};
+}
+(function(ctx) {
+  ctx.save();
+  FINDING_DEPS.forEach(dp => {
+    const a = _regionCentroid(hyperedges[dp.from]);
+    const b = _regionCentroid(hyperedges[dp.to]);
+    const dx = b.x-a.x, dy = b.y-a.y, L = Math.hypot(dx,dy);
+    const ux = dx/L, uy = dy/L;
+    const x1 = a.x+ux*115, y1 = a.y+uy*115;   // 영역 라벨을 피해 안쪽에서 시작/끝
+    const x2 = b.x-ux*135, y2 = b.y-uy*135;
+    // 전부 dashed + 5배 두께 + 반투명: 노드 간 실선 엣지와 확실히 구분
+    ctx.beginPath();
+    ctx.lineWidth = dp.style === "double" ? 15 : 8;
+    ctx.strokeStyle = dp.style === "contrast" ? "#8a8a5e" : "#a5a8f5";
+    ctx.setLineDash(dp.style === "dotted" ? [4,10]
+                    : dp.style === "double" ? [22,14]
+                    : dp.style === "contrast" ? [10,12] : [14,10]);
+    ctx.globalAlpha = 0.22;
+    ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.setLineDash([]);
+    if (dp.style !== "contrast") {            // 화살촉 (두께에 맞춰 확대)
+      const ah = dp.style === "double" ? 34 : 26;
+      ctx.beginPath();
+      ctx.moveTo(x2+ux*10,y2+uy*10);
+      ctx.lineTo(x2-ux*ah-uy*ah*0.45, y2-uy*ah+ux*ah*0.45);
+      ctx.lineTo(x2-ux*ah+uy*ah*0.45, y2-uy*ah-ux*ah*0.45);
+      ctx.closePath();
+      ctx.globalAlpha = 0.32;
+      ctx.fillStyle = ctx.strokeStyle; ctx.fill();
+    }
+    ctx.globalAlpha = 0.95;
+    ctx.fillStyle = "#4a4dbf";
+    ctx.font = "18px sans-serif"; ctx.textAlign = "center";
+    const t = dp.labelT === undefined ? 0.5 : dp.labelT;
+    ctx.fillText(dp.label, x1+(x2-x1)*t, y1+(y2-y1)*t - 6);
+  });
   ctx.restore();
-}
-
-/* ===== 좌표 변환 / 히트테스트 ===== */
-function toWorld(mx,my){return {x:(mx-view.tx)/view.s,y:(my-view.ty)/view.s};}
-function nodeAt(mx,my){
-  const p=toWorld(mx,my);let best=null,bd=1e9;
-  for(const n of nodes){const r=radius(n)+4;const d=Math.hypot(n.x-p.x,n.y-p.y);if(d<r&&d<bd){bd=d;best=n;}}
-  return best;
-}
-function fitView(){
-  if(!nodes.length)return;
-  let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
-  for(const n of nodes){minx=Math.min(minx,n.x);miny=Math.min(miny,n.y);maxx=Math.max(maxx,n.x);maxy=Math.max(maxy,n.y);}
-  const w=cv.width/DPR,h=cv.height/DPR,gw=maxx-minx||1,gh=maxy-miny||1;
-  view.s=Math.max(.3,Math.min(2,0.85*Math.min(w/gw,h/gh)));
-  view.tx=w/2-(minx+maxx)/2*view.s;view.ty=h/2-(miny+maxy)/2*view.s;
-  draw();
-}
-
-/* ===== 패널/범례 ===== */
-function buildLegend(){
-  const groups=[...new Set(nodes.map(n=>n.group))];
-  document.getElementById("legend").innerHTML=groups.map(g=>`<span class="lg"><i style="background:${colorOf(g)}"></i>${esc(g)} (${nodes.filter(n=>n.group===g).length})</span>`).join("");
-}
-function esc(s){return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-function showInfo(n){
-  const box=document.getElementById("info");
-  if(!n){box.style.display="none";return;}
-  const nb=[...(adj.get(n.id)||[])];
-  box.style.display="block";
-  box.innerHTML=`<h3>${esc(n.label)}</h3><div class="meta">${esc(n.group)}${n.status?" · "+esc(n.status):""} · 연결 ${nb.length}</div>`+
-    (nb.length?`<div>연결:</div><ul>${nb.map(id=>`<li onclick="selectNode('${id.replace(/'/g,"\\'")}')">${esc(id)}</li>`).join("")}</ul>`:"<div style='color:#94a3b8'>연결 없음</div>");
-}
-function selectNode(id){selected=id;const n=nodes.find(x=>x.id===id);showInfo(n);draw();}
-
-/* ===== 클라우드 저장/불러오기 ===== */
-const DOC_ID='vault-graph';
-function validate(d){return d&&Array.isArray(d.nodes)&&Array.isArray(d.links);}
-async function loadDoc(){
-  try{
-    const rows=await api('/rest/v1/mindmaps?id=eq.'+DOC_ID+'&select=data',{headers:authHeaders(true)});
-    DATA=(rows&&rows.length&&validate(rows[0].data))?rows[0].data:JSON.parse(JSON.stringify(DEFAULT_GRAPH));
-    initSim();fitView();setSave("");
-    if(!(rows&&rows.length)){showBanner("아직 저장된 그래프가 없어 기본값을 표시합니다. 최신 볼트는 scripts/build-vault-graph.mjs 로 만들어 '볼트에서 불러오기' 하세요.");}
-  }catch(e){
-    const b=document.getElementById("banner");b.style.display="block";
-    if(/relation|does not exist|42P01|PGRST205|404/i.test(e.message)) b.textContent="mindmaps 테이블이 없습니다. enable_rls_mindmaps.sql 을 먼저 실행하세요.";
-    else { b.textContent="불러오기 실패: "+e.message.slice(0,120)+" — 기본값을 표시합니다."; DATA=JSON.parse(JSON.stringify(DEFAULT_GRAPH));initSim();fitView(); }
-  }
-}
-async function saveDoc(silent){
-  if(!isLoggedIn())return;setSave("저장 중…");
-  try{
-    await api('/rest/v1/mindmaps',{method:'POST',headers:Object.assign(authHeaders(true),{Prefer:'resolution=merge-duplicates,return=minimal'}),
-      body:JSON.stringify({id:DOC_ID,data:DATA,updated_at:new Date().toISOString()})});
-    setSave("저장됨 ✓");if(!silent)toast("그래프를 클라우드에 저장했습니다.");
-  }catch(e){setSave("저장 실패");toast("저장 실패: "+e.message.slice(0,100));}
-}
-function download(name,text){const b=new Blob([text],{type:"application/json"}),u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);}
-function exportJSON(){download("vault-graph.json",JSON.stringify(DATA,null,2));toast("백업 JSON을 내려받았습니다.");}
-function importJSON(input){
-  const f=input.files[0];if(!f)return;const r=new FileReader();
-  r.onload=()=>{try{const d=JSON.parse(r.result);if(!validate(d)){toast("형식 오류: nodes/links 필요");return;}
-    DATA=d;initSim();fitView();saveDoc(false);toast(`불러왔습니다 (노드 ${d.nodes.length}).`);
-  }catch(e){toast("JSON 파싱 실패");}};
-  r.readAsText(f);input.value="";
-}
-function showBanner(m){const b=document.getElementById("banner");b.textContent=m;b.style.display="block";}
-
-/* ===== 보기 토글 ===== */
-function toggleLabels(){showLabels=!showLabels;document.getElementById("lblBtn").textContent="라벨 "+(showLabels?"✓":"✕");draw();}
-
-/* ===== 인증/게이트 ===== */
-async function login(where){
-  const email=document.getElementById(where==='g'?'gEmail':'liEmail').value.trim();
-  const pw=document.getElementById(where==='g'?'gPw':'liPw').value;
-  if(!email||!pw){toast("이메일/비밀번호 입력");return;}
-  try{
-    const r=await api('/auth/v1/token?grant_type=password',{method:"POST",headers:{"apikey":CFG.key,"Content-Type":"application/json"},body:JSON.stringify({email,password:pw})});
-    SESSION={access_token:r.access_token,refresh_token:r.refresh_token,email};localStorage.setItem("cfms_session",JSON.stringify(SESSION));
-    toast("로그인되었습니다.");renderAuthbar();showApp();await loadDoc();
-  }catch(e){const m="로그인 실패: 이메일/비밀번호 확인";toast(m);document.getElementById("gateMsg").textContent=m;}
-}
-function logout(){SESSION=null;localStorage.removeItem("cfms_session");renderAuthbar();showGate();}
-function renderAuthbar(){
-  const bar=document.getElementById("authbar");
-  if(isLoggedIn())bar.innerHTML=`<span class="pill">✔ ${esc(SESSION.email)}</span> <button class="btn sm" onclick="logout()">로그아웃</button>`;
-  else bar.innerHTML=`<input id="liEmail" placeholder="이메일" style="width:140px"><input id="liPw" type="password" placeholder="비밀번호" style="width:110px"><button class="btn sm p" onclick="login('h')">로그인</button>`;
-}
-function showApp(){document.getElementById("gate").style.display="none";document.getElementById("wrap").style.display="block";document.getElementById("tools").style.display="flex";resize();}
-function showGate(){document.getElementById("wrap").style.display="none";document.getElementById("tools").style.display="none";document.getElementById("gate").style.display="flex";document.getElementById("banner").style.display="none";}
-
-/* ===== 캔버스 이벤트 ===== */
-function resize(){
-  DPR=window.devicePixelRatio||1;const w=cv.clientWidth,h=cv.clientHeight;
-  cv.width=w*DPR;cv.height=h*DPR;draw();
-}
-function bind(){
-  cv=document.getElementById("cv");ctx=cv.getContext("2d");
-  window.addEventListener("resize",()=>{if(document.getElementById("wrap").style.display!=="none")resize();});
-  let panning=false,last=null;
-  cv.addEventListener("mousedown",e=>{
-    const r=cv.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;
-    const n=nodeAt(mx,my);
-    if(n){dragNode=n;selectNode(n.id);reheat();}
-    else{panning=true;last={x:e.clientX,y:e.clientY};selected=null;showInfo(null);draw();}
-  });
-  window.addEventListener("mousemove",e=>{
-    const r=cv.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;
-    if(dragNode){const p=toWorld(mx,my);dragNode.x=p.x;dragNode.y=p.y;dragNode.vx=0;dragNode.vy=0;draw();return;}
-    if(panning){view.tx+=e.clientX-last.x;view.ty+=e.clientY-last.y;last={x:e.clientX,y:e.clientY};draw();return;}
-    const hv=nodeAt(mx,my);const id=hv?hv.id:null;if(id!==hover){hover=id;cv.style.cursor=hv?"pointer":"grab";draw();}
-  });
-  window.addEventListener("mouseup",()=>{if(dragNode){dragNode=null;reheat();}panning=false;});
-  cv.addEventListener("wheel",e=>{e.preventDefault();const r=cv.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;
-    const f=e.deltaY<0?1.1:1/1.1,ns=Math.max(.15,Math.min(4,view.s*f));
-    view.tx=mx-(mx-view.tx)*(ns/view.s);view.ty=my-(my-view.ty)*(ns/view.s);view.s=ns;draw();},{passive:false});
-  document.getElementById("search").addEventListener("input",draw);
-}
-
-/* ===== 부팅 ===== */
-async function boot(){bind();renderAuthbar();if(isLoggedIn()){showApp();await loadDoc();}else{showGate();}}
-boot();
+})(ctx);
+// FINDING_DEPS_END
+});
 </script>
 </body>
 </html>
