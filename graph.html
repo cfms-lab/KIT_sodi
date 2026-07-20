@@ -77,9 +77,27 @@ function esc(s) {
 
 // Build vis datasets (deterministic radial layout: apps ring around their base hub)
 const POS = {"Tomo_SFTF": {"x": -130, "y": -40}, "PFTF": {"x": 130, "y": -40}, "Tomo_SFTFSoft": {"x": -130, "y": 110}, "SFTF_Clustering": {"x": 140, "y": -190}, "Tomo_DiffSupport": {"x": -90, "y": 255}, "PFTF_GNN": {"x": -330, "y": -60}, "SFTF_InjMold": {"x": -675, "y": -150}, "SFTF_SewerPOC": {"x": -620, "y": -390}, "SFTF_PDNElectric": {"x": -380, "y": -230}, "SFTF_ThermalChip": {"x": -610, "y": -268}, "SFTF_BatteryThermal": {"x": -790, "y": -320}, "PFTF_CNC": {"x": -455, "y": -325}, "SFTF_Composite": {"x": 400, "y": -240}, "PFTF_Compression": {"x": 665, "y": -150}, "PFTF_Mold": {"x": 790, "y": -320}, "PFTF_Radiotherapy": {"x": 585, "y": -215}, "SFTF_WarehouseAGV": {"x": -790, "y": 180}, "PFTF_AssetShock": {"x": -650, "y": 300}, "SFTF_UrbanTraffic": {"x": -510, "y": 185}, "SFTF_DataCenterTraffic": {"x": -330, "y": 370}, "PFTF_subMarine": {"x": -200, "y": 430}, "PFTF_Assembly": {"x": -70, "y": 380}, "PFTF_RainNowcast": {"x": 60, "y": 430}, "PFTF_Terrain": {"x": 190, "y": 380}, "PFTF_Solar": {"x": 320, "y": 430}, "PFTF_FXShock": {"x": 435, "y": 355}, "PFTF_kDop": {"x": 560, "y": 130}, "PFTF_VisCull": {"x": 770, "y": 130}, "PFTF_Inspection": {"x": 665, "y": 265}};
+// === 투고 상태 배지 (submit / revision / accepted / printed) ===
+// 값 형식: "저널,상태,MM-DD". draft 단계는 표기하지 않음.
+// 정본: Papers/투고현황.md frontmatter(graph_badges) — graphify-out/status_badges.py 로 재적용 가능.
+const STATUS_BADGES = {
+  "Tomo_SFTF": "RPJ,submit,07-20"
+};
+const STATUS_COLORS = { submit: "#d4a017", revision: "#e06e10", accepted: "#12a150", printed: "#7a3fd1" };
+RAW_NODES.forEach(n => {
+  const b = STATUS_BADGES[n.id];
+  if (!b) return;
+  n.label = n.label + "\n[" + b + "]";
+  n.title = (n.title || n.id) + " — 투고: " + b;
+  const st = (b.split(",")[1] || "").trim();
+  const c = STATUS_COLORS[st] || "#d4a017";
+  n.color = Object.assign({}, n.color, { border: c, highlight: Object.assign({}, (n.color && n.color.highlight) || {}, { border: c }) });
+  n.borderWidth = 5;
+});
+
 const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
   ...(POS[n.id] ? { x: POS[n.id].x, y: POS[n.id].y, fixed: { x: true, y: true } } : {}),
-  id: n.id, label: n.label, color: n.color, size: n.size,
+  id: n.id, label: n.label, color: n.color, size: n.size, borderWidth: n.borderWidth || 1,
   font: { ...(n.font || {}), size: Math.max(22, (n.font && n.font.size) || 0) }, title: n.title,
   _community: n.community, _community_name: n.community_name,
   _source_file: n.source_file, _file_type: n.file_type, _degree: n.degree,
