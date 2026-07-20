@@ -63,7 +63,10 @@
     </div>
     <div id="legend"></div>
   </div>
-  <div id="stats">29 nodes &middot; 34 edges &middot; 5 communities</div>
+  <div id="stats">29 nodes &middot; 34 edges &middot; 5 communities
+    &nbsp;<button id="reset-pos-btn" style="font-size:11px;padding:2px 8px;cursor:pointer;border:1px solid #999;border-radius:4px;background:#f4f4f4">위치 초기화</button>
+    <button id="copy-pos-btn" style="font-size:11px;padding:2px 8px;cursor:pointer;border:1px solid #999;border-radius:4px;background:#f4f4f4">위치 복사</button>
+  </div>
 </div>
 <script>
 const RAW_NODES = [{"id": "Tomo_SFTF", "label": "Tomo_SFTF", "color": {"background": "#c8c8c8", "border": "#bbbbbb", "highlight": {"background": "#c8c8c8", "border": "#c8c8c8"}}, "size": 31.4, "font": {"size": 12, "color": "#333333"}, "title": "Tomo_SFTF", "community": 0, "community_name": "베이스 (이론·투고 트랙)", "source_file": "Tomo_SFTF.md", "file_type": "concept", "degree": 10}, {"id": "Tomo_SFTFSoft", "label": "Tomo_SFTFSoft", "color": {"background": "#c8c8c8", "border": "#bbbbbb", "highlight": {"background": "#c8c8c8", "border": "#c8c8c8"}}, "size": 16.4, "font": {"size": 12, "color": "#333333"}, "title": "Tomo_SFTFSoft", "community": 0, "community_name": "베이스 (이론·투고 트랙)", "source_file": "Tomo_SFTFSoft.md", "file_type": "concept", "degree": 3}, {"id": "SFTF_Clustering", "label": "SFTF_Clustering", "color": {"background": "#c8c8c8", "border": "#bbbbbb", "highlight": {"background": "#c8c8c8", "border": "#c8c8c8"}}, "size": 16.4, "font": {"size": 12, "color": "#333333"}, "title": "SFTF_Clustering", "community": 0, "community_name": "베이스 (이론·투고 트랙)", "source_file": "SFTF_Clustering.md", "file_type": "concept", "degree": 3}, {"id": "PFTF", "label": "PFTF", "color": {"background": "#c8c8c8", "border": "#bbbbbb", "highlight": {"background": "#c8c8c8", "border": "#c8c8c8"}}, "size": 40.0, "font": {"size": 12, "color": "#333333"}, "title": "PFTF", "community": 0, "community_name": "베이스 (이론·투고 트랙)", "source_file": "PFTF.md", "file_type": "concept", "degree": 14}, {"id": "SFTF_Composite", "label": "SFTF_Composite", "color": {"background": "#e02020", "border": "#8f1414", "highlight": {"background": "#c8c8c8", "border": "#e02020"}}, "size": 14.3, "font": {"size": 0, "color": "#333333"}, "title": "SFTF_Composite", "community": 1, "community_name": "上 SCI-E", "source_file": "SFTF_Composite.md", "file_type": "concept", "degree": 2}, {"id": "SFTF_InjMold", "label": "SFTF_InjMold", "color": {"background": "#e02020", "border": "#8f1414", "highlight": {"background": "#c8c8c8", "border": "#e02020"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "SFTF_InjMold", "community": 1, "community_name": "上 SCI-E", "source_file": "SFTF_InjMold.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_Compression", "label": "PFTF_Compression", "color": {"background": "#f28e2b", "border": "#a35e1a", "highlight": {"background": "#c8c8c8", "border": "#f28e2b"}}, "size": 14.3, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_Compression", "community": 2, "community_name": "中~上", "source_file": "PFTF_Compression.md", "file_type": "concept", "degree": 2}, {"id": "SFTF_ThermalChip", "label": "SFTF_ThermalChip", "color": {"background": "#f28e2b", "border": "#a35e1a", "highlight": {"background": "#c8c8c8", "border": "#f28e2b"}}, "size": 14.3, "font": {"size": 0, "color": "#333333"}, "title": "SFTF_ThermalChip", "community": 2, "community_name": "中~上", "source_file": "SFTF_ThermalChip.md", "file_type": "concept", "degree": 2}, {"id": "PFTF_Mold", "label": "PFTF_Mold", "color": {"background": "#f28e2b", "border": "#a35e1a", "highlight": {"background": "#c8c8c8", "border": "#f28e2b"}}, "size": 14.3, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_Mold", "community": 2, "community_name": "中~上", "source_file": "PFTF_Mold.md", "file_type": "concept", "degree": 2}, {"id": "Tomo_DiffSupport", "label": "Tomo_DiffSupport", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "Tomo_DiffSupport", "community": 3, "community_name": "中 SCOPUS", "source_file": "Tomo_DiffSupport.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_kDop", "label": "PFTF_kDop", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 18.6, "font": {"size": 12, "color": "#333333"}, "title": "PFTF_kDop", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_kDop.md", "file_type": "concept", "degree": 4}, {"id": "PFTF_VisCull", "label": "PFTF_VisCull", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 16.4, "font": {"size": 12, "color": "#333333"}, "title": "PFTF_VisCull", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_VisCull.md", "file_type": "concept", "degree": 3}, {"id": "SFTF_SewerPOC", "label": "SFTF_SewerPOC", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 16.4, "font": {"size": 12, "color": "#333333"}, "title": "SFTF_SewerPOC", "community": 3, "community_name": "中 SCOPUS", "source_file": "SFTF_SewerPOC.md", "file_type": "concept", "degree": 3}, {"id": "PFTF_FXShock", "label": "PFTF_FXShock", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_FXShock", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_FXShock.md", "file_type": "concept", "degree": 1}, {"id": "SFTF_BatteryThermal", "label": "SFTF_BatteryThermal", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 14.3, "font": {"size": 0, "color": "#333333"}, "title": "SFTF_BatteryThermal", "community": 3, "community_name": "中 SCOPUS", "source_file": "SFTF_BatteryThermal.md", "file_type": "concept", "degree": 2}, {"id": "SFTF_PDNElectric", "label": "SFTF_PDNElectric", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 14.3, "font": {"size": 0, "color": "#333333"}, "title": "SFTF_PDNElectric", "community": 3, "community_name": "中 SCOPUS", "source_file": "SFTF_PDNElectric.md", "file_type": "concept", "degree": 2}, {"id": "PFTF_Inspection", "label": "PFTF_Inspection", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_Inspection", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_Inspection.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_RainNowcast", "label": "PFTF_RainNowcast", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_RainNowcast", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_RainNowcast.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_Terrain", "label": "PFTF_Terrain", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_Terrain", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_Terrain.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_Solar", "label": "PFTF_Solar", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_Solar", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_Solar.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_subMarine", "label": "PFTF_subMarine", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_subMarine", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_subMarine.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_Assembly", "label": "PFTF_Assembly", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_Assembly", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_Assembly.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_CNC", "label": "PFTF_CNC", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_CNC", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_CNC.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_Radiotherapy", "label": "PFTF_Radiotherapy", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_Radiotherapy", "community": 3, "community_name": "中 SCOPUS", "source_file": "PFTF_Radiotherapy.md", "file_type": "concept", "degree": 1}, {"id": "SFTF_DataCenterTraffic", "label": "SFTF_DataCenterTraffic", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "SFTF_DataCenterTraffic", "community": 3, "community_name": "中 SCOPUS", "source_file": "SFTF_DataCenterTraffic.md", "file_type": "concept", "degree": 1}, {"id": "SFTF_UrbanTraffic", "label": "SFTF_UrbanTraffic", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "SFTF_UrbanTraffic", "community": 3, "community_name": "中 SCOPUS", "source_file": "SFTF_UrbanTraffic.md", "file_type": "concept", "degree": 1}, {"id": "SFTF_WarehouseAGV", "label": "SFTF_WarehouseAGV", "color": {"background": "#2e9e44", "border": "#1e6b2e", "highlight": {"background": "#c8c8c8", "border": "#2e9e44"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "SFTF_WarehouseAGV", "community": 3, "community_name": "中 SCOPUS", "source_file": "SFTF_WarehouseAGV.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_AssetShock", "label": "PFTF_AssetShock", "color": {"background": "#2a78d6", "border": "#1b4e8c", "highlight": {"background": "#c8c8c8", "border": "#2a78d6"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_AssetShock", "community": 4, "community_name": "下", "source_file": "PFTF_AssetShock.md", "file_type": "concept", "degree": 1}, {"id": "PFTF_GNN", "label": "PFTF_GNN", "color": {"background": "#2a78d6", "border": "#1b4e8c", "highlight": {"background": "#c8c8c8", "border": "#2a78d6"}}, "size": 12.1, "font": {"size": 0, "color": "#333333"}, "title": "PFTF_GNN", "community": 4, "community_name": "下", "source_file": "PFTF_GNN.md", "file_type": "concept", "degree": 1}];
@@ -76,7 +79,7 @@ function esc(s) {
 }
 
 // Build vis datasets (deterministic radial layout: apps ring around their base hub)
-const POS = {"Tomo_SFTF": {"x": -130, "y": -40}, "PFTF": {"x": 130, "y": -40}, "Tomo_SFTFSoft": {"x": -130, "y": 110}, "SFTF_Clustering": {"x": 140, "y": -190}, "Tomo_DiffSupport": {"x": -90, "y": 255}, "PFTF_GNN": {"x": -330, "y": -60}, "SFTF_InjMold": {"x": -675, "y": -150}, "SFTF_SewerPOC": {"x": -620, "y": -390}, "SFTF_PDNElectric": {"x": -380, "y": -230}, "SFTF_ThermalChip": {"x": -610, "y": -268}, "SFTF_BatteryThermal": {"x": -790, "y": -320}, "PFTF_CNC": {"x": -455, "y": -325}, "SFTF_Composite": {"x": 400, "y": -240}, "PFTF_Compression": {"x": 665, "y": -150}, "PFTF_Mold": {"x": 790, "y": -320}, "PFTF_Radiotherapy": {"x": 585, "y": -215}, "SFTF_WarehouseAGV": {"x": -790, "y": 180}, "PFTF_AssetShock": {"x": -650, "y": 300}, "SFTF_UrbanTraffic": {"x": -510, "y": 185}, "SFTF_DataCenterTraffic": {"x": -330, "y": 370}, "PFTF_subMarine": {"x": -200, "y": 430}, "PFTF_Assembly": {"x": -70, "y": 380}, "PFTF_RainNowcast": {"x": 60, "y": 430}, "PFTF_Terrain": {"x": 190, "y": 380}, "PFTF_Solar": {"x": 320, "y": 430}, "PFTF_FXShock": {"x": 435, "y": 355}, "PFTF_kDop": {"x": 560, "y": 130}, "PFTF_VisCull": {"x": 770, "y": 130}, "PFTF_Inspection": {"x": 665, "y": 265}};
+const POS = {"Tomo_SFTF": {"x": -153, "y": -79}, "Tomo_SFTFSoft": {"x": -32, "y": 35}, "SFTF_Clustering": {"x": -23, "y": -387}, "PFTF": {"x": 293, "y": -95}, "SFTF_Composite": {"x": 125, "y": -427}, "SFTF_InjMold": {"x": -632, "y": -100}, "PFTF_Compression": {"x": 587, "y": -159}, "SFTF_ThermalChip": {"x": -585, "y": -248}, "PFTF_Mold": {"x": 408, "y": -444}, "Tomo_DiffSupport": {"x": 72, "y": -51}, "PFTF_kDop": {"x": 679, "y": 20}, "PFTF_VisCull": {"x": 791, "y": 166}, "SFTF_SewerPOC": {"x": -208, "y": -413}, "PFTF_FXShock": {"x": 435, "y": 355}, "SFTF_BatteryThermal": {"x": -625, "y": -403}, "SFTF_PDNElectric": {"x": -380, "y": -230}, "PFTF_Inspection": {"x": 622, "y": 290}, "PFTF_RainNowcast": {"x": 81, "y": 489}, "PFTF_Terrain": {"x": 204, "y": 394}, "PFTF_Solar": {"x": 308, "y": 474}, "PFTF_subMarine": {"x": -97, "y": 359}, "PFTF_Assembly": {"x": -38, "y": 428}, "PFTF_CNC": {"x": -455, "y": -325}, "PFTF_Radiotherapy": {"x": 468, "y": -288}, "SFTF_DataCenterTraffic": {"x": -278, "y": 329}, "SFTF_UrbanTraffic": {"x": -521, "y": 235}, "SFTF_WarehouseAGV": {"x": -607, "y": 146}, "PFTF_AssetShock": {"x": -119, "y": 138}, "PFTF_GNN": {"x": -330, "y": -60}};
 // === 투고 상태 배지 (submit / revision / accepted / printed) ===
 // 값 형식: "저널,상태,MM-DD". draft 단계는 표기하지 않음.
 // 정본: Papers/투고현황.md frontmatter(graph_badges) — graphify-out/status_badges.py 로 재적용 가능.
@@ -95,8 +98,15 @@ RAW_NODES.forEach(n => {
   n.borderWidth = 5;
 });
 
+// 드래그 위치 저장소: localStorage 값이 있으면 POS(기본 배치)보다 우선한다.
+// fixed 플래그는 걸지 않는다 — physics가 꺼져 있으므로 노드는 드래그한
+// 자리에 그대로 머물고, dragEnd에서 그 좌표를 저장한다.
+const POS_STORE_KEY = 'graphify_graph_positions_v1';
+let savedPos = {};
+try { savedPos = JSON.parse(localStorage.getItem(POS_STORE_KEY) || '{}') || {}; } catch (e) { savedPos = {}; }
+
 const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
-  ...(POS[n.id] ? { x: POS[n.id].x, y: POS[n.id].y, fixed: { x: true, y: true } } : {}),
+  ...((savedPos[n.id] || POS[n.id]) ? { x: (savedPos[n.id] || POS[n.id]).x, y: (savedPos[n.id] || POS[n.id]).y } : {}),
   id: n.id, label: n.label, color: n.color, size: n.size, borderWidth: n.borderWidth || 1,
   font: { ...(n.font || {}), size: Math.max(22, (n.font && n.font.size) || 0) }, title: n.title,
   _community: n.community, _community_name: n.community_name,
@@ -141,6 +151,50 @@ const network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
 
 network.once('stabilizationIterationsDone', () => {
   network.setOptions({ physics: { enabled: false } });
+});
+
+// === 드래그 위치 영속화 ===============================================
+// 드래그가 끝나면 해당 노드들의 좌표를 localStorage에 저장한다.
+// (이 브라우저에서 다시 열 때 저장 위치가 기본 배치 POS를 덮어쓴다.)
+network.on('dragEnd', params => {
+  if (!params.nodes || params.nodes.length === 0) return;
+  const positions = network.getPositions(params.nodes);
+  params.nodes.forEach(id => {
+    const p = positions[id];
+    if (p) savedPos[id] = { x: Math.round(p.x), y: Math.round(p.y) };
+  });
+  try { localStorage.setItem(POS_STORE_KEY, JSON.stringify(savedPos)); } catch (e) {}
+});
+
+// "위치 초기화": 저장본을 지우고 파일에 내장된 기본 배치(POS)로 복귀.
+document.getElementById('reset-pos-btn').addEventListener('click', () => {
+  savedPos = {};
+  try { localStorage.removeItem(POS_STORE_KEY); } catch (e) {}
+  RAW_NODES.forEach(n => { if (POS[n.id]) network.moveNode(n.id, POS[n.id].x, POS[n.id].y); });
+  network.fit({ animation: true });
+});
+
+// "위치 복사": 현재 전체 배치를 POS 상수 형식의 JSON으로 클립보드에 복사.
+// 마음에 드는 배치를 이 파일의 `const POS = {...}` 줄에 붙여 넣으면
+// (또는 그렇게 요청하면) 저장 없이도 모든 브라우저·배포본의 기본값이 된다.
+document.getElementById('copy-pos-btn').addEventListener('click', () => {
+  const all = network.getPositions(RAW_NODES.map(n => n.id));
+  const entries = RAW_NODES.map(n => {
+    const p = all[n.id];
+    return `"${n.id}": {"x": ${Math.round(p.x)}, "y": ${Math.round(p.y)}}`;
+  });
+  const text = 'const POS = {' + entries.join(', ') + '};';
+  const done = () => {
+    const btn = document.getElementById('copy-pos-btn');
+    const old = btn.textContent;
+    btn.textContent = '복사됨!';
+    setTimeout(() => { btn.textContent = old; }, 1500);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done, () => window.prompt('복사 실패 — 직접 복사하세요:', text));
+  } else {
+    window.prompt('직접 복사하세요:', text);
+  }
 });
 
 function showInfo(nodeId) {
