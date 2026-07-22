@@ -367,8 +367,22 @@ network.on('afterDrawing', function(ctx) {
         ctx.strokeStyle = '#6366f1';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        // CONVEX hull (Andrew monotone chain), then expand from centroid
-        const pts = positions.slice().sort((a, b) => a.x - b.x || a.y - b.y);
+        // CONVEX hull (Andrew monotone chain), then expand from centroid.
+        // 소집합(멤버<=2) hull은 선분으로 퇴화 — 멤버 주위 패딩 링을 합쳐
+        // 캡슐형 영역으로 부풀린다 (발견4·5·6 가독성, 2026-07-22).
+        let srcPts = positions;
+        const degen = positions.length <= 2;
+        if (degen) {
+            const PAD = 60, K = 16;
+            srcPts = [];
+            positions.forEach(p => {
+                for (let k = 0; k < K; k++) {
+                    const a = 2 * Math.PI * k / K;
+                    srcPts.push({x: p.x + PAD * Math.cos(a), y: p.y + PAD * Math.sin(a)});
+                }
+            });
+        }
+        const pts = srcPts.slice().sort((a, b) => a.x - b.x || a.y - b.y);
         const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
         const lower = [];
         for (const p of pts) {
@@ -385,8 +399,8 @@ network.on('afterDrawing', function(ctx) {
         const cx = hull.reduce((s, p) => s + p.x, 0) / hull.length;
         const cy = hull.reduce((s, p) => s + p.y, 0) / hull.length;
         const expanded = hull.map(p => ({
-            x: cx + (p.x - cx) * 1.25,
-            y: cy + (p.y - cy) * 1.25
+            x: cx + (p.x - cx) * (degen ? 1.0 : 1.25),
+            y: cy + (p.y - cy) * (degen ? 1.0 : 1.25)
         }));
         ctx.moveTo(expanded[0].x, expanded[0].y);
         expanded.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
