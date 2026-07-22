@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SFTF/PFTF — 발견 1~6 기준 배치</title>
+<title>SFTF/PFTF — 발견 1~6 + BASE 트랙</title>
 <script src="https://unpkg.com/vis-network@9.1.6/standalone/umd/vis-network.min.js"
         integrity="sha384-Ux6phic9PEHJ38YtrijhkzyJ8yQlH8i/+buBR8s3mAZOJrP1gwyvAcIYl3GWtpX1"
         crossorigin="anonymous"></script>
@@ -91,7 +91,7 @@ function esc(s) {
 }
 
 // Build vis datasets (deterministic radial layout: apps ring around their base hub)
-const POS = {"Tomo_SFTF": {"x": -130, "y": -40}, "Tomo_SFTFSoft": {"x": -130, "y": 110}, "SFTF_Clustering": {"x": 12, "y": -204}, "PFTF": {"x": 314, "y": -81}, "SFTF_Composite": {"x": 88, "y": -385}, "SFTF_InjMold": {"x": -671, "y": -113}, "PFTF_Compression": {"x": 799, "y": -93}, "SFTF_ThermalChip": {"x": -610, "y": -268}, "PFTF_Mold": {"x": 449, "y": -396}, "Tomo_DiffSupport": {"x": -104, "y": 225}, "PFTF_VisCull_kDop": {"x": 734, "y": 105}, "SFTF_SewerPOC": {"x": -280, "y": -378}, "PFTF_FXShock": {"x": 435, "y": 355}, "SFTF_BatteryThermal": {"x": -785, "y": -340}, "SFTF_PDNElectric": {"x": -380, "y": -230}, "PFTF_Inspection": {"x": 611, "y": 262}, "PFTF_RainNowcast": {"x": 60, "y": 430}, "PFTF_Terrain": {"x": 190, "y": 380}, "PFTF_Solar": {"x": 320, "y": 430}, "PFTF_subMarine": {"x": -200, "y": 430}, "PFTF_Assembly": {"x": -70, "y": 380}, "PFTF_CNC": {"x": -361, "y": -301}, "PFTF_Radiotherapy": {"x": 513, "y": -259}, "SFTF_DataCenterTraffic": {"x": -314, "y": 354}, "SFTF_UrbanTraffic": {"x": -378, "y": 115}, "SFTF_WarehouseAGV": {"x": -619, "y": 42}, "PFTF_AssetShock": {"x": -476, "y": 259}, "PFTF_GNN": {"x": -330, "y": -60}, "SFTF_DrapePrior": {"x": 102, "y": 190}, "PFTF_AsymTensor": {"x": 97, "y": 2}};
+const POS = {"Tomo_SFTF": {"x": -130, "y": -66}, "Tomo_SFTFSoft": {"x": -127, "y": 66}, "SFTF_Clustering": {"x": 12, "y": -204}, "PFTF": {"x": 195, "y": -82}, "SFTF_Composite": {"x": 88, "y": -385}, "SFTF_InjMold": {"x": -671, "y": -113}, "PFTF_Compression": {"x": 799, "y": -93}, "SFTF_ThermalChip": {"x": -610, "y": -268}, "PFTF_Mold": {"x": 449, "y": -396}, "Tomo_DiffSupport": {"x": -104, "y": 225}, "PFTF_VisCull_kDop": {"x": 734, "y": 105}, "SFTF_SewerPOC": {"x": -280, "y": -378}, "PFTF_FXShock": {"x": 435, "y": 355}, "SFTF_BatteryThermal": {"x": -785, "y": -340}, "SFTF_PDNElectric": {"x": -405, "y": -226}, "PFTF_Inspection": {"x": 611, "y": 262}, "PFTF_RainNowcast": {"x": 60, "y": 430}, "PFTF_Terrain": {"x": 190, "y": 380}, "PFTF_Solar": {"x": 320, "y": 430}, "PFTF_subMarine": {"x": -200, "y": 430}, "PFTF_Assembly": {"x": -70, "y": 380}, "PFTF_CNC": {"x": -361, "y": -301}, "PFTF_Radiotherapy": {"x": 513, "y": -259}, "SFTF_DataCenterTraffic": {"x": -314, "y": 354}, "SFTF_UrbanTraffic": {"x": -378, "y": 115}, "SFTF_WarehouseAGV": {"x": -619, "y": 42}, "PFTF_AssetShock": {"x": -476, "y": 259}, "PFTF_GNN": {"x": -330, "y": -60}, "SFTF_DrapePrior": {"x": 102, "y": 190}, "PFTF_AsymTensor": {"x": 173, "y": 39}};
 // === 투고 상태 배지 (submit / revision / accepted / printed) ===
 // 값 형식: "저널,상태,MM-DD". draft 단계는 표기하지 않음.
 // 정본: Papers/투고현황.md frontmatter(graph_badges) — graphify-out/status_badges.py 로 재적용 가능.
@@ -380,20 +380,34 @@ LEGEND.forEach(c => {
 </script>
 <script>
 // Render hyperedges as shaded regions
-const hyperedges = [{"label": "발견1 줄 세우기는 0차+연결지도 (랭킹 마진 +0.01)", "nodes": ["SFTF_InjMold", "SFTF_SewerPOC", "SFTF_PDNElectric", "SFTF_ThermalChip", "SFTF_BatteryThermal", "PFTF_CNC"]}, {"label": "발견2 2차는 크기·보정 (RMSE 4x, 잔차 0%)", "nodes": ["SFTF_Composite", "PFTF_Compression", "PFTF_Mold", "PFTF_Radiotherapy"]}, {"label": "발견3 1차를 죽이는 범인들 (보존칙·제곱식·강한 solver)", "nodes": ["SFTF_WarehouseAGV", "PFTF_AssetShock", "SFTF_UrbanTraffic"]}, {"label": "발견3' 대조: 1차가 사는 곳 (부호 결정적·1차 주연)", "nodes": ["SFTF_DataCenterTraffic", "PFTF_subMarine", "PFTF_Assembly", "PFTF_RainNowcast", "PFTF_Terrain", "PFTF_Solar", "PFTF_FXShock"]}, {"label": "발견4·5·6 보수성 게이트: 경계 vs 모멘트 · 양화사 · ±d", "nodes": ["PFTF_VisCull_kDop", "PFTF_Inspection"]}];
+const hyperedges = [{"label": "발견1 줄 세우기는 0차+연결지도 (랭킹 마진 +0.01)", "nodes": ["SFTF_InjMold", "SFTF_SewerPOC", "SFTF_PDNElectric", "SFTF_ThermalChip", "SFTF_BatteryThermal", "PFTF_CNC"]}, {"label": "발견2 2차는 크기·보정 (RMSE 4x, 잔차 0%)", "nodes": ["SFTF_Composite", "PFTF_Compression", "PFTF_Mold", "PFTF_Radiotherapy"]}, {"label": "발견3 1차를 죽이는 범인들 (보존칙·제곱식·강한 solver)", "nodes": ["SFTF_WarehouseAGV", "PFTF_AssetShock", "SFTF_UrbanTraffic"]}, {"label": "발견3' 대조: 1차가 사는 곳 (부호 결정적·1차 주연)", "nodes": ["SFTF_DataCenterTraffic", "PFTF_subMarine", "PFTF_Assembly", "PFTF_RainNowcast", "PFTF_Terrain", "PFTF_Solar", "PFTF_FXShock"]}, {"label": "발견4·5·6 보수성 게이트: 경계 vs 모멘트 · 양화사 · ±d", "nodes": ["PFTF_VisCull_kDop", "PFTF_Inspection"]}, {"label": "BASE / 핵심 이론 트랙: SFTF · SFTFSoft · SFTFCluster · PFTF", "kind": "base", "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering", "PFTF"], "color": "#0f766e", "labelColor": "#115e59", "fillAlpha": 0.1, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.18}];
 // afterDrawing passes ctx already transformed to network coordinate space.
 // Draw node positions raw — no manual pan/zoom/DPR math needed.
 network.on('afterDrawing', function(ctx) {
-    hyperedges.forEach(h => {
+    // Draw the base hull first so application-region hulls remain readable
+    // where the two sets overlap.  Array order is preserved for the finding
+    // dependency indices below.
+    const hyperedgesForDrawing = hyperedges.slice().sort((a, b) => {
+        const abase = a.kind === 'base' ? 0 : 1;
+        const bbase = b.kind === 'base' ? 0 : 1;
+        return abase - bbase;
+    });
+    hyperedgesForDrawing.forEach(h => {
         const positions = h.nodes
             .map(nid => network.getPositions([nid])[nid])
             .filter(p => p !== undefined);
         if (positions.length < 2) return;
         ctx.save();
-        ctx.globalAlpha = 0.12;
-        ctx.fillStyle = '#6366f1';
-        ctx.strokeStyle = '#6366f1';
-        ctx.lineWidth = 2;
+        const color = h.color || '#6366f1';
+        const fillAlpha = h.fillAlpha == null ? 0.12 : h.fillAlpha;
+        const strokeAlpha = h.strokeAlpha == null ? 0.4 : h.strokeAlpha;
+        const labelAlpha = h.labelAlpha == null ? 0.8 : h.labelAlpha;
+        const scale = h.scale == null ? 1.25 : h.scale;
+        ctx.globalAlpha = fillAlpha;
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = h.lineWidth == null ? 2 : h.lineWidth;
+        ctx.setLineDash(h.dash || []);
         ctx.beginPath();
         // CONVEX hull (Andrew monotone chain), then expand from centroid.
         // 소집합(멤버<=2) hull은 선분으로 퇴화 — 멤버 주위 패딩 링을 합쳐
@@ -427,21 +441,22 @@ network.on('afterDrawing', function(ctx) {
         const cx = hull.reduce((s, p) => s + p.x, 0) / hull.length;
         const cy = hull.reduce((s, p) => s + p.y, 0) / hull.length;
         const expanded = hull.map(p => ({
-            x: cx + (p.x - cx) * (degen ? 1.0 : 1.25),
-            y: cy + (p.y - cy) * (degen ? 1.0 : 1.25)
+            x: cx + (p.x - cx) * (degen ? 1.0 : scale),
+            y: cy + (p.y - cy) * (degen ? 1.0 : scale)
         }));
         ctx.moveTo(expanded[0].x, expanded[0].y);
         expanded.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
         ctx.closePath();
         ctx.fill();
-        ctx.globalAlpha = 0.4;
+        ctx.globalAlpha = strokeAlpha;
         ctx.stroke();
         // Label
-        ctx.globalAlpha = 0.8;
-        ctx.fillStyle = '#4f46e5';
+        ctx.globalAlpha = labelAlpha;
+        ctx.fillStyle = h.labelColor || color;
         ctx.font = 'bold 20px sans-serif';
         ctx.textAlign = 'center';
         const topY = Math.min.apply(null, expanded.map(p => p.y)); ctx.fillText(h.label, cx, topY - 16);
+        ctx.setLineDash([]);
         ctx.restore();
     });
 // FINDING_DEPS_BEGIN — 발견 간 의존성 (분류표 노트의 DAG, layout_findings.py 정본)
