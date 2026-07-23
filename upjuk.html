@@ -347,15 +347,22 @@ function renderPaper(p,i){const st=p.PrintStatus;let x=[];
   const edit=isLoggedIn()?`<div class="rowtools"><button onclick="openEdit(${p.ID})">수정</button></div>`:"";
   return `<div class="paper st${st}"><div class="num">${i}.</div><div class="body">${x.join("")} ${access}</div>${edit}</div>`;
 }
+function publicationCounts(items){
+  return items.reduce((n,p)=>{p.PrintStatus===1?n.published++:n.other++;return n;},{published:0,other:0});
+}
+function formatPublicationCounts(n){return n.other>0?`${n.published}(${n.other})`:`${n.published}`;}
 function renderStats(){const cats=presentCategs();
   const years=[...new Set(PAPERS.map(evalYear))].filter(Boolean).sort((a,b)=>b-a);
-  const sums={};cats.forEach(c=>sums[c]=0);let grand=0;
+  const sums={};cats.forEach(c=>sums[c]={published:0,other:0});
+  const grand={published:0,other:0};
   let h='<table class="stats-table"><tr><th>평가연도<br><small>3월~2월</small></th>'+cats.map(c=>`<th>${CATEG_KOR[c]||c}</th>`).join("")+'<th>계</th></tr>';
-  for(const y of years){let rt=0;h+=`<tr><td class="yr">${y}</td>`;
-    for(const c of cats){const n=PAPERS.filter(p=>evalYear(p)===y&&p.CATEG===c).length;sums[c]+=n;rt+=n;
-      h+=`<td>${n>0?`<button class="cnt" onclick="quickFilter('${c}',${y})">${n}</button>`:""}</td>`;}
-    grand+=rt;h+=`<td><button class="cnt" onclick="quickFilter('ALL',${y})"><b>${rt}</b></button></td></tr>`;}
-  h+='<tr class="sum"><td>Sum</td>'+cats.map(c=>`<td>${sums[c]}</td>`).join("")+`<td>${grand}</td></tr></table>`;
+  for(const y of years){const row={published:0,other:0};h+=`<tr><td class="yr">${y}</td>`;
+    for(const c of cats){const n=publicationCounts(PAPERS.filter(p=>evalYear(p)===y&&p.CATEG===c));
+      sums[c].published+=n.published;sums[c].other+=n.other;row.published+=n.published;row.other+=n.other;
+      h+=`<td>${n.published+n.other>0?`<button class="cnt" onclick="quickFilter('${c}',${y})">${formatPublicationCounts(n)}</button>`:""}</td>`;}
+    grand.published+=row.published;grand.other+=row.other;
+    h+=`<td><button class="cnt" onclick="quickFilter('ALL',${y})"><b>${formatPublicationCounts(row)}</b></button></td></tr>`;}
+  h+='<tr class="sum"><td>Sum</td>'+cats.map(c=>`<td>${formatPublicationCounts(sums[c])}</td>`).join("")+`<td>${formatPublicationCounts(grand)}</td></tr></table>`;
   document.getElementById("statsArea").innerHTML=h;
 }
 function quickFilter(c,y){document.getElementById("fCateg").value=(c==="ALL"||presentCategs().includes(c))?c:"ALL";
