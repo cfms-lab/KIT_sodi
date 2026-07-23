@@ -76,8 +76,8 @@
 <div class="toolbar">
   <label>종류 (Category)<select id="fCateg"></select></label>
   <label>저자 (Author)<select id="fAuthor"><option value="ALL">ALL</option></select></label>
-  <label>연도 From<input type="number" id="fFrom" value="1998"></label>
-  <label>연도 To<input type="number" id="fTo"></label>
+  <label>평가연도 From (3월~다음해 2월)<input type="number" id="fFrom" value="1998"></label>
+  <label>평가연도 To<input type="number" id="fTo"></label>
   <button class="btn" onclick="doSearch()">검색</button>
   <button class="btn secondary" id="btnAdd" onclick="openEdit(null)" disabled>＋ 새 논문</button>
   <button class="btn secondary sm" onclick="reload()">새로고침</button>
@@ -288,6 +288,9 @@ function checkName(Str,author,first,second,last){
 /* ===== UI ===== */
 function presentCategs(){const set=new Set(PAPERS.map(p=>p.CATEG).filter(Boolean));
   const o=CATEG_ORDER.filter(c=>set.has(c));for(const c of set)if(!o.includes(c))o.push(c);return o;}
+// 평가연도 Y는 Y년 3월부터 Y+1년 2월까지이다.
+// 월 정보가 없는 자료(P_MONTH=0)는 기존 연도(P_YEAR)에 포함한다.
+function evalYear(p){return p.P_MONTH>=1&&p.P_MONTH<=2?p.P_YEAR-1:p.P_YEAR;}
 function initUI(){
   const cats=presentCategs();
   document.getElementById("fCateg").innerHTML='<option value="ALL">ALL (전체)</option>'+
@@ -295,7 +298,9 @@ function initUI(){
   document.getElementById("eCateg").innerHTML=CATEG_ORDER.map(c=>`<option value="${c}">${CATEG_KOR[c]||c} (${c})</option>`).join("");
   document.getElementById("fAuthor").innerHTML='<option value="ALL" selected>ALL</option>'+
     PEOPLE.map(p=>`<option value="${p.NAME}">${p.NAME} (${[p.ENGNAME_FIRST,p.ENGNAME_SECOND,p.ENGNAME_LAST].filter(Boolean).join(" ")})</option>`).join("");
-  const maxY=Math.max(new Date().getFullYear(),...PAPERS.map(p=>p.P_YEAR));
+  const now=new Date();
+  const currentEvalYear=now.getMonth()+1<=2?now.getFullYear()-1:now.getFullYear();
+  const maxY=Math.max(currentEvalYear,...PAPERS.map(evalYear));
   document.getElementById("fTo").value=maxY; document.getElementById("eYear").value=maxY;
   renderStats(); doSearch();
 }
@@ -303,7 +308,7 @@ function getFilters(){return{categ:document.getElementById("fCateg").value,autho
   from:parseInt(document.getElementById("fFrom").value,10)||0,to:parseInt(document.getElementById("fTo").value,10)||9999};}
 function authorEng(n){const p=PEOPLE.find(x=>x.NAME===n);return p?{f:p.ENGNAME_FIRST||"",s:p.ENGNAME_SECOND||"",l:p.ENGNAME_LAST||""}:{f:"",s:"",l:""};}
 function searchPapers(f){const eng=f.author!=="ALL"?authorEng(f.author):{f:"",s:"",l:""};
-  let res=PAPERS.filter(p=>{if(p.P_YEAR<f.from||p.P_YEAR>f.to)return false;if(f.categ!=="ALL"&&p.CATEG!==f.categ)return false;
+  let res=PAPERS.filter(p=>{const y=evalYear(p);if(y<f.from||y>f.to)return false;if(f.categ!=="ALL"&&p.CATEG!==f.categ)return false;
     return checkName(p.AUTHORS,f.author,eng.f,eng.s,eng.l);});
   res.sort((a,b)=>b.P_YEAR-a.P_YEAR||b.P_MONTH-a.P_MONTH||b.P_DAY-a.P_DAY||(a.JOURNAL_NAME||"").localeCompare(b.JOURNAL_NAME||""));
   return res;}
@@ -311,12 +316,12 @@ function doSearch(){const f=getFilters();renderList(searchPapers(f),f);}
 function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function renderList(res,f){
   const info=document.getElementById("countInfo");
-  const label=(f.categ==="ALL"?"전체 종류":(CATEG_KOR[f.categ]||f.categ))+` · ${f.from}~${f.to}`+(f.author!=="ALL"?` · 저자: ${f.author}`:"");
+  const label=(f.categ==="ALL"?"전체 종류":(CATEG_KOR[f.categ]||f.categ))+` · 평가연도 ${f.from}~${f.to} (3월~다음해 2월)`+(f.author!=="ALL"?` · 저자: ${f.author}`:"");
   info.textContent=`${label} — 총 ${res.length}건`;
   const area=document.getElementById("listArea");
   if(!res.length){area.innerHTML='<p style="color:#888">검색 결과가 없습니다.</p>';return;}
   let html="",py=null,i=1;
-  for(const p of res){if(py!==p.P_YEAR){html+=`<div class="yearsep"><span class="y">${p.P_YEAR}</span><span class="ln"></span></div>`;py=p.P_YEAR;}html+=renderPaper(p,i++);}
+  for(const p of res){const y=evalYear(p);if(py!==y){html+=`<div class="yearsep"><span class="y">평가연도 ${y} (${y}.3~${y+1}.2)</span><span class="ln"></span></div>`;py=y;}html+=renderPaper(p,i++);}
   area.innerHTML=html;
 }
 function renderPaper(p,i){const st=p.PrintStatus;let x=[];
@@ -343,11 +348,11 @@ function renderPaper(p,i){const st=p.PrintStatus;let x=[];
   return `<div class="paper st${st}"><div class="num">${i}.</div><div class="body">${x.join("")} ${access}</div>${edit}</div>`;
 }
 function renderStats(){const cats=presentCategs();
-  const years=[...new Set(PAPERS.map(p=>p.P_YEAR))].filter(Boolean).sort((a,b)=>b-a);
+  const years=[...new Set(PAPERS.map(evalYear))].filter(Boolean).sort((a,b)=>b-a);
   const sums={};cats.forEach(c=>sums[c]=0);let grand=0;
-  let h='<table class="stats-table"><tr><th>Year</th>'+cats.map(c=>`<th>${CATEG_KOR[c]||c}</th>`).join("")+'<th>계</th></tr>';
+  let h='<table class="stats-table"><tr><th>평가연도<br><small>3월~2월</small></th>'+cats.map(c=>`<th>${CATEG_KOR[c]||c}</th>`).join("")+'<th>계</th></tr>';
   for(const y of years){let rt=0;h+=`<tr><td class="yr">${y}</td>`;
-    for(const c of cats){const n=PAPERS.filter(p=>p.P_YEAR===y&&p.CATEG===c).length;sums[c]+=n;rt+=n;
+    for(const c of cats){const n=PAPERS.filter(p=>evalYear(p)===y&&p.CATEG===c).length;sums[c]+=n;rt+=n;
       h+=`<td>${n>0?`<button class="cnt" onclick="quickFilter('${c}',${y})">${n}</button>`:""}</td>`;}
     grand+=rt;h+=`<td><button class="cnt" onclick="quickFilter('ALL',${y})"><b>${rt}</b></button></td></tr>`;}
   h+='<tr class="sum"><td>Sum</td>'+cats.map(c=>`<td>${sums[c]}</td>`).join("")+`<td>${grand}</td></tr></table>`;
