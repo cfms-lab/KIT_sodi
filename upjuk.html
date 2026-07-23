@@ -24,11 +24,11 @@
   .btn.secondary{background:#fff;color:var(--green);border:1px solid var(--green)}
   .btn.danger{background:#c62828}
   .btn.sm{padding:5px 10px;font-size:12px}
-  .layout{display:flex} .sidebar{width:680px;min-width:680px;padding:16px;border-right:1px solid var(--line);background:#fafbfa;height:calc(100vh - 108px);overflow:auto}
+  .layout{display:flex} .sidebar{width:500px;min-width:500px;padding:16px;border-right:1px solid var(--line);background:#fafbfa;height:calc(100vh - 108px);overflow:auto}
   .main{flex:1;padding:16px 22px;height:calc(100vh - 108px);overflow:auto}
   .stats-table{border-collapse:collapse;width:100%;font-size:12px}
-  .stats-table th,.stats-table td{border:1px solid var(--line);padding:3px 4px;text-align:center;white-space:nowrap}
-  .stats-table th{background:var(--green);color:#fff} .stats-table .yr{background:#eef3ee;font-weight:600}
+  .stats-table th,.stats-table td{border:1px solid var(--line);padding:3px;text-align:center;white-space:nowrap}
+  .stats-table th{background:var(--green);color:#fff;line-height:1.15} .stats-table .yr{background:#eef3ee;font-weight:600}
   .stats-table .sum td{background:#e8f5e9;font-weight:700}
   .cnt{background:none;border:none;color:var(--green);cursor:pointer;font-weight:600;font-size:12px;text-decoration:underline}
   .yearsep{display:flex;align-items:center;gap:10px;margin:18px 0 8px}
@@ -175,6 +175,7 @@
 /* ===== 카테고리 ===== */
 const CATEG_ORDER=["IJ","DJ","IC","DC","IL","PT","AW","PB","ETC","TODO"];
 const CATEG_KOR={IJ:"SCIE",DJ:"국내논문",IC:"해외학회",DC:"국내학회",IL:"초청강연",PT:"특허",AW:"수상",PB:"저서",ETC:"기타",TODO:"할일"};
+const CATEG_HEADER={IJ:"SC<br>IE",DJ:"국내<br>논문",IC:"해외<br>학회",DC:"국내<br>학회",IL:"초청<br>강연"};
 const PRINT_SUFFIX={2:"(In Print)",3:"(Accepted)",4:"(Submitted)",5:"(draft)"};
 
 /* ===== 저자(드물게 변경 → 내장) ===== */
@@ -360,7 +361,7 @@ function renderStats(){const cats=presentCategs();
   const years=[...new Set(PAPERS.map(evalYear))].filter(Boolean).sort((a,b)=>b-a);
   const sums={};cats.forEach(c=>sums[c]={published:0,other:0});
   const grand={published:0,other:0};
-  let h='<table class="stats-table"><tr><th>평가연도<br><small>3월~2월</small></th>'+cats.map(c=>`<th>${CATEG_KOR[c]||c}</th>`).join("")+'<th>계</th></tr>';
+  let h='<table class="stats-table"><tr><th>평가연도<br><small>3월~2월</small></th>'+cats.map(c=>`<th>${CATEG_HEADER[c]||CATEG_KOR[c]||c}</th>`).join("")+'<th>계</th></tr>';
   for(const y of years){const row={published:0,other:0};h+=`<tr><td class="yr">${y}</td>`;
     for(const c of cats){const n=publicationCounts(PAPERS.filter(p=>evalYear(p)===y&&p.CATEG===c));
       sums[c].published+=n.published;sums[c].other+=n.other;row.published+=n.published;row.other+=n.other;
