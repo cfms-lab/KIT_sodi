@@ -54,16 +54,16 @@ PROJECT_PATHS = _load_project_paths()
 # journal-qualified submission badges such as "[RPJ,draft]".
 CAPTION_SUFFIXES = {
     "SFTF_Composite": "[draft]",
-    # 2026-07-27: 중 승급했으나 미투고이므로 draft 표기를 유지한다.
+    # 2026-07-30: 상으로 동기화됐으나 미투고이므로 draft 표기를 유지한다.
     "SFTF_QEM": "[draft]",
 }
 
 # 노드 hover 툴팁.  TODO_NODES 로 주입된 노드는 이미 graph.html 안에 있으면
 # 다시 주입되지 않으므로, 등급이 바뀌어도 예전 title 이 그대로 남는다.
-# (SFTF_QEM 이 중으로 올라간 뒤에도 "ToDo:" 로 표시되던 것이 그 사례다.)
+# (SFTF_QEM 이 상으로 올라간 뒤에도 이전 등급이 표시될 수 있는 것이 그 사례다.)
 # 여기에 적어 두면 매 실행마다 덮어쓴다.
 NODE_TITLES = {
-    "SFTF_QEM": "SFTF_QEM [draft] — 중: 여각 규약 오류 정정 후 전 게이트 재검증, "
+    "SFTF_QEM": "SFTF_QEM [draft] — 상: 여각 규약 오류 정정 후 전 게이트 재검증, "
                 "Cura 교차검증(두 신뢰 기준의 천장 ρ=+0.754), 코퍼스 50메쉬. 미투고.",
     "SFTF_DynamicTargetSearch": "SFTF_DynamicTargetSearch — ToDo: "
                                 "시간가변 그래프의 분산 표적탐색 concept; "
@@ -141,20 +141,20 @@ HYPEREDGES = [
      "lineWidth": 3, "dash": [12, 6], "scale": 1.18},
 ]
 
-# 2026-07-29 quality snapshot.  Quality is the single classification axis
+# 2026-07-30 quality snapshot, synchronized from the KIT_sodi mindmap backup. Quality is the single classification axis
 # used by both the node colors and the Communities legend.
 QUALITY_ROWS = [
     ("Tomo_SFTF", "Tomo_SFTF", "상", "TDP v2.1·외부 60-mesh 감사·budget–complexity·PiAM 연속성"),
     ("Tomo_SFTFSoft", "Tomo_SFTFSoft", "상", "TDP v2.1·현대/legacy Cura·receiver 반례·조건부 first-hit 수렴"),
     ("SFTFSoft_GNN", "SFTFSoft_GNN", "상", "3,817 mesh·held-out·Cura 재라벨·Prusa 교차검증"),
-    ("SFTF_Clustering", "SFTF_Clustering", "중", "SFTFCluster 계열 TDP 원고·cross-slicer/partition 자산; 독립성 게이트 잔여"),
+    ("SFTF_Clustering", "SFTF_Clustering", "상", "SFTFCluster 계열 TDP 원고·cross-slicer/partition 자산; 독립성 게이트 잔여"),
     ("PFTF", "PFTF", "중", "PFTF v0.9 이론·family synthesis; 삼형제 V2/V3/V4 synchronization TODO"),
-    ("SFTF_DrapePrior", "SFTF_DrapePrior", "중", "IJCST 투고본·ESM·노이즈 플로어 방어된 M3; 판별자는 홀드아웃 과적합(20/32)"),
-    ("SFTF_Composite", "SFTF_Composite", "중", "한·영문 완성·191 tests·R9–R13 사전등록/독립감사; R11 합성 held-out 음성, 공식 CAD·물리 검증 잔여"),
+    ("SFTF_DrapePrior", "SFTF_DrapePrior", "상", "IJCST 투고본·ESM·노이즈 플로어 방어된 M3; 판별자는 홀드아웃 과적합(20/32)"),
+    ("SFTF_Composite", "SFTF_Composite", "상", "한·영문 완성·191 tests·R9–R13 사전등록/독립감사; R11 합성 held-out 음성, 공식 CAD·물리 검증 잔여"),
     ("SFTF_InjMold", "SFTF_InjMold", "중", "B24·exact integration·set-cover·B-rep·blind protocol; 원고 조립 잔여"),
     ("Tomo_DiffSupport", "Tomo_DiffSupport", "중", "claim–evidence matrix·JAX gradient·fail-closed; utility/print gate 미실행"),
     ("PFTF_AsymTensor", "PFTF_AsymTensor", "중", "9/9 meshes·6 figures·TDP v1; 응용 held-out 부족"),
-    ("PFTF_Compression", "PFTF_Compression", "중", "역설계·orthotropic contact·friction·held-out 원고; 임상 cohort 잔여"),
+    ("PFTF_Compression", "PFTF_Compression", "상", "역설계·orthotropic contact·friction·held-out 원고; 임상 cohort 잔여"),
     ("PFTF_Mold", "PFTF_Mold", "중", "IBOF gate·영문 원고; held-out 일반화 0%"),
     ("PFTF_FXShock", "PFTF_FXShock", "중", "frozen/event holdout/falsification; n=8·실제 시장/인과 근거 제한"),
     ("PFTF_VisCull_kDop", "PFTF_VisCull_kDop", "중", "G1–G22 검증선·원고 2편(en/kr); 음성 timing 결과가 2번째 CPU 모델에서 복제(사전등록 R0–R3 통과); GPU contact 미구현"),
@@ -162,22 +162,22 @@ QUALITY_ROWS = [
     ("SFTF_SewerPOC", "SFTF_SewerPOC", "중", "수식 매핑·AVE·PoC 원고; 실제 관망/수리모형 검증 부족"),
     ("SFTF_BatteryThermal", "SFTF_BatteryThermal", "하", "배터리 열·유동 응용 PoC; 외부 열해석·실측·held-out 검증 미확보"),
     ("SFTF_PDNElectric", "SFTF_PDNElectric", "하", "전기/PDN 응용 PoC; 독립 baseline·재현 benchmark·원고 근거 부족"),
-    ("PFTF_Inspection", "PFTF_Inspection", "중", "held-out coverage 0.991·oracle 0.998·latency 25%; 논문·외부 cohort 잔여"),
-    ("PFTF_RainNowcast", "PFTF_RainNowcast", "중", "Stage A+B·CSI 개선·FSS +0.09/Brier 개선; 외부시즌·기상장 일반화 잔여"),
-    ("PFTF_Terrain", "PFTF_Terrain", "중", "3종 AWS terrain tiles held-out·PoC; 규모·외부 지형 일반화 잔여"),
-    ("PFTF_Solar", "PFTF_Solar", "중", "PoC+초안·정확 surrogate/계측 oracle; 실측·외부기간 held-out 잔여"),
-    ("PFTF_subMarine", "PFTF_subMarine", "중", "Stage A–B 반복·SFTF 우세 확인; sparse 조건·외부 해양장 일반화 잔여"),
-    ("PFTF_Assembly", "PFTF_Assembly", "중", "완료조건 4/4·exact edge·false-feasible 0; CAD cohort·원고 조립 잔여"),
+    ("PFTF_Inspection", "PFTF_Inspection", "하", "held-out coverage 0.991·oracle 0.998·latency 25%; 논문·외부 cohort 잔여"),
+    ("PFTF_RainNowcast", "PFTF_RainNowcast", "하", "Stage A+B·CSI 개선·FSS +0.09/Brier 개선; 외부시즌·기상장 일반화 잔여"),
+    ("PFTF_Terrain", "PFTF_Terrain", "하", "3종 AWS terrain tiles held-out·PoC; 규모·외부 지형 일반화 잔여"),
+    ("PFTF_Solar", "PFTF_Solar", "하", "PoC+초안·정확 surrogate/계측 oracle; 실측·외부기간 held-out 잔여"),
+    ("PFTF_subMarine", "PFTF_subMarine", "하", "Stage A–B 반복·SFTF 우세 확인; sparse 조건·외부 해양장 일반화 잔여"),
+    ("PFTF_Assembly", "PFTF_Assembly", "하", "완료조건 4/4·exact edge·false-feasible 0; CAD cohort·원고 조립 잔여"),
     ("PFTF_CNC", "PFTF_CNC", "중", "완료조건 4/4·dense oracle·undercut/normal 검증; 실기계·held-out cohort 잔여"),
-    ("PFTF_Radiotherapy", "PFTF_Radiotherapy", "중", "train 20/held-out 8·surrogate gate; clinical/TCIA cohort·외부 검증 미완료"),
-    ("SFTF_DataCenterTraffic", "SFTF_DataCenterTraffic", "중", "96-node PoC·warm-start·4–47x 개선; 실운영 trace·외부 재현 잔여"),
+    ("PFTF_Radiotherapy", "PFTF_Radiotherapy", "하", "train 20/held-out 8·surrogate gate; clinical/TCIA cohort·외부 검증 미완료"),
+    ("SFTF_DataCenterTraffic", "SFTF_DataCenterTraffic", "하", "96-node PoC·warm-start·4–47x 개선; 실운영 trace·외부 재현 잔여"),
     ("SFTF_UrbanTraffic", "SFTF_UrbanTraffic", "하", "M2–M4 계획·solver gap 미해결·추가 DP 필요; 완성 원고·외부 검증 부족"),
     ("SFTF_WarehouseAGV", "SFTF_WarehouseAGV", "하", "DES 초기 검증·proxy 실패·정책 비교 잔여; 실창고 trace·원고 부족"),
     ("PFTF_AssetShock", "PFTF_AssetShock", "하", "38 benchmark/provider rehearsal; draft 원고와 실제 provider outcome 없음"),
     ("PFTF_DrapePrior_VisCull_kDop", "PFTF_DrapePrior_VisCull_kDop", "ToDo", "M3→kDOP gate+exact fallback 설계선; 실제 cloth solver end-to-end benchmark 전"),
     ("PFTF_ResearchOptimize", "PFTF_ResearchOptimize", "ToDo", "연구 그래프 기반 evidence-aware 투고 순서 설계; 실제 back-test·가중치 calibration 전"),
     ("PFTF_alpha", "PFTF_alpha", "ToDo", "local anisotropic alpha field 설계선; density/normal baseline과 frozen held-out benchmark 전"),
-    ("SFTF_QEM", "SFTF_QEM", "중", "여각 규약 오류 정정·Cura 교차검증(천장 ρ=+0.754)·코퍼스 50메쉬·원고 2편+설명서; 성능 우월 주장 없는 평가방법론 트랙, 미투고"),
+    ("SFTF_QEM", "SFTF_QEM", "상", "여각 규약 오류 정정·Cura 교차검증(천장 ρ=+0.754)·코퍼스 50메쉬·원고 2편+설명서; 성능 우월 주장 없는 평가방법론 트랙, 미투고"),
     ("SFTF_DynamicTargetSearch", "SFTF_DynamicTargetSearch", "ToDo",
      "시간가변 그래프의 분산 표적탐색 설계선; simulation POC·baseline·robustness gate 전"),
 ]
@@ -443,20 +443,20 @@ DYNAMIC_TARGET_SEARCH_NODE = {
     "degree": 3,
 }
 
-# 2026-07-27: ToDo 설계선에서 중(SCOPUS급)으로 승급. 원고 2편+설명서가 있고
+# 2026-07-30: mindmap Paper quality 기준 상으로 동기화. 원고 2편+설명서가 있고
 # 게이트 T·T2·G2·S·X 가 닫혔다.  라벨에 [draft] 를 병기하는 이유는 등급이
-# 중이어도 아직 미투고이기 때문이며, 색은 다른 중 노드와 같은 #f28e2b 를 쓴다.
+# 상이어도 아직 미투고이기 때문이다.
 QEM_NODE = {
     "id": "SFTF_QEM",
     # 캡션의 "[draft]" 는 CAPTION_SUFFIXES 가 붙인다. 여기에 직접 쓰면 두 번 붙는다.
     "label": "SFTF_QEM",
-    "color": {"background": "#f28e2b", "border": "#f28e2b",
-               "highlight": {"background": "#f28e2b", "border": "#f28e2b"}},
+    "color": {"background": "#59a14f", "border": "#59a14f",
+               "highlight": {"background": "#59a14f", "border": "#59a14f"}},
     "size": 16.4,
     "font": {"size": 12, "color": "#333333"},
-    "title": "SFTF_QEM [draft] — 중: 여각 규약 오류 정정 후 재검증, Cura 교차검증(천장 ρ=+0.754), 코퍼스 50메쉬",
-    "community": 2,
-    "community_name": "중",
+    "title": "SFTF_QEM [draft] — 상: 여각 규약 오류 정정 후 재검증, Cura 교차검증(천장 ρ=+0.754), 코퍼스 50메쉬",
+    "community": 1,
+    "community_name": "상",
     "source_file": "SFTF_QEM.md",
     "file_type": "concept",
     "degree": 2,
@@ -532,6 +532,11 @@ def _reclassify_raw_nodes(match):
             node.pop("_project_path", None)
         q = quality_lookup.get(node.get("id"))
         if q:
+            # Historical hover titles sometimes embed the previous grade.
+            # Keep them synchronized with QUALITY_ROWS on every regeneration.
+            node["title"] = re.sub(
+                r" — [상중하上中下]:", f" — {q[0]}:", node.get("title") or node["id"], count=1
+            )
             node["community"] = QUALITY_COMMUNITY_IDS[q[0]]
             node["community_name"] = q[0]
             node_border = "#000000" if q[0] == "ToDo" else GRADE_COLORS[q[0]]
@@ -572,9 +577,9 @@ quality_html = (
     '<div id="quality-board">'
     # QUALITY_ROWS 를 손댈 때 이 날짜도 같이 올린다.  하드코딩이라, 갱신하지 않으면
     # 재생성이 graph.html 의 최신 날짜를 조용히 되돌린다(2026-07-27 에 실제로 발생).
-    '<h3>최근 논문 quality (2026-07-29)</h3>'
+    '<h3>최근 논문 quality (2026-07-30)</h3>'
     '<div class="quality-meta">상=상위권 심사 대응 가능 · 중=핵심 gate 잔여 · 하=PoC/원고 미완료 · ToDo=새 설계선/검증 전<br>'
-    '단순 VSCode 커밋은 제외 · 근거: Papers/최근변경_논문Quality_2026-07-22.md 및 Papers/SFTF_DrapePrior_PFTF_VisCull_kDOP_상호보완성_2026-07-23.md</div>'
+    '단순 VSCode 커밋은 제외 · 등급 정본: KIT_sodi/mindmap.html 백업(2026-07-30) · 세부 근거: Papers/투고가능성_재평가_2026-07-28.md</div>'
     '<table><thead><tr><th>프로젝트</th><th>등급</th><th>핵심 근거</th></tr></thead>'
     f'<tbody>{quality_html_rows}</tbody></table></div>'
 )
