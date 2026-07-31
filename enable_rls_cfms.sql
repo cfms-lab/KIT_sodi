@@ -16,7 +16,9 @@ grant select on public.jobgis_jobs_public to anon, authenticated;
 grant select on public.jobgis_office_types to anon;
 grant select, insert, update, delete on public.jobgis_office_types to authenticated;
 
+-- 관계도는 공개 열람(anon SELECT), 편집은 로그인 사용자만.
 revoke all on public.mindmaps from anon;
+grant select on public.mindmaps to anon;
 grant select, insert, update, delete on public.mindmaps to authenticated;
 
 grant usage, select on all sequences in schema public to authenticated;
@@ -100,6 +102,12 @@ on public.jobgis_office_types for all
 to authenticated
 using (true)
 with check (true);
+
+drop policy if exists "mindmaps anon read" on public.mindmaps;
+create policy "mindmaps anon read"
+on public.mindmaps for select
+to anon
+using (true);
 
 drop policy if exists "mindmaps authenticated full access" on public.mindmaps;
 create policy "mindmaps authenticated full access"

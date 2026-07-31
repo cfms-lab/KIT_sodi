@@ -7,7 +7,8 @@
 
 - 홈페이지: https://cfms-lab.github.io/KIT_sodi/
 - 공개 조회는 로그인 없이 가능합니다.
-- 추가, 수정, 삭제, PDF 원문, 내부 관계도는 우측 상단 로그인 후 사용할 수 있습니다.
+- 프로젝트 관계도(`mindmap.html`)와 프로젝트 그래프(`graph.html`)는 로그인 없이 누구나 열람할 수 있습니다.
+- 추가, 수정, 삭제, PDF 원문은 우측 상단 로그인 후 사용할 수 있습니다.
 - 로그인 세션은 `localStorage`의 `cfms_session`으로 앱 간 공유됩니다.
 
 ## 앱 구성
@@ -18,8 +19,8 @@
 | `upjuk.html` | 논문/업적 관리, draft 숨김, PDF 원문 업로드/열람 |
 | `timetable.html` | 학기별 수업 시간표, 드래그 이동/복사, 학기 복제 |
 | `jobgis.html` | 졸업생 취업 현황 지도, 공개 조회 시 이름 마스킹 |
-| `mindmap.html` | 연구/개발 프로젝트 관계도, 로그인 전용 |
-| `graph.html` | 옵시디언 볼트 기반 프로젝트 그래프, 로그인 전용 |
+| `mindmap.html` | 연구/개발 프로젝트 관계도, 공개 열람 · 편집은 로그인 |
+| `graph.html` | 옵시디언 볼트 기반 프로젝트 그래프, 공개 열람 (정적 파일) |
 | `backup.html` | Supabase 데이터 백업 도구 |
 | `scripts/build-vault-graph.mjs` | Markdown/Obsidian 볼트에서 `vault-graph.json` 생성 |
 
@@ -29,7 +30,7 @@
 
 1. `schema_cfms.sql`: 테이블, 공개 취업 뷰, PDF 버킷 생성
 2. `enable_rls_cfms.sql`: RLS, anon/authenticated 권한, PDF storage 정책 적용
-3. `enable_rls_mindmaps.sql`: 관계도 테이블만 빠르게 보강할 때 쓰는 최소 정책 파일
+3. `enable_rls_mindmaps.sql`: 관계도 테이블만 빠르게 보강할 때 쓰는 최소 정책 파일 (anon 열람 + 로그인 편집)
 
 기본 내장 연결 정보는 각 HTML의 `BAKED_URL`, `BAKED_KEY`에 있습니다. 공개 저장소에 들어간 키는 Supabase `anon` 키이며, 실제 보안은 RLS와 storage 정책이 담당합니다.
 
@@ -60,4 +61,8 @@ Markdown/Obsidian 볼트에서 그래프 JSON을 다시 만들 때:
 node scripts/build-vault-graph.mjs D:\path\to\_Research_Vault vault-graph.json
 ```
 
-생성된 `vault-graph.json`은 `graph.html`의 `볼트에서 불러오기` 버튼으로 업로드하면 Supabase의 `mindmaps` 테이블에 저장됩니다.
+`graph.html`은 graphify가 만든 그래프를 파일 안에 내장한 정적 페이지입니다. 갱신은 아래로 합니다.
+
+```powershell
+node update-graph-embed.mjs
+```
