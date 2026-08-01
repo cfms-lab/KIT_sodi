@@ -168,8 +168,8 @@
   <div class="controls-bar">
     <div class="cb-th">
       <label>오버행 임계각 θ<sub>c</sub></label>
-      <input type="range" id="thresh" min="20" max="80" value="50" step="1">
-      <span class="v mono"><span id="thV">50</span>°</span>
+      <input type="range" id="thresh" min="20" max="80" value="60" step="1">
+      <span class="v mono"><span id="thV">60</span>°</span>
     </div>
     <div class="cb-btns">
       <button class="primary" id="findAll">네 글자 최적 방향</button>
@@ -298,7 +298,7 @@
   }
 
   // ---- global controls ----
-  let thetaC = 50;
+  let thetaC = 60;
   const thV = document.getElementById('thV'), thresh = document.getElementById('thresh');
   function setTheta(v){ thetaC=Math.max(20,Math.min(80,Math.round(v))); thresh.value=thetaC; thV.textContent=thetaC; for(const it of insts) it.sweep=null; }
   thresh.addEventListener('input', ()=> setTheta(+thresh.value));
