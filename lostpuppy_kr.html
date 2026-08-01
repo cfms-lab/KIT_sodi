@@ -77,7 +77,8 @@
   .modes input:checked + span { color:#201400; }
   .modes label:has(input:checked) { background: var(--sand-bright); border-color: var(--sand-bright); color:#201400; font-weight:600; }
   .modes label:has(input:focus-visible) { outline: 3px solid color-mix(in srgb, var(--sand) 40%, transparent); outline-offset: 1px; }
-  .toggle { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-soft); cursor:pointer; margin-left:auto; }
+  .toggles { display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-left:auto; }
+  .toggle { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-soft); cursor:pointer; }
   .toggle input { accent-color: var(--bed); width:15px; height:15px; cursor:pointer; }
 
   button {
@@ -118,6 +119,14 @@
     display:flex; flex-wrap:wrap; gap:6px 16px; align-items:baseline;
   }
   .msg .count { font-family:"Cascadia Code","Consolas",monospace; font-weight:500; font-size:12.5px; color:var(--ink-soft); margin-left:auto; }
+  .msg.found { border-left-color: var(--sand-bright); color:#201400; background: var(--sand-bright); animation: foundflash .9s ease-out 2; }
+  .msg.found .count { color: rgba(32,20,0,.7); }
+  @keyframes foundflash {
+    0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sand-bright) 70%, transparent); }
+    70%  { box-shadow: 0 0 0 14px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+  @media (prefers-reduced-motion: reduce) { .msg.found { animation: none; } }
 
   /* explainer */
   h2.sec {
@@ -146,7 +155,7 @@
     .lab-mark { font-size:11px; }
     .nav-actions { gap:12px; }
     .nav-link { font-size:11px; }
-    .toggle { margin-left:0; }
+    .toggles { margin-left:0; width:100%; justify-content:flex-start; gap:14px; }
   }
   @media (max-width: 560px) {   /* three nav links no longer fit on one row */
     .lab-nav { height:auto; flex-wrap:wrap; padding:14px 0; gap:10px 14px; margin-bottom:20px; }
@@ -179,11 +188,14 @@
 
   <div class="controls-bar">
     <div class="modes" role="radiogroup" aria-label="지도 종류">
-      <label><input type="radio" name="mode" value="Scalar"><span>단순 점수 지도</span></label>
+      <label><input type="radio" name="mode" value="Scalar" checked><span>단순 점수 지도</span></label>
       <label><input type="radio" name="mode" value="SFTF"><span>SFTF 후보 지역</span></label>
-      <label><input type="radio" name="mode" value="PFTF" checked><span>PFTF 방향 지도</span></label>
+      <label><input type="radio" name="mode" value="PFTF"><span>PFTF 방향 지도</span></label>
     </div>
-    <label class="toggle"><input type="checkbox" id="showPuppy"> 정답 강아지 보기</label>
+    <div class="toggles">
+      <label class="toggle"><input type="checkbox" id="sound" checked> 🔊 소리</label>
+      <label class="toggle"><input type="checkbox" id="showPuppy"> 정답 강아지 보기</label>
+    </div>
   </div>
 
   <div class="board">
@@ -221,7 +233,7 @@
     </div>
   </div>
 
-  <p class="msg"><span id="msg">단서를 합쳐 먼저 찾아볼 곳을 골라 보세요!</span><span class="count" id="count">확인한 칸 0</span></p>
+  <p class="msg" aria-live="polite"><span id="msg">단서를 합쳐 먼저 찾아볼 곳을 골라 보세요!</span><span class="count" id="count">확인한 칸 0</span></p>
 
   <h2 class="sec">세 가지 지도는 무엇이 다른가</h2>
   <p class="lede">위쪽 버튼으로 지도를 바꿔 보세요. 같은 단서인데 <b>얼마나 많은 정보를 쓰느냐</b>에 따라 추천이 달라집니다.</p>
@@ -255,7 +267,7 @@
   </div>
 
   <footer>
-    원본은 Python + tkinter 데스크톱 앱(<code>PFTF_LostPuppy_dev</code>)이며, 이 페이지는 그 점수 모델(<code>core.py</code>)을 <b>브라우저에서 그대로 돌도록 JavaScript로 이식</b>한 것입니다 — 설치도 서버도 필요 없습니다. 같은 엔진의 다른 응용은 <a href="sftf-apps_kr.html">활용분야</a>, 3D프린팅 원리 자체는 <a href="sftf-webtoy_kr.html">알고리즘 개념</a> 페이지에서 볼 수 있습니다. · 팁: 칸을 <span class="kbd">클릭</span>해 직접 찾아보세요.
+    원본은 Python + tkinter 데스크톱 앱(<code>PFTF_LostPuppy_dev</code>)이며, 이 페이지는 그 점수 모델(<code>core.py</code>)을 <b>브라우저에서 그대로 돌도록 JavaScript로 이식</b>한 것입니다 — 설치도 서버도 필요 없습니다. 같은 엔진의 다른 응용은 <a href="sftf-apps_kr.html">활용분야</a>, 3D프린팅 원리 자체는 <a href="sftf-webtoy_kr.html">알고리즘 개념</a> 페이지에서 볼 수 있습니다. · 팁: 칸을 <span class="kbd">클릭</span>해 직접 찾아보세요. 강아지를 찾으면 소리와 함께 표시됩니다 — 조용히 보려면 위쪽 <b>🔊 소리</b>를 꺼 두세요(설정이 기억됩니다).
   </footer>
 </div>
 
@@ -357,7 +369,7 @@
       { x: 3,  y: 3, kind: 'avoid',     strength: 0.8,  radius: 4.0, dir: [0, 0],      icon: '🔊', label: '시끄러운 광장' },
     ];
     if (rng() > 0.5) puppy = [17, 5];
-    return { puppy, lastSeen, clues, obstacles, searched: new Set() };
+    return { puppy, lastSeen, clues, obstacles, searched: new Set(), found: false };
   }
 
   // ---------------------------------------------------------------
@@ -394,16 +406,80 @@
     return `rgb(${RAMP[RAMP.length - 1][1].join(',')})`;
   }
 
+  // ---------------------------------------------------------------
+  // Sound — synthesized with the Web Audio API so the page stays a
+  // single self-contained file. The context is created on the first
+  // click, which is also the only way autoplay policies allow it.
+  // ---------------------------------------------------------------
+  const SOUND_KEY = 'cfms_lostpuppy_sound';
+  let audio = null;
+
+  function soundOn() { return document.getElementById('sound').checked; }
+
+  function ac() {
+    try {
+      if (!audio) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return null;
+        audio = new Ctx();
+      }
+      if (audio.state === 'suspended') audio.resume();
+      return audio;
+    } catch (_e) { return null; }   // never let audio break the game
+  }
+
+  function tone(freq, at, dur, { type = 'sine', peak = 0.14, glide = 0 } = {}) {
+    const c = ac(); if (!c) return;
+    try {
+    const t0 = c.currentTime + at;
+    const osc = c.createOscillator(), gain = c.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t0);
+    if (glide) osc.frequency.exponentialRampToValueAtTime(freq * glide, t0 + dur);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(peak, t0 + Math.min(0.03, dur * 0.3));
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(gain).connect(c.destination);
+    osc.start(t0); osc.stop(t0 + dur + 0.02);
+    } catch (_e) { /* no audio device — stay silent, keep playing */ }
+  }
+
+  function playFound() {
+    if (!soundOn()) return;
+    // rising major arpeggio + an octave sparkle on top
+    const notes = [523.25, 659.25, 783.99, 1046.50];   // C5 E5 G5 C6
+    notes.forEach((f, i) => tone(f, i * 0.09, 0.34, { type: 'triangle', peak: 0.17 }));
+    tone(1567.98, 0.36, 0.5, { type: 'sine', peak: 0.09 });   // G6 shimmer
+    // two short "woof"s under the fanfare
+    tone(220, 0.02, 0.13, { type: 'sawtooth', peak: 0.07, glide: 0.55 });
+    tone(196, 0.20, 0.15, { type: 'sawtooth', peak: 0.07, glide: 0.55 });
+  }
+
+  function playMiss() {
+    if (!soundOn()) return;
+    tone(196, 0, 0.09, { type: 'sine', peak: 0.05 });
+  }
+
+  function playBlocked() {
+    if (!soundOn()) return;
+    tone(110, 0, 0.13, { type: 'square', peak: 0.045, glide: 0.7 });
+  }
+
   const canvas = document.getElementById('park'), ctx = canvas.getContext('2d');
   const msgEl = document.getElementById('msg'), countEl = document.getElementById('count');
+  const msgBar = document.querySelector('.msg');
   const showPuppy = document.getElementById('showPuppy');
   const searchBestBtn = document.getElementById('searchBest');
   const clearBtn = document.getElementById('clearSearch');
   const newGameBtn = document.getElementById('newGame');
 
   let state = buildDemo(7);
-  let mode = 'PFTF';
+  let mode = 'Scalar';
   let cell = 24, margin = 6;
+  let celebrateAt = -1e9;          // performance.now() of the last "found"
+  let animRAF = null;
+  const CELEBRATE_MS = 2400;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   const modeOf = () => mode;
   const isDirectional = () => mode === 'PFTF';
@@ -456,7 +532,8 @@
             arrow(cx - vx * L * .35, cy - vy * L * .35, cx + vx * L, cy + vy * L);
           }
         }
-        if (state.searched.has(k)) {
+        const isPuppyCell = state.found && x === state.puppy[0] && y === state.puppy[1];
+        if (state.searched.has(k) && !isPuppyCell) {
           ctx.fillStyle = 'rgba(7,16,20,.55)';
           ctx.fillRect(x0, y0, cell, cell);
           ctx.fillStyle = P.ink;
@@ -479,10 +556,64 @@
 
     if (showPuppy.checked) {
       const [x0, y0] = boxOf(state.puppy[0], state.puppy[1]);
-      ctx.font = `${Math.round(cell * 0.8)}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+      const cx = x0 + cell / 2, cy = y0 + cell / 2;
+      const t = (performance.now() - celebrateAt) / 1000;
+      const partying = state.found && t < CELEBRATE_MS / 1000 && !reduceMotion.matches;
+      let pop = 1;
+
+      if (state.found) {
+        // permanent marker so the answer stays obvious after the party ends
+        ctx.fillStyle = 'rgba(7,16,20,.5)';
+        ctx.fillRect(x0, y0, cell, cell);
+        ctx.save();
+        ctx.shadowColor = P.sandBright; ctx.shadowBlur = cell * 0.7;
+        ctx.strokeStyle = P.sandBright;
+        ctx.lineWidth = Math.max(2.5, cell * 0.12);
+        ctx.strokeRect(x0 + ctx.lineWidth / 2, y0 + ctx.lineWidth / 2, cell - ctx.lineWidth, cell - ctx.lineWidth);
+        ctx.restore();
+      }
+      if (partying) {
+        for (let i = 0; i < 3; i++) {                    // expanding shockwaves
+          const ph = t * 1.15 - i * 0.26;
+          if (ph <= 0 || ph >= 1) continue;
+          ctx.globalAlpha = (1 - ph) * 0.85;
+          ctx.strokeStyle = i % 2 ? P.bed : P.sandBright;
+          ctx.lineWidth = Math.max(1.5, cell * 0.09 * (1 - ph));
+          ctx.beginPath(); ctx.arc(cx, cy, cell * 0.45 + ph * cell * 2.6, 0, 7); ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+        const bounce = Math.exp(-t * 3.4) * Math.abs(Math.sin(t * 11));
+        pop = 1 + 0.55 * bounce;
+      }
+
+      ctx.save();
+      ctx.translate(cx, cy); ctx.scale(pop, pop); ctx.translate(-cx, -cy);
+      // dark disc behind the puppy: the emoji alone washes out on the hot cells
+      ctx.beginPath(); ctx.arc(cx, cy, cell * 0.44, 0, 7);
+      ctx.fillStyle = 'rgba(7,16,20,.82)'; ctx.fill();
+      ctx.strokeStyle = state.found ? P.sandBright : P.ink;
+      ctx.lineWidth = Math.max(1.5, cell * (state.found ? 0.09 : 0.06));
+      ctx.stroke();
+      ctx.font = `${Math.round(cell * 0.62)}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('🐶', x0 + cell / 2, y0 + cell / 2 + 1);
+      ctx.fillText('🐶', cx, cy + 1);
+      ctx.restore();
     }
+  }
+
+  function runCelebration() {
+    celebrateAt = performance.now();
+    msgBar.classList.remove('found');
+    void msgBar.offsetWidth;               // restart the flash animation
+    msgBar.classList.add('found');
+    playFound();
+    if (reduceMotion.matches || animRAF) { draw(); return; }
+    const step = () => {
+      draw();
+      animRAF = (performance.now() - celebrateAt < CELEBRATE_MS) ? requestAnimationFrame(step) : null;
+      if (!animRAF) draw();
+    };
+    animRAF = requestAnimationFrame(step);
   }
 
   function arrow(x1, y1, x2, y2) {
@@ -513,15 +644,22 @@
     const c = cellAt(evt);
     if (!c) return;
     const k = key(c[0], c[1]);
-    if (state.obstacles.has(k)) { say('여기는 연못이나 울타리예요. 지나갈 수 없어요.'); return; }
+    if (state.obstacles.has(k)) {
+      playBlocked();
+      say('여기는 연못이나 울타리예요. 지나갈 수 없어요.');
+      return;
+    }
     state.searched.add(k);
     if (c[0] === state.puppy[0] && c[1] === state.puppy[1]) {
       showPuppy.checked = true;
+      state.found = true;
       say(`🎉 찾았어요! ${state.searched.size}칸을 확인했어요.`);
+      runCelebration();
     } else {
+      playMiss();
       say(`여기에는 없어요. 지금까지 ${state.searched.size}칸을 확인했어요.`);
+      draw();
     }
-    draw();
   });
 
   searchBestBtn.addEventListener('click', () => {
@@ -532,10 +670,13 @@
       state.searched.add(k);
       if (x === state.puppy[0] && y === state.puppy[1]) {
         showPuppy.checked = true;
+        state.found = true;
         say(`🎉 추천 지도를 따라 ${state.searched.size}번 만에 찾았어요!`);
-      } else {
-        say(`추천 장소를 확인했어요. 탐색 횟수: ${state.searched.size}`);
+        runCelebration();
+        return;
       }
+      playMiss();
+      say(`추천 장소를 확인했어요. 탐색 횟수: ${state.searched.size}`);
       break;
     }
     draw();
@@ -543,7 +684,9 @@
 
   clearBtn.addEventListener('click', () => {
     state.searched.clear();
+    state.found = false;
     showPuppy.checked = false;
+    msgBar.classList.remove('found');
     say('탐색 기록을 지웠어요. 다른 지도를 시험해 보세요!');
     draw();
   });
@@ -552,11 +695,19 @@
     const seed = state.puppy[0] * 31 + state.puppy[1] + state.searched.size + 1;
     state = buildDemo(seed);
     showPuppy.checked = false;
+    msgBar.classList.remove('found');
     say('새 강아지가 숨어 있어요. 단서를 살펴보세요!');
     draw();
   });
 
   showPuppy.addEventListener('change', draw);
+
+  const soundBox = document.getElementById('sound');
+  if (localStorage.getItem(SOUND_KEY) === 'off') soundBox.checked = false;
+  soundBox.addEventListener('change', () => {
+    localStorage.setItem(SOUND_KEY, soundBox.checked ? 'on' : 'off');
+    if (soundBox.checked) tone(880, 0, 0.12, { type: 'sine', peak: 0.1 });   // confirm it works
+  });
   for (const radio of document.querySelectorAll('input[name="mode"]')) {
     radio.addEventListener('change', () => { if (radio.checked) { mode = radio.value; draw(); } });
   }
