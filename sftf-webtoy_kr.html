@@ -5,39 +5,54 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CFMS — SFTF 서포트 방향 장난감</title>
 <style>
-  /* Single committed light theme — white ground, printer-friendly. */
+  /* Dark web theme aligned with the SFTF + TOMO orientation demo. */
   :root {
-    --paper: #FFFFFF; --paper-2: #F5F3EF; --ink: #211C14; --ink-soft: #5C5240;
-    --line: #DED7C9; --sand: #C8801E; --sand-bright: #E0982E; --overhang: #D4451F;
-    --rayleigh: #5560D8;  /* R  face-to-face flow (indigo) */
-    --bed: #178C7E;       /* B  plate / virtual ground node (teal) */
-    --chamber: #FFFFFF; --chamber-grid: #ECE7DC;
-    --part-fill: #CBBFA6; --part-stroke: #6B5F49; --shadow: rgba(33,28,20,.10);
-    color-scheme: light;
+    --paper:#071014; --paper-2:#0D191E; --ink:#EEF4F7; --ink-soft:#91A3AC;
+    --line:rgba(184,215,226,.15); --sand:#D39A46; --sand-bright:#E5FF4F; --overhang:#FF795E;
+    --rayleigh:#7B88FF;  /* R  face-to-face flow (indigo) */
+    --bed:#56D9DC;       /* B  plate / virtual ground node (cyan) */
+    --chamber:#091318; --chamber-grid:#203139;
+    --part-fill:#526970; --part-stroke:#C6D3D8; --shadow:rgba(0,0,0,.32);
+    color-scheme: dark;
   }
   @media print {
+    :root {
+      --paper:#FFFFFF; --paper-2:#F5F3EF; --ink:#211C14; --ink-soft:#5C5240;
+      --line:#DED7C9; --chamber:#FFFFFF; --chamber-grid:#ECE7DC;
+      --part-fill:#CBBFA6; --part-stroke:#6B5F49; --shadow:rgba(33,28,20,.10);
+      color-scheme: light;
+    }
     body { background:#fff; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .wrap { max-width:none; padding:0; }
     .panel, .lcard { box-shadow:none; break-inside:avoid; }
-    .controls-bar { display:none; }
+    .lab-nav, .controls-bar { display:none; }
   }
   :root[data-theme="light"], :root[data-theme="dark"] {
-    --paper:#FFFFFF; --paper-2:#F5F3EF; --ink:#211C14; --ink-soft:#5C5240;
-    --line:#DED7C9; --sand:#C8801E; --sand-bright:#E0982E; --overhang:#D4451F;
-    --rayleigh:#5560D8; --bed:#178C7E; --chamber:#FFFFFF; --chamber-grid:#ECE7DC;
-    --part-fill:#CBBFA6; --part-stroke:#6B5F49; --shadow:rgba(33,28,20,.10);
-    color-scheme: light;
+    --paper:#071014; --paper-2:#0D191E; --ink:#EEF4F7; --ink-soft:#91A3AC;
+    --line:rgba(184,215,226,.15); --sand:#D39A46; --sand-bright:#E5FF4F; --overhang:#FF795E;
+    --rayleigh:#7B88FF; --bed:#56D9DC; --chamber:#091318; --chamber-grid:#203139;
+    --part-fill:#526970; --part-stroke:#C6D3D8; --shadow:rgba(0,0,0,.32);
+    color-scheme: dark;
   }
 
   * { box-sizing: border-box; }
   html, body { margin: 0; }
   body {
-    background: var(--paper); color: var(--ink);
+    min-width: 320px;
+    background: radial-gradient(circle at 78% 0%, rgba(86,217,220,.14), transparent 30%), var(--paper);
+    color: var(--ink);
     font-family: "Segoe UI", -apple-system, system-ui, Roboto, sans-serif;
     line-height: 1.5; -webkit-font-smoothing: antialiased;
   }
   .mono { font-family: "Cascadia Code","Consolas",ui-monospace,"SF Mono",Menlo,monospace; }
-  .wrap { max-width: 1180px; margin: 0 auto; padding: clamp(18px,3vw,40px); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(18px,3vw,40px) clamp(18px,3vw,40px); }
+
+  .lab-nav { height:76px; display:flex; align-items:center; justify-content:space-between; gap:20px; border-bottom:1px solid var(--line); margin-bottom:clamp(24px,3vw,40px); }
+  .lab-mark { display:flex; gap:10px; align-items:center; flex:none; color:var(--ink); font-weight:800; letter-spacing:.13em; text-decoration:none; font-size:13px; }
+  .mark-dot { width:11px; height:11px; background:var(--sand-bright); border-radius:50%; box-shadow:13px 0 0 var(--bed); margin-right:13px; }
+  .nav-actions { display:flex; align-items:center; justify-content:flex-end; gap:22px; }
+  .nav-link { color:var(--ink-soft); text-decoration:none; font-size:13px; border-bottom:1px solid currentColor; padding-bottom:3px; white-space:nowrap; }
+  .nav-link-primary { color:var(--ink); }
 
   header.masthead {
     display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 28px;
@@ -122,11 +137,26 @@
   footer { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 12.5px; }
   footer code { font-family:"Cascadia Code","Consolas",monospace; background: var(--paper-2); padding: 1px 6px; border-radius: 5px; color: var(--ink); }
   .kbd { font-family:"Cascadia Code","Consolas",monospace; font-size:11px; border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:1px 6px; color:var(--ink); }
+  @media (max-width: 680px) {
+    .lab-mark { font-size:11px; }
+    .nav-actions { gap:12px; }
+    .nav-link { font-size:11px; }
+  }
 </style>
 </head>
 <body>
 
 <div class="wrap">
+  <nav class="lab-nav" aria-label="연구실 데모">
+    <a class="lab-mark" href="https://cfms-lab.github.io/KIT_sodi/" rel="noreferrer">
+      <span class="mark-dot" aria-hidden="true"></span>
+      <span>CFMS LAB</span>
+    </a>
+    <div class="nav-actions">
+      <a class="nav-link nav-link-primary" href="sftf-webtoy_kr.html" aria-current="page">알고리즘 개념</a>
+      <a class="nav-link" href="https://tomo-sftf-demo-689160817827.asia-northeast3.run.app" rel="noreferrer">최적 배향 계산</a>
+    </div>
+  </nav>
   <header class="masthead">
     <div>
       <p class="eyebrow">Support Flow Tensor Field · 직관 장난감</p>
