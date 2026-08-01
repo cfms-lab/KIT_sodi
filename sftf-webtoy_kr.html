@@ -154,7 +154,7 @@
     </a>
     <div class="nav-actions">
       <a class="nav-link nav-link-primary" href="sftf-webtoy_kr.html" aria-current="page">알고리즘 개념</a>
-      <a class="nav-link" href="https://tomo-sftf-demo-689160817827.asia-northeast3.run.app" rel="noreferrer">최적 배향 계산</a>
+      <a class="nav-link" href="https://tomo-sftf-demo-689160817827.asia-northeast3.run.app" target="_blank" rel="opener">최적 배향 계산</a>
     </div>
   </nav>
   <header class="masthead">
@@ -199,6 +199,66 @@
 <script>
 (() => {
   "use strict";
+  const TOMO_ORIGIN = 'https://tomo-sftf-demo-689160817827.asia-northeast3.run.app';
+  const SUPABASE_URL = 'https://ijutjirouxgqcldjyhma.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYXNlIiwicmVmIjoiaWp1dGppcm91eGdxY2xkanlobWEiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4MjQwOTgwMCwiZXhwIjoyMDk3OTg1ODAwfQ.gIAwf6a2oY-DkTXaf5eM2L4ROMCKim5WsevGfjol7tE';
+  const SESSION_KEY = 'cfms_session';
+
+  function readCfmsSession() {
+    try {
+      return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  function tokenExpiresSoon(token) {
+    try {
+      const encoded = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(encoded));
+      return !payload.exp || payload.exp <= Math.floor(Date.now() / 1000) + 60;
+    } catch (_error) {
+      return true;
+    }
+  }
+
+  async function refreshCfmsSession(session) {
+    if (!session?.refresh_token) return null;
+    try {
+      const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+        method: 'POST',
+        headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: session.refresh_token }),
+      });
+      if (!response.ok) return null;
+      const refreshed = await response.json();
+      const nextSession = {
+        ...session,
+        access_token: refreshed.access_token,
+        refresh_token: refreshed.refresh_token || session.refresh_token,
+      };
+      localStorage.setItem(SESSION_KEY, JSON.stringify(nextSession));
+      return nextSession;
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  window.addEventListener('message', async (event) => {
+    if (event.origin !== TOMO_ORIGIN || event.data?.type !== 'tomo-auth-request') return;
+    let session = readCfmsSession();
+    if (session?.access_token && tokenExpiresSoon(session.access_token)) {
+      session = await refreshCfmsSession(session);
+    }
+    const accessToken = typeof session?.access_token === 'string'
+      ? session.access_token
+      : '';
+    event.source?.postMessage(
+      { type: 'cfms-supabase-session', access_token: accessToken },
+      TOMO_ORIGIN,
+    );
+  });
+
   const root = document.documentElement;
   let P = {};
   function readPalette(){
