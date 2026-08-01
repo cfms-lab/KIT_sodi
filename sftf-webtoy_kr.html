@@ -142,6 +142,10 @@
     .nav-actions { gap:12px; }
     .nav-link { font-size:11px; }
   }
+  @media (max-width: 560px) {   /* three nav links no longer fit on one row */
+    .lab-nav { height:auto; flex-wrap:wrap; padding:14px 0; gap:10px 14px; margin-bottom:20px; }
+    .nav-actions { width:100%; justify-content:flex-start; gap:14px; }
+  }
 </style>
 </head>
 <body>

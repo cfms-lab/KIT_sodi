@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CFMS — 길 잃은 강아지를 찾아라! (PFTF 데모)</title>
+<style>
+  /* Dark web theme aligned with the SFTF + TOMO orientation demo. */
+  :root {
+    --paper:#071014; --paper-2:#0D191E; --ink:#EEF4F7; --ink-soft:#91A3AC;
+    --line:rgba(184,215,226,.15); --sand:#D39A46; --sand-bright:#E5FF4F; --overhang:#FF795E;
+    --rayleigh:#7B88FF;  /* PFTF direction arrows (indigo) */
+    --bed:#56D9DC;       /* impassable water / fence (cyan) */
+    --chamber:#091318; --chamber-grid:#203139;
+    --part-fill:#526970; --part-stroke:#C6D3D8; --shadow:rgba(0,0,0,.32);
+    color-scheme: dark;
+  }
+  :root[data-theme="light"], :root[data-theme="dark"] {
+    --paper:#071014; --paper-2:#0D191E; --ink:#EEF4F7; --ink-soft:#91A3AC;
+    --line:rgba(184,215,226,.15); --sand:#D39A46; --sand-bright:#E5FF4F; --overhang:#FF795E;
+    --rayleigh:#7B88FF; --bed:#56D9DC; --chamber:#091318; --chamber-grid:#203139;
+    --part-fill:#526970; --part-stroke:#C6D3D8; --shadow:rgba(0,0,0,.32);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-width: 320px;
+    background: radial-gradient(circle at 78% 0%, rgba(86,217,220,.14), transparent 30%), var(--paper);
+    color: var(--ink);
+    font-family: "Segoe UI", -apple-system, system-ui, Roboto, sans-serif;
+    line-height: 1.6; -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: "Cascadia Code","Consolas",ui-monospace,"SF Mono",Menlo,monospace; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(14px,3vw,40px) clamp(18px,3vw,40px); }
+
+  .lab-nav { height:76px; display:flex; align-items:center; justify-content:space-between; gap:20px; border-bottom:1px solid var(--line); margin-bottom:clamp(20px,3vw,34px); }
+  .lab-mark { display:flex; gap:10px; align-items:center; flex:none; color:var(--ink); font-weight:800; letter-spacing:.13em; text-decoration:none; font-size:13px; }
+  .mark-dot { width:11px; height:11px; background:var(--sand-bright); border-radius:50%; box-shadow:13px 0 0 var(--bed); margin-right:13px; }
+  .nav-actions { display:flex; align-items:center; justify-content:flex-end; gap:22px; }
+  .nav-link { color:var(--ink-soft); text-decoration:none; font-size:13px; border-bottom:1px solid currentColor; padding-bottom:3px; white-space:nowrap; }
+  .nav-link-primary { color:var(--ink); }
+
+  header.masthead {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 28px;
+    border-bottom: 1px solid var(--line); padding-bottom: 18px; margin-bottom: 18px;
+  }
+  .eyebrow {
+    font-family: "Cascadia Code","Consolas",ui-monospace,monospace;
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--sand); margin: 0 0 8px;
+  }
+  .eyebrow a { color: inherit; }
+  h1 {
+    font-family: "Cascadia Code","Consolas",ui-monospace,monospace;
+    font-weight: 700; font-size: clamp(22px,4vw,38px); line-height: 1.04; margin: 0;
+    letter-spacing: -0.01em; text-wrap: balance;
+  }
+  h1 .k { color: var(--ink-soft); font-weight: 400; display: block; font-size: .5em; letter-spacing:.04em; margin-top: 6px; }
+  .thesis { flex: 1 1 320px; min-width: 260px; color: var(--ink-soft); font-size: 15px; max-width: 52ch; }
+  .thesis b { color: var(--ink); font-weight: 600; }
+
+  /* control strip */
+  .controls-bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
+    background: var(--paper-2); border: 1px solid var(--line); border-radius: 12px;
+    padding: 11px 14px; margin-bottom: 16px;
+  }
+  .modes { display:flex; gap:6px; flex-wrap:wrap; }
+  .modes label {
+    font-size: 13px; padding: 7px 13px; border-radius: 9px; border:1px solid var(--line);
+    background: var(--paper); color: var(--ink-soft); cursor: pointer; white-space: nowrap;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .modes label:hover { background: color-mix(in srgb, var(--sand) 12%, var(--paper)); }
+  .modes input { position:absolute; opacity:0; width:0; height:0; }
+  .modes input:checked + span { color:#201400; }
+  .modes label:has(input:checked) { background: var(--sand-bright); border-color: var(--sand-bright); color:#201400; font-weight:600; }
+  .modes label:has(input:focus-visible) { outline: 3px solid color-mix(in srgb, var(--sand) 40%, transparent); outline-offset: 1px; }
+  .toggle { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-soft); cursor:pointer; margin-left:auto; }
+  .toggle input { accent-color: var(--bed); width:15px; height:15px; cursor:pointer; }
+
+  button {
+    font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    padding: 9px 14px; border-radius: 9px; border: 1px solid var(--line);
+    background: var(--paper); color: var(--ink); transition: transform .08s, background .15s;
+  }
+  button:hover { background: color-mix(in srgb, var(--sand) 12%, var(--paper)); }
+  button:active { transform: translateY(1px); }
+  button.primary { background: var(--sand-bright); border-color: var(--sand-bright); color: #201400; }
+  button:focus-visible { outline: 3px solid color-mix(in srgb, var(--sand) 40%, transparent); outline-offset: 1px; }
+
+  /* board + side panel */
+  .board { display: grid; grid-template-columns: minmax(0,1fr) 280px; gap: 16px; align-items: start; }
+  @media (max-width: 880px) { .board { grid-template-columns: 1fr; } }
+
+  .park { background: var(--chamber); border: 1px solid var(--line); border-radius: 14px; padding: 8px; overflow: hidden; }
+  .park canvas { display: block; width: 100%; touch-action: manipulation; cursor: pointer; }
+
+  .side { display: flex; flex-direction: column; gap: 12px; }
+  .card { background: var(--paper-2); border: 1px solid var(--line); border-radius: 14px; padding: 13px 15px; }
+  .card h2 { font-family:"Cascadia Code","Consolas",monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 9px; font-weight:600; }
+  .clues { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:7px; font-size:13.5px; color:var(--ink-soft); }
+  .clues li { display:flex; gap:9px; align-items:flex-start; }
+  .clues .ic { flex:none; width:20px; text-align:center; }
+  .clues b { color:var(--ink); font-weight:600; }
+  .legend { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; font-size:13px; color:var(--ink-soft); }
+  .legend li { display:flex; gap:9px; align-items:flex-start; }
+  .legend .sw { width:14px; height:14px; border-radius:4px; flex:none; margin-top:3px; }
+  .legend .sw.hot { background: linear-gradient(90deg, #0E2026, #FF795E); }
+  .legend b { color:var(--ink); font-weight:600; }
+  .side .acts { display:flex; flex-direction:column; gap:8px; }
+  .side .acts button { width:100%; }
+
+  .msg {
+    background: var(--paper-2); border:1px solid var(--line); border-left:3px solid var(--sand-bright);
+    border-radius: 0 12px 12px 0; padding: 11px 15px; margin-top: 14px; font-size: 14px; font-weight: 600;
+    display:flex; flex-wrap:wrap; gap:6px 16px; align-items:baseline;
+  }
+  .msg .count { font-family:"Cascadia Code","Consolas",monospace; font-weight:500; font-size:12.5px; color:var(--ink-soft); margin-left:auto; }
+
+  /* explainer */
+  h2.sec {
+    font-family:"Cascadia Code","Consolas",monospace; font-size: clamp(15px,2.2vw,19px);
+    margin: 30px 0 6px; letter-spacing:-.01em;
+  }
+  .lede { color: var(--ink-soft); font-size: 14.5px; margin: 0 0 14px; max-width: 88ch; }
+  .lede b { color: var(--ink); font-weight:600; }
+  .maps { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap:12px; }
+  .mapcard { background: var(--paper-2); border:1px solid var(--line); border-radius:12px; padding:12px 14px; }
+  .mapcard .t { font-weight:700; font-size:14px; margin-bottom:4px; }
+  .mapcard .t .n { font-family:"Cascadia Code","Consolas",monospace; color:var(--sand-bright); margin-right:6px; }
+  .mapcard .d { color:var(--ink-soft); font-size:13px; }
+  .note {
+    border-left:2px solid var(--sand); background:var(--paper-2); border-radius:0 12px 12px 0;
+    padding:12px 16px; margin:16px 0 0; font-size:13.5px; color:var(--ink-soft);
+  }
+  .note .h { color:var(--sand); font-family:"Cascadia Code","Consolas",monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; display:block; margin-bottom:4px; }
+  .note b { color:var(--ink); font-weight:600; }
+  .note code, footer code { font-family:"Cascadia Code","Consolas",monospace; background:var(--paper); padding:1px 6px; border-radius:5px; color:var(--ink); }
+
+  footer { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 12.5px; }
+  footer a { color: var(--ink); }
+  .kbd { font-family:"Cascadia Code","Consolas",monospace; font-size:11px; border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:1px 6px; color:var(--ink); }
+  @media (max-width: 680px) {
+    .lab-mark { font-size:11px; }
+    .nav-actions { gap:12px; }
+    .nav-link { font-size:11px; }
+    .toggle { margin-left:0; }
+  }
+  @media (max-width: 560px) {   /* three nav links no longer fit on one row */
+    .lab-nav { height:auto; flex-wrap:wrap; padding:14px 0; gap:10px 14px; margin-bottom:20px; }
+    .nav-actions { width:100%; justify-content:flex-start; gap:14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav class="lab-nav" aria-label="연구실 데모">
+    <a class="lab-mark" href="https://cfms-lab.github.io/KIT_sodi/" rel="noreferrer">
+      <span class="mark-dot" aria-hidden="true"></span>
+      <span>CFMS LAB</span>
+    </a>
+    <div class="nav-actions">
+      <a class="nav-link" href="sftf-webtoy_kr.html">알고리즘 개념</a>
+      <a class="nav-link" href="https://tomo-sftf-demo-689160817827.asia-northeast3.run.app" target="_blank" rel="opener">최적 배향 계산</a>
+      <a class="nav-link nav-link-primary" href="sftf-apps_kr.html">활용분야</a>
+    </div>
+  </nav>
+
+  <header class="masthead">
+    <div>
+      <p class="eyebrow"><a href="sftf-apps_kr.html">활용분야</a> · 직관 데모 · PFTF_LostPuppy</p>
+      <h1>길 잃은 강아지를 찾아라!<span class="k">clue ledger → candidate cells → actual search</span></h1>
+    </div>
+    <p class="thesis">공원에서 강아지가 사라졌습니다. 단서를 <b>지도 한 장에 합쳐</b> 어디부터 찾아볼지 정해 보세요. 3D프린팅 서포트 계산에 쓰는 <b>SFTF/PFTF와 똑같은 구조</b>를, 수식 없이 손으로 돌려 보는 데모입니다.</p>
+  </header>
+
+  <div class="controls-bar">
+    <div class="modes" role="radiogroup" aria-label="지도 종류">
+      <label><input type="radio" name="mode" value="Scalar"><span>단순 점수 지도</span></label>
+      <label><input type="radio" name="mode" value="SFTF"><span>SFTF 후보 지역</span></label>
+      <label><input type="radio" name="mode" value="PFTF" checked><span>PFTF 방향 지도</span></label>
+    </div>
+    <label class="toggle"><input type="checkbox" id="showPuppy"> 정답 강아지 보기</label>
+  </div>
+
+  <div class="board">
+    <div class="park">
+      <canvas id="park" aria-label="공원 지도. 칸을 클릭하면 그 칸을 찾아봅니다."></canvas>
+    </div>
+
+    <div class="side">
+      <div class="card">
+        <h2>🕵️ 단서 카드</h2>
+        <ul class="clues">
+          <li><span class="ic">📍</span><span><b>마지막 목격</b> — 남서쪽</span></li>
+          <li><span class="ic">🐾</span><span><b>발자국</b> — 북동쪽으로 향함</span></li>
+          <li><span class="ic">🍪</span><span><b>좋아하는 곳</b> — 간식 가게</span></li>
+          <li><span class="ic">🔊</span><span><b>피하는 곳</b> — 시끄러운 광장</span></li>
+          <li><span class="ic">🌊</span><span>파란 연못과 울타리는 <b>못 지나가요</b></span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>지도 읽는 법</h2>
+        <ul class="legend">
+          <li><span class="sw hot"></span><span>색이 <b>붉을수록</b> 먼저 찾아볼 곳</span></li>
+          <li><span class="sw" style="background:var(--sand-bright)"></span><span><b>노란 테두리</b> = 추천 후보 칸 (상위 7칸)</span></li>
+          <li><span class="sw" style="background:var(--rayleigh)"></span><span><b>화살표</b> = 강아지가 갔을 방향</span></li>
+          <li><span class="sw" style="background:var(--bed)"></span><span><b>파란 칸</b> = 연못·울타리 (통과 불가)</span></li>
+        </ul>
+      </div>
+
+      <div class="card acts">
+        <button class="primary" id="searchBest">추천 장소부터 찾아보기</button>
+        <button id="clearSearch">찾은 칸 지우기</button>
+        <button id="newGame">새 게임</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="msg"><span id="msg">단서를 합쳐 먼저 찾아볼 곳을 골라 보세요!</span><span class="count" id="count">확인한 칸 0</span></p>
+
+  <h2 class="sec">세 가지 지도는 무엇이 다른가</h2>
+  <p class="lede">위쪽 버튼으로 지도를 바꿔 보세요. 같은 단서인데 <b>얼마나 많은 정보를 쓰느냐</b>에 따라 추천이 달라집니다.</p>
+  <div class="maps">
+    <div class="mapcard">
+      <div class="t"><span class="n">1</span>단순 점수 지도</div>
+      <div class="d">단서마다 “가까울수록 높은 점수”만 더합니다. 방향 정보는 버립니다. 그래서 마지막 목격 지점 <b>주변에 동그랗게</b> 점수가 몰립니다.</div>
+    </div>
+    <div class="mapcard">
+      <div class="t"><span class="n">2</span>SFTF 후보 지역</div>
+      <div class="d">같은 점수 지도에서 <b>상위 후보 칸</b>을 골라 표시합니다. SFTF가 답하는 질문은 “<b>어디부터?</b>” — 3D프린팅에서 어느 방향으로 세울지 후보를 추리는 것과 같은 역할입니다.</div>
+    </div>
+    <div class="mapcard">
+      <div class="t"><span class="n">3</span>PFTF 방향 지도</div>
+      <div class="d">단서의 <b>방향</b>까지 씁니다. 발자국이 북동쪽을 향하면 그쪽 점수를 최대 1.85배 올리고 반대쪽은 깎습니다(정렬 보너스). 그래서 붉은 영역이 <b>실제 이동 방향으로 길게 늘어납니다</b>.</div>
+    </div>
+  </div>
+
+  <div class="note">
+    <span class="h">점수는 이렇게 계산됩니다</span>
+    각 칸에서 단서까지의 거리 <code>d</code>로 <b>가우시안 근접도</b> <code>exp(−d²/2r²)</code>를 구하고, 단서 세기를 곱해 전부 더합니다.
+    PFTF 모드에서는 여기에 <b>정렬 보너스</b> <code>max(0.12, 1 + 0.85·cos θ)</code>를 곱합니다 — <code>θ</code>는 “칸이 놓인 방향”과 “단서가 가리키는 방향”의 각도 차이입니다.
+    피해야 할 단서(🔊)는 반대로 <code>0.9</code>를 곱해 점수를 <b>깎습니다</b>. 마지막에 전체를 0~1로 정규화해 색을 칠합니다.
+    코드로는 스무 줄 남짓 — <b>3D프린팅 서포트 점수 <code>S = R + B</code>도 구조가 똑같습니다</b>: 흐름을 한 장부에 더하고, 상위 후보만 정밀 검증에 넘깁니다.
+  </div>
+
+  <div class="note">
+    <span class="h">왜 이게 연구인가</span>
+    강아지를 <b>정확히 어디 있는지 맞히는 것이 목적이 아닙니다.</b> 진짜 목적은 “아무 데나 뒤지는 것보다, 추천 지도를 따라가면 <b>더 적은 칸을 확인하고 찾는가</b>”입니다.
+    <b>추천 장소부터 찾아보기</b> 버튼을 눌러 확인한 칸 수를 세어 보고, 지도를 <b>단순 점수</b>로 바꾼 뒤 <b>찾은 칸 지우기</b> → 다시 눌러 비교해 보세요. 같은 실험을 자동으로 수천 번 돌린 것이 이 프로젝트의 본체입니다.
+  </div>
+
+  <footer>
+    원본은 Python + tkinter 데스크톱 앱(<code>PFTF_LostPuppy_dev</code>)이며, 이 페이지는 그 점수 모델(<code>core.py</code>)을 <b>브라우저에서 그대로 돌도록 JavaScript로 이식</b>한 것입니다 — 설치도 서버도 필요 없습니다. 같은 엔진의 다른 응용은 <a href="sftf-apps_kr.html">활용분야</a>, 3D프린팅 원리 자체는 <a href="sftf-webtoy_kr.html">알고리즘 개념</a> 페이지에서 볼 수 있습니다. · 팁: 칸을 <span class="kbd">클릭</span>해 직접 찾아보세요.
+  </footer>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---------------------------------------------------------------
+  // Port of python/src/pftf_lost_puppy/core.py — same formulas, same
+  // constants. Only the RNG differs (CPython's Mersenne Twister is not
+  // reproducible here), so "new game" varies deterministically per seed
+  // but not identically to the desktop app.
+  // ---------------------------------------------------------------
+  const W = 20, H = 16;
+  const key = (x, y) => y * W + x;
+
+  function unit(dx, dy) {
+    const len = Math.hypot(dx, dy);
+    return len === 0 ? [0, 0] : [dx / len, dy / len];
+  }
+
+  function scoreMap(state, directional) {
+    const scores = [], vectors = [];
+    for (let y = 0; y < H; y++) {
+      const row = new Array(W).fill(0), vrow = [];
+      for (let x = 0; x < W; x++) vrow.push([0, 0]);
+      scores.push(row); vectors.push(vrow);
+    }
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        if (state.obstacles.has(key(x, y))) { scores[y][x] = -1; continue; }
+        let total = 0.02, vx = 0, vy = 0;
+        for (const c of state.clues) {
+          const dx = x - c.x, dy = y - c.y, dist = Math.hypot(dx, dy);
+          const prox = Math.exp(-(dist * dist) / (2 * c.radius * c.radius));
+          if (c.kind === 'avoid') {
+            total -= 0.9 * c.strength * prox;
+            const [ux, uy] = unit(dx, dy);
+            vx += ux * c.strength * prox; vy += uy * c.strength * prox;
+          } else {
+            let bonus = 1;
+            if (directional && (c.dir[0] !== 0 || c.dir[1] !== 0)) {
+              const [ux, uy] = unit(dx, dy), [cx, cy] = unit(c.dir[0], c.dir[1]);
+              bonus = Math.max(0.12, 1 + 0.85 * (ux * cx + uy * cy));
+              vx += cx * c.strength * prox; vy += cy * c.strength * prox;
+            } else {
+              const [ux, uy] = unit(c.x - x, c.y - y);
+              vx += ux * c.strength * prox * 0.25; vy += uy * c.strength * prox * 0.25;
+            }
+            total += c.strength * prox * bonus;
+          }
+        }
+        scores[y][x] = Math.max(0, total);
+        vectors[y][x] = unit(vx, vy);
+      }
+    }
+    let lo = Infinity, hi = -Infinity;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const s = scores[y][x];
+      if (s >= 0) { if (s < lo) lo = s; if (s > hi) hi = s; }
+    }
+    const span = (hi - lo) || 1;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      if (scores[y][x] >= 0) scores[y][x] = (scores[y][x] - lo) / span;
+    }
+    return { scores, vectors };
+  }
+
+  function bestCells(scores, count) {
+    const cand = [];
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      if (scores[y][x] >= 0) cand.push([scores[y][x], x, y]);
+    }
+    cand.sort((a, b) => (b[0] - a[0]) || (b[1] - a[1]) || (b[2] - a[2]));
+    return cand.slice(0, count).map(([, x, y]) => [x, y]);
+  }
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function buildDemo(seed) {
+    const rng = mulberry32(seed === undefined ? 7 : seed);
+    const obstacles = new Set();
+    for (let x = 8; x < 12; x++) for (let y = 7; y < 10; y++) obstacles.add(key(x, y));
+    for (let y = 2; y < 7; y++) obstacles.add(key(12, y));
+
+    const lastSeen = [3, 12];
+    let puppy = [16, 4];
+    const clues = [
+      { x: lastSeen[0], y: lastSeen[1], kind: 'last_seen', strength: 1.0,  radius: 6.0, dir: [1.0, -0.55], icon: '📍', label: '마지막 목격' },
+      { x: 9,  y: 8, kind: 'footprint', strength: 1.25, radius: 5.0, dir: [1.0, -0.7], icon: '🐾', label: '발자국' },
+      { x: 15, y: 3, kind: 'favorite',  strength: 0.9,  radius: 4.0, dir: [0, 0],      icon: '🍪', label: '간식 가게' },
+      { x: 3,  y: 3, kind: 'avoid',     strength: 0.8,  radius: 4.0, dir: [0, 0],      icon: '🔊', label: '시끄러운 광장' },
+    ];
+    if (rng() > 0.5) puppy = [17, 5];
+    return { puppy, lastSeen, clues, obstacles, searched: new Set() };
+  }
+
+  // ---------------------------------------------------------------
+  // View — replaces the tkinter canvas, sized to the page instead of a
+  // fixed 34px cell.
+  // ---------------------------------------------------------------
+  const root = document.documentElement;
+  let P = {};
+  function readPalette() {
+    const cs = getComputedStyle(root), g = k => cs.getPropertyValue(k).trim();
+    P = { chamber: g('--chamber'), grid: g('--chamber-grid'), line: g('--line'),
+          overhang: g('--overhang'), rayleigh: g('--rayleigh'), bed: g('--bed'),
+          sand: g('--sand'), sandBright: g('--sand-bright'), ink: g('--ink'), inkSoft: g('--ink-soft') };
+  }
+  readPalette();
+  new MutationObserver(readPalette).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+
+  // Heat ramp for a dark page: cold deep teal -> plum -> sand -> hot coral.
+  const RAMP = [
+    [0.00, [14, 32, 38]],
+    [0.35, [82, 54, 66]],
+    [0.68, [178, 106, 74]],
+    [1.00, [255, 121, 94]],
+  ];
+  function heatColor(v) {
+    v = Math.max(0, Math.min(1, v));
+    for (let i = 1; i < RAMP.length; i++) {
+      if (v <= RAMP[i][0]) {
+        const [t0, c0] = RAMP[i - 1], [t1, c1] = RAMP[i];
+        const f = (v - t0) / (t1 - t0);
+        return `rgb(${Math.round(c0[0] + (c1[0] - c0[0]) * f)},${Math.round(c0[1] + (c1[1] - c0[1]) * f)},${Math.round(c0[2] + (c1[2] - c0[2]) * f)})`;
+      }
+    }
+    return `rgb(${RAMP[RAMP.length - 1][1].join(',')})`;
+  }
+
+  const canvas = document.getElementById('park'), ctx = canvas.getContext('2d');
+  const msgEl = document.getElementById('msg'), countEl = document.getElementById('count');
+  const showPuppy = document.getElementById('showPuppy');
+  const searchBestBtn = document.getElementById('searchBest');
+  const clearBtn = document.getElementById('clearSearch');
+  const newGameBtn = document.getElementById('newGame');
+
+  let state = buildDemo(7);
+  let mode = 'PFTF';
+  let cell = 24, margin = 6;
+
+  const modeOf = () => mode;
+  const isDirectional = () => mode === 'PFTF';
+  // The three radio labels promise three different views, but the desktop
+  // build renders "Scalar" and "SFTF" identically. Candidate outlines are
+  // shown only from SFTF upward so each label means something on the web.
+  const showCandidates = () => mode !== 'Scalar';
+
+  function resize() {
+    const box = canvas.parentElement.clientWidth;
+    margin = Math.max(4, Math.round(box * 0.012));
+    cell = Math.max(12, Math.floor((box - 2 * margin) / W));
+    const w = cell * W + 2 * margin, h = cell * H + 2 * margin;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = w * dpr; canvas.height = h * dpr;
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    draw();
+  }
+
+  function boxOf(x, y) { return [margin + x * cell, margin + y * cell]; }
+
+  function draw() {
+    const w = cell * W + 2 * margin, h = cell * H + 2 * margin;
+    ctx.clearRect(0, 0, w, h);
+    const directional = isDirectional();
+    const { scores, vectors } = scoreMap(state, directional);
+    const top = new Set(bestCells(scores, 7).map(([x, y]) => key(x, y)));
+    const withCandidates = showCandidates();
+
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const [x0, y0] = boxOf(x, y), k = key(x, y);
+        const blocked = state.obstacles.has(k);
+        ctx.fillStyle = blocked ? '#15455270' : heatColor(scores[y][x]);
+        ctx.fillRect(x0, y0, cell, cell);
+        if (blocked) {
+          ctx.fillStyle = 'rgba(86,217,220,.18)';
+          ctx.fillRect(x0, y0, cell, cell);
+        }
+        const hot = withCandidates && top.has(k);
+        ctx.strokeStyle = hot ? P.sandBright : 'rgba(184,215,226,.10)';
+        ctx.lineWidth = hot ? 2 : 1;
+        ctx.strokeRect(x0 + .5, y0 + .5, cell - 1, cell - 1);
+
+        if (directional && !blocked && (x + y) % 2 === 0) {
+          const [vx, vy] = vectors[y][x];
+          if (Math.abs(vx) + Math.abs(vy) > 0.15) {
+            const cx = x0 + cell / 2, cy = y0 + cell / 2, L = cell * 0.36;
+            arrow(cx - vx * L * .35, cy - vy * L * .35, cx + vx * L, cy + vy * L);
+          }
+        }
+        if (state.searched.has(k)) {
+          ctx.fillStyle = 'rgba(7,16,20,.55)';
+          ctx.fillRect(x0, y0, cell, cell);
+          ctx.fillStyle = P.ink;
+          ctx.font = `700 ${Math.round(cell * 0.52)}px "Segoe UI", sans-serif`;
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText('✓', x0 + cell / 2, y0 + cell / 2 + 1);
+        }
+      }
+    }
+
+    for (const c of state.clues) {
+      const [x0, y0] = boxOf(c.x, c.y), cx = x0 + cell / 2, cy = y0 + cell / 2;
+      ctx.beginPath(); ctx.arc(cx, cy, cell * 0.42, 0, 7);
+      ctx.fillStyle = 'rgba(7,16,20,.78)'; ctx.fill();
+      ctx.strokeStyle = c.kind === 'avoid' ? P.bed : P.sandBright; ctx.lineWidth = 2; ctx.stroke();
+      ctx.font = `${Math.round(cell * 0.55)}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(c.icon, cx, cy + 1);
+    }
+
+    if (showPuppy.checked) {
+      const [x0, y0] = boxOf(state.puppy[0], state.puppy[1]);
+      ctx.font = `${Math.round(cell * 0.8)}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('🐶', x0 + cell / 2, y0 + cell / 2 + 1);
+    }
+  }
+
+  function arrow(x1, y1, x2, y2) {
+    ctx.strokeStyle = P.rayleigh; ctx.fillStyle = P.rayleigh;
+    ctx.lineWidth = Math.max(1.2, cell * 0.075);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    const a = Math.atan2(y2 - y1, x2 - x1), hd = Math.max(4, cell * 0.24);
+    ctx.beginPath(); ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - hd * Math.cos(a - 0.5), y2 - hd * Math.sin(a - 0.5));
+    ctx.lineTo(x2 - hd * Math.cos(a + 0.5), y2 - hd * Math.sin(a + 0.5));
+    ctx.closePath(); ctx.fill();
+  }
+
+  function say(text) {
+    msgEl.textContent = text;
+    countEl.textContent = `확인한 칸 ${state.searched.size}`;
+  }
+
+  function cellAt(evt) {
+    const rc = canvas.getBoundingClientRect();
+    const px = (evt.clientX - rc.left) * (cell * W + 2 * margin) / rc.width;
+    const py = (evt.clientY - rc.top) * (cell * H + 2 * margin) / rc.height;
+    const x = Math.floor((px - margin) / cell), y = Math.floor((py - margin) / cell);
+    return (x >= 0 && x < W && y >= 0 && y < H) ? [x, y] : null;
+  }
+
+  canvas.addEventListener('click', evt => {
+    const c = cellAt(evt);
+    if (!c) return;
+    const k = key(c[0], c[1]);
+    if (state.obstacles.has(k)) { say('여기는 연못이나 울타리예요. 지나갈 수 없어요.'); return; }
+    state.searched.add(k);
+    if (c[0] === state.puppy[0] && c[1] === state.puppy[1]) {
+      showPuppy.checked = true;
+      say(`🎉 찾았어요! ${state.searched.size}칸을 확인했어요.`);
+    } else {
+      say(`여기에는 없어요. 지금까지 ${state.searched.size}칸을 확인했어요.`);
+    }
+    draw();
+  });
+
+  searchBestBtn.addEventListener('click', () => {
+    const { scores } = scoreMap(state, isDirectional());
+    for (const [x, y] of bestCells(scores, W * H)) {
+      const k = key(x, y);
+      if (state.searched.has(k)) continue;
+      state.searched.add(k);
+      if (x === state.puppy[0] && y === state.puppy[1]) {
+        showPuppy.checked = true;
+        say(`🎉 추천 지도를 따라 ${state.searched.size}번 만에 찾았어요!`);
+      } else {
+        say(`추천 장소를 확인했어요. 탐색 횟수: ${state.searched.size}`);
+      }
+      break;
+    }
+    draw();
+  });
+
+  clearBtn.addEventListener('click', () => {
+    state.searched.clear();
+    showPuppy.checked = false;
+    say('탐색 기록을 지웠어요. 다른 지도를 시험해 보세요!');
+    draw();
+  });
+
+  newGameBtn.addEventListener('click', () => {
+    const seed = state.puppy[0] * 31 + state.puppy[1] + state.searched.size + 1;
+    state = buildDemo(seed);
+    showPuppy.checked = false;
+    say('새 강아지가 숨어 있어요. 단서를 살펴보세요!');
+    draw();
+  });
+
+  showPuppy.addEventListener('change', draw);
+  for (const radio of document.querySelectorAll('input[name="mode"]')) {
+    radio.addEventListener('change', () => { if (radio.checked) { mode = radio.value; draw(); } });
+  }
+
+  new ResizeObserver(resize).observe(canvas.parentElement);
+  resize();
+  say('단서를 합쳐 먼저 찾아볼 곳을 골라 보세요!');
+})();
+</script>
+</body>
+</html>
