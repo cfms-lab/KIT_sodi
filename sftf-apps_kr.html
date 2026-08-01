@@ -100,6 +100,9 @@
   /* Source figures are drawn on white; multiply-blend them onto one muted plate
      so no bright rectangle glares against the dark page tone. */
   .plate { background:#E9EFF1; border-radius:10px; padding:8px; overflow:hidden; }
+  /* The LostPuppy shot is the dark-themed web demo, so it needs no light plate. */
+  .plate.shot-dark { background: var(--chamber); border:1px solid var(--line); }
+  .plate.shot-dark img { mix-blend-mode: normal; }
   a.plate.live { display:block; position:relative; text-decoration:none; transition: box-shadow .18s, transform .08s; }
   a.plate.live:hover { box-shadow: 0 0 0 2px var(--sand-bright); }
   a.plate.live:active { transform: translateY(1px); }
@@ -237,11 +240,11 @@
   <p class="lede">먼저 수식 없이 구조만 보는 데모입니다. 공원에서 잃어버린 강아지를 찾을 때, 우리는 단서를 하나씩 따로 보지 않고 <b>지도 한 장 위에 전부 합쳐</b> 놓고 “어디부터 가 볼까”를 정합니다. 그게 바로 위 3단계입니다. <b>설치 없이 브라우저에서 바로 돌려볼 수 있습니다.</b></p>
   <div class="demo">
     <div class="figbox">
-      <a class="plate live" href="lostpuppy_kr.html" aria-label="길 잃은 강아지 찾기 데모 실행하기">
-        <img src="pics/sftf-apps/app_lostpuppy.png" alt="길 잃은 강아지 찾기 교육용 게임 실행 화면 — 붉은 칸은 우선 탐색 지역, 화살표는 PFTF 방향 추천, 파란 칸은 통행 불가">
+      <a class="plate live shot-dark" href="lostpuppy_kr.html" aria-label="길 잃은 강아지 찾기 데모 실행하기">
+        <img src="pics/sftf-apps/app_lostpuppy_web.png" alt="길 잃은 강아지 찾기 웹 데모 화면 — 붉은 칸은 우선 탐색 지역, 노란 테두리는 추천 후보 칸, 화살표는 PFTF 방향 추천, 파란 칸은 통행 불가">
         <span class="playtag">▶ 브라우저에서 실행</span>
       </a>
-      <p class="figcap">PFTF_LostPuppy 실행 화면 · 단서 합산 지도 + 방향장</p>
+      <p class="figcap">PFTF_LostPuppy 웹 데모 · 단서 합산 지도 + 방향장</p>
       <a class="runbtn" href="lostpuppy_kr.html">데모 직접 해보기 →</a>
     </div>
     <div>
