@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>CFMS 로그인 연결</title>
+</head>
+<body>
+<script>
+(() => {
+  'use strict';
+
+  // Tokens are sent only to the production TOMO demo, never through a URL.
+  const TARGET_ORIGIN = 'https://tomo-sftf-demo-689160817827.asia-northeast3.run.app';
+  const SUPABASE_URL = 'https://ijutjirouxgqcldjyhma.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdXRqaXJvdXhncWNsZGp5aG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDk4MDAsImV4cCI6MjA5Nzk4NTgwMH0.gIAwf6a2oY-DkTXaf5eM2L4ROMCKim5WsevGfjol7tE';
+  const SESSION_KEY = 'cfms_session';
+
+  function readSession() {
+    try {
+      return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  function tokenExpiresSoon(token) {
+    try {
+      const encoded = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(encoded));
+      return !payload.exp || payload.exp <= Math.floor(Date.now() / 1000) + 60;
+    } catch (_error) {
+      return true;
+    }
+  }
+
+  async function refreshSession(session) {
+    if (!session?.refresh_token) return null;
+    try {
+      const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refresh_token: session.refresh_token }),
+      });
+      if (!response.ok) return null;
+      const refreshed = await response.json();
+      const nextSession = {
+        ...session,
+        access_token: refreshed.access_token,
+        refresh_token: refreshed.refresh_token || session.refresh_token,
+      };
+      localStorage.setItem(SESSION_KEY, JSON.stringify(nextSession));
+      return nextSession;
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  async function sendSession() {
+    let session = readSession();
+    if (session?.access_token && tokenExpiresSoon(session.access_token)) {
+      session = await refreshSession(session);
+    }
+    const accessToken = typeof session?.access_token === 'string'
+      ? session.access_token
+      : '';
+    window.parent.postMessage(
+      { type: 'cfms-supabase-session', access_token: accessToken },
+      TARGET_ORIGIN,
+    );
+  }
+
+  if (window.parent !== window) sendSession();
+})();
+</script>
+</body>
+</html>
