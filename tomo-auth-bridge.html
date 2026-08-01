@@ -60,7 +60,7 @@
     }
   }
 
-  async function sendSession() {
+  async function sendSession(targetWindow) {
     let session = readSession();
     if (session?.access_token && tokenExpiresSoon(session.access_token)) {
       session = await refreshSession(session);
@@ -68,13 +68,21 @@
     const accessToken = typeof session?.access_token === 'string'
       ? session.access_token
       : '';
-    window.parent.postMessage(
-      { type: 'cfms-supabase-session', access_token: accessToken },
+    targetWindow.postMessage(
+      {
+        type: 'cfms-supabase-session',
+        access_token: accessToken,
+        email: typeof session?.email === 'string' ? session.email : '',
+      },
       TARGET_ORIGIN,
     );
   }
 
-  if (window.parent !== window) sendSession();
+  if (window.parent !== window) {
+    sendSession(window.parent);
+  } else if (window.opener && !window.opener.closed) {
+    sendSession(window.opener).finally(() => window.setTimeout(() => window.close(), 350));
+  }
 })();
 </script>
 </body>

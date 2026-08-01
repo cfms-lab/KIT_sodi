@@ -201,7 +201,7 @@
   "use strict";
   const TOMO_ORIGIN = 'https://tomo-sftf-demo-689160817827.asia-northeast3.run.app';
   const SUPABASE_URL = 'https://ijutjirouxgqcldjyhma.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYXNlIiwicmVmIjoiaWp1dGppcm91eGdxY2xkanlobWEiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4MjQwOTgwMCwiZXhwIjoyMDk3OTg1ODAwfQ.gIAwf6a2oY-DkTXaf5eM2L4ROMCKim5WsevGfjol7tE';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdXRqaXJvdXhncWNsZGp5aG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDk4MDAsImV4cCI6MjA5Nzk4NTgwMH0.gIAwf6a2oY-DkTXaf5eM2L4ROMCKim5WsevGfjol7tE';
   const SESSION_KEY = 'cfms_session';
 
   function readCfmsSession() {
@@ -254,7 +254,11 @@
       ? session.access_token
       : '';
     event.source?.postMessage(
-      { type: 'cfms-supabase-session', access_token: accessToken },
+      {
+        type: 'cfms-supabase-session',
+        access_token: accessToken,
+        email: typeof session?.email === 'string' ? session.email : '',
+      },
       TOMO_ORIGIN,
     );
   });
