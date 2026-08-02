@@ -92,7 +92,7 @@ function esc(s) {
 }
 
 // Build vis datasets (deterministic radial layout: apps ring around their base hub)
-const POS = {"Tomo_SFTF": {"x": -278, "y": -4}, "Tomo_SFTFSoft": {"x": -5, "y": -48}, "SFTF_Clustering": {"x": -193, "y": -185}, "PFTF": {"x": 252, "y": 15}, "SFTF_Composite": {"x": -5, "y": -466}, "SFTF_InjMold": {"x": -609, "y": -94}, "PFTF_Compression": {"x": 558, "y": -108}, "SFTF_ThermalChip": {"x": -603, "y": -233}, "PFTF_Mold": {"x": 390, "y": -388}, "Tomo_DiffSupport": {"x": 172, "y": -70}, "DFSVR_VisCull": {"x": 390, "y": 85}, "PFTF_VisCull_kDop": {"x": 602, "y": 188}, "SFTF_SewerPOC": {"x": -349, "y": -337}, "PFTF_FXShock": {"x": 450, "y": 362}, "SFTF_BatteryThermal": {"x": -531, "y": -365}, "SFTF_PDNElectric": {"x": -446, "y": -198}, "PFTF_Inspection": {"x": 732, "y": 263}, "PFTF_RainNowcast": {"x": 138, "y": 487}, "PFTF_Terrain": {"x": 210, "y": 363}, "PFTF_Solar": {"x": 320, "y": 430}, "PFTF_subMarine": {"x": -230, "y": 335}, "PFTF_Assembly": {"x": 15, "y": 413}, "PFTF_CNC": {"x": -217, "y": -435}, "PFTF_Radiotherapy": {"x": 459, "y": -245}, "SFTF_DataCenterTraffic": {"x": -2, "y": 268}, "SFTF_UrbanTraffic": {"x": -368, "y": 138}, "SFTF_WarehouseAGV": {"x": -583, "y": 94}, "PFTF_AssetShock": {"x": -400, "y": 260}, "SFTFSoft_GNN": {"x": 55, "y": -133}, "SFTF_DrapePrior": {"x": 46, "y": 123}, "PFTF_AsymTensor": {"x": 61, "y": 61}, "PFTF_DrapePrior_VisCull_kDop": {"x": 409, "y": 195}, "PFTF_ResearchOptimize": {"x": 392, "y": -15}, "PFTF_alpha": {"x": 270, "y": -191}, "SFTF_QEM": {"x": 111, "y": -288}, "SFTF_DynamicTargetSearch": {"x": -61, "y": -266}};
+const POS = {"Tomo_SFTF": {"x": -180, "y": -13}, "Tomo_SFTFSoft": {"x": 88, "y": 113}, "SFTF_Clustering": {"x": -27, "y": 140}, "PFTF": {"x": 101, "y": 390}, "SFTF_Composite": {"x": 290, "y": -253}, "SFTF_InjMold": {"x": -430, "y": -17}, "PFTF_Compression": {"x": 479, "y": 109}, "SFTF_ThermalChip": {"x": -420, "y": -233}, "PFTF_Mold": {"x": 425, "y": -106}, "Tomo_DiffSupport": {"x": 226, "y": 94}, "DFSVR_VisCull": {"x": 349, "y": 41}, "PFTF_VisCull_kDop": {"x": 373, "y": 288}, "SFTF_SewerPOC": {"x": -178, "y": -250}, "PFTF_FXShock": {"x": 252, "y": 571}, "SFTF_BatteryThermal": {"x": -299, "y": -359}, "SFTF_PDNElectric": {"x": -344, "y": -154}, "PFTF_Inspection": {"x": 460, "y": 359}, "PFTF_RainNowcast": {"x": 71, "y": 678}, "PFTF_Terrain": {"x": -22, "y": 610}, "PFTF_Solar": {"x": 164, "y": 698}, "PFTF_subMarine": {"x": -177, "y": 525}, "PFTF_Assembly": {"x": -156, "y": 646}, "PFTF_CNC": {"x": 80, "y": -363}, "PFTF_Radiotherapy": {"x": 482, "y": 4}, "SFTF_DataCenterTraffic": {"x": -281, "y": 464}, "SFTF_UrbanTraffic": {"x": -338, "y": 205}, "SFTF_WarehouseAGV": {"x": -461, "y": 146}, "PFTF_AssetShock": {"x": -361, "y": 337}, "SFTFSoft_GNN": {"x": 57, "y": -18}, "SFTF_DrapePrior": {"x": -112, "y": 291}, "PFTF_AsymTensor": {"x": -168, "y": 146}, "PFTF_DrapePrior_VisCull_kDop": {"x": 232, "y": 314}, "PFTF_ResearchOptimize": {"x": 310, "y": 448}, "PFTF_alpha": {"x": 303, "y": -68}, "SFTF_QEM": {"x": 185, "y": -212}, "SFTF_DynamicTargetSearch": {"x": -56, "y": -157}};
 // 사용자 지정 기본 배치 (2026-08-02b)
 // === 투고 상태 배지 (draft / submit / revision / accepted / printed) ===
 // 값 형식: "저널,상태[,MM-DD]". draft는 예정 저널이 정해진 노드만 표기.
@@ -524,7 +524,7 @@ LEGEND.forEach(c => {
 </script>
 <script>
 // Render hyperedges as shaded regions
-const hyperedges = [{"label": "발견1 줄 세우기는 0차+연결지도 (랭킹 마진 +0.01)", "nodes": ["SFTF_InjMold", "SFTF_SewerPOC", "SFTF_PDNElectric", "SFTF_ThermalChip", "SFTF_BatteryThermal", "PFTF_CNC"]}, {"label": "발견2 2차는 크기·보정 (RMSE 4x, 잔차 0%)", "nodes": ["SFTF_Composite", "PFTF_Compression", "PFTF_Mold", "PFTF_Radiotherapy"]}, {"label": "발견3 1차를 죽이는 범인들 (보존칙·제곱식·강한 solver)", "nodes": ["SFTF_WarehouseAGV", "PFTF_AssetShock", "SFTF_UrbanTraffic"]}, {"label": "발견3' 대조: 1차가 사는 곳 (부호 결정적·1차 주연)", "nodes": ["SFTF_DataCenterTraffic", "PFTF_subMarine", "PFTF_Assembly", "PFTF_RainNowcast", "PFTF_Terrain", "PFTF_Solar", "PFTF_FXShock"]}, {"label": "발견4·5·6 보수성 게이트: 경계 vs 모멘트 · 양화사 · ±d", "nodes": ["PFTF_VisCull_kDop", "PFTF_Inspection"]}, {"label": "BASE / 핵심 이론 트랙", "kind": "base", "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering", "PFTF"], "color": "#0f766e", "labelColor": "#115e59", "fillAlpha": 0.1, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.18}];
+const hyperedges = [{"label": "발견1", "nodes": ["SFTF_InjMold", "SFTF_SewerPOC", "SFTF_PDNElectric", "SFTF_ThermalChip", "SFTF_BatteryThermal", "PFTF_CNC"]}, {"label": "발견2", "nodes": ["SFTF_Composite", "PFTF_Compression", "PFTF_Mold", "PFTF_Radiotherapy"]}, {"label": "발견3", "nodes": ["SFTF_WarehouseAGV", "PFTF_AssetShock", "SFTF_UrbanTraffic"]}, {"label": "발견3'", "nodes": ["SFTF_DataCenterTraffic", "PFTF_subMarine", "PFTF_Assembly", "PFTF_RainNowcast", "PFTF_Terrain", "PFTF_Solar", "PFTF_FXShock"]}, {"label": "발견4·5·6", "nodes": ["PFTF_VisCull_kDop", "PFTF_Inspection"]}, {"label": "BASE", "kind": "base", "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering", "PFTF"], "color": "#0f766e", "labelColor": "#115e59", "fillAlpha": 0.1, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.18}];
 // afterDrawing passes ctx already transformed to network coordinate space.
 // Draw node positions raw — no manual pan/zoom/DPR math needed.
 network.on('afterDrawing', function(ctx) {
@@ -598,19 +598,22 @@ network.on('afterDrawing', function(ctx) {
         ctx.globalAlpha = labelAlpha;
         ctx.fillStyle = h.labelColor || color;
         ctx.font = 'bold 20px sans-serif';
-        ctx.textAlign = 'center';
-        const topY = Math.min.apply(null, expanded.map(p => p.y)); ctx.fillText(h.label, cx, topY - 16);
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'bottom';
+        const leftX = Math.min.apply(null, expanded.map(p => p.x));
+        const topY = Math.min.apply(null, expanded.map(p => p.y));
+        ctx.fillText(h.label, leftX, topY);
         ctx.setLineDash([]);
         ctx.restore();
     });
 // FINDING_DEPS_BEGIN — 발견 간 의존성 (분류표 노트의 DAG, layout_findings.py 정본)
 const FINDING_DEPS = [
-  {from:0, to:1, style:"solid",    label:"전제(사다리·레이스)"},
-  {from:0, to:2, style:"solid",    label:"전제"},
-  {from:0, to:4, style:"solid",    label:"전제", labelT:0.22},
-  {from:2, to:1, style:"dotted",   label:"\u2124\u2082 보조정리", labelT:0.78},
-  {from:2, to:4, style:"double",   label:"\u2124\u2082 쌍대(\u00b1d)"},
-  {from:2, to:3, style:"contrast", label:"소거 \u2194 생존 대비"},
+  {from:0, to:1, style:"solid"},
+  {from:0, to:2, style:"solid"},
+  {from:0, to:4, style:"solid"},
+  {from:2, to:1, style:"dotted"},
+  {from:2, to:4, style:"double"},
+  {from:2, to:3, style:"contrast"},
 ];
 function _regionCentroid(h) {
   const ps = h.nodes.map(nid => network.getPositions([nid])[nid]).filter(p => p);
@@ -646,11 +649,6 @@ function _regionCentroid(h) {
       ctx.globalAlpha = 0.32;
       ctx.fillStyle = ctx.strokeStyle; ctx.fill();
     }
-    ctx.globalAlpha = 0.95;
-    ctx.fillStyle = "#4a4dbf";
-    ctx.font = "18px sans-serif"; ctx.textAlign = "center";
-    const t = dp.labelT === undefined ? 0.5 : dp.labelT;
-    ctx.fillText(dp.label, x1+(x2-x1)*t, y1+(y2-y1)*t - 6);
   });
   ctx.restore();
 })(ctx);
