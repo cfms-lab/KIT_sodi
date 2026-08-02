@@ -93,43 +93,43 @@ function esc(s) {
 
 // Build vis datasets (deterministic radial layout: apps ring around their base hub)
 const POS = {"Tomo_SFTF": {"x": -278, "y": -4}, "Tomo_SFTFSoft": {"x": -5, "y": -48}, "SFTF_Clustering": {"x": -193, "y": -185}, "PFTF": {"x": 252, "y": 15}, "SFTF_Composite": {"x": -5, "y": -466}, "SFTF_InjMold": {"x": -609, "y": -94}, "PFTF_Compression": {"x": 558, "y": -108}, "SFTF_ThermalChip": {"x": -603, "y": -233}, "PFTF_Mold": {"x": 390, "y": -388}, "Tomo_DiffSupport": {"x": 172, "y": -70}, "PFTF_VisCull_kDop": {"x": 602, "y": 188}, "SFTF_SewerPOC": {"x": -349, "y": -337}, "PFTF_FXShock": {"x": 450, "y": 362}, "SFTF_BatteryThermal": {"x": -531, "y": -365}, "SFTF_PDNElectric": {"x": -446, "y": -198}, "PFTF_Inspection": {"x": 732, "y": 263}, "PFTF_RainNowcast": {"x": 138, "y": 487}, "PFTF_Terrain": {"x": 210, "y": 363}, "PFTF_Solar": {"x": 320, "y": 430}, "PFTF_subMarine": {"x": -230, "y": 335}, "PFTF_Assembly": {"x": 15, "y": 413}, "PFTF_CNC": {"x": -217, "y": -435}, "PFTF_Radiotherapy": {"x": 459, "y": -245}, "SFTF_DataCenterTraffic": {"x": -2, "y": 268}, "SFTF_UrbanTraffic": {"x": -368, "y": 138}, "SFTF_WarehouseAGV": {"x": -583, "y": 94}, "PFTF_AssetShock": {"x": -400, "y": 260}, "SFTFSoft_GNN": {"x": 55, "y": -133}, "SFTF_DrapePrior": {"x": 46, "y": 123}, "PFTF_AsymTensor": {"x": 61, "y": 61}, "PFTF_DrapePrior_VisCull_kDop": {"x": 409, "y": 195}, "PFTF_ResearchOptimize": {"x": 392, "y": -15}, "PFTF_alpha": {"x": 270, "y": -191}, "SFTF_QEM": {"x": 111, "y": -288}, "SFTF_DynamicTargetSearch": {"x": -61, "y": -266}};
-// 사용자 지정 기본 배치 (2026-08-02)
+// 사용자 지정 기본 배치 (2026-08-02b)
 Object.assign(POS, {
-  "Tomo_SFTF": {"x": -148, "y": -33},
-  "Tomo_SFTFSoft": {"x": -38, "y": 180},
-  "SFTF_Clustering": {"x": 63, "y": 93},
+  "Tomo_SFTF": {"x": -183, "y": 69},
+  "Tomo_SFTFSoft": {"x": -15, "y": 169},
+  "SFTF_Clustering": {"x": -124, "y": -91},
   "PFTF": {"x": 122, "y": 358},
-  "SFTF_Composite": {"x": 250, "y": -257},
-  "SFTF_InjMold": {"x": -479, "y": -12},
+  "SFTF_Composite": {"x": 193, "y": -307},
+  "SFTF_InjMold": {"x": -482, "y": -4},
   "PFTF_Compression": {"x": 479, "y": 109},
-  "SFTF_ThermalChip": {"x": -464, "y": -227},
+  "SFTF_ThermalChip": {"x": -473, "y": -182},
   "PFTF_Mold": {"x": 401, "y": -178},
-  "Tomo_DiffSupport": {"x": 258, "y": 121},
-  "PFTF_VisCull_kDop": {"x": 365, "y": 326},
+  "Tomo_DiffSupport": {"x": 199, "y": 118},
+  "PFTF_VisCull_kDop": {"x": 383, "y": 320},
   "SFTF_SewerPOC": {"x": -215, "y": -283},
-  "PFTF_FXShock": {"x": 252, "y": 571},
-  "SFTF_BatteryThermal": {"x": -339, "y": -347},
-  "SFTF_PDNElectric": {"x": -377, "y": -167},
-  "PFTF_Inspection": {"x": 428, "y": 410},
-  "PFTF_RainNowcast": {"x": 71, "y": 678},
-  "PFTF_Terrain": {"x": -22, "y": 610},
-  "PFTF_Solar": {"x": 164, "y": 698},
-  "PFTF_subMarine": {"x": -208, "y": 524},
-  "PFTF_Assembly": {"x": -156, "y": 646},
-  "PFTF_CNC": {"x": -70, "y": -404},
+  "PFTF_FXShock": {"x": 285, "y": 584},
+  "SFTF_BatteryThermal": {"x": -400, "y": -317},
+  "SFTF_PDNElectric": {"x": -358, "y": -132},
+  "PFTF_Inspection": {"x": 461, "y": 395},
+  "PFTF_RainNowcast": {"x": 151, "y": 604},
+  "PFTF_Terrain": {"x": -97, "y": 525},
+  "PFTF_Solar": {"x": 223, "y": 685},
+  "PFTF_subMarine": {"x": -244, "y": 549},
+  "PFTF_Assembly": {"x": -91, "y": 622},
+  "PFTF_CNC": {"x": 22, "y": -322},
   "PFTF_Radiotherapy": {"x": 477, "y": -54},
   "SFTF_DataCenterTraffic": {"x": -281, "y": 464},
   "SFTF_UrbanTraffic": {"x": -346, "y": 193},
   "SFTF_WarehouseAGV": {"x": -486, "y": 137},
   "PFTF_AssetShock": {"x": -394, "y": 317},
-  "SFTFSoft_GNN": {"x": 164, "y": 28},
-  "SFTF_DrapePrior": {"x": -90, "y": 299},
-  "PFTF_AsymTensor": {"x": 160, "y": 176},
-  "PFTF_DrapePrior_VisCull_kDop": {"x": 295, "y": 456},
-  "PFTF_ResearchOptimize": {"x": 364, "y": 50},
-  "PFTF_alpha": {"x": 264, "y": -84},
-  "SFTF_QEM": {"x": 10, "y": -283},
-  "SFTF_DynamicTargetSearch": {"x": 50, "y": -149}
+  "SFTFSoft_GNN": {"x": 130, "y": 44},
+  "SFTF_DrapePrior": {"x": 88, "y": 479},
+  "PFTF_AsymTensor": {"x": 150, "y": 180},
+  "PFTF_DrapePrior_VisCull_kDop": {"x": 271, "y": 455},
+  "PFTF_ResearchOptimize": {"x": 222, "y": 369},
+  "PFTF_alpha": {"x": 274, "y": -66},
+  "SFTF_QEM": {"x": 69, "y": -57},
+  "SFTF_DynamicTargetSearch": {"x": 170, "y": -217}
 });
 
 // === 투고 상태 배지 (draft / submit / revision / accepted / printed) ===
@@ -287,18 +287,24 @@ const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
 })));
 
 // 엣지 색은 vis 기본값(color.inherit='from')에 따라 출발 노드의 테두리색을 물려받는다.
-// 투고 우선/ToDo 노드는 테두리가 검정(#000000)이라 그 엣지들도 검정으로 그려지고,
-// 검정 노드 캡션과 섞여 구분이 안 된다. 해당 엣지만 밝기 0.5배(흰색과 반반)인
-// 회색으로 낮춘다 — 노드 테두리의 검정 표식은 그대로 둔다.
+// 투고 우선/ToDo 노드는 테두리가 검정(#000000), Closed 노드는 짙은 슬레이트(#374151)라
+// 그 엣지들도 어둡게 그려져 검정 노드 캡션과 섞인다. 해당 엣지만 흰색과 반반 섞어
+// 밝기를 올린 회색으로 바꾼다 — 노드 테두리의 어두운 표식 자체는 그대로 둔다.
 const NODE_BORDER_COLOR = Object.fromEntries(
   RAW_NODES.map(n => [n.id, String((n.color && n.color.border) || '').trim().toLowerCase()])
 );
-const BLACK_EDGE_GRAY = '#808080';   // rgb(0,0,0) → 흰색과 50% 혼합
+const DARK_BORDERS = ['#000000', '#000', 'black', '#374151'];  // 검정 표식 · Closed 슬레이트
+function lightenHalf(hex) {   // 흰색과 50% 혼합 → #000000 → #808080, #374151 → #9ba0a8
+  const v = hex.replace('#', '');
+  const ch = v.length === 3 ? v.split('').map(c => c + c) : [v.slice(0, 2), v.slice(2, 4), v.slice(4, 6)];
+  return '#' + ch.map(c => Math.round((parseInt(c, 16) + 255) / 2).toString(16).padStart(2, '0')).join('');
+}
 function dimmedEdgeColor(e) {
   const border = NODE_BORDER_COLOR[e.from];
-  if (border !== '#000000' && border !== '#000' && border !== 'black') return e.color;
+  if (!DARK_BORDERS.includes(border)) return e.color;
+  const gray = lightenHalf(border === 'black' ? '#000000' : border);
   return Object.assign({}, e.color, {
-    color: BLACK_EDGE_GRAY, highlight: BLACK_EDGE_GRAY, hover: BLACK_EDGE_GRAY, inherit: false,
+    color: gray, highlight: gray, hover: gray, inherit: false,
   });
 }
 const edgesDS = new vis.DataSet(RAW_EDGES.map((e, i) => ({
