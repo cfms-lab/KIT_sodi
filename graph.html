@@ -286,13 +286,28 @@ const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
   _source_file: n.source_file, _file_type: n.file_type, _project_role: n._project_role, _display_label: n._display_label || n.label, _closed: n._closed, _degree: n.degree, _project_path: n._project_path, _intro: INDUSTRIAL_EFFECTS[n.id] || n._intro, _quality: n._quality, _quality_note: n._quality_note, _bottleneck: n._bottleneck,
 })));
 
+// 엣지 색은 vis 기본값(color.inherit='from')에 따라 출발 노드의 테두리색을 물려받는다.
+// 투고 우선/ToDo 노드는 테두리가 검정(#000000)이라 그 엣지들도 검정으로 그려지고,
+// 검정 노드 캡션과 섞여 구분이 안 된다. 해당 엣지만 밝기 0.5배(흰색과 반반)인
+// 회색으로 낮춘다 — 노드 테두리의 검정 표식은 그대로 둔다.
+const NODE_BORDER_COLOR = Object.fromEntries(
+  RAW_NODES.map(n => [n.id, String((n.color && n.color.border) || '').trim().toLowerCase()])
+);
+const BLACK_EDGE_GRAY = '#808080';   // rgb(0,0,0) → 흰색과 50% 혼합
+function dimmedEdgeColor(e) {
+  const border = NODE_BORDER_COLOR[e.from];
+  if (border !== '#000000' && border !== '#000' && border !== 'black') return e.color;
+  return Object.assign({}, e.color, {
+    color: BLACK_EDGE_GRAY, highlight: BLACK_EDGE_GRAY, hover: BLACK_EDGE_GRAY, inherit: false,
+  });
+}
 const edgesDS = new vis.DataSet(RAW_EDGES.map((e, i) => ({
   id: i, from: e.from, to: e.to,
   label: '',
   title: e.title,
   dashes: e.dashes,
   width: e.width,
-  color: e.color,
+  color: dimmedEdgeColor(e),
   arrows: { to: { enabled: true, scaleFactor: 1.0 } },
 })));
 
@@ -541,7 +556,7 @@ LEGEND.forEach(c => {
 </script>
 <script>
 // Render hyperedges as shaded regions
-const hyperedges = [{"label": "발견1 줄 세우기는 0차+연결지도 (랭킹 마진 +0.01)", "nodes": ["SFTF_InjMold", "SFTF_SewerPOC", "SFTF_PDNElectric", "SFTF_ThermalChip", "SFTF_BatteryThermal", "PFTF_CNC"]}, {"label": "발견2 2차는 크기·보정 (RMSE 4x, 잔차 0%)", "nodes": ["SFTF_Composite", "PFTF_Compression", "PFTF_Mold", "PFTF_Radiotherapy"]}, {"label": "발견3 1차를 죽이는 범인들 (보존칙·제곱식·강한 solver)", "nodes": ["SFTF_WarehouseAGV", "PFTF_AssetShock", "SFTF_UrbanTraffic"]}, {"label": "발견3' 대조: 1차가 사는 곳 (부호 결정적·1차 주연)", "nodes": ["SFTF_DataCenterTraffic", "PFTF_subMarine", "PFTF_Assembly", "PFTF_RainNowcast", "PFTF_Terrain", "PFTF_Solar", "PFTF_FXShock"]}, {"label": "발견4·5·6 보수성 게이트: 경계 vs 모멘트 · 양화사 · ±d", "nodes": ["PFTF_VisCull_kDop", "PFTF_Inspection"]}, {"label": "BASE / 핵심 이론 트랙", "kind": "base", "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering", "PFTF"], "color": "#0f766e", "labelColor": "#115e59", "fillAlpha": 0.1, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.18}];
+const hyperedges = [{"label": "발견1", "nodes": ["SFTF_InjMold", "SFTF_SewerPOC", "SFTF_PDNElectric", "SFTF_ThermalChip", "SFTF_BatteryThermal", "PFTF_CNC"]}, {"label": "발견2", "nodes": ["SFTF_Composite", "PFTF_Compression", "PFTF_Mold", "PFTF_Radiotherapy"]}, {"label": "발견3", "nodes": ["SFTF_WarehouseAGV", "PFTF_AssetShock", "SFTF_UrbanTraffic"]}, {"label": "발견3'", "nodes": ["SFTF_DataCenterTraffic", "PFTF_subMarine", "PFTF_Assembly", "PFTF_RainNowcast", "PFTF_Terrain", "PFTF_Solar", "PFTF_FXShock"]}, {"label": "발견4·5·6", "nodes": ["PFTF_VisCull_kDop", "PFTF_Inspection"]}, {"label": "BASE / 핵심 이론 트랙", "kind": "base", "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering", "PFTF"], "color": "#0f766e", "labelColor": "#115e59", "fillAlpha": 0.1, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.18}];
 // afterDrawing passes ctx already transformed to network coordinate space.
 // Draw node positions raw — no manual pan/zoom/DPR math needed.
 network.on('afterDrawing', function(ctx) {
