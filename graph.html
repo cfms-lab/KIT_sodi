@@ -92,46 +92,8 @@ function esc(s) {
 }
 
 // Build vis datasets (deterministic radial layout: apps ring around their base hub)
-const POS = {"Tomo_SFTF": {"x": -278, "y": -4}, "Tomo_SFTFSoft": {"x": -5, "y": -48}, "SFTF_Clustering": {"x": -193, "y": -185}, "PFTF": {"x": 252, "y": 15}, "SFTF_Composite": {"x": -5, "y": -466}, "SFTF_InjMold": {"x": -609, "y": -94}, "PFTF_Compression": {"x": 558, "y": -108}, "SFTF_ThermalChip": {"x": -603, "y": -233}, "PFTF_Mold": {"x": 390, "y": -388}, "Tomo_DiffSupport": {"x": 172, "y": -70}, "PFTF_VisCull_kDop": {"x": 602, "y": 188}, "SFTF_SewerPOC": {"x": -349, "y": -337}, "PFTF_FXShock": {"x": 450, "y": 362}, "SFTF_BatteryThermal": {"x": -531, "y": -365}, "SFTF_PDNElectric": {"x": -446, "y": -198}, "PFTF_Inspection": {"x": 732, "y": 263}, "PFTF_RainNowcast": {"x": 138, "y": 487}, "PFTF_Terrain": {"x": 210, "y": 363}, "PFTF_Solar": {"x": 320, "y": 430}, "PFTF_subMarine": {"x": -230, "y": 335}, "PFTF_Assembly": {"x": 15, "y": 413}, "PFTF_CNC": {"x": -217, "y": -435}, "PFTF_Radiotherapy": {"x": 459, "y": -245}, "SFTF_DataCenterTraffic": {"x": -2, "y": 268}, "SFTF_UrbanTraffic": {"x": -368, "y": 138}, "SFTF_WarehouseAGV": {"x": -583, "y": 94}, "PFTF_AssetShock": {"x": -400, "y": 260}, "SFTFSoft_GNN": {"x": 55, "y": -133}, "SFTF_DrapePrior": {"x": 46, "y": 123}, "PFTF_AsymTensor": {"x": 61, "y": 61}, "PFTF_DrapePrior_VisCull_kDop": {"x": 409, "y": 195}, "PFTF_ResearchOptimize": {"x": 392, "y": -15}, "PFTF_alpha": {"x": 270, "y": -191}, "SFTF_QEM": {"x": 111, "y": -288}, "SFTF_DynamicTargetSearch": {"x": -61, "y": -266}};
+const POS = {"Tomo_SFTF": {"x": -180, "y": -13}, "Tomo_SFTFSoft": {"x": 88, "y": 113}, "SFTF_Clustering": {"x": -22, "y": 171}, "PFTF": {"x": 111, "y": 379}, "SFTF_Composite": {"x": 290, "y": -253}, "SFTF_InjMold": {"x": -430, "y": -17}, "PFTF_Compression": {"x": 479, "y": 109}, "SFTF_ThermalChip": {"x": -420, "y": -233}, "PFTF_Mold": {"x": 425, "y": -94}, "Tomo_DiffSupport": {"x": 259, "y": 79}, "PFTF_VisCull_kDop": {"x": 373, "y": 288}, "SFTF_SewerPOC": {"x": -176, "y": -275}, "PFTF_FXShock": {"x": 252, "y": 571}, "SFTF_BatteryThermal": {"x": -299, "y": -359}, "SFTF_PDNElectric": {"x": -377, "y": -167}, "PFTF_Inspection": {"x": 460, "y": 359}, "PFTF_RainNowcast": {"x": 71, "y": 678}, "PFTF_Terrain": {"x": -22, "y": 610}, "PFTF_Solar": {"x": 164, "y": 698}, "PFTF_subMarine": {"x": -177, "y": 525}, "PFTF_Assembly": {"x": -156, "y": 646}, "PFTF_CNC": {"x": 189, "y": -378}, "PFTF_Radiotherapy": {"x": 482, "y": 4}, "SFTF_DataCenterTraffic": {"x": -281, "y": 464}, "SFTF_UrbanTraffic": {"x": -338, "y": 205}, "SFTF_WarehouseAGV": {"x": -461, "y": 146}, "PFTF_AssetShock": {"x": -361, "y": 337}, "SFTFSoft_GNN": {"x": 122, "y": -54}, "SFTF_DrapePrior": {"x": -90, "y": 299}, "PFTF_AsymTensor": {"x": -168, "y": 146}, "PFTF_DrapePrior_VisCull_kDop": {"x": 320, "y": 476}, "PFTF_ResearchOptimize": {"x": 296, "y": 404}, "PFTF_alpha": {"x": 259, "y": -70}, "SFTF_QEM": {"x": 21, "y": -250}, "SFTF_DynamicTargetSearch": {"x": -74, "y": -163}};
 // 사용자 지정 기본 배치 (2026-08-02b)
-Object.assign(POS, {
-  "Tomo_SFTF": {"x": -183, "y": 69},
-  "Tomo_SFTFSoft": {"x": -15, "y": 169},
-  "SFTF_Clustering": {"x": -124, "y": -91},
-  "PFTF": {"x": 122, "y": 358},
-  "SFTF_Composite": {"x": 193, "y": -307},
-  "SFTF_InjMold": {"x": -482, "y": -4},
-  "PFTF_Compression": {"x": 479, "y": 109},
-  "SFTF_ThermalChip": {"x": -473, "y": -182},
-  "PFTF_Mold": {"x": 401, "y": -178},
-  "Tomo_DiffSupport": {"x": 199, "y": 118},
-  "PFTF_VisCull_kDop": {"x": 383, "y": 320},
-  "SFTF_SewerPOC": {"x": -215, "y": -283},
-  "PFTF_FXShock": {"x": 285, "y": 584},
-  "SFTF_BatteryThermal": {"x": -400, "y": -317},
-  "SFTF_PDNElectric": {"x": -358, "y": -132},
-  "PFTF_Inspection": {"x": 461, "y": 395},
-  "PFTF_RainNowcast": {"x": 151, "y": 604},
-  "PFTF_Terrain": {"x": -97, "y": 525},
-  "PFTF_Solar": {"x": 223, "y": 685},
-  "PFTF_subMarine": {"x": -244, "y": 549},
-  "PFTF_Assembly": {"x": -91, "y": 622},
-  "PFTF_CNC": {"x": 22, "y": -322},
-  "PFTF_Radiotherapy": {"x": 477, "y": -54},
-  "SFTF_DataCenterTraffic": {"x": -281, "y": 464},
-  "SFTF_UrbanTraffic": {"x": -346, "y": 193},
-  "SFTF_WarehouseAGV": {"x": -486, "y": 137},
-  "PFTF_AssetShock": {"x": -394, "y": 317},
-  "SFTFSoft_GNN": {"x": 130, "y": 44},
-  "SFTF_DrapePrior": {"x": 88, "y": 479},
-  "PFTF_AsymTensor": {"x": 150, "y": 180},
-  "PFTF_DrapePrior_VisCull_kDop": {"x": 271, "y": 455},
-  "PFTF_ResearchOptimize": {"x": 222, "y": 369},
-  "PFTF_alpha": {"x": 274, "y": -66},
-  "SFTF_QEM": {"x": 69, "y": -57},
-  "SFTF_DynamicTargetSearch": {"x": 170, "y": -217}
-});
-
 // === 투고 상태 배지 (draft / submit / revision / accepted / printed) ===
 // 값 형식: "저널,상태[,MM-DD]". draft는 예정 저널이 정해진 노드만 표기.
 // 정본: Papers/투고현황.md frontmatter(graph_badges) — graphify-out/status_badges.py 로 재적용 가능.
