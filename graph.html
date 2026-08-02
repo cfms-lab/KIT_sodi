@@ -79,6 +79,12 @@
   <div id="stats">37 nodes &middot; 52 edges &middot; 5 communities
     &nbsp;<button id="reset-pos-btn" style="font-size:14px;padding:2px 8px;cursor:pointer;border:1px solid #999;border-radius:4px;background:#f4f4f4">위치 초기화</button>
     <button id="copy-pos-btn" style="font-size:14px;padding:2px 8px;cursor:pointer;border:1px solid #999;border-radius:4px;background:#f4f4f4">위치 복사</button>
+    &nbsp;<select id="layout-sel" style="font-size:14px;padding:2px 6px;border:1px solid #999;border-radius:4px;background:#f4f4f4">
+      <option value="free">배치: 수동(POS)</option>
+      <option value="LR">배치: 계층 ←→</option>
+      <option value="UD">배치: 계층 ↑↓</option>
+    </select>
+    <label style="font-size:14px;margin-left:6px;cursor:pointer"><input type="checkbox" id="focus-cb">포커스</label>
   </div>
 </div>
 <script>
@@ -309,10 +315,121 @@ network.once('stabilizationIterationsDone', () => {
   network.setOptions({ physics: { enabled: false } });
 });
 
+// === 배치 모드 =========================================================
+// 이 그래프는 사이클이 없는 DAG(37 노드 / 52 엣지, 6층)이다.
+// 자유 배치는 PFTF·Tomo_SFTF 두 허브의 스포크가 서로를 가로질러
+// 교차가 심해진다. 계층(Sugiyama) 배치는 의존 방향을 축으로 세워
+// 교차를 구조적으로 줄인다.
+
+// 최장경로 계층화: level(v) = 0 (선행 없음) 또는 1 + max(level(선행))
+const PRED = {};
+RAW_NODES.forEach(n => { PRED[n.id] = []; });
+RAW_EDGES.forEach(e => { if (PRED[e.to]) PRED[e.to].push(e.from); });
+const LEVEL = {};
+function levelOf(id, seen) {
+  if (LEVEL[id] !== undefined) return LEVEL[id];
+  seen = seen || {};
+  if (seen[id]) return 0;              // 안전장치(현재 그래프엔 사이클 없음)
+  seen[id] = true;
+  const ps = PRED[id] || [];
+  LEVEL[id] = ps.length === 0 ? 0 : 1 + Math.max(...ps.map(p => levelOf(p, seen)));
+  return LEVEL[id];
+}
+RAW_NODES.forEach(n => levelOf(n.id));
+
+let layoutMode = 'free';
+
+function applyLayout(mode) {
+  layoutMode = mode;
+  const posBtnsOn = (mode === 'free');
+  document.getElementById('reset-pos-btn').disabled = !posBtnsOn;
+  document.getElementById('copy-pos-btn').disabled = !posBtnsOn;
+
+  if (mode === 'free') {
+    network.setOptions({
+      layout: { hierarchical: { enabled: false } },
+      edges: { smooth: { type: 'continuous', roundness: 0.2 } },
+    });
+    RAW_NODES.forEach(n => {
+      const p = savedPos[n.id] || POS[n.id];
+      if (p) network.moveNode(n.id, p.x, p.y);
+    });
+  } else {
+    // 계층 배치에서는 각 노드의 level을 명시해 vis의 추정에 맡기지 않는다.
+    nodesDS.update(RAW_NODES.map(n => ({ id: n.id, level: LEVEL[n.id] })));
+    network.setOptions({
+      layout: {
+        hierarchical: {
+          enabled: true,
+          direction: mode,               // 'LR' 또는 'UD'
+          sortMethod: 'directed',
+          shakeTowardsRoot: true,
+          levelSeparation: mode === 'LR' ? 260 : 190,
+          nodeSpacing: 130,
+          treeSpacing: 160,
+          blockShifting: true,
+          edgeMinimization: true,        // 층 내 순서를 바꿔 교차를 줄인다
+          parentCentralization: true,
+        },
+      },
+      edges: {
+        smooth: {
+          type: 'cubicBezier',
+          forceDirection: mode === 'LR' ? 'horizontal' : 'vertical',
+          roundness: 0.55,
+        },
+      },
+    });
+  }
+  network.fit({ animation: { duration: 400 } });
+}
+
+document.getElementById('layout-sel').addEventListener('change', ev => {
+  applyLayout(ev.target.value);
+});
+
+// === 포커스 모드 =======================================================
+// 노드를 클릭하면 1-hop 이웃만 남기고 나머지를 흐리게 한다.
+// 허브(PFTF 차수 16, Tomo_SFTF 차수 14)를 볼 때 특히 효과가 크다.
+let focusOn = false;
+const DIM_OPACITY = 0.12;
+
+function clearFocus() {
+  nodesDS.update(RAW_NODES.map(n => ({ id: n.id, opacity: 1 })));
+  edgesDS.update(RAW_EDGES.map((e, i) => ({ id: i, hidden: false })));
+}
+
+function applyFocus(rootId) {
+  const keep = new Set(network.getConnectedNodes(rootId));
+  keep.add(rootId);
+  nodesDS.update(RAW_NODES.map(n => ({
+    id: n.id, opacity: keep.has(n.id) ? 1 : DIM_OPACITY,
+  })));
+  edgesDS.update(RAW_EDGES.map((e, i) => ({
+    id: i, hidden: !(e.from === rootId || e.to === rootId),
+  })));
+}
+
+document.getElementById('focus-cb').addEventListener('change', ev => {
+  focusOn = ev.target.checked;
+  if (!focusOn) clearFocus();
+  else {
+    const sel = network.getSelectedNodes();
+    if (sel.length) applyFocus(sel[0]);
+  }
+});
+
+network.on('selectNode', params => {
+  if (focusOn && params.nodes.length) applyFocus(params.nodes[0]);
+});
+network.on('deselectNode', () => { if (focusOn) clearFocus(); });
+
+
 // === 드래그 위치 영속화 ===============================================
 // 드래그가 끝나면 해당 노드들의 좌표를 localStorage에 저장한다.
 // (이 브라우저에서 다시 열 때 저장 위치가 기본 배치 POS를 덮어쓴다.)
 network.on('dragEnd', params => {
+  if (layoutMode !== 'free') return;   // 계층 배치의 임시 좌표는 저장하지 않는다
   if (!params.nodes || params.nodes.length === 0) return;
   const positions = network.getPositions(params.nodes);
   params.nodes.forEach(id => {
