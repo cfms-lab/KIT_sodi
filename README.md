@@ -66,3 +66,14 @@ node scripts/build-vault-graph.mjs D:\path\to\_Research_Vault vault-graph.json
 ```powershell
 node update-graph-embed.mjs
 ```
+
+## graph.html 로컬 3D 뷰어
+
+`graph.py`는 실행할 때마다 `graph.html` 안의 노드, 엣지, `POS`, hyperedge를 직접 읽고 Polyscope로 표시합니다. 뷰어가 열린 동안에도 `graph.html` 변경을 1초 간격으로 감지해 노드 수와 위치를 자동 갱신합니다. XY 배치는 같은 비율로 유지되며 Z 좌표는 방향과 무관한 고유 이웃 수(Degree)입니다.
+
+```powershell
+uv sync
+uv run python graph.py
+```
+
+GUI를 열지 않고 데이터만 검증하려면 `uv run python graph.py --check`, 실행 중 자동 갱신을 끄려면 `--no-watch`를 사용합니다.

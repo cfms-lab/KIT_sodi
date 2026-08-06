@@ -2,3 +2,7 @@ _to_delete
 .vscode/settings.json
 /sftf-webtoy_kr.html
 /sftf-apps_kr.html
+.uv-cache/
+.venv/
+.polyscope.ini
+__pycache__/
