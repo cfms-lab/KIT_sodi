@@ -29,7 +29,9 @@ DSTS = ["graph.html"]
 # Project notes are the single source of truth for local VS Code paths.  The
 # graph node id normally matches the Obsidian project-note stem, so the button
 # stays correct when a project is moved without hard-coding 30+ paths here.
-PROJECTS_DIR = Path(__file__).resolve().parents[1] / "Projects"
+PROJECTS_DIR = Path(r"D:\cfms-research-vault\Projects")
+if not PROJECTS_DIR.is_dir():
+    PROJECTS_DIR = Path(__file__).resolve().parents[1] / "Projects"
 
 def _load_project_paths():
     paths = {}
@@ -68,77 +70,100 @@ NODE_TITLES = {
     "SFTF_DynamicTargetSearch": "SFTF_DynamicTargetSearch — ToDo: "
                                 "시간가변 그래프의 분산 표적탐색 concept; "
                                 "simulation POC·baseline·robustness gate 전",
+    "PFTF_alpha": "PFTF_alpha — 중: positive two-layer draft; "
+                  "Phase 50/51C frozen evidence, B5/M1 상대 207/207 paired wins·"
+                  "topology error 0. PFTF/local-SPD 우월성은 주장하지 않으며 "
+                  "게재지·관련연구·submission package가 남음",
+    "DFSVR_VisCull": "DFSVR_VisCull — ToDo: DFSVR exact first-hit용 "
+                     "conservative BVH scalability 설계선; 값·gradient parity·"
+                     "거짓음성 0·end-to-end utility gate 전",
+    "SFTFSoft_GNN_DFSVR": "SFTFSoft_GNN_DFSVR — ToDo: profile-conditioned "
+                          "GNN proposer → DFSVR first-hit refiner → "
+                          "held-out slicer verifier",
 }
 
 # ----------------------------------------------------------------- 좌표 (발견 기준)
 POS = {
-    # 사용자 드래그 배치("위치 복사")를 정본으로 승격 (2026-07-30).
-    "Tomo_SFTF": (-278, -4),
-    "Tomo_SFTFSoft": (-5, -48),
-    "SFTF_Clustering": (-193, -185),
-    "PFTF": (252, 15),
-    "SFTF_Composite": (-5, -466),
-    "SFTF_InjMold": (-609, -94),
-    "PFTF_Compression": (558, -108),
-    "SFTF_ThermalChip": (-603, -233),
-    "PFTF_Mold": (390, -388),
-    "Tomo_DiffSupport": (172, -70),
-    "PFTF_VisCull_kDop": (602, 188),
-    "SFTF_SewerPOC": (-349, -337),
-    "PFTF_FXShock": (450, 362),
-    "SFTF_BatteryThermal": (-531, -365),
-    "SFTF_PDNElectric": (-446, -198),
-    "PFTF_Inspection": (732, 263),
-    "PFTF_RainNowcast": (138, 487),
-    "PFTF_Terrain": (210, 363),
-    "PFTF_Solar": (320, 430),
-    "PFTF_subMarine": (-230, 335),
-    "PFTF_Assembly": (15, 413),
-    "PFTF_CNC": (-217, -435),
-    "PFTF_Radiotherapy": (459, -245),
-    "SFTF_DataCenterTraffic": (-2, 268),
-    "SFTF_UrbanTraffic": (-368, 138),
-    "SFTF_WarehouseAGV": (-583, 94),
-    "PFTF_AssetShock": (-400, 260),
-    "SFTFSoft_GNN": (55, -133),
-    "SFTF_DrapePrior": (46, 123),
-    "PFTF_AsymTensor": (61, 61),
-    # 새 통합 프로젝트: DrapePrior와 VisCull×kDOP 사이의 ToDo 설계선
-    "PFTF_DrapePrior_VisCull_kDop": (409, 195),
-    # 연구 포트폴리오 최적화 메타 방법론(ToDo)
-    "PFTF_ResearchOptimize": (392, -15),
-    # PFTF 기반 local anisotropic alpha-field 설계선(ToDo)
-    "PFTF_alpha": (270, -191),
-    # SFTF 목적함수 보존 적응 메쉬 간소화 설계선(ToDo) — Tomo_SFTF 인접
-    "SFTF_QEM": (111, -288),
-    # SFTF·SFTFSoft·Clustering을 결합하는 시간가변 표적탐색 설계선(ToDo)
-    "SFTF_DynamicTargetSearch": (-61, -266),
+    # 2026-08-06: GitHub Pages 배포본의 37-node 사용자 배치를 정본으로 승격.
+    "Tomo_SFTF": (-185, 165),
+    "Tomo_SFTFSoft": (-3, 151),
+    "SFTF_Clustering": (210, 525),
+    "PFTF": (101, 390),
+    "SFTF_Composite": (355, 667),
+    "SFTF_InjMold": (-417, 0),
+    "PFTF_Compression": (530, 578),
+    "SFTF_ThermalChip": (-395, -174),
+    "PFTF_Mold": (508, 667),
+    "Tomo_DiffSupport": (265, 152),
+    "PFTF_VisCull_kDop": (395, 422),
+    "SFTF_SewerPOC": (-166, -136),
+    "PFTF_FXShock": (155, 653),
+    "SFTF_BatteryThermal": (-211, -203),
+    "SFTF_PDNElectric": (-330, -90),
+    "PFTF_Inspection": (533, 394),
+    "PFTF_RainNowcast": (6, 635),
+    "PFTF_Terrain": (-132, 572),
+    "PFTF_Solar": (56, 708),
+    "PFTF_subMarine": (-244, 549),
+    "PFTF_Assembly": (-127, 687),
+    "PFTF_CNC": (74, -193),
+    "PFTF_Radiotherapy": (357, 603),
+    "SFTF_DataCenterTraffic": (-281, 464),
+    "SFTF_UrbanTraffic": (-345, 226),
+    "SFTF_WarehouseAGV": (-429, 151),
+    "PFTF_AssetShock": (-361, 337),
+    "SFTFSoft_GNN": (149, 71),
+    "SFTF_DrapePrior": (207, 304),
+    "PFTF_AsymTensor": (175, 209),
+    "PFTF_DrapePrior_VisCull_kDop": (302, 362),
+    "PFTF_ResearchOptimize": (-53, 420),
+    "PFTF_alpha": (153, -68),
+    "SFTF_QEM": (34, 1),
+    "SFTF_DynamicTargetSearch": (-147, 29),
+    "DFSVR_VisCull": (414, 120),
+    "SFTFSoft_GNN_DFSVR": (285, 11),
 }
 
 HYPEREDGES = [
-    {"label": "발견1 줄 세우기는 0차+연결지도 (랭킹 마진 +0.01)",
+    {"label": "발견1",
      "nodes": ["SFTF_InjMold", "SFTF_SewerPOC", "SFTF_PDNElectric",
                "SFTF_ThermalChip", "SFTF_BatteryThermal", "PFTF_CNC"]},
-    {"label": "발견2 2차는 크기·보정 (RMSE 4x, 잔차 0%)",
+    {"label": "발견2",
      "nodes": ["SFTF_Composite", "PFTF_Compression", "PFTF_Mold",
                "PFTF_Radiotherapy"]},
-    {"label": "발견3 1차를 죽이는 범인들 (보존칙·제곱식·강한 solver)",
+    {"label": "발견3",
      "nodes": ["SFTF_WarehouseAGV", "PFTF_AssetShock", "SFTF_UrbanTraffic"]},
-    {"label": "발견3' 대조: 1차가 사는 곳 (부호 결정적·1차 주연)",
+    {"label": "발견3'",
      "nodes": ["SFTF_DataCenterTraffic", "PFTF_subMarine", "PFTF_Assembly",
                "PFTF_RainNowcast", "PFTF_Terrain", "PFTF_Solar",
                "PFTF_FXShock"]},
-    {"label": "발견4·5·6 보수성 게이트: 경계 vs 모멘트 · 양화사 · ±d",
+    {"label": "발견4·5·6",
      "nodes": ["PFTF_VisCull_kDop", "PFTF_Inspection"]},
     # The four method-level foundations are intentionally separate from the
     # 발견1~6 application regions.  A teal dashed hull exposes the strategic
     # base role without reusing the finding-region color.
-    {"label": "BASE / 핵심 이론 트랙",
+    {"label": "BASE",
      "kind": "base",
      "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering", "PFTF"],
      "color": "#0f766e", "labelColor": "#115e59",
      "fillAlpha": 0.10, "strokeAlpha": 0.85, "labelAlpha": 0.95,
      "lineWidth": 3, "dash": [12, 6], "scale": 1.18},
+    # 발견 hyperedge와 별개인 역할 overlay. 발견을 확정하지 않고 방법론과
+    # 다단계 통합 구조를 보여 준다.
+    {"label": "METHOD / 이론·추론 확장",
+     "kind": "role",
+     "nodes": ["Tomo_DiffSupport", "SFTFSoft_GNN", "PFTF_AsymTensor"],
+     "color": "#7c3aed", "labelColor": "#6d28d9",
+     "fillAlpha": 0.035, "strokeAlpha": 0.75, "labelAlpha": 0.95,
+     "lineWidth": 2, "dash": [4, 6], "scale": 1.12},
+    {"label": "PIPELINE / 다단계 통합",
+     "kind": "role",
+     "nodes": ["SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop",
+               "SFTF_DynamicTargetSearch", "DFSVR_VisCull",
+               "SFTFSoft_GNN_DFSVR"],
+     "color": "#0891b2", "labelColor": "#0e7490",
+     "fillAlpha": 0.025, "strokeAlpha": 0.70, "labelAlpha": 0.95,
+     "lineWidth": 2, "dash": [16, 8], "scale": 1.08},
 ]
 
 # 2026-07-30 quality snapshot, synchronized from the KIT_sodi mindmap backup. Quality is the single classification axis
@@ -176,10 +201,14 @@ QUALITY_ROWS = [
     ("PFTF_AssetShock", "PFTF_AssetShock", "하", "38 benchmark/provider rehearsal; draft 원고와 실제 provider outcome 없음"),
     ("PFTF_DrapePrior_VisCull_kDop", "PFTF_DrapePrior_VisCull_kDop", "ToDo", "M3→kDOP gate+exact fallback 설계선; 실제 cloth solver end-to-end benchmark 전"),
     ("PFTF_ResearchOptimize", "PFTF_ResearchOptimize", "ToDo", "연구 그래프 기반 evidence-aware 투고 순서 설계; 실제 back-test·가중치 calibration 전"),
-    ("PFTF_alpha", "PFTF_alpha", "ToDo", "local anisotropic alpha field 설계선; density/normal baseline과 frozen held-out benchmark 전"),
+    ("PFTF_alpha", "PFTF_alpha", "중", "Phase 50 합성 144건·Phase 51C S3DIS 63건 frozen held-out, B5/M1 상대 207/207 paired wins·topology error 0; PFTF/local-SPD 우월성 제외"),
     ("SFTF_QEM", "SFTF_QEM", "상", "여각 규약 오류 정정·Cura 교차검증(천장 ρ=+0.754)·코퍼스 50메쉬·원고 2편+설명서; 성능 우월 주장 없는 평가방법론 트랙, 미투고"),
     ("SFTF_DynamicTargetSearch", "SFTF_DynamicTargetSearch", "ToDo",
      "시간가변 그래프의 분산 표적탐색 설계선; simulation POC·baseline·robustness gate 전"),
+    ("DFSVR_VisCull", "DFSVR_VisCull", "ToDo",
+     "DFSVR exact first-hit용 conservative BVH scalability 설계선; 값·gradient parity·거짓음성 0·end-to-end utility gate 전"),
+    ("SFTFSoft_GNN_DFSVR", "SFTFSoft_GNN_DFSVR", "ToDo",
+     "profile-conditioned GNN proposer → DFSVR first-hit refiner → held-out slicer verifier; frozen budget-matched A–E benchmark 전"),
 ]
 
 # 대학원생이 처음 그래프를 읽을 때 바로 이해할 수 있도록, 각 프로젝트를
@@ -218,9 +247,30 @@ INTRODUCTIONS = {
     "PFTF_AsymTensor": "방향에 따라 다르게 반응하는 재료나 문제를 표현하기 위한 비대칭 텐서 이론이다.",
     "PFTF_DrapePrior_VisCull_kDop": "옷감의 좋은 시작 상태와 안전한 충돌 필터를 결합해 천 계산을 빠르게 하려는 새 연구선이다.",
     "PFTF_ResearchOptimize": "프로젝트 사이의 연결과 작업량을 비교해 효율적인 논문 투고 순서를 찾는 방법이다.",
-    "PFTF_alpha": "점의 밀도와 방향에 맞춰 물체의 오목한 경계를 더 안정적으로 복원하려는 새 연구선이다.",
+    "PFTF_alpha": "서로 떨어진 두 표면을 먼저 구분해 각 층을 따로 복원함으로써 alpha 방법의 잘못된 연결과 위상 오류를 줄이는 연구다.",
     "SFTF_QEM": "메쉬를 줄여 방향 탐색을 빠르게 하려다 그 가설이 기각되었고, 대신 지지비용 계산의 검증 방법 자체를 다루게 된 연구다. 각도 규약 오류를 스스로 찾아 정정한 기록과, 서로 다른 두 슬라이서조차 완전히 일치하지 않는다는 측정이 주 내용이다.",
     "SFTF_DynamicTargetSearch": "여러 이동 센서의 불완전한 보고를 합쳐 구조가 바뀌는 공간에서 목표물과 다음 탐색 경로를 찾으려는 연구다.",
+    "DFSVR_VisCull": "정확한 지지 구조 계산 전에 안전하게 불필요한 교차 후보를 줄여 DFSVR을 빠르게 하려는 연구선이다.",
+    "SFTFSoft_GNN_DFSVR": "GNN이 좋은 출력 방향 후보를 빠르게 고르고 DFSVR이 정밀하게 다듬은 뒤 슬라이서로 확인하는 후속 연구다.",
+}
+
+# 발견을 확정하는 hyperedge와 구분되는 그래프 해석용 역할 및 후보 표지.
+GRAPH_ROLES = {
+    "Tomo_DiffSupport": "METHOD / 이론·추론 확장",
+    "SFTFSoft_GNN": "METHOD / 이론·추론 확장",
+    "PFTF_AsymTensor": "METHOD / 이론·추론 확장",
+    "SFTF_DrapePrior": "PIPELINE / 다단계 통합",
+    "PFTF_DrapePrior_VisCull_kDop": "PIPELINE / 다단계 통합",
+    "SFTF_DynamicTargetSearch": "PIPELINE / 다단계 통합",
+    "DFSVR_VisCull": "PIPELINE / 다단계 통합",
+    "SFTFSoft_GNN_DFSVR": "PIPELINE / 다단계 통합",
+    "SFTF_QEM": "AUDIT / 평가·검증",
+    "PFTF_ResearchOptimize": "META / 연구 포트폴리오 도구",
+}
+
+FINDING_CANDIDATES = {
+    "PFTF_alpha": "발견1?",
+    "DFSVR_VisCull": "발견4·5·6?",
 }
 
 GRADE_COLORS = {"상": "#e02020", "중": "#f28e2b", "하": "#2a78d6", "ToDo": "#ffffff"}
@@ -367,6 +417,42 @@ existing_quality_js = (
 )
 preserve_extended_quality = "const REMAINING_BOTTLENECKS" in existing_quality_js
 
+def _update_json_object_constant(js, name, updates):
+    """Update one JSON-valued JavaScript object without rewriting its logic."""
+    pattern = rf"const {re.escape(name)} = (\{{.*?\}});"
+    def repl(match):
+        value = json.loads(match.group(1))
+        value.update(updates)
+        return f"const {name} = " + json.dumps(value, ensure_ascii=False) + ";"
+    updated, count = re.subn(pattern, repl, js, count=1, flags=re.S)
+    assert count == 1, f"{name} constant not found"
+    return updated
+
+if preserve_extended_quality:
+    s = _update_json_object_constant(
+        s,
+        "STATUS_BADGES",
+        {"PFTF_alpha": "미정,draft"},
+    )
+    existing_quality_js = _update_json_object_constant(
+        existing_quality_js,
+        "REMAINING_BOTTLENECKS",
+        {
+            "PFTF_alpha": "게재지·관련연구·서지·저자·declarations·data availability 확정; close-layer·outlier·N<160·automatic pair discovery와 PFTF/local-SPD 우월성 주장 금지",
+            "DFSVR_VisCull": "값·gradient parity·거짓음성 0 및 실제 end-to-end utility 검증",
+            "SFTFSoft_GNN_DFSVR": "frozen budget-matched A–E baseline, held-out slicer 전이 및 latency/quality 동시 검증",
+        },
+    )
+    s = _update_json_object_constant(
+        s,
+        "INDUSTRIAL_EFFECTS",
+        {
+            "PFTF_alpha": "실내 스캔의 바닥·천장처럼 떨어진 두 표면을 먼저 분리 복원해 잘못된 연결과 topology 오류를 줄일 수 있다. 자동 객체 탐지와 close-layer는 미지원이다.",
+            "DFSVR_VisCull": "정확한 first-hit 결과를 유지하면서 불필요한 교차 후보를 안전하게 줄이면 미분가능 지지 구조 계산의 확장성을 높일 수 있다.",
+            "SFTFSoft_GNN_DFSVR": "GNN의 빠른 후보 제안과 DFSVR의 정밀 보정을 결합해 출력 방향 탐색 시간과 검증 비용을 함께 줄이는 것을 목표로 한다.",
+        },
+    )
+
 # Remove a prior overlay before reinserting it so the generator remains
 # idempotent when the quality snapshot changes.
 s = re.sub(r"\n/\* QUALITY_BOARD_BEGIN \*/.*?/\* QUALITY_BOARD_END \*/\n?", "\n", s, flags=re.S)
@@ -415,16 +501,16 @@ RESEARCH_OPTIMIZE_NODE = {
 ALPHA_NODE = {
     "id": "PFTF_alpha",
     "label": "PFTF_alpha",
-    "color": {"background": "#ffffff", "border": "#000000",
-               "highlight": {"background": "#ffffff", "border": "#000000"}},
+    "color": {"background": "#f28e2b", "border": "#f28e2b",
+               "highlight": {"background": "#f28e2b", "border": "#f28e2b"}},
     "size": 16.4,
     "font": {"size": 12, "color": "#333333", "bold": False},
-    "title": "PFTF_alpha — ToDo: local anisotropic alpha field",
-    "community": 4,
-    "community_name": "ToDo",
+    "title": NODE_TITLES["PFTF_alpha"],
+    "community": 2,
+    "community_name": "중",
     "source_file": "PFTF_alpha.md",
     "file_type": "concept",
-    "degree": 1,
+    "degree": 2,
 }
 
 DYNAMIC_TARGET_SEARCH_NODE = {
@@ -441,6 +527,36 @@ DYNAMIC_TARGET_SEARCH_NODE = {
     "source_file": "SFTF_동적표적탐색_연구아이디어_2026-07-29.md",
     "file_type": "concept",
     "degree": 3,
+}
+
+DFSVR_VIS_CULL_NODE = {
+    "id": "DFSVR_VisCull",
+    "label": "DFSVR_VisCull",
+    "color": {"background": "#ffffff", "border": "#000000",
+               "highlight": {"background": "#ffffff", "border": "#000000"}},
+    "size": 15.4,
+    "font": {"size": 13, "color": "#333333"},
+    "title": NODE_TITLES["DFSVR_VisCull"],
+    "community": 4,
+    "community_name": "ToDo",
+    "source_file": "DFSVR_VisCull.md",
+    "file_type": "concept",
+    "degree": 2,
+}
+
+SFTFSOFT_GNN_DFSVR_NODE = {
+    "id": "SFTFSoft_GNN_DFSVR",
+    "label": "SFTFSoft_GNN_DFSVR",
+    "color": {"background": "#ffffff", "border": "#000000",
+               "highlight": {"background": "#ffffff", "border": "#000000"}},
+    "size": 15.4,
+    "font": {"size": 13, "color": "#333333"},
+    "title": NODE_TITLES["SFTFSoft_GNN_DFSVR"],
+    "community": 4,
+    "community_name": "ToDo",
+    "source_file": "SFTFSoft_GNN_DFSVR.md",
+    "file_type": "concept",
+    "degree": 2,
 }
 
 # 2026-07-30: mindmap Paper quality 기준 상으로 동기화. 원고 2편+설명서가 있고
@@ -470,6 +586,8 @@ TODO_NODES = [
     ALPHA_NODE,
     QEM_NODE,
     DYNAMIC_TARGET_SEARCH_NODE,
+    DFSVR_VIS_CULL_NODE,
+    SFTFSOFT_GNN_DFSVR_NODE,
 ]
 
 TODO_EDGES = [
@@ -509,6 +627,36 @@ TODO_EDGES = [
      "label": "clusters basins", "title": "clusters candidate basins [INFERRED]",
      "dashes": True, "width": 2, "color": {"opacity": 0.7},
      "confidence": "INFERRED"},
+    {"from": "Tomo_DiffSupport", "to": "DFSVR_VisCull",
+     "label": "accelerates", "title": "accelerates — scales [INFERRED]",
+     "dashes": True, "width": 3, "color": {"opacity": 0.7},
+     "confidence": "INFERRED", "_rel": "accelerates", "_detail": "scales",
+     "_tentative": False},
+    {"from": "PFTF_VisCull_kDop", "to": "DFSVR_VisCull",
+     "label": "provides", "title": "provides — conservative gate [INFERRED]",
+     "dashes": True, "width": 3, "color": {"opacity": 0.7},
+     "confidence": "INFERRED", "_rel": "provides",
+     "_detail": "conservative gate", "_tentative": False},
+    {"from": "SFTF_QEM", "to": "SFTFSoft_GNN",
+     "label": "validates", "title": "validates — audits tessellation [INFERRED]",
+     "dashes": True, "width": 3, "color": {"opacity": 0.7},
+     "confidence": "INFERRED", "_rel": "validates",
+     "_detail": "audits tessellation", "_tentative": False},
+    {"from": "PFTF_AsymTensor", "to": "SFTFSoft_GNN",
+     "label": "provides", "title": "provides — directed messages [INFERRED]",
+     "dashes": True, "width": 3, "color": {"opacity": 0.7},
+     "confidence": "INFERRED", "_rel": "provides",
+     "_detail": "directed messages", "_tentative": False},
+    {"from": "SFTFSoft_GNN", "to": "SFTFSoft_GNN_DFSVR",
+     "label": "provides", "title": "provides — proposes top-K [INFERRED]",
+     "dashes": True, "width": 3, "color": {"opacity": 0.7},
+     "confidence": "INFERRED", "_rel": "provides",
+     "_detail": "proposes top-K", "_tentative": False},
+    {"from": "Tomo_DiffSupport", "to": "SFTFSoft_GNN_DFSVR",
+     "label": "provides", "title": "provides — refines [INFERRED]",
+     "dashes": True, "width": 3, "color": {"opacity": 0.7},
+     "confidence": "INFERRED", "_rel": "provides", "_detail": "refines",
+     "_tentative": True},
 ]
 
 def _reclassify_raw_nodes(match):
@@ -517,20 +665,34 @@ def _reclassify_raw_nodes(match):
         if not any(node.get("id") == todo_node["id"] for node in nodes):
             nodes.append(todo_node.copy())
     for node in nodes:
-        node["_intro"] = INTRODUCTIONS.get(node.get("id"), "")
-        suffix = CAPTION_SUFFIXES.get(node.get("id"))
+        node_id = node.get("id")
+        node["_intro"] = INTRODUCTIONS.get(node_id, "")
+        node["_graph_role"] = GRAPH_ROLES.get(node_id, "")
+        node["_finding_candidate"] = FINDING_CANDIDATES.get(node_id, "")
+        label = node.get("label") or node_id
+        for old_candidate in FINDING_CANDIDATES.values():
+            label = re.sub(r"\n" + re.escape(old_candidate) + r"$", "", label)
+        candidate = FINDING_CANDIDATES.get(node_id)
+        if candidate:
+            label += "\n" + candidate
+            node["borderWidth"] = max(4, node.get("borderWidth") or 1)
+            shape_properties = dict(node.get("shapeProperties") or {})
+            shape_properties["borderDashes"] = [6, 4]
+            node["shapeProperties"] = shape_properties
+        node["label"] = label
+        suffix = CAPTION_SUFFIXES.get(node_id)
         if suffix:
             label = re.sub(r"\n\[draft\]$", "", node.get("label") or node["id"])
             node["label"] = label + "\n" + suffix
-        title = NODE_TITLES.get(node.get("id"))
+        title = NODE_TITLES.get(node_id)
         if title:
             node["title"] = title
-        project_path = PROJECT_PATHS.get(node.get("id"))
+        project_path = PROJECT_PATHS.get(node_id)
         if project_path:
             node["_project_path"] = project_path
         else:
             node.pop("_project_path", None)
-        q = quality_lookup.get(node.get("id"))
+        q = quality_lookup.get(node_id)
         if q:
             # Historical hover titles sometimes embed the previous grade.
             # Keep them synchronized with QUALITY_ROWS on every regeneration.
@@ -577,9 +739,9 @@ quality_html = (
     '<div id="quality-board">'
     # QUALITY_ROWS 를 손댈 때 이 날짜도 같이 올린다.  하드코딩이라, 갱신하지 않으면
     # 재생성이 graph.html 의 최신 날짜를 조용히 되돌린다(2026-07-27 에 실제로 발생).
-    '<h3>최근 논문 quality (2026-07-30)</h3>'
+    '<h3>최근 논문 quality (2026-08-06)</h3>'
     '<div class="quality-meta">상=상위권 심사 대응 가능 · 중=핵심 gate 잔여 · 하=PoC/원고 미완료 · ToDo=새 설계선/검증 전<br>'
-    '단순 VSCode 커밋은 제외 · 등급 정본: KIT_sodi/mindmap.html 백업(2026-07-30) · 세부 근거: Papers/투고가능성_재평가_2026-07-28.md</div>'
+    '단순 VSCode 커밋은 제외 · 등급 정본: KIT_sodi/mindmap.html 백업(2026-07-30) · 세부 근거: Papers/투고가능성_재평가_2026-08-06.md</div>'
     '<table><thead><tr><th>프로젝트</th><th>등급</th><th>핵심 근거</th></tr></thead>'
     f'<tbody>{quality_html_rows}</tbody></table></div>'
 )
@@ -621,8 +783,19 @@ hyper_js = "const hyperedges = " + json.dumps(HYPEREDGES, ensure_ascii=False) + 
 s, n2 = re.subn(r"const hyperedges = \[.*?\];", lambda _m: hyper_js, s, count=1,
                 flags=re.S)
 s, n3 = re.subn(r"<title>.*?</title>",
-                "<title>SFTF/PFTF — 발견 1~6 + BASE 트랙</title>", s, count=1,
+                "<title>SFTF/PFTF — 발견 1~6 + BASE/METHOD/PIPELINE</title>", s, count=1,
                 flags=re.S)
+
+# Broad role overlays go behind the finding regions, while BASE stays at the
+# very back. Array order itself is retained because FINDING_DEPS uses indices.
+s = s.replace(
+    "const abase = a.kind === 'base' ? 0 : 1;\n"
+    "        const bbase = b.kind === 'base' ? 0 : 1;\n"
+    "        return abase - bbase;",
+    "const rank = h => h.kind === 'base' ? 0 : (h.kind === 'role' ? 1 : 2);\n"
+    "        return rank(a) - rank(b);",
+    1,
+)
 
 # 노드 캡션은 22px에서 15% 축소한 18.7px로 고정한다.
 # 영역(hull) 라벨은 기존 20px를 유지한다 (멱등: 값 고정 치환).
@@ -647,6 +820,10 @@ s, nf3 = re.subn(
     r"ctx\.fillText\(h\.label, cx, [^)]+\);",
     "const topY = Math.min.apply(null, expanded.map(p => p.y)); "
     "ctx.fillText(h.label, cx, topY - 16);", s)
+if nf3 == 0:
+    # The deployed 37-node baseline already uses the newer left/top label
+    # placement, so no conversion is required.
+    nf3 = len(re.findall(r"ctx\.fillText\(h\.label, leftX, topY\);", s))
 assert nf3 >= 1, nf3
 
 # ------------------------------------------------- 프린터 친화 라이트 테마 (2026-07-19d)
@@ -798,6 +975,7 @@ s, n_node_meta = re.subn(
     r"  _source_file: n\.source_file, _file_type: n\.file_type,.*?\n",
     "  _source_file: n.source_file, _file_type: n.file_type, "
     "_project_role: n._project_role, _display_label: n._display_label || n.label, "
+    "_graph_role: n._graph_role, _finding_candidate: n._finding_candidate, "
     "_closed: n._closed, _degree: n.degree, _project_path: n._project_path, "
     "_intro: INDUSTRIAL_EFFECTS[n.id] || n._intro, _quality: n._quality, "
     "_quality_note: n._quality_note, _bottleneck: n._bottleneck,\n",
@@ -869,11 +1047,24 @@ _quality_field = (
     + _dollar + "{esc(n._quality || '—')}</b></div>\n"
     + _quality_note_field
 )
+_role_fields = (
+    "    " + _dollar + "{n._graph_role ? " + _backtick
+    + '<div class="field">Graph role: <b>'
+    + _dollar + "{esc(n._graph_role)}</b></div>" + _backtick
+    + " : ''}\n"
+    + "    " + _dollar + "{n._finding_candidate ? " + _backtick
+    + '<div class="field">Finding candidate: <b>'
+    + _dollar + "{esc(n._finding_candidate)}</b></div>" + _backtick
+    + " : ''}\n"
+)
 _source_marker = (
     "    <div class=\"field\">Source: " + _dollar
     + "{esc(n._source_file || '-')}</div>"
 )
-s = s.replace(_source_marker, _intro_field + _quality_field + _source_marker, 1)
+s = re.sub(r"\n\s*\$\{n\._graph_role \? `[^`]*` : ''\}", "", s)
+s = re.sub(r"\n\s*\$\{n\._finding_candidate \? `[^`]*` : ''\}", "", s)
+s = s.replace(_source_marker,
+              _intro_field + _role_fields + _quality_field + _source_marker, 1)
 
 # Put a small launch button beside each node name.  The project path comes
 # from the matching Obsidian project note and is carried through the dataset;
