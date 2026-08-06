@@ -159,7 +159,7 @@
 
 <script>
 /* ====================== 버전 (배포 확인용) ====================== */
-const APP_VERSION='v2026-07-31a';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
+const APP_VERSION='v2026-08-06a';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
 
 /* ====================== 기본 데이터 (첫 실행 시드) ====================== */
 const DEFAULT_DATA = /*DATA_START*/{"version":1,"title":"CFMS 프로젝트 관계도 2026","showRel":true,"root":{"id":"root","title":"CFMS 연구실 2026","kind":"root","note":"두 워크스페이스의 세부 프로젝트 관계도","children":[{"id":"sftf","title":"__SFTF_Projects(2026)","kind":"group","note":"3D 프린팅 Support Flow Tensor Field 연구군 (D:\\__SFTF_Projects(2026))","children":[{"id":"tomo_sftf","title":"Tomo_SFTF_dev","kind":"core","status":"active","note":"SFTF 본체: 빌드방향 후보 생성(coarse-to-refine) + TOMO_CPU/GPU 엔진(DLL). 표준 템플릿의 기원."},{"id":"clustering","title":"SFTF_Clustering_dev","kind":"app","status":"active","note":"면별 SFTF 특징 → 출판지향 메쉬 분할(clustering). 한국섬유공학회지 투고."},{"id":"derivative","title":"SFTF_Derivative_dev","kind":"app","status":"active","note":"미분가능 SFTF 손실항 + GNN + 경사기반 빌드방향 최적화. TOMO 교차검증."},{"id":"composite","title":"SFTF_Composite_dev","kind":"app","status":"stub","note":"복합재 적용 (신규 스캐폴드)."},{"id":"injmold","title":"SFTF_InjMold_dev","kind":"app","status":"stub","note":"사출성형 적용 (신규 스캐폴드)."}]},{"id":"vscode","title":"__VSCode_Projects","kind":"group","note":"의복 CAD·영상계측·랩 웹앱·인프라 (D:\\__VSCode_Projects)","children":[{"id":"cadsuite","title":"의복 CAD 스위트","kind":"subgroup","note":"Clo3D 오픈소스 대안","children":[{"id":"cfmscad","title":"cfmsCAD2026_dev","kind":"app","status":"active","note":"3D 의복 CAD 에디터 (UI/패턴)."},{"id":"cfmsdrape","title":"cfmsDrape2026_dev","kind":"app","status":"active","note":"암시적 옷감 드레이프 솔버(DLL). SCAD/GarmentCode 입력, 인체 충돌·자기충돌."},{"id":"cfmssew","title":"cfmsSew2026_dev","kind":"app","status":"active","note":"2D 패턴 봉제대응 자동인식(휴리스틱→GNN). CAD/Drape에 병합 예정."},{"id":"cfmsshared","title":"cfmsShared2026_dev","kind":"infra","status":"infra","note":"CAD↔Drape 인터페이스 단일진실(contract/messages) 공유 git 채널."}]},{"id":"measure","title":"영상 계측","kind":"subgroup","children":[{"id":"dispersity","title":"cfmsDispersity2026_Dev","kind":"app","status":"active","note":"광학현미경 입자 분산도 정량화(정적 kNN 에너지). C++Builder(Baraff 클로스심) 포팅."},{"id":"sem","title":"TSE_SEM2026_dev","kind":"app","status":"active","note":"SEM 섬유 영상 정량화(반지름·배향·기공) + metaball 3D 재구성."}]},{"id":"webapps","title":"랩 웹앱 (cfms-lab/KIT_sodi · Supabase)","kind":"subgroup","children":[{"id":"upjuk","title":"논문관리 (upjuk)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/upjuk.html","note":"업적 리스트 CRUD + PDF. draft는 RLS로 비로그인 숨김."},{"id":"timetable","title":"수업시간표 (TimeTable)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/timetable.html","note":"학기별 시간표 드래그 편성."},{"id":"jobgis","title":"취업현황 (JobGIS)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/jobgis.html","note":"졸업생 취업처 지도."},{"id":"mindmap","title":"이 관계도 (Mindmap)","kind":"web","status":"active","note":"프로젝트 관계도 (이 페이지, 로그인 전용)."}]},{"id":"infra","title":"인프라/템플릿","kind":"subgroup","children":[{"id":"template","title":"__vscode_AI_template","kind":"infra","status":"infra","note":"표준 프로젝트 템플릿(코드+논문, uv/xelatex/훅). 모든 *_dev의 기반. Tomo_SFTF에서 기원."},{"id":"hooks","title":"__클로드코드_훅설정","kind":"infra","status":"infra","note":"Claude Code 전역 훅 설정."}]}]}]},"links":[{"from":"tomo_sftf","to":"clustering","label":"코어 분리"},{"from":"tomo_sftf","to":"derivative","label":"코어 재사용"},{"from":"tomo_sftf","to":"composite","label":"파생"},{"from":"tomo_sftf","to":"injmold","label":"파생"},{"from":"clustering","to":"derivative","label":"코드 재사용"},{"from":"tomo_sftf","to":"template","label":"템플릿 기원"},{"from":"cfmsshared","to":"cfmscad","label":"contract"},{"from":"cfmsshared","to":"cfmsdrape","label":"contract"},{"from":"cfmssew","to":"cfmscad","label":"병합 예정"},{"from":"cfmssew","to":"cfmsdrape","label":"병합 예정"},{"from":"derivative","to":"cfmsdrape","label":"드레이프 응용 연계"},{"from":"dispersity","to":"cfmsdrape","label":"클로스심 계보"}]}/*DATA_END*/;
@@ -269,6 +269,92 @@ function validate(data){
   });
   return {ok:errors.length===0, errors};
 }
+
+const SUBMISSION_PLAN_VERSION='2026-08-06';
+function applySubmissionPlan20260806(data){
+  if(!data||!data.root||data.submissionPlanVersion===SUBMISSION_PLAN_VERSION) return false;
+  const root=data.root;
+  const byTitle=(re)=>{ let hit=null; walk(root,n=>{ if(!hit&&re.test(n.title||'')) hit=n; }); return hit; };
+  const ensureNode=(id,re,props)=>{
+    let n=findNode(root,id)||byTitle(re);
+    if(!n) n={id,children:[]};
+    Object.assign(n,props);
+    if(!n.children) n.children=[];
+    return n;
+  };
+  const detach=(n)=>{
+    const p=findParent(root,n.id);
+    if(!p) return;
+    const i=(p.children||[]).findIndex(c=>c.id===n.id);
+    if(i>=0) p.children.splice(i,1);
+  };
+  const ensureLink=(from,to,label)=>{
+    data.links||(data.links=[]);
+    if(!data.links.some(l=>l.from===from&&l.to===to&&l.label===label)) data.links.push({from,to,label});
+  };
+
+  const sftf=findNode(root,'sftf')||byTitle(/Tomo_SFTF|SFTF-v2\.2|__SFTF_Projects/i);
+  if(!sftf) return false;
+  Object.assign(sftf,{
+    title:'#1 Tomo_SFTF — 특허 출원 후 즉시 submit', kind:'high', status:'draft',
+    note:'특허 출원 접수 확인 후 곧바로 submit. 후속 원고는 acceptance를 기다리지 않고 투고번호·preprint·비공개 제출본으로 연결.'
+  });
+
+  const lane=ensureNode('pftf_submission_lane_20260806',/^PFTF framework 투고 경로/i,{
+    title:'PFTF framework 투고 경로 (2026-08-06)',kind:'group',status:'draft',dir:'v',
+    note:'VisCull_kDop → Composite → Ground-node evidence(비투고) → Compression/Mold 중 하나 → PFTF framework'
+  });
+  const vis=ensureNode('pftf_viscull_kdop_submission',/PFTF_VisCull(?:_kDop)?/i,{
+    title:'#2 PFTF_VisCull_kDop',kind:'medium',status:'draft',note:'C&G 제출 패키지 폐쇄. 저자·소속·COI와 최종 빌드 후 선행 투고.'
+  });
+  const composite=ensureNode('sftf_composite_submission',/SFTF_Composite/i,{
+    title:'#3 SFTF_Composite',kind:'high',status:'draft',note:'게이트+상쇄 방지+라우팅 positive flagship. 공식 double-dome CAD와 독립 holdout을 닫고 투고/preprint.'
+  });
+  const ground=ensureNode('pftf_groundnode_evidence',/^Ground-node evidence matrix/i,{
+    title:'Ground-node evidence matrix (별도 투고 없음)',kind:'group',status:'draft',
+    note:'PDN·Sewer·Battery의 20-seed 결과를 framework 표와 공개 재현 저장소로 동결. 독립 투고 순서에는 넣지 않음.'
+  });
+  const calibration=ensureNode('pftf_calibration_choice',/^#4 정량 보정축/i,{
+    title:'#4 정량 보정축 — Compression 또는 Mold',kind:'group',status:'draft',dir:'v',
+    note:'둘 다 기다리지 않고 먼저 claim-grade가 된 한 사례를 선택.'
+  });
+  const compression=ensureNode('pftf_compression_submission',/PFTF_Compression/i,{
+    title:'PFTF_Compression (우선 후보)',kind:'high',status:'draft',note:'실제 상완밴드 의복압 측정과 독립 3D 검증을 닫으면 정량 보정축으로 선행 투고.'
+  });
+  const mold=ensureNode('pftf_mold_submission',/PFTF_Mold/i,{
+    title:'PFTF_Mold (대안)',kind:'medium',status:'draft',note:'solids4foam/OpenFOAM 독립 검증이 먼저 닫히면 Compression을 대체하는 정량 보정축.'
+  });
+  const pftf=ensureNode('pftf_framework_submission',/^#?\d*\.?\s*PFTF(?: framework)?$/i,{
+    title:'#5 PFTF framework',kind:'medium',status:'draft',
+    note:'자식 논문의 acceptance가 아니라 선행 submit/preprint와 claim-grade evidence 동결 후 제출. 이론·선택규칙·cross-domain synthesis에 집중.'
+  });
+
+  [lane,vis,composite,ground,calibration,compression,mold,pftf].forEach(detach);
+  const laneIds=new Set([vis.id,composite.id,ground.id,calibration.id,pftf.id]);
+  const laneExtras=(lane.children||[]).filter(n=>!laneIds.has(n.id));
+  lane.children=[vis,composite,ground,calibration,pftf,...laneExtras];
+  const calibrationIds=new Set([compression.id,mold.id]);
+  const calibrationExtras=(calibration.children||[]).filter(n=>!calibrationIds.has(n.id));
+  calibration.children=[compression,mold,...calibrationExtras];
+  const sftfKids=(sftf.children||[]).filter(n=>n.id!==lane.id);
+  sftf.children=[lane,...sftfKids];
+  sftf.collapsed=false; lane.collapsed=false; calibration.collapsed=false;
+
+  const cluster=byTitle(/SFTF_Cluster/i);
+  const drape=byTitle(/SFTF_DrapePrior/i);
+  const pdn=byTitle(/PDNElectric/i), sewer=byTitle(/SewerPOC/i), battery=byTitle(/BatteryThermal/i);
+  ensureLink(sftf.id,lane.id,'특허 후 PFTF 투고 경로');
+  ensureLink(vis.id,composite.id,'다음 투고');
+  ensureLink(composite.id,ground.id,'evidence 동결');
+  ensureLink(ground.id,calibration.id,'보강축 선택');
+  ensureLink(calibration.id,pftf.id,'claim-grade 후 framework');
+  if(cluster) ensureLink(cluster.id,composite.id,'방법 계보');
+  if(drape) ensureLink(drape.id,vis.id,'증거 계보');
+  [pdn,sewer,battery].filter(Boolean).forEach(n=>ensureLink(ground.id,n.id,'evidence'));
+
+  data.submissionPlanVersion=SUBMISSION_PLAN_VERSION;
+  return true;
+}
 //==PURE_END
 
 /* ====================== Supabase 설정/세션 (upjuk과 공유) ====================== */
@@ -335,6 +421,7 @@ function normalizeKinds(data){
 const STATUS={published:'published',inprint:'in print',accepted:'accepted',submitted:'submitted',draft:'draft',cancelled:'cancelled'};
 let DATA=JSON.parse(JSON.stringify(DEFAULT_DATA));
 normalizeKinds(DATA);
+applySubmissionPlan20260806(DATA);
 let sel=null, view={tx:60,ty:30,s:1}, showRel=true, LAY=null;
 
 /* ====================== 실행취소 / 다시실행 (undo/redo) ====================== */
@@ -450,7 +537,7 @@ function renderEdit(){
   area.innerHTML=`
     <label>제목<input id="fTitle" value="${esc(n.title)}"></label>
     <div class="row">
-      <label style="flex:1">종류<select id="fKind">${kinds}</select></label>
+      <label style="flex:1">Paper quality<select id="fKind">${kinds}</select></label>
       <label style="flex:1">상태<select id="fStatus">${stats}</select></label>
     </div>
     <label>링크 URL (선택)<input id="fUrl" value="${esc(n.url||'')}" placeholder="https://..."></label>
@@ -580,10 +667,11 @@ async function loadDoc(){
     if(rows&&rows.length&&rows[0].data){ DATA=rows[0].data; }
     else if(canEdit()){ DATA=JSON.parse(JSON.stringify(DEFAULT_DATA)); await saveDoc(true); toast('기본 관계도를 클라우드에 생성했습니다.'); }
     else { DATA=JSON.parse(JSON.stringify(DEFAULT_DATA)); }
+    const planMigrated=applySubmissionPlan20260806(DATA);
     const kindsMigrated=normalizeKinds(DATA);
     showRel=DATA.showRel!==false; document.getElementById('relBtn').textContent='관계선 '+(showRel?'✓':'✕');
     sel=null; render(); renderEdit(); fitView(); setSaveState('');
-    if(kindsMigrated) await saveDoc(true);
+    if(canEdit() && (planMigrated||kindsMigrated)) await saveDoc(true);
   }catch(e){
     const b=document.getElementById('banner'); b.style.display='block';
     if(/relation|does not exist|42P01|PGRST205|404/i.test(e.message))
@@ -591,7 +679,7 @@ async function loadDoc(){
     else if(!isLoggedIn() && /401|403|PGRST301|permission denied/i.test(e.message))
       b.textContent='공개 열람 권한이 없습니다. Supabase에서 enable_rls_mindmaps.sql 을 다시 실행해 anon SELECT 정책을 적용하세요.';
     else b.textContent='데이터를 불러오지 못했습니다: '+e.message.slice(0,140);
-    normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
+    applySubmissionPlan20260806(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
   }
 }
 async function saveDoc(silent){
@@ -610,7 +698,7 @@ function exportJSON(){ download('mindmap_backup.json', JSON.stringify(DATA,null,
 function importJSON(input){
   if(!canEdit()){ input.value=''; return toast('복원하려면 로그인하세요.'); }
   const f=input.files[0]; if(!f)return; const r=new FileReader();
-  r.onload=()=>{ try{ const d=JSON.parse(r.result); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); applySubmissionPlan20260806(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
     if(!confirm('백업으로 현재 클라우드 관계도를 덮어쓸까요?'))return;
     pushHistory();
     DATA=d; showRel=DATA.showRel!==false; sel=null; render(); renderEdit(); saveDoc(false);
