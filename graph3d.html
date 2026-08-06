@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Graphify WebGL 3D</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, Pretendard, "Noto Sans KR", system-ui, sans-serif;
+      --ink: #172033;
+      --muted: #657087;
+      --panel: rgba(255, 255, 255, 0.88);
+      --line: rgba(38, 53, 79, 0.14);
+      --accent: #1c63e3;
+    }
+
+    * { box-sizing: border-box; }
+    html, body, #app { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body {
+      background: radial-gradient(circle at 50% 22%, #ffffff 0, #f3f6fb 45%, #e8edf5 100%);
+      color: var(--ink);
+    }
+
+    canvas { display: block; }
+    #viewport { position: fixed; inset: 0; }
+
+    .panel {
+      position: fixed;
+      z-index: 4;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel);
+      box-shadow: 0 14px 40px rgba(34, 48, 75, 0.13);
+      backdrop-filter: blur(14px);
+    }
+
+    #toolbar {
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 13px;
+    }
+
+    .brand { min-width: 190px; }
+    .brand strong { display: block; font-size: 15px; letter-spacing: .01em; }
+    #status { margin-top: 3px; color: var(--muted); font-size: 11px; white-space: nowrap; }
+
+    .controls { display: flex; align-items: center; gap: 9px; flex: 1; flex-wrap: wrap; }
+    label.control { display: inline-flex; align-items: center; gap: 6px; color: #3b465c; font-size: 12px; white-space: nowrap; }
+    select, button, .file-button {
+      min-height: 31px;
+      border: 1px solid rgba(38, 53, 79, 0.19);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.94);
+      color: var(--ink);
+      padding: 5px 9px;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    button:hover, .file-button:hover, select:hover { border-color: rgba(28, 99, 227, .55); }
+    button:focus-visible, select:focus-visible, input:focus-visible, .file-button:focus-visible {
+      outline: 2px solid rgba(28, 99, 227, .35);
+      outline-offset: 2px;
+    }
+    input[type="checkbox"] { accent-color: var(--accent); }
+    #node-select { width: 170px; }
+    #graph-file { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+    #details { left: 14px; bottom: 14px; width: min(330px, calc(100vw - 28px)); padding: 13px 15px; }
+    #details h2 { margin: 0 0 4px; font-size: 15px; overflow-wrap: anywhere; }
+    #details p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    #details .hint { color: #778198; }
+
+    #legend { right: 14px; bottom: 14px; padding: 10px 12px; font-size: 11px; color: #455066; }
+    .legend-row { display: flex; align-items: center; gap: 7px; margin: 4px 0; }
+    .swatch { width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+
+    #toast {
+      position: fixed;
+      z-index: 8;
+      left: 50%;
+      top: 92px;
+      max-width: min(680px, calc(100vw - 32px));
+      transform: translateX(-50%);
+      padding: 9px 13px;
+      border-radius: 9px;
+      background: rgba(32, 40, 57, .91);
+      color: #fff;
+      font-size: 12px;
+      line-height: 1.45;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease;
+    }
+    #toast.show { opacity: 1; }
+
+    .node-label, .hyper-label {
+      pointer-events: none;
+      user-select: none;
+      white-space: pre-line;
+      text-align: center;
+      text-shadow: 0 1px 2px #fff, 0 0 4px #fff, 0 0 8px #fff;
+      transition: opacity .12s ease;
+    }
+    .node-label { color: #192238; font-size: 11px; font-weight: 650; line-height: 1.08; }
+    .hyper-label {
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.72);
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    @media (max-width: 850px) {
+      #toolbar { align-items: flex-start; }
+      .brand { min-width: 140px; }
+      #legend { display: none; }
+      .optional-control { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"><div id="viewport"></div></div>
+
+  <header id="toolbar" class="panel">
+    <div class="brand">
+      <strong>Graphify WebGL 3D</strong>
+      <div id="status">graph.html 읽는 중…</div>
+    </div>
+    <div class="controls">
+      <label class="control">연결
+        <select id="connection-mode" aria-label="연결 표시 방식">
+          <option value="Off">끄기</option>
+          <option value="Selected" selected>선택 노드</option>
+          <option value="All">전체 (희미하게)</option>
+        </select>
+      </label>
+      <label class="control">노드
+        <select id="node-select" aria-label="포커스 노드"><option value="">화면에서 선택</option></select>
+      </label>
+      <label class="control optional-control"><input id="labels-toggle" type="checkbox" checked> 이름</label>
+      <label class="control optional-control"><input id="hulls-toggle" type="checkbox" checked> hyperedge</label>
+      <label class="control optional-control"><input id="deps-toggle" type="checkbox"> hyperedge 연결</label>
+      <label class="control optional-control"><input id="auto-toggle" type="checkbox" checked> 자동 갱신</label>
+      <button id="reload-button" type="button">다시 읽기</button>
+      <button id="fit-button" type="button">화면 맞춤</button>
+      <button id="open-2d-button" type="button" title="2D 그래프로 전환">2D graph 보기</button>
+      <label class="file-button" for="graph-file" tabindex="0">graph.html 선택</label>
+      <input id="graph-file" type="file" accept=".html,text/html">
+    </div>
+  </header>
+
+  <aside id="details" class="panel">
+    <h2>노드를 선택하세요</h2>
+    <p class="hint">클릭: 1-hop 관계 · 드래그: 회전 · 휠: 확대 · 오른쪽 드래그: 이동</p>
+  </aside>
+
+  <aside id="legend" class="panel" aria-label="방향 범례">
+    <div class="legend-row"><span class="swatch" style="background:#fbbd14"></span>선택</div>
+    <div class="legend-row"><span class="swatch" style="background:#fa5c14"></span>나가는 연결</div>
+    <div class="legend-row"><span class="swatch" style="background:#1a73e8"></span>들어오는 연결</div>
+    <div class="legend-row"><span class="swatch" style="background:#a83fea"></span>양방향</div>
+  </aside>
+  <div id="toast" role="status"></div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+    import { ConvexGeometry } from 'three/addons/geometries/ConvexGeometry.js';
+
+    const LAYOUT_SCALE = 60;
+    const HULL_INRADIUS = 0.8864518862828913;
+    const HULL_PALETTE = [
+      '#1c63e3', '#e39c1c', '#e31cc6', '#1ce338',
+      '#6a1ce3', '#95e31c', '#e31c31', '#1ce3ce'
+    ];
+    const RELATION_COLORS = {
+      selected: '#fbbd14', outgoing: '#fa5c14', incoming: '#1a73e8', bidirectional: '#a83fea'
+    };
+
+    const viewport = document.getElementById('viewport');
+    const statusEl = document.getElementById('status');
+    const toastEl = document.getElementById('toast');
+    const detailsEl = document.getElementById('details');
+    const modeEl = document.getElementById('connection-mode');
+    const nodeSelectEl = document.getElementById('node-select');
+    const labelsEl = document.getElementById('labels-toggle');
+    const hullsEl = document.getElementById('hulls-toggle');
+    const depsEl = document.getElementById('deps-toggle');
+    const autoEl = document.getElementById('auto-toggle');
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf2f5fa);
+    scene.fog = new THREE.FogExp2(0xf2f5fa, 0.012);
+
+    const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.02, 1000);
+    camera.up.set(0, 0, 1);
+    camera.position.set(17, -21, 18);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    viewport.appendChild(renderer.domElement);
+
+    const labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(innerWidth, innerHeight);
+    Object.assign(labelRenderer.domElement.style, {
+      position: 'fixed', inset: '0', pointerEvents: 'none', zIndex: '2'
+    });
+    document.body.appendChild(labelRenderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.075;
+    controls.screenSpacePanning = true;
+    controls.minDistance = 2;
+    controls.maxDistance = 150;
+    controls.target.set(0, 0, 5);
+
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x9ca9bc, 2.0));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 3.1);
+    keyLight.position.set(-10, -14, 28);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.set(2048, 2048);
+    keyLight.shadow.camera.left = -30;
+    keyLight.shadow.camera.right = 30;
+    keyLight.shadow.camera.top = 30;
+    keyLight.shadow.camera.bottom = -30;
+    keyLight.shadow.camera.far = 80;
+    scene.add(keyLight);
+    const fillLight = new THREE.DirectionalLight(0xbad2ff, 1.0);
+    fillLight.position.set(18, 12, 10);
+    scene.add(fillLight);
+
+    const grid = new THREE.GridHelper(46, 46, 0xaeb9ca, 0xd8dee9);
+    grid.rotation.x = Math.PI / 2;
+    grid.position.z = -0.03;
+    grid.material.transparent = true;
+    grid.material.opacity = 0.42;
+    scene.add(grid);
+
+    const content = new THREE.Group();
+    content.name = 'dynamic graph content';
+    scene.add(content);
+    const hullGroup = new THREE.Group();
+    const stemGroup = new THREE.Group();
+    const allEdgesGroup = new THREE.Group();
+    const dependencyGroup = new THREE.Group();
+    const nodeGroup = new THREE.Group();
+    const focusGroup = new THREE.Group();
+    content.add(hullGroup, stemGroup, allEdgesGroup, dependencyGroup, nodeGroup, focusGroup);
+
+    let model = null;
+    let nodeMeshes = [];
+    let hullInfos = [];
+    let selectedIndex = -1;
+    let currentHash = '';
+    let toastTimer = 0;
+    let pollBusy = false;
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    const pointerStart = new THREE.Vector2();
+
+    function showToast(message, timeout = 4200) {
+      clearTimeout(toastTimer);
+      toastEl.textContent = message;
+      toastEl.classList.add('show');
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), timeout);
+    }
+
+    function escapeRegExp(text) {
+      return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function balancedLiteral(source, start) {
+      let opening = -1;
+      for (let i = start; i < source.length; i += 1) {
+        if (source[i] === '[' || source[i] === '{') { opening = i; break; }
+        if (!/\s|[=(,]/.test(source[i])) throw new Error(`객체/배열을 찾을 수 없습니다 (${i})`);
+      }
+      if (opening < 0) throw new Error('객체/배열을 찾을 수 없습니다.');
+      const pairs = { '[': ']', '{': '}' };
+      const stack = [];
+      let quote = null;
+      let escaped = false;
+      for (let i = opening; i < source.length; i += 1) {
+        const ch = source[i];
+        if (quote !== null) {
+          if (escaped) escaped = false;
+          else if (ch === '\\') escaped = true;
+          else if (ch === quote) quote = null;
+          continue;
+        }
+        if (ch === '"' || ch === "'" || ch === '`') quote = ch;
+        else if (pairs[ch]) stack.push(pairs[ch]);
+        else if (ch === ']' || ch === '}') {
+          if (!stack.length || stack.pop() !== ch) throw new Error('graph.html의 괄호가 맞지 않습니다.');
+          if (!stack.length) return source.slice(opening, i + 1);
+        }
+      }
+      throw new Error('graph.html의 객체/배열이 끝나지 않았습니다.');
+    }
+
+    function variableValue(source, name, required = true) {
+      const re = new RegExp(`\\b(?:const|let|var)\\s+${escapeRegExp(name)}\\s*=`);
+      const match = re.exec(source);
+      if (!match) {
+        if (required) throw new Error(`graph.html에 ${name} 선언이 없습니다.`);
+        return null;
+      }
+      const literal = balancedLiteral(source, match.index + match[0].length);
+      return Function(`"use strict"; return (${literal});`)();
+    }
+
+    function parseGraphHtml(source) {
+      const positions = { ...variableValue(source, 'POS') };
+      const assignRe = /Object\.assign\s*\(\s*POS\s*,/g;
+      let assign;
+      while ((assign = assignRe.exec(source)) !== null) {
+        Object.assign(positions, Function(`"use strict"; return (${balancedLiteral(source, assignRe.lastIndex)});`)());
+      }
+      return {
+        nodes: variableValue(source, 'RAW_NODES'),
+        edges: variableValue(source, 'RAW_EDGES'),
+        positions,
+        hyperedges: variableValue(source, 'hyperedges', false) || [],
+        findingDeps: variableValue(source, 'FINDING_DEPS', false) || []
+      };
+    }
+
+    function colorValue(value, fallback = '#bfc5cf') {
+      try { return new THREE.Color(typeof value === 'string' ? value : fallback); }
+      catch { return new THREE.Color(fallback); }
+    }
+
+    function buildModel(data) {
+      if (!Array.isArray(data.nodes) || !Array.isArray(data.edges)) throw new Error('노드 또는 edge 데이터가 배열이 아닙니다.');
+      const ids = data.nodes.map(node => String(node.id));
+      if (new Set(ids).size !== ids.length) throw new Error('중복된 노드 ID가 있습니다.');
+      const indexById = new Map(ids.map((id, index) => [id, index]));
+      const missingPositions = ids.filter(id => !data.positions[id]);
+      if (missingPositions.length) throw new Error(`POS에 없는 노드: ${missingPositions.slice(0, 8).join(', ')}`);
+
+      const neighbors = ids.map(() => new Set());
+      for (const edge of data.edges) {
+        const a = indexById.get(String(edge.from));
+        const b = indexById.get(String(edge.to));
+        if (a === undefined || b === undefined) throw new Error(`존재하지 않는 edge 끝점: ${edge.from} → ${edge.to}`);
+        if (a !== b) { neighbors[a].add(b); neighbors[b].add(a); }
+      }
+      for (const hyperedge of data.hyperedges) {
+        for (const id of hyperedge.nodes || []) {
+          if (!indexById.has(String(id))) throw new Error(`hyperedge에 없는 노드: ${id}`);
+        }
+      }
+
+      const xy = ids.map(id => [Number(data.positions[id].x), Number(data.positions[id].y)]);
+      const xs = xy.map(p => p[0]);
+      const ys = xy.map(p => p[1]);
+      const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
+      const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+      const degrees = neighbors.map(set => set.size);
+      const points = xy.map((p, i) => new THREE.Vector3((p[0] - cx) / LAYOUT_SCALE, -(p[1] - cy) / LAYOUT_SCALE, degrees[i]));
+      const radii = data.nodes.map(node => Math.max(8, Number(node.size || 13)) / LAYOUT_SCALE);
+      return { ...data, ids, indexById, neighbors, degrees, points, radii };
+    }
+
+    function disposeGroup(group) {
+      while (group.children.length) {
+        const child = group.children.pop();
+        child.traverse(object => {
+          if (object.element?.remove) object.element.remove();
+          object.geometry?.dispose?.();
+          if (Array.isArray(object.material)) object.material.forEach(material => material.dispose?.());
+          else object.material?.dispose?.();
+        });
+      }
+    }
+
+    function clearGraph() {
+      [hullGroup, stemGroup, allEdgesGroup, dependencyGroup, nodeGroup, focusGroup].forEach(disposeGroup);
+      nodeMeshes = [];
+      hullInfos = [];
+      selectedIndex = -1;
+    }
+
+    function labelObject(text, className, color = null) {
+      const element = document.createElement('div');
+      element.className = className;
+      element.textContent = text;
+      if (color) element.style.color = color;
+      const label = new CSS2DObject(element);
+      label.userData.isGraphLabel = true;
+      return label;
+    }
+
+    function lineBetween(a, b, material) {
+      const geometry = new THREE.BufferGeometry().setFromPoints([a, b]);
+      return new THREE.Line(geometry, material);
+    }
+
+    function sphereDirections() {
+      const result = [];
+      for (const x of [-1, 0, 1]) for (const y of [-1, 0, 1]) for (const z of [-1, 0, 1]) {
+        if (x || y || z) result.push(new THREE.Vector3(x, y, z).normalize());
+      }
+      return result;
+    }
+    const shellDirections = sphereDirections();
+
+    function addHyperedges() {
+      model.hyperedges.forEach((hyperedge, hyperIndex) => {
+        const indices = (hyperedge.nodes || []).map(id => model.indexById.get(String(id))).filter(index => index !== undefined);
+        if (!indices.length) { hullInfos.push(null); return; }
+        const centers = indices.map(index => model.points[index]);
+        const box = new THREE.Box3().setFromPoints(centers);
+        const span = box.getSize(new THREE.Vector3()).length();
+        const scale = Math.max(1, Number(hyperedge.scale || 1.25));
+        const padding = Math.max(0.06, (scale - 1) * Math.max(span, 1) * 0.08);
+        const samples = [];
+        indices.forEach(index => {
+          const shellRadius = (model.radii[index] * 1.08 + padding) / HULL_INRADIUS;
+          shellDirections.forEach(direction => samples.push(model.points[index].clone().addScaledVector(direction, shellRadius)));
+        });
+
+        const geometry = new ConvexGeometry(samples);
+        geometry.computeVertexNormals();
+        const color = HULL_PALETTE[hyperIndex % HULL_PALETTE.length];
+        const opacity = THREE.MathUtils.clamp(Number(hyperedge.fillAlpha ?? 0.12), 0.08, 0.24);
+        const material = new THREE.MeshPhysicalMaterial({
+          color, transparent: true, opacity, roughness: 0.36, metalness: 0,
+          clearcoat: 0.18, clearcoatRoughness: 0.5, side: THREE.DoubleSide,
+          depthWrite: false, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.renderOrder = 1 + hyperIndex;
+        hullGroup.add(mesh);
+
+        const centroid = centers.reduce((sum, point) => sum.add(point), new THREE.Vector3()).multiplyScalar(1 / centers.length);
+        const top = samples.reduce((best, point) => point.z > best.z ? point : best, samples[0]).clone();
+        top.z += Math.max(0.12, Math.max(...model.radii) * 0.5);
+        const label = labelObject(String(hyperedge.label || `hyperedge ${hyperIndex + 1}`), 'hyper-label', color);
+        label.position.copy(top);
+        hullGroup.add(label);
+        hullInfos.push({ mesh, centroid, label, color });
+      });
+    }
+
+    function addDependencies() {
+      for (const dep of model.findingDeps) {
+        const source = hullInfos[Number(dep.from)];
+        const target = hullInfos[Number(dep.to)];
+        if (!source || !target) continue;
+        const a = source.centroid.clone();
+        const b = target.centroid.clone();
+        const middle = a.clone().lerp(b, Number(dep.labelT ?? 0.5));
+        middle.z += Math.max(0.45, a.distanceTo(b) * 0.06);
+        const curve = new THREE.QuadraticBezierCurve3(a, middle, b);
+        const geometry = new THREE.BufferGeometry().setFromPoints(curve.getPoints(40));
+        const material = new THREE.LineDashedMaterial({ color: 0x818aa0, transparent: true, opacity: 0.38, dashSize: 0.16, gapSize: 0.12 });
+        const line = new THREE.Line(geometry, material);
+        line.computeLineDistances();
+        dependencyGroup.add(line);
+      }
+      dependencyGroup.visible = depsEl.checked;
+    }
+
+    function addStems() {
+      const material = new THREE.LineDashedMaterial({ color: 0x7e899d, transparent: true, opacity: 0.28, dashSize: 0.09, gapSize: 0.09 });
+      model.points.forEach(point => {
+        const stem = lineBetween(new THREE.Vector3(point.x, point.y, 0), new THREE.Vector3(point.x, point.y, Math.max(0, point.z - 0.18)), material.clone());
+        stem.computeLineDistances();
+        stemGroup.add(stem);
+      });
+    }
+
+    function addAllEdges() {
+      for (const edge of model.edges) {
+        const sourceIndex = model.indexById.get(String(edge.from));
+        const targetIndex = model.indexById.get(String(edge.to));
+        const a = model.points[sourceIndex];
+        const b = model.points[targetIndex];
+        let material;
+        if (edge.dashes) {
+          material = new THREE.LineDashedMaterial({ color: 0x59677c, transparent: true, opacity: 0.12, dashSize: 0.12, gapSize: 0.1 });
+        } else {
+          material = new THREE.LineBasicMaterial({ color: 0x59677c, transparent: true, opacity: 0.1 });
+        }
+        const line = lineBetween(a, b, material);
+        if (edge.dashes) line.computeLineDistances();
+        allEdgesGroup.add(line);
+      }
+    }
+
+    function addNodes() {
+      model.nodes.forEach((node, index) => {
+        const color = colorValue(node.color?.background);
+        const geometry = new THREE.SphereGeometry(model.radii[index], 34, 22);
+        const material = new THREE.MeshPhysicalMaterial({
+          color, roughness: 0.28, metalness: 0.02, clearcoat: 0.24,
+          clearcoatRoughness: 0.38, transparent: true, opacity: 1
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.copy(model.points[index]);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.userData = { nodeIndex: index, baseColor: color.clone() };
+        nodeGroup.add(mesh);
+        nodeMeshes.push(mesh);
+
+        const nodeLabel = labelObject(String(node.label || node.id), 'node-label');
+        nodeLabel.position.set(0, 0, model.radii[index] + 0.13);
+        mesh.add(nodeLabel);
+        mesh.userData.label = nodeLabel;
+
+        const border = String(node.color?.border || '').toLowerCase();
+        if (node.shape === 'dot' && (node.borderWidth > 2 || ['#000000', '#000', 'black', '#374151'].includes(border))) {
+          const ring = new THREE.Mesh(
+            new THREE.TorusGeometry(model.radii[index] * 1.14, 0.018, 7, 48),
+            new THREE.MeshBasicMaterial({ color: colorValue(border, '#555b66'), transparent: true, opacity: 0.72 })
+          );
+          ring.userData.decorative = true;
+          mesh.add(ring);
+        }
+      });
+    }
+
+    function relationMap(index) {
+      const relations = new Map();
+      const ensure = neighbor => {
+        if (!relations.has(neighbor)) relations.set(neighbor, { outgoing: false, incoming: false });
+        return relations.get(neighbor);
+      };
+      for (const edge of model.edges) {
+        const a = model.indexById.get(String(edge.from));
+        const b = model.indexById.get(String(edge.to));
+        if (a === index && b !== index) ensure(b).outgoing = true;
+        if (b === index && a !== index) ensure(a).incoming = true;
+      }
+      return relations;
+    }
+
+    function resetNodes() {
+      nodeMeshes.forEach(mesh => {
+        mesh.material.opacity = 1;
+        mesh.material.color.copy(mesh.userData.baseColor);
+        mesh.userData.label.element.style.opacity = labelsEl.checked ? '1' : '0';
+      });
+    }
+
+    function addHalo(index, color, scale = 1.32) {
+      const halo = new THREE.Mesh(
+        new THREE.TorusGeometry(model.radii[index] * scale, 0.035, 9, 64),
+        new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.95, depthTest: false })
+      );
+      halo.position.copy(model.points[index]);
+      halo.renderOrder = 120;
+      focusGroup.add(halo);
+    }
+
+    function addFocusCurve(aIndex, bIndex, color) {
+      const a = model.points[aIndex];
+      const b = model.points[bIndex];
+      const middle = a.clone().lerp(b, 0.5);
+      middle.z += Math.max(0.18, a.distanceTo(b) * 0.045);
+      const curve = new THREE.QuadraticBezierCurve3(a, middle, b);
+      const geometry = new THREE.TubeGeometry(curve, 28, 0.022, 7, false);
+      const material = new THREE.MeshStandardMaterial({ color, roughness: 0.35, transparent: true, opacity: 0.82 });
+      focusGroup.add(new THREE.Mesh(geometry, material));
+    }
+
+    function updateDetails(index, relations) {
+      if (index < 0) {
+        detailsEl.innerHTML = '<h2>노드를 선택하세요</h2><p class="hint">클릭: 1-hop 관계 · 드래그: 회전 · 휠: 확대 · 오른쪽 드래그: 이동</p>';
+        return;
+      }
+      const node = model.nodes[index];
+      let outgoing = 0, incoming = 0, bidirectional = 0;
+      relations.forEach(value => {
+        if (value.outgoing && value.incoming) bidirectional += 1;
+        else if (value.outgoing) outgoing += 1;
+        else incoming += 1;
+      });
+      const title = String(node.title || node.label || node.id).split('\n')[0];
+      detailsEl.replaceChildren();
+      const heading = document.createElement('h2');
+      heading.textContent = String(node.id);
+      const body = document.createElement('p');
+      body.textContent = `Degree ${model.degrees[index]} · 나감 ${outgoing} · 들어옴 ${incoming} · 양방향 ${bidirectional}${title && title !== node.id ? ` · ${title}` : ''}`;
+      detailsEl.append(heading, body);
+    }
+
+    function selectNode(index, moveCamera = false) {
+      disposeGroup(focusGroup);
+      resetNodes();
+      selectedIndex = Number.isInteger(index) ? index : -1;
+      const selectedMode = modeEl.value === 'Selected';
+      const relations = selectedIndex >= 0 ? relationMap(selectedIndex) : new Map();
+      if (selectedIndex >= 0 && selectedMode) {
+        nodeMeshes.forEach((mesh, i) => {
+          if (i !== selectedIndex && !relations.has(i)) {
+            mesh.material.opacity = 0.15;
+            mesh.userData.label.element.style.opacity = '0';
+          }
+        });
+        addHalo(selectedIndex, RELATION_COLORS.selected, 1.4);
+        relations.forEach((value, neighbor) => {
+          const kind = value.outgoing && value.incoming ? 'bidirectional' : (value.outgoing ? 'outgoing' : 'incoming');
+          addHalo(neighbor, RELATION_COLORS[kind], 1.28);
+          addFocusCurve(selectedIndex, neighbor, RELATION_COLORS[kind]);
+        });
+      }
+      allEdgesGroup.visible = modeEl.value === 'All';
+      nodeSelectEl.value = selectedIndex >= 0 ? model.ids[selectedIndex] : '';
+      updateDetails(selectedIndex, relations);
+      if (moveCamera && selectedIndex >= 0) {
+        const oldTarget = controls.target.clone();
+        const delta = model.points[selectedIndex].clone().sub(oldTarget);
+        controls.target.copy(model.points[selectedIndex]);
+        camera.position.add(delta);
+      }
+    }
+
+    function applyMode() {
+      if (modeEl.value === 'Selected') selectNode(selectedIndex);
+      else {
+        disposeGroup(focusGroup);
+        resetNodes();
+        allEdgesGroup.visible = modeEl.value === 'All';
+        updateDetails(selectedIndex, selectedIndex >= 0 ? relationMap(selectedIndex) : new Map());
+      }
+    }
+
+    function populateNodeSelect() {
+      nodeSelectEl.replaceChildren(new Option('화면에서 선택', ''));
+      [...model.ids].sort((a, b) => a.localeCompare(b)).forEach(id => nodeSelectEl.add(new Option(id, id)));
+    }
+
+    function fitCamera() {
+      if (!model?.points.length) return;
+      const box = new THREE.Box3().setFromPoints(model.points);
+      box.expandByScalar(Math.max(...model.radii) * 2.5);
+      const sphere = box.getBoundingSphere(new THREE.Sphere());
+      const fov = THREE.MathUtils.degToRad(camera.fov);
+      const distance = Math.max(5, sphere.radius / Math.sin(fov / 2) * 1.22);
+      const direction = new THREE.Vector3(1.12, -1.48, 0.92).normalize();
+      controls.target.copy(sphere.center);
+      camera.position.copy(sphere.center).addScaledVector(direction, distance);
+      camera.near = Math.max(0.02, distance / 1000);
+      camera.far = distance * 20;
+      camera.updateProjectionMatrix();
+      controls.update();
+    }
+
+    function renderGraph(nextModel, initial = false) {
+      clearGraph();
+      model = nextModel;
+      addHyperedges();
+      addDependencies();
+      addStems();
+      addAllEdges();
+      addNodes();
+      populateNodeSelect();
+      hullGroup.visible = hullsEl.checked;
+      allEdgesGroup.visible = modeEl.value === 'All';
+      nodeGroup.visible = true;
+      if (initial) fitCamera();
+      updateDetails(-1, new Map());
+      statusEl.textContent = `${model.nodes.length} nodes · ${model.edges.length} directed edges · ${model.hyperedges.length} hyperedges · z = Degree`;
+    }
+
+    function hashText(text) {
+      let hash = 2166136261;
+      for (let i = 0; i < text.length; i += 1) {
+        hash ^= text.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return (hash >>> 0).toString(16);
+    }
+
+    function loadText(text, announce = false) {
+      const hash = hashText(text);
+      if (hash === currentHash) return false;
+      const nextModel = buildModel(parseGraphHtml(text));
+      const initial = !model;
+      renderGraph(nextModel, initial);
+      currentHash = hash;
+      if (announce && !initial) showToast('graph.html 변경을 반영했습니다.');
+      return true;
+    }
+
+    async function fetchGraph(force = false) {
+      if (pollBusy) return;
+      pollBusy = true;
+      try {
+        const response = await fetch(`./graph.html?webgl=${Date.now()}`, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const text = await response.text();
+        if (force) currentHash = '';
+        loadText(text, !force);
+      } catch (error) {
+        if (!model) {
+          statusEl.textContent = 'graph.html을 자동으로 읽지 못했습니다.';
+          showToast(`로컬 서버가 필요합니다: uv run python -m http.server 8000 → http://localhost:8000/graph3d.html (또는 graph.html 선택)`, 9000);
+        } else if (force) showToast(`다시 읽기 실패: ${error.message}`);
+      } finally {
+        pollBusy = false;
+      }
+    }
+
+    renderer.domElement.addEventListener('pointerdown', event => pointerStart.set(event.clientX, event.clientY));
+    renderer.domElement.addEventListener('pointerup', event => {
+      if (!model || event.button !== 0 || pointerStart.distanceTo(new THREE.Vector2(event.clientX, event.clientY)) > 5) return;
+      pointer.x = (event.clientX / innerWidth) * 2 - 1;
+      pointer.y = -(event.clientY / innerHeight) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+      const hit = raycaster.intersectObjects(nodeMeshes, false)[0];
+      selectNode(hit ? hit.object.userData.nodeIndex : -1);
+    });
+
+    modeEl.addEventListener('change', applyMode);
+    nodeSelectEl.addEventListener('change', () => {
+      const index = nodeSelectEl.value ? model.indexById.get(nodeSelectEl.value) : -1;
+      selectNode(index, index >= 0);
+    });
+    labelsEl.addEventListener('change', () => selectNode(selectedIndex));
+    hullsEl.addEventListener('change', () => { hullGroup.visible = hullsEl.checked; });
+    depsEl.addEventListener('change', () => { dependencyGroup.visible = depsEl.checked; });
+    document.getElementById('reload-button').addEventListener('click', () => fetchGraph(true));
+    document.getElementById('fit-button').addEventListener('click', fitCamera);
+    document.getElementById('open-2d-button').addEventListener('click', () => { window.location.href = './graph.html'; });
+    document.getElementById('graph-file').addEventListener('change', async event => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      try { currentHash = ''; loadText(await file.text()); showToast(`${file.name}을 읽었습니다.`); }
+      catch (error) { showToast(`파일 읽기 실패: ${error.message}`, 8000); }
+      event.target.value = '';
+    });
+    document.querySelector('.file-button').addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') document.getElementById('graph-file').click();
+    });
+
+    addEventListener('resize', () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+      labelRenderer.setSize(innerWidth, innerHeight);
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+    }
+    animate();
+    fetchGraph(true);
+    setInterval(() => { if (autoEl.checked) fetchGraph(false); }, 1500);
+  </script>
+</body>
+</html>

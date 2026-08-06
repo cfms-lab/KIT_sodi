@@ -21,6 +21,7 @@
 | `jobgis.html` | 졸업생 취업 현황 지도, 공개 조회 시 이름 마스킹 |
 | `mindmap.html` | 연구/개발 프로젝트 관계도, 공개 열람 · 편집은 로그인 |
 | `graph.html` | 옵시디언 볼트 기반 프로젝트 그래프, 공개 열람 (정적 파일) |
+| `graph3d.html` | `graph.html`을 실시간으로 읽는 WebGL 3D 그래프 뷰어 |
 | `backup.html` | Supabase 데이터 백업 도구 |
 | `scripts/build-vault-graph.mjs` | Markdown/Obsidian 볼트에서 `vault-graph.json` 생성 |
 
@@ -71,9 +72,21 @@ node update-graph-embed.mjs
 
 `graph.py`는 실행할 때마다 `graph.html` 안의 노드, 엣지, `POS`, hyperedge를 직접 읽고 Polyscope로 표시합니다. 뷰어가 열린 동안에도 `graph.html` 변경을 1초 간격으로 감지해 노드 수와 위치를 자동 갱신합니다. XY 배치는 같은 비율로 유지되며 Z 좌표는 방향과 무관한 고유 이웃 수(Degree)입니다.
 
+연결 표시는 기본적으로 `Selected` 모드입니다. 노드 sphere를 클릭하면 그 노드의 1-hop 연결만 곡선과 halo로 표시되며, 주황은 outgoing, 파랑은 incoming, 보라는 양방향입니다. 패널의 `Connections`에서 `Off / Selected / All`을 선택할 수 있습니다.
+
 ```powershell
 uv sync
 uv run python graph.py
 ```
 
 GUI를 열지 않고 데이터만 검증하려면 `uv run python graph.py --check`, 실행 중 자동 갱신을 끄려면 `--no-watch`를 사용합니다.
+
+### WebGL 3D 뷰어
+
+`graph3d.html`은 별도 빌드 없이 Three.js로 렌더링되며, `graph.html`의 노드·위치·연결·hyperedge 변경을 1.5초 간격으로 자동 반영합니다. 브라우저 보안 정책상 파일을 직접 더블클릭하지 말고 저장소 루트에서 로컬 서버를 실행합니다.
+
+```powershell
+uv run python -m http.server 8000
+```
+
+그다음 `http://localhost:8000/graph3d.html`을 엽니다. 서버 없이 열었을 때는 화면의 `graph.html 선택` 버튼으로 정본 파일을 직접 불러올 수도 있습니다.

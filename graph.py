@@ -24,6 +24,13 @@ from scipy.spatial import ConvexHull
 
 DEFAULT_LAYOUT_SCALE = 60.0  # graph.html pixels per Polyscope world unit
 DEFAULT_EDGE_COLOR = (0.55, 0.55, 0.58)
+CONNECTION_MODES = ("Off", "Selected", "All")
+FOCUS_CONNECTION_NAME = "Selected-node connections"
+FOCUS_HALO_NAME = "Selected-node direction halos"
+FOCUS_SELECTED_COLOR = (0.98, 0.74, 0.08)
+FOCUS_OUTGOING_COLOR = (0.98, 0.36, 0.08)
+FOCUS_INCOMING_COLOR = (0.10, 0.45, 0.95)
+FOCUS_BIDIRECTIONAL_COLOR = (0.66, 0.25, 0.92)
 
 
 def _balanced_literal(text: str, start: int) -> str:
@@ -399,14 +406,18 @@ class SceneLabels:
     node_anchors: list[tuple[np.ndarray, str]] = field(default_factory=list)
     hyperedge_anchors: list[tuple[np.ndarray, str, tuple[float, float, float]]] = field(default_factory=list)
     dependency_anchors: list[tuple[np.ndarray, str]] = field(default_factory=list)
+    all_connection_structures: list[Any] = field(default_factory=list)
+    dependency_structures: list[Any] = field(default_factory=list)
+    connection_group: Any = None
 
 
 def register_scene(ps: Any, model: GraphModel) -> SceneLabels:
     """Register a complete scene. No node/edge count is assumed."""
     labels = SceneLabels()
     hyper_group = _make_group(ps, "Hyperedges")
-    graph_group = _make_group(ps, "Directed graph")
+    graph_group = _make_group(ps, "Nodes and connections")
     guide_group = _make_group(ps, "Degree height guides")
+    labels.connection_group = graph_group
 
     hyperedge_hulls: list[HyperedgeHull | None] = []
     for index, hyperedge in enumerate(model.hyperedges):
@@ -478,7 +489,9 @@ def register_scene(ps: Any, model: GraphModel) -> SceneLabels:
         html_width = 15.0 if style == "double" else 8.0
         curve.set_radius(0.5 * html_width / model.layout_scale, relative=False)
         curve.set_transparency(0.22)
+        curve.set_enabled(False)
         _add_to_group(curve, hyper_group)
+        labels.dependency_structures.append(curve)
 
         if style != "contrast":
             arrow_size = (34.0 if style == "double" else 26.0) / model.layout_scale
@@ -493,22 +506,22 @@ def register_scene(ps: Any, model: GraphModel) -> SceneLabels:
                 edge_width=0.0,
             )
             arrow.set_transparency(0.32)
+            arrow.set_enabled(False)
             _add_to_group(arrow, hyper_group)
+            labels.dependency_structures.append(arrow)
         t = float(dep.get("labelT", 0.5))
         anchor = start + (end - start) * t
         anchor[2] += max(0.12, 6.0 / model.layout_scale)
         labels.dependency_anchors.append((anchor, str(dep.get("label", ""))))
 
-    # Graph edges, preserving directedness, source-node color, width, and dashes.
+    # Keep every exact graph edge available for the optional All mode, but do
+    # not attach arrowheads. Direction is shown without clutter in focus mode.
     solid_segments: list[tuple[np.ndarray, np.ndarray]] = []
     dashed_segments: list[tuple[np.ndarray, np.ndarray]] = []
     solid_colors: list[tuple[float, float, float]] = []
     dashed_colors: list[tuple[float, float, float]] = []
     solid_radii: list[float] = []
     dashed_radii: list[float] = []
-    cone_vertices: list[np.ndarray] = []
-    cone_faces: list[tuple[int, int, int]] = []
-    cone_face_colors: list[tuple[float, float, float]] = []
 
     dark_borders = {"#000000", "#000", "black", "#374151"}
     for edge in model.edges:
@@ -542,16 +555,6 @@ def register_scene(ps: Any, model: GraphModel) -> SceneLabels:
             solid_colors.append(color)
             solid_radii.append(radius)
 
-        direction = delta / length
-        tip = target - direction * (model.node_radii[target_i] * 1.08)
-        arrow_length = max(0.28, radius * 8.0)
-        arrow_radius = max(0.10, radius * 3.8)
-        vertices, faces = _cone(tip, direction, arrow_length, arrow_radius)
-        base = len(cone_vertices)
-        cone_vertices.extend(vertices)
-        cone_faces.extend((base + a, base + b, base + c) for a, b, c in faces)
-        cone_face_colors.extend([color] * len(faces))
-
     def register_edge_set(
         name: str,
         segments: list[tuple[np.ndarray, np.ndarray]],
@@ -565,25 +568,13 @@ def register_scene(ps: Any, model: GraphModel) -> SceneLabels:
         curve.add_scalar_quantity("HTML edge radius", np.asarray(radii), defined_on="edges", enabled=False)
         curve.set_edge_radius_quantity("HTML edge radius", autoscale=False)
         curve.add_color_quantity("Source-node edge color", np.asarray(colors), defined_on="edges", enabled=True)
-        curve.set_transparency(0.7)
+        curve.set_transparency(0.20)
+        curve.set_enabled(False)
         _add_to_group(curve, graph_group)
+        labels.all_connection_structures.append(curve)
 
     register_edge_set("Graph edges - solid", solid_segments, solid_colors, solid_radii)
     register_edge_set("Graph edges - dashed", dashed_segments, dashed_colors, dashed_radii)
-
-    if cone_vertices:
-        arrows = ps.register_surface_mesh(
-            "Directed arrowheads",
-            np.asarray(cone_vertices),
-            np.asarray(cone_faces, dtype=np.int32),
-            color=DEFAULT_EDGE_COLOR,
-            smooth_shade=False,
-            edge_width=0.0,
-            material="flat",
-        )
-        arrows.add_color_quantity("Source-node arrow color", np.asarray(cone_face_colors), defined_on="faces", enabled=True)
-        arrows.set_transparency(0.78)
-        _add_to_group(arrows, graph_group)
 
     # Subtle vertical guides make the exact Degree height immediately legible.
     stem_segments: list[tuple[np.ndarray, np.ndarray]] = []
@@ -645,7 +636,8 @@ def register_scene(ps: Any, model: GraphModel) -> SceneLabels:
     cloud.add_scalar_quantity("HTML y", model.html_xy[:, 1], enabled=False)
     cloud.add_scalar_quantity("HTML node radius", model.node_radii, enabled=False)
     cloud.set_point_radius_quantity("HTML node radius", autoscale=False)
-    cloud.add_color_quantity("HTML node color", model.node_colors, enabled=True)
+    cloud.add_color_quantity("HTML node color", model.node_colors, enabled=False)
+    cloud.add_color_quantity("Display node color", model.node_colors, enabled=True)
     _add_to_group(cloud, graph_group)
 
     labels.node_anchors = [
@@ -695,6 +687,65 @@ def _draw_text(psim: Any, draw_list: Any, font: Any, position: tuple[float, floa
         draw_list.AddText(position, foreground, text)
 
 
+def _node_relation_kinds(model: GraphModel, selected_index: int) -> dict[int, str]:
+    """Classify exact one-hop neighbors from the selected node's viewpoint."""
+    flags: dict[int, list[bool]] = {}
+    for edge in model.edges:
+        source_i = model.id_to_index[str(edge["from"])]
+        target_i = model.id_to_index[str(edge["to"])]
+        if source_i == target_i:
+            continue
+        if source_i == selected_index:
+            flags.setdefault(target_i, [False, False])[0] = True
+        if target_i == selected_index:
+            flags.setdefault(source_i, [False, False])[1] = True
+    return {
+        neighbor_i: "bidirectional" if outgoing and incoming else "outgoing" if outgoing else "incoming"
+        for neighbor_i, (outgoing, incoming) in flags.items()
+    }
+
+
+def _relation_color(kind: str) -> tuple[float, float, float]:
+    if kind == "outgoing":
+        return FOCUS_OUTGOING_COLOR
+    if kind == "incoming":
+        return FOCUS_INCOMING_COLOR
+    return FOCUS_BIDIRECTIONAL_COLOR
+
+
+def _curved_connection_points(model: GraphModel, source_i: int, target_i: int, samples: int = 18) -> np.ndarray:
+    source = model.points[source_i]
+    target = model.points[target_i]
+    delta = target - source
+    length = float(np.linalg.norm(delta))
+    if length <= 1e-12:
+        return np.empty((0, 3), dtype=float)
+    direction = delta / length
+    start = source + direction * model.node_radii[source_i] * 1.12
+    end = target - direction * model.node_radii[target_i] * 1.12
+    control = (start + end) * 0.5
+    control[2] += min(0.85, max(0.18, length * 0.055))
+    t = np.linspace(0.0, 1.0, samples)[:, None]
+    return (1.0 - t) ** 2 * start + 2.0 * (1.0 - t) * t * control + t**2 * end
+
+
+def _halo_ring(center: np.ndarray, radius: float, samples: int = 64) -> np.ndarray:
+    return np.asarray(
+        [
+            center
+            + np.array(
+                (
+                    radius * math.cos(2.0 * math.pi * k / samples),
+                    radius * math.sin(2.0 * math.pi * k / samples),
+                    0.025,
+                )
+            )
+            for k in range(samples)
+        ],
+        dtype=float,
+    )
+
+
 @dataclass
 class ViewerState:
     model: GraphModel
@@ -705,8 +756,132 @@ class ViewerState:
     next_watch_at: float
     show_node_labels: bool = True
     show_hyperedge_labels: bool = True
+    show_hyperedge_dependencies: bool = False
+    connection_mode: int = 1
+    selected_node_index: int | None = None
+    focused_node_indices: set[int] = field(default_factory=set)
     auto_fit_on_reload: bool = True
     last_error: str = ""
+
+
+def _set_node_display_colors(ps: Any, colors: np.ndarray) -> None:
+    cloud = ps.get_point_cloud("Graph nodes")
+    cloud.remove_quantity("Display node color", error_if_absent=False)
+    cloud.add_color_quantity("Display node color", colors, enabled=True)
+
+
+def _remove_focus_structures(ps: Any) -> None:
+    ps.remove_curve_network(FOCUS_CONNECTION_NAME, error_if_absent=False)
+    ps.remove_curve_network(FOCUS_HALO_NAME, error_if_absent=False)
+
+
+def _register_focus_structures(ps: Any, state: ViewerState, relations: dict[int, str]) -> None:
+    selected_i = state.selected_node_index
+    if selected_i is None:
+        return
+
+    connection_segments: list[tuple[np.ndarray, np.ndarray]] = []
+    connection_colors: list[tuple[float, float, float]] = []
+    halo_segments: list[tuple[np.ndarray, np.ndarray]] = []
+    halo_colors: list[tuple[float, float, float]] = []
+
+    selected_ring = _halo_ring(
+        state.model.points[selected_i],
+        state.model.node_radii[selected_i] * 1.34,
+    )
+    selected_parts = _polyline_segments(selected_ring, True, None)
+    halo_segments.extend(selected_parts)
+    halo_colors.extend([FOCUS_SELECTED_COLOR] * len(selected_parts))
+
+    for neighbor_i, kind in sorted(relations.items()):
+        color = _relation_color(kind)
+        points = _curved_connection_points(state.model, selected_i, neighbor_i)
+        parts = _polyline_segments(points, False, None)
+        connection_segments.extend(parts)
+        connection_colors.extend([color] * len(parts))
+
+        ring = _halo_ring(
+            state.model.points[neighbor_i],
+            state.model.node_radii[neighbor_i] * 1.34,
+        )
+        parts = _polyline_segments(ring, True, None)
+        halo_segments.extend(parts)
+        halo_colors.extend([color] * len(parts))
+
+    if connection_segments:
+        vertices, edge_ids = _segment_arrays(connection_segments)
+        curves = ps.register_curve_network(
+            FOCUS_CONNECTION_NAME,
+            vertices,
+            edge_ids,
+            color=DEFAULT_EDGE_COLOR,
+            material="flat",
+        )
+        curves.add_color_quantity(
+            "Direction from selected node",
+            np.asarray(connection_colors),
+            defined_on="edges",
+            enabled=True,
+        )
+        curves.set_radius(0.026, relative=False)
+        curves.set_transparency(0.76)
+        _add_to_group(curves, state.labels.connection_group)
+
+    if halo_segments:
+        vertices, edge_ids = _segment_arrays(halo_segments)
+        halos = ps.register_curve_network(
+            FOCUS_HALO_NAME,
+            vertices,
+            edge_ids,
+            color=FOCUS_SELECTED_COLOR,
+            material="flat",
+        )
+        halos.add_color_quantity(
+            "Selected and direction colors",
+            np.asarray(halo_colors),
+            defined_on="edges",
+            enabled=True,
+        )
+        halos.set_radius(0.032, relative=False)
+        _add_to_group(halos, state.labels.connection_group)
+
+
+def _apply_connection_mode(ps: Any, state: ViewerState) -> None:
+    show_all = CONNECTION_MODES[state.connection_mode] == "All"
+    for structure in state.labels.all_connection_structures:
+        structure.set_enabled(show_all)
+    _remove_focus_structures(ps)
+
+    state.focused_node_indices.clear()
+    display_colors = state.model.node_colors.copy()
+    if CONNECTION_MODES[state.connection_mode] == "Selected" and state.selected_node_index is not None:
+        relations = _node_relation_kinds(state.model, state.selected_node_index)
+        state.focused_node_indices = {state.selected_node_index, *relations.keys()}
+        background = np.asarray((0.94, 0.94, 0.96), dtype=float)
+        display_colors = 0.16 * display_colors + 0.84 * background
+        active = np.asarray(sorted(state.focused_node_indices), dtype=np.int32)
+        display_colors[active] = state.model.node_colors[active]
+        _register_focus_structures(ps, state, relations)
+    _set_node_display_colors(ps, display_colors)
+
+
+def _set_hyperedge_dependencies_enabled(state: ViewerState) -> None:
+    for structure in state.labels.dependency_structures:
+        structure.set_enabled(state.show_hyperedge_dependencies)
+
+
+def _poll_node_selection(ps: Any, state: ViewerState) -> None:
+    try:
+        pick = ps.get_selection()
+    except Exception:
+        return
+    if not pick.is_hit or pick.structure_name != "Graph nodes":
+        return
+    selected_i = int(pick.local_index)
+    if not 0 <= selected_i < len(state.model.nodes) or selected_i == state.selected_node_index:
+        return
+    state.selected_node_index = selected_i
+    _apply_connection_mode(ps, state)
 
 
 def _fit_camera(ps: Any, model: GraphModel) -> None:
@@ -721,14 +896,19 @@ def _fit_camera(ps: Any, model: GraphModel) -> None:
 
 def _replace_scene(ps: Any, state: ViewerState) -> None:
     new_model = load_graph(state.model.html_path, state.model.layout_scale)
+    ps.reset_selection()
     ps.remove_all_structures()
     if hasattr(ps, "remove_all_groups"):
         ps.remove_all_groups()
     new_labels = register_scene(ps, new_model)
     state.model = new_model
     state.labels = new_labels
+    state.selected_node_index = None
+    state.focused_node_indices.clear()
     state.mtime_ns = new_model.html_path.stat().st_mtime_ns
     state.last_error = ""
+    _apply_connection_mode(ps, state)
+    _set_hyperedge_dependencies_enabled(state)
     if state.auto_fit_on_reload:
         _fit_camera(ps, new_model)
     print(summary(new_model, prefix="Reloaded"), flush=True)
@@ -746,6 +926,8 @@ def _make_callback(ps: Any, psim: Any, state: ViewerState, font_holder: dict[str
             except Exception as exc:  # Keep the last valid scene while graph.html is being written.
                 state.last_error = str(exc)
 
+        _poll_node_selection(ps, state)
+
         psim.TextUnformatted("graph.html live Polyscope viewer")
         psim.TextUnformatted(
             f"{len(state.model.nodes)} nodes | {len(state.model.edges)} directed edges | "
@@ -754,7 +936,29 @@ def _make_callback(ps: Any, psim: Any, state: ViewerState, font_holder: dict[str
         psim.TextUnformatted("Z = unique-neighbor Degree (exact)")
         _, state.show_node_labels = psim.Checkbox("Node labels", state.show_node_labels)
         _, state.show_hyperedge_labels = psim.Checkbox("Hyperedge labels", state.show_hyperedge_labels)
+        changed, connection_mode = psim.Combo("Connections", state.connection_mode, list(CONNECTION_MODES))
+        if changed:
+            state.connection_mode = connection_mode
+            _apply_connection_mode(ps, state)
+        changed, show_dependencies = psim.Checkbox(
+            "Hyperedge dependency guides",
+            state.show_hyperedge_dependencies,
+        )
+        if changed:
+            state.show_hyperedge_dependencies = show_dependencies
+            _set_hyperedge_dependencies_enabled(state)
         _, state.auto_fit_on_reload = psim.Checkbox("Auto-fit after reload", state.auto_fit_on_reload)
+        if state.selected_node_index is None:
+            psim.TextUnformatted("Focus: click a node sphere")
+        else:
+            selected_id = state.model.ids[state.selected_node_index]
+            relations = _node_relation_kinds(state.model, state.selected_node_index)
+            psim.TextUnformatted(f"Focus: {selected_id} ({len(relations)} neighbors)")
+            psim.TextUnformatted("Halo: orange outgoing | blue incoming | purple both")
+            if psim.Button("Clear focus"):
+                ps.reset_selection()
+                state.selected_node_index = None
+                _apply_connection_mode(ps, state)
         if psim.Button("Reload graph.html now"):
             try:
                 _replace_scene(ps, state)
@@ -777,7 +981,9 @@ def _make_callback(ps: Any, psim: Any, state: ViewerState, font_holder: dict[str
         draw_list = psim.GetForegroundDrawList()
         font = font_holder.get("font")
         if state.show_node_labels:
-            for anchor, text in state.labels.node_anchors:
+            for node_i, (anchor, text) in enumerate(state.labels.node_anchors):
+                if state.focused_node_indices and node_i not in state.focused_node_indices:
+                    continue
                 screen = _project_to_screen(ps, psim, anchor)
                 if screen is not None:
                     _draw_text(psim, draw_list, font, (screen[0] + 5.0, screen[1] - 10.0), text, (0.20, 0.20, 0.20), 15.0)
@@ -786,10 +992,11 @@ def _make_callback(ps: Any, psim: Any, state: ViewerState, font_holder: dict[str
                 screen = _project_to_screen(ps, psim, anchor)
                 if screen is not None:
                     _draw_text(psim, draw_list, font, screen, text, color, 18.0)
-            for anchor, text in state.labels.dependency_anchors:
-                screen = _project_to_screen(ps, psim, anchor)
-                if screen is not None:
-                    _draw_text(psim, draw_list, font, screen, text, (0.29, 0.30, 0.75), 15.0)
+            if state.show_hyperedge_dependencies:
+                for anchor, text in state.labels.dependency_anchors:
+                    screen = _project_to_screen(ps, psim, anchor)
+                    if screen is not None:
+                        _draw_text(psim, draw_list, font, screen, text, (0.29, 0.30, 0.75), 15.0)
 
     return callback
 

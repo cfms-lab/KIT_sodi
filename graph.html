@@ -10,6 +10,9 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #ffffff; color: #333333; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; height: 100vh; overflow: hidden; }
   #graph { flex: 1; }
+  #open-3d-btn { position: fixed; top: 12px; left: 12px; z-index: 50; padding: 7px 11px; border: 1px solid #9aa8bd; border-radius: 7px; background: rgba(255,255,255,0.94); color: #243047; font: 600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; box-shadow: 0 5px 16px rgba(32,48,76,0.14); cursor: pointer; }
+  #open-3d-btn:hover { border-color: #4E79A7; background: #ffffff; }
+  #open-3d-btn:focus-visible { outline: 2px solid rgba(78,121,167,0.38); outline-offset: 2px; }
   #matrix-wrap { flex: 1; display: none; overflow: auto; background: #ffffff; padding: 12px; }
   #matrix-wrap.on { display: block; }
   table.adj { border-collapse: collapse; font-size: 11px; font-family: ui-monospace, Menlo, Consolas, monospace; }
@@ -70,6 +73,7 @@
 </style>
 </head>
 <body>
+<button id="open-3d-btn" type="button" title="WebGL 3D 그래프로 전환" onclick="window.location.href='./graph3d.html'">3D WebGL 보기</button>
 <div id="graph"></div>
 <div id="matrix-wrap"><div id="matrix-legend"></div><div id="matrix-host"></div></div>
 <div id="sidebar">
