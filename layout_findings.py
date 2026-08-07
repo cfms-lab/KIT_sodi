@@ -17,6 +17,7 @@ graph_발견.html 두 파일을 동일 내용으로 갱신한다.
 """
 import io
 import json
+import os
 import re
 from pathlib import Path
 from html import escape as html_escape
@@ -68,8 +69,12 @@ NODE_TITLES = {
     "SFTF_QEM": "SFTF_QEM [draft] — 상: 여각 규약 오류 정정 후 전 게이트 재검증, "
                 "Cura 교차검증(두 신뢰 기준의 천장 ρ=+0.754), 코퍼스 50메쉬. 미투고.",
     "SFTF_DynamicTargetSearch": "SFTF_DynamicTargetSearch — ToDo: "
-                                "시간가변 그래프의 분산 표적탐색 concept; "
-                                "simulation POC·baseline·robustness gate 전",
+                                "Net1 G0 topology·provenance와 15개 테스트 완료; "
+                                "LeakDB scenario localization·baseline 전",
+    "SFTF_ActiveOverprint": "SFTF_ActiveOverprint — ToDo: "
+                            "surface·next-view 계약 테스트 8개 완료; "
+                            "Physical AI 의복 시뮬레이션 직접 통합선; "
+                            "RGB-D replay·controlled textile print 전",
     "PFTF_alpha": "PFTF_alpha — 중: positive two-layer draft; "
                   "Phase 50/51C frozen evidence, B5/M1 상대 207/207 paired wins·"
                   "topology error 0. PFTF/local-SPD 우월성은 주장하지 않으며 "
@@ -82,23 +87,30 @@ NODE_TITLES = {
                           "held-out slicer verifier",
 }
 
+# Nodes promoted from idea-only placeholders to real project notes keep their
+# source link synchronized here even when they already exist in RAW_NODES.
+NODE_SOURCE_FILES = {
+    "SFTF_DynamicTargetSearch": "SFTF_DynamicTargetSearch.md",
+    "SFTF_ActiveOverprint": "SFTF_ActiveOverprint.md",
+}
+
 # ----------------------------------------------------------------- 좌표 (발견 기준)
 POS = {
-    # 2026-08-06: GitHub Pages 배포본의 37-node 사용자 배치를 정본으로 승격.
-    "Tomo_SFTF": (-185, 165),
-    "Tomo_SFTFSoft": (-3, 151),
-    "SFTF_Clustering": (210, 525),
+    # 2026-08-06: 사용자가 graph.html에서 조정한 배치를 정본으로 승격.
+    "Tomo_SFTF": (-210, 192),
+    "Tomo_SFTFSoft": (-20, 207),
+    "SFTF_Clustering": (109, 508),
     "PFTF": (101, 390),
-    "SFTF_Composite": (355, 667),
+    "SFTF_Composite": (349, 706),
     "SFTF_InjMold": (-417, 0),
     "PFTF_Compression": (530, 578),
-    "SFTF_ThermalChip": (-395, -174),
+    "SFTF_ThermalChip": (-366, -185),
     "PFTF_Mold": (508, 667),
-    "Tomo_DiffSupport": (265, 152),
+    "Tomo_DiffSupport": (259, 135),
     "PFTF_VisCull_kDop": (395, 422),
-    "SFTF_SewerPOC": (-166, -136),
+    "SFTF_SewerPOC": (-121, -142),
     "PFTF_FXShock": (155, 653),
-    "SFTF_BatteryThermal": (-211, -203),
+    "SFTF_BatteryThermal": (-172, -250),
     "SFTF_PDNElectric": (-330, -90),
     "PFTF_Inspection": (533, 394),
     "PFTF_RainNowcast": (6, 635),
@@ -106,22 +118,23 @@ POS = {
     "PFTF_Solar": (56, 708),
     "PFTF_subMarine": (-244, 549),
     "PFTF_Assembly": (-127, 687),
-    "PFTF_CNC": (74, -193),
-    "PFTF_Radiotherapy": (357, 603),
+    "PFTF_CNC": (74, -222),
+    "PFTF_Radiotherapy": (348, 615),
     "SFTF_DataCenterTraffic": (-281, 464),
     "SFTF_UrbanTraffic": (-345, 226),
     "SFTF_WarehouseAGV": (-429, 151),
     "PFTF_AssetShock": (-361, 337),
-    "SFTFSoft_GNN": (149, 71),
+    "SFTFSoft_GNN": (149, 69),
     "SFTF_DrapePrior": (207, 304),
-    "PFTF_AsymTensor": (175, 209),
-    "PFTF_DrapePrior_VisCull_kDop": (302, 362),
-    "PFTF_ResearchOptimize": (-53, 420),
-    "PFTF_alpha": (153, -68),
+    "PFTF_AsymTensor": (146, 173),
+    "PFTF_DrapePrior_VisCull_kDop": (275, 263),
+    "PFTF_ResearchOptimize": (-70, 423),
+    "PFTF_alpha": (182, -238),
     "SFTF_QEM": (34, 1),
-    "SFTF_DynamicTargetSearch": (-147, 29),
-    "DFSVR_VisCull": (414, 120),
-    "SFTFSoft_GNN_DFSVR": (285, 11),
+    "SFTF_DynamicTargetSearch": (-142, 41),
+    "SFTF_ActiveOverprint": (-67, 112),
+    "DFSVR_VisCull": (458, 229),
+    "SFTFSoft_GNN_DFSVR": (300, -36),
 }
 
 HYPEREDGES = [
@@ -159,7 +172,7 @@ HYPEREDGES = [
     {"label": "PIPELINE / 다단계 통합",
      "kind": "role",
      "nodes": ["SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop",
-               "SFTF_DynamicTargetSearch", "DFSVR_VisCull",
+               "SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint", "DFSVR_VisCull",
                "SFTFSoft_GNN_DFSVR"],
      "color": "#0891b2", "labelColor": "#0e7490",
      "fillAlpha": 0.025, "strokeAlpha": 0.70, "labelAlpha": 0.95,
@@ -204,7 +217,9 @@ QUALITY_ROWS = [
     ("PFTF_alpha", "PFTF_alpha", "중", "Phase 50 합성 144건·Phase 51C S3DIS 63건 frozen held-out, B5/M1 상대 207/207 paired wins·topology error 0; PFTF/local-SPD 우월성 제외"),
     ("SFTF_QEM", "SFTF_QEM", "상", "여각 규약 오류 정정·Cura 교차검증(천장 ρ=+0.754)·코퍼스 50메쉬·원고 2편+설명서; 성능 우월 주장 없는 평가방법론 트랙, 미투고"),
     ("SFTF_DynamicTargetSearch", "SFTF_DynamicTargetSearch", "ToDo",
-     "시간가변 그래프의 분산 표적탐색 설계선; simulation POC·baseline·robustness gate 전"),
+     "Net1 G0 topology·provenance, 11 nodes·12 candidate pipes, 총 15 tests; LeakDB scenario localization·baseline 전"),
+    ("SFTF_ActiveOverprint", "SFTF_ActiveOverprint", "ToDo",
+     "surface·next-view 계약 8 tests, Physical AI 의복 시뮬레이션 직접 통합선; RGB-D replay·controlled textile overprint 전"),
     ("DFSVR_VisCull", "DFSVR_VisCull", "ToDo",
      "DFSVR exact first-hit용 conservative BVH scalability 설계선; 값·gradient parity·거짓음성 0·end-to-end utility gate 전"),
     ("SFTFSoft_GNN_DFSVR", "SFTFSoft_GNN_DFSVR", "ToDo",
@@ -250,6 +265,7 @@ INTRODUCTIONS = {
     "PFTF_alpha": "서로 떨어진 두 표면을 먼저 구분해 각 층을 따로 복원함으로써 alpha 방법의 잘못된 연결과 위상 오류를 줄이는 연구다.",
     "SFTF_QEM": "메쉬를 줄여 방향 탐색을 빠르게 하려다 그 가설이 기각되었고, 대신 지지비용 계산의 검증 방법 자체를 다루게 된 연구다. 각도 규약 오류를 스스로 찾아 정정한 기록과, 서로 다른 두 슬라이서조차 완전히 일치하지 않는다는 측정이 주 내용이다.",
     "SFTF_DynamicTargetSearch": "여러 이동 센서의 불완전한 보고를 합쳐 구조가 바뀌는 공간에서 목표물과 다음 탐색 경로를 찾으려는 연구다.",
+    "SFTF_ActiveOverprint": "카메라로 기존 물체나 로봇이 고정한 의복의 출력 가능 표면과 다음 관측 위치를 찾고 그 위에 안전하게 작은 형상을 덧출력하려는 연구다.",
     "DFSVR_VisCull": "정확한 지지 구조 계산 전에 안전하게 불필요한 교차 후보를 줄여 DFSVR을 빠르게 하려는 연구선이다.",
     "SFTFSoft_GNN_DFSVR": "GNN이 좋은 출력 방향 후보를 빠르게 고르고 DFSVR이 정밀하게 다듬은 뒤 슬라이서로 확인하는 후속 연구다.",
 }
@@ -262,6 +278,7 @@ GRAPH_ROLES = {
     "SFTF_DrapePrior": "PIPELINE / 다단계 통합",
     "PFTF_DrapePrior_VisCull_kDop": "PIPELINE / 다단계 통합",
     "SFTF_DynamicTargetSearch": "PIPELINE / 다단계 통합",
+    "SFTF_ActiveOverprint": "PIPELINE / 다단계 통합",
     "DFSVR_VisCull": "PIPELINE / 다단계 통합",
     "SFTFSoft_GNN_DFSVR": "PIPELINE / 다단계 통합",
     "SFTF_QEM": "AUDIT / 평가·검증",
@@ -520,13 +537,27 @@ DYNAMIC_TARGET_SEARCH_NODE = {
                "highlight": {"background": "#ffffff", "border": "#000000"}},
     "size": 16.4,
     "font": {"size": 12, "color": "#333333", "bold": False},
-    "title": "SFTF_DynamicTargetSearch — ToDo: 시간가변 그래프의 분산 표적탐색 concept; "
-             "simulation POC·baseline·robustness gate 전",
+    "title": NODE_TITLES["SFTF_DynamicTargetSearch"],
     "community": 4,
     "community_name": "ToDo",
-    "source_file": "SFTF_동적표적탐색_연구아이디어_2026-07-29.md",
+    "source_file": "SFTF_DynamicTargetSearch.md",
     "file_type": "concept",
     "degree": 3,
+}
+
+ACTIVE_OVERPRINT_NODE = {
+    "id": "SFTF_ActiveOverprint",
+    "label": "SFTF_ActiveOverprint",
+    "color": {"background": "#ffffff", "border": "#000000",
+               "highlight": {"background": "#ffffff", "border": "#000000"}},
+    "size": 16.4,
+    "font": {"size": 12, "color": "#333333", "bold": False},
+    "title": NODE_TITLES["SFTF_ActiveOverprint"],
+    "community": 4,
+    "community_name": "ToDo",
+    "source_file": "SFTF_ActiveOverprint.md",
+    "file_type": "concept",
+    "degree": 4,
 }
 
 DFSVR_VIS_CULL_NODE = {
@@ -586,6 +617,7 @@ TODO_NODES = [
     ALPHA_NODE,
     QEM_NODE,
     DYNAMIC_TARGET_SEARCH_NODE,
+    ACTIVE_OVERPRINT_NODE,
     DFSVR_VIS_CULL_NODE,
     SFTFSOFT_GNN_DFSVR_NODE,
 ]
@@ -625,6 +657,22 @@ TODO_EDGES = [
      "confidence": "INFERRED"},
     {"from": "SFTF_Clustering", "to": "SFTF_DynamicTargetSearch",
      "label": "clusters basins", "title": "clusters candidate basins [INFERRED]",
+     "dashes": True, "width": 2, "color": {"opacity": 0.7},
+     "confidence": "INFERRED"},
+    {"from": "SFTF_DynamicTargetSearch", "to": "SFTF_ActiveOverprint",
+     "label": "instantiates", "title": "instantiates active-vision overprinting [INFERRED]",
+     "dashes": True, "width": 2, "color": {"opacity": 0.7},
+     "confidence": "INFERRED"},
+    {"from": "Tomo_SFTF", "to": "SFTF_ActiveOverprint",
+     "label": "support evidence", "title": "provides support-aware candidate evidence [INFERRED]",
+     "dashes": True, "width": 2, "color": {"opacity": 0.7},
+     "confidence": "INFERRED"},
+    {"from": "SFTF_Clustering", "to": "SFTF_ActiveOverprint",
+     "label": "clusters surfaces", "title": "clusters printable surface basins [INFERRED]",
+     "dashes": True, "width": 2, "color": {"opacity": 0.7},
+     "confidence": "INFERRED"},
+    {"from": "SFTF_DrapePrior", "to": "SFTF_ActiveOverprint",
+     "label": "garment state", "title": "provides draped garment/contact state for Physical AI overprinting [INFERRED]",
      "dashes": True, "width": 2, "color": {"opacity": 0.7},
      "confidence": "INFERRED"},
     {"from": "Tomo_DiffSupport", "to": "DFSVR_VisCull",
@@ -687,6 +735,9 @@ def _reclassify_raw_nodes(match):
         title = NODE_TITLES.get(node_id)
         if title:
             node["title"] = title
+        source_file = NODE_SOURCE_FILES.get(node_id)
+        if source_file:
+            node["source_file"] = source_file
         project_path = PROJECT_PATHS.get(node_id)
         if project_path:
             node["_project_path"] = project_path
@@ -701,6 +752,10 @@ def _reclassify_raw_nodes(match):
             )
             node["community"] = QUALITY_COMMUNITY_IDS[q[0]]
             node["community_name"] = q[0]
+            node["_quality"] = q[0]
+            node["_quality_note"] = q[1]
+            if q[0] == "ToDo":
+                node["font"] = {**(node.get("font") or {}), "bold": False}
             node_border = "#000000" if q[0] == "ToDo" else GRADE_COLORS[q[0]]
             node_color = dict(node.get("color") or {})
             highlight = dict(node_color.get("highlight") or {})
@@ -739,7 +794,7 @@ quality_html = (
     '<div id="quality-board">'
     # QUALITY_ROWS 를 손댈 때 이 날짜도 같이 올린다.  하드코딩이라, 갱신하지 않으면
     # 재생성이 graph.html 의 최신 날짜를 조용히 되돌린다(2026-07-27 에 실제로 발생).
-    '<h3>최근 논문 quality (2026-08-06)</h3>'
+    '<h3>최근 논문 quality (2026-08-07)</h3>'
     '<div class="quality-meta">상=상위권 심사 대응 가능 · 중=핵심 gate 잔여 · 하=PoC/원고 미완료 · ToDo=새 설계선/검증 전<br>'
     '단순 VSCode 커밋은 제외 · 등급 정본: KIT_sodi/mindmap.html 백업(2026-07-30) · 세부 근거: Papers/투고가능성_재평가_2026-08-06.md</div>'
     '<table><thead><tr><th>프로젝트</th><th>등급</th><th>핵심 근거</th></tr></thead>'
@@ -747,6 +802,24 @@ quality_html = (
 )
 
 s = s.replace("</style>", QUALITY_CSS + "\n</style>", 1)
+s = re.sub(r"\n?/\* GRAPH3D_NAV_BEGIN \*/.*?/\* GRAPH3D_NAV_END \*/\n?", "", s, flags=re.S)
+s = re.sub(r'\n?<button id="open-3d-btn".*?</button>\n?', "\n", s, count=1, flags=re.S)
+GRAPH3D_NAV_CSS = """/* GRAPH3D_NAV_BEGIN */
+  #open-3d-btn { position: fixed; top: 12px; left: 12px; z-index: 50; padding: 7px 11px; border: 1px solid #9aa8bd; border-radius: 7px; background: rgba(255,255,255,0.94); color: #243047; font: 600 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; box-shadow: 0 5px 16px rgba(32,48,76,0.14); cursor: pointer; }
+  #open-3d-btn:hover { border-color: #4E79A7; background: #ffffff; }
+  #open-3d-btn:focus-visible { outline: 2px solid rgba(78,121,167,0.38); outline-offset: 2px; }
+/* GRAPH3D_NAV_END */"""
+s = s.replace(
+    "</style>",
+    "\n" + GRAPH3D_NAV_CSS + "\n</style>",
+    1,
+)
+s = s.replace(
+    "<body>",
+    '<body>\n<button id="open-3d-btn" type="button" title="WebGL 3D 그래프로 전환" '
+    'onclick="window.location.href=\'./graph3d.html\'">3D WebGL 보기</button>',
+    1,
+)
 s = s.replace('<div id="legend-wrap">', quality_html + '\n<div id="legend-wrap">', 1)
 
 # Communities is now the paper-quality axis; rebuild its legend from the
@@ -888,6 +961,14 @@ s = s.replace(
     '"color": {"background": "#c8c8c8", "border": "#000000", '
     '"highlight": {"background": "#c8c8c8", "border": "#000000"}}',
     '"id": "PFTF_ResearchOptimize", "label": "PFTF_ResearchOptimize", '
+    '"color": {"background": "#ffffff", "border": "#000000", '
+    '"highlight": {"background": "#ffffff", "border": "#000000"}}',
+)
+s = s.replace(
+    '"id": "SFTF_DynamicTargetSearch", "label": "SFTF_DynamicTargetSearch", '
+    '"color": {"background": "#c8c8c8", "border": "#000000", '
+    '"highlight": {"background": "#c8c8c8", "border": "#000000"}}',
+    '"id": "SFTF_DynamicTargetSearch", "label": "SFTF_DynamicTargetSearch", '
     '"color": {"background": "#ffffff", "border": "#000000", '
     '"highlight": {"background": "#ffffff", "border": "#000000"}}',
 )
@@ -1133,4 +1214,7 @@ def _deploy_to_homepage():
             return
     print("deploy 대상(KIT_sodi) 미발견 — 복사 생략")
 
-_deploy_to_homepage()
+if os.environ.get("SFTF_SKIP_GRAPH_DEPLOY") == "1":
+    print("deploy skipped: SFTF_SKIP_GRAPH_DEPLOY=1")
+else:
+    _deploy_to_homepage()
