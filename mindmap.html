@@ -355,6 +355,126 @@ function applySubmissionPlan20260806(data){
   data.submissionPlanVersion=SUBMISSION_PLAN_VERSION;
   return true;
 }
+
+/* ====== graph.html에는 있으나 mindmap에 아직 없는 노드만 삽입 (2026-08-11) ======
+   현재 클라우드 mindmap(사용자가 이름을 바꿔 넣은 66개 노드)과 대조한 결과 실제로 빠진 것은 4개뿐이다.
+   각 노드를 graph.html의 연결(edge) 기준으로 의미상 가장 가까운 기존 노드 밑에 붙인다.
+   색(kind)은 graph 등급 그대로: 상=high, 중=medium, 하=low, ToDo=todo.
+   applySubmissionPlan과 같은 방식으로 클라우드·기본 데이터 모두에 idempotent하게 적용된다. */
+const GRAPH_NODES_VERSION='2026-08-11b';
+function applyGraphNodes20260811(data){
+  if(!data||!data.root) return false;
+  if(data.graphNodesVersion===GRAPH_NODES_VERSION) return false;
+  const root=data.root;
+  const byTitle=(re)=>{ let hit=null; walk(root,n=>{ if(!hit&&re.test(n.title||'')) hit=n; }); return hit; };
+  const attach=(parent,node)=>{                       // 같은 id가 이미 있으면 건너뜀(중복 방지)
+    if(!parent) return false;
+    if(findNode(root,node.id)) return false;
+    (parent.children||(parent.children=[])).push(node); parent.collapsed=false; return true;
+  };
+  const lane=byTitle(/PFTF framework 투고 경로/);      // 투고 경로 그룹
+  const framework=byTitle(/#5\s*PFTF framework/);      // #5 PFTF framework (PFTF 응용 인스턴스들이 모인 곳)
+  const viscull=byTitle(/#2\s*PFTF_VisCull_kDop/);     // #2 PFTF_VisCull_kDop
+  // CNC: PFTF depends_on → 다른 PFTF 응용(#5 framework 하위)들과 같은 자리
+  attach(framework,{id:'gx_pftf_cnc',title:'PFTF_CNC',kind:'medium',status:'draft',
+    note:'CNC 공구가 가공할 수 있는 방향을 골라 가공 실패를 줄이는 응용이다. (graph: PFTF에서 파생)'});
+  // AssetShock: PFTF depends_on, PFTF_FXShock의 형제 → FXShock과 같은 부모(#5 framework)
+  attach(framework,{id:'gx_pftf_assetshock',title:'PFTF_AssetShock',kind:'low',status:'draft',
+    note:'큰 경제 충격이 여러 자산에 미치는 영향을 비교해 위험을 관리하는 응용이다. FXShock과 형제. (graph: PFTF에서 파생)'});
+  // DrapePrior_VisCull_kDop: VisCull_kDop를 extends, DrapePrior를 complements → #2 VisCull_kDop 밑
+  attach(viscull,{id:'gx_pftf_drapeprior_viscull_kdop',title:'PFTF_DrapePrior_VisCull_kDop',kind:'todo',status:'draft',
+    note:'옷감의 좋은 시작 상태와 안전한 충돌 필터를 결합해 천 계산을 빠르게 하려는 새 연구선이다. (graph: SFTF_DrapePrior 보완 + PFTF_VisCull_kDop 확장)'});
+  // ResearchOptimize: 투고 순서 최적화 자체 → 투고 경로 그룹 밑
+  attach(lane,{id:'gx_pftf_researchoptimize',title:'PFTF_ResearchOptimize',kind:'todo',status:'draft',
+    note:'프로젝트 사이의 연결과 작업량을 비교해 효율적인 논문 투고 순서를 찾는 방법이다. (graph: PFTF의 인스턴스)'});
+  data.graphNodesVersion=GRAPH_NODES_VERSION;
+  return true;
+}
+
+/* ====== 중복 노드 정리 (2026-08-11) ======
+   같은 이름이 두 번 들어간 것을 한 번만 남긴다.
+   - PFTF_alpha: '#2 SFTF_QEM' 밑(nzyk4gd6, 중·draft) 유지, '#5 framework' 밑 취소본(nli69r22) 삭제
+   - SFTF_DynamicTargetSearch: A(nkbfa3m1, #3 Composite 밑) 유지, B(nvthuh54)의 하위(ActiveOverprint 갈래)를 A로 옮긴 뒤 B 삭제 */
+const DEDUP_VERSION='2026-08-11';
+function applyDedup20260811(data){
+  if(!data||!data.root) return false;
+  if(data.dedupVersion===DEDUP_VERSION) return false;
+  const root=data.root;
+  const removeNode=(id)=>{ const par=findParent(root,id); if(!par) return; const i=(par.children||[]).findIndex(c=>c.id===id); if(i>=0) par.children.splice(i,1); };
+  let changed=false;
+  if(findNode(root,'nli69r22')){ removeNode('nli69r22'); changed=true; }         // PFTF_alpha 취소본 삭제
+  const A=findNode(root,'nkbfa3m1'), B=findNode(root,'nvthuh54');
+  if(A&&B){                                                                       // DTS: B의 하위를 A로 병합 후 B 삭제
+    (B.children||[]).forEach(c=>{ (A.children||(A.children=[])).push(c); });
+    A.collapsed=false; removeNode('nvthuh54'); changed=true;
+  }
+  data.dedupVersion=DEDUP_VERSION;
+  return changed;
+}
+
+/* ====== graph.html 소개문·프로젝트 경로 주입 (2026-08-11) ======
+   각 노드 제목 아래에 graph.html "소개"를 7어절 이하로 축약해 표시(다른 학과 공저자 소개용)하고,
+   graph.html의 VSCODE 폴더 경로를 붙여 선택 패널에서 'VS Code로 열기'를 쓸 수 있게 한다.
+   현재 클라우드 노드 id 기준으로 매핑한다(사용자가 바꾼 이름과 무관하게 안정적). */
+const GRAPH_META_VERSION='2026-08-11b';
+function applyGraphMeta20260811(data){
+  if(!data||!data.root) return false;
+  if(data.graphMetaVersion===GRAPH_META_VERSION) return false;
+  const root=data.root;
+  const META={
+    'sftf':{b:'가장 안정적인 3D 출력 방향 찾기',p:'D:\\__SFTF_Projects(2026)\\Tomo_SFTF_dev'},
+    'ny0tqz74':{b:'부드러운 점수로 최적 출력 방향 탐색',p:'D:\\__SFTF_Projects(2026)\\Tomo_SFTFSoft_dev'},
+    'tomo_sftf':{b:'면을 묶어 지지 구조 빠르게 분석',p:'D:\\__SFTF_Projects(2026)\\Tomo_SFTFCluster_dev'},
+    'n0llvuh1':{b:'방향 정보를 행렬로 정리한 일반 이론',p:'D:\\__PFTF_Projects(2026)\\PFTF_dev'},
+    'nxt5kwi1':{b:'복합재 섬유 방향 고려한 제작 방향',p:'D:\\__SFTF_Projects(2026)\\SFTF_Composite_dev'},
+    'n8t2x7d2':{b:'사출 금형 흐름으로 결함 적은 설계',p:'D:\\__SFTF_Projects(2026)\\SFTF_InjMold_dev'},
+    'nokpy3z1':{b:'압박 의류의 압력을 방향별로 예측',p:'D:\\__PFTF_Projects(2026)\\PFTF_Compression_dev'},
+    'n8q2k963':{b:'칩 열 배출 방향 찾아 과열 감소',p:'D:\\__SFTF_Projects(2026)\\SFTF_ThermalChip_dev'},
+    'pftf_mold_submission':{b:'금형 부품 수축량 예측해 오차 감소',p:'D:\\__PFTF_Projects(2026)\\PFTF_Mold_dev'},
+    'nkytwti1':{b:'미분 가능한 지지 계산으로 설계 자동 개선',p:'D:\\__SFTF_Projects(2026)\\Tomo_DiffSupport_dev'},
+    'nh2ivjs1':{b:'안 보이는 후보 걸러 3D 계산 절감',p:'D:\\__PFTF_Projects(2026)\\PFTF_VisCull_kDop_dev'},
+    'n01wecm2':{b:'하수관망 흐름 방향으로 관망 해석',p:'D:\\__SFTF_Projects(2026)\\SFTF_SewerPOC_dev'},
+    'n28uhcb7':{b:'환율 충격의 자산 위험 영향 분석',p:'D:\\__PFTF_Projects(2026)\\PFTF_FXShock_dev'},
+    'nca3mrq1':{b:'배터리 열 집중부 찾아 냉각 설계',p:'D:\\__SFTF_Projects(2026)\\SFTF_BatteryThermal_dev'},
+    'nd8ctbq4':{b:'전원망 전압 불안정 위치 탐지',p:'D:\\__SFTF_Projects(2026)\\SFTF_PDNElectric_dev'},
+    'n2jvi7n6':{b:'방향·위치로 검사 후보 빠르게 축소',p:'D:\\__PFTF_Projects(2026)\\PFTF_Inspection_dev'},
+    'nj8l68c8':{b:'강우 확산 방향 예측한 단시간 예보',p:'D:\\__PFTF_Projects(2026)\\PFTF_RainNowcast_dev'},
+    'nywj24v4':{b:'지형 방향·경사로 넓은 지역 계산',p:'D:\\__PFTF_Projects(2026)\\PFTF_Terrain_dev'},
+    'n9udaty3':{b:'태양광 입사 방향으로 발전량 예측',p:'D:\\__PFTF_Projects(2026)\\PFTF_Solar_dev'},
+    'nqov6ls1':{b:'수중 센서 방향으로 위치 추정',p:'D:\\__PFTF_Projects(2026)\\PFTF_subMarine_dev'},
+    'n1krev41':{b:'부품 안 부딪히는 조립 방향 찾기',p:'D:\\__PFTF_Projects(2026)\\PFTF_Assembly_dev'},
+    'nece2i15':{b:'종양 겨냥·주변 보호 방사선 방향',p:'D:\\__PFTF_Projects(2026)\\PFTF_Radiotherapy_dev'},
+    'nbarkbz3':{b:'데이터센터 작업 흐름으로 지연 감소',p:'D:\\__SFTF_Projects(2026)\\SFTF_DataCenterTraffic_dev'},
+    'nv1x2vl2':{b:'도시 차량 흐름 방향으로 병목 탐지',p:'D:\\__SFTF_Projects(2026)\\SFTF_UrbanTraffic_dev'},
+    'no1b3vw4':{b:'창고 로봇 경로 최적화로 운반 단축',p:'D:\\__SFTF_Projects(2026)\\SFTF_WarehouseAGV_dev'},
+    'nf7nopp2':{b:'그래프 학습으로 출력 방향 품질 예측',p:'D:\\__SFTF_Projects(2026)\\SFTFSoft_GNN_dev'},
+    'njkskwe4':{b:'옷감 접촉 예측해 천 시뮬레이션 가속',p:'D:\\__SFTF_Projects(2026)\\SFTF_DrapePrior_dev'},
+    'nongkxm5':{b:'방향 이방성 표현하는 비대칭 텐서 이론',p:'D:\\__PFTF_Projects(2026)\\PFTF_AsymTensor_dev'},
+    'nzyk4gd6':{b:'떨어진 두 표면 분리로 위상 오류 감소',p:'D:\\__PFTF_Projects(2026)\\PFTF_alpha_dev'},
+    'nafefnc3':{b:'지지비용 계산의 검증 방법 자체 연구',p:'D:\\__SFTF_Projects(2026)\\SFTF_QEM_dev'},
+    'nkbfa3m1':{b:'이동 센서 종합해 목표·탐색 경로 추정',p:'D:\\__SFTF_Projects(2026)\\SFTF_DynamicTargetSearch_dev'},
+    'nu3n7ge9':{b:'교차 후보 줄여 DFSVR 계산 가속',p:''},
+    'nda9ax91':{b:'GNN 제안과 DFSVR 정밀화 결합',p:''},
+    'n7hixqe5':{b:'관측으로 표면 찾아 안전하게 덧출력',p:'D:\\__SFTF_Projects(2026)\\SFTF_ActiveOverprint_dev'},
+    'nub29i31':{b:'온돌 냉방 중 숨은 에어컨 검출 한계',p:'D:\\__PFTF_Projects(2026)\\ColdOndol_dev'},
+    'n8d1t0y2':{b:'부하·이슬점만으로 냉방 배분 최적화',p:'D:\\__PFTF_Projects(2026)\\ColdOndol_dev\\docs'},
+    'n2dzarb3':{b:'옷감 관통 여부 기준 엔진과 벤치마크',p:'D:\\__VSCode_Projects\\cfmsMiindo_dev\\drafts\\cfms_vs_cipc'},
+    'gx_pftf_cnc':{b:'CNC 가공 가능한 방향 선택',p:'D:\\__PFTF_Projects(2026)\\PFTF_CNC_dev'},
+    'gx_pftf_assetshock':{b:'경제 충격의 자산별 위험 비교',p:'D:\\__PFTF_Projects(2026)\\PFTF_AssetShock_dev'},
+    'gx_pftf_drapeprior_viscull_kdop':{b:'드레이프 예측과 충돌 필터 결합 가속',p:'D:\\__PFTF_Projects(2026)\\PFTF_DrapePrior_VisCull_kDop_dev'},
+    'gx_pftf_researchoptimize':{b:'연구 연결·작업량으로 투고 순서 최적화',p:'D:\\__PFTF_Projects(2026)\\PFTF_ResearchOptimize_dev'},
+    'cfmsdrape':{p:'D:\\__VSCode_Projects\\cfmsMiindo_dev'}   // 'cfms미인도' — VSCODE 폴더 열기 버튼용 경로
+  };
+  let changed=false;
+  Object.keys(META).forEach(id=>{
+    const n=findNode(root,id); if(!n) return;
+    const m=META[id];
+    if(m.b && n.brief!==m.b){ n.brief=m.b; changed=true; }
+    if(m.p && n.projectPath!==m.p){ n.projectPath=m.p; changed=true; }
+  });
+  data.graphMetaVersion=GRAPH_META_VERSION;
+  return changed;
+}
 //==PURE_END
 
 /* ====================== Supabase 설정/세션 (upjuk과 공유) ====================== */
@@ -493,14 +613,14 @@ function render(){
     const isMatch=q&&((n.title||'').toLowerCase().includes(q)||(n.note||'').toLowerCase().includes(q));
     const cls='node'+(n.id===sel?' sel':'')+(isMatch?' match':'');
     const hasKids=(n.children||[]).length>0;
-    const sub=truncW(n.note||'', p.w-24, 10);   // 상태 글자 제거 — 노드에는 메모만 표시 (박스 폭에 맞게 자름)
+    const sub=truncW(n.brief||n.note||'', p.w-24, 10);   // 제목 아래: graph 소개(brief) 우선, 없으면 메모 (박스 폭에 맞게 자름)
     const titleY=sub?19:(lay.nodeH/2+4.5);
     h+=`<g class="${cls}" data-id="${n.id}" transform="translate(${p.x},${p.y})">`;
     h+=`<rect class="box" width="${p.w}" height="${lay.nodeH}" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="2" ${dash} data-act="sel" data-id="${n.id}"/>`;
     h+=`<text x="12" y="${titleY}" font-size="12.5" font-weight="700" fill="${textColor}" ${cancelled?'text-decoration="line-through"':''}>${esc(truncW(n.title, p.w-24-(n.url?16:0), 12.5))}</text>`;
     if(sub)h+=`<text x="12" y="${lay.nodeH-11}" font-size="10" fill="${cancelled?INK2:textColor}">${esc(sub)}</text>`;
     if(n.url)h+=`<text x="${p.w-7}" y="15" text-anchor="end" font-size="10">🔗</text>`;
-    h+=`<title>${esc(n.title)}${n.note?'\n'+esc(n.note):''}${n.url?'\n'+esc(n.url):''}</title>`;
+    h+=`<title>${esc(n.title)}${n.brief?'\n'+esc(n.brief):''}${n.note?'\n'+esc(n.note):''}${n.url?'\n'+esc(n.url):''}</title>`;
     if(hasKids){ const tx=-10,ty=lay.nodeH/2;
       h+=`<g class="toggle" data-act="toggle" data-id="${n.id}"><circle cx="${tx}" cy="${ty}" r="8.5" fill="#fcfcfb" stroke="${stroke}" stroke-width="1.6"/>`+
          `<text x="${tx}" y="${ty+4}" text-anchor="middle" font-size="12" font-weight="700" fill="${stroke}">${n.collapsed?'+':'–'}</text></g>`;
@@ -516,6 +636,15 @@ function renderLegend(){
     +`<span class="lg"><i style="border-color:#9d9c98;background:#e3e2de"></i><s>cancelled(취소)</s></span>`;
 }
 
+/* ====== VSCODE 버튼: 선택 패널에서 클릭 시 VS Code 새 창으로 프로젝트 폴더 열기 (graph.html과 동일) ====== */
+document.addEventListener('click', e=>{
+  const b=e.target.closest('.vscode-btn'); if(!b) return;
+  e.preventDefault(); e.stopPropagation();
+  const p=b.dataset.vscodePath; if(!p) return;
+  const norm=p.replace(/\\/g,'/').replace(/\/+$/,'');
+  window.open('vscode://file/'+encodeURI(norm)+'/?windowId=_blank','_blank','noopener');
+});
+
 /* ====================== 편집 패널 ====================== */
 function selectNode(id){ sel=id; render(); renderEdit(); updatePanelBtn(); }
 function renderEdit(){
@@ -525,6 +654,8 @@ function renderEdit(){
   if(!canEdit()){                                   // 열람 모드: 내용만 보여주고 편집 폼은 만들지 않는다
     area.innerHTML=`<h4 style="margin:0 0 6px">${esc(n.title)}</h4>
       <p class="muted" style="margin:0 0 8px">${esc(KIND[n.kind]?KIND[n.kind].label:(n.kind||''))} · ${esc(STATUS[n.status]||n.status||'')}</p>
+      ${n.brief?`<p style="font-size:13px;color:#334155;margin:0 0 8px">${esc(n.brief)}</p>`:''}
+      ${n.projectPath?`<button type="button" class="btn sm vscode-btn" data-vscode-path="${esc(n.projectPath)}" title="VS Code 새 창으로 프로젝트 폴더 열기" style="margin:0 0 8px">📁 VSCODE로 열기</button>`:''}
       ${n.note?`<p style="font-size:12px;line-height:1.6;white-space:pre-wrap">${esc(n.note)}</p>`:''}
       ${n.url?`<button class="btn sm" onclick="window.open('${esc(n.url)}','_blank')">링크 열기</button>`:''}
       <p class="help" style="margin-top:12px">편집하려면 오른쪽 위에서 로그인하세요.</p>`;
@@ -553,6 +684,7 @@ function renderEdit(){
       <button class="btn sm" onclick="mv(1)">▼아래</button>
     </div>
     <div class="row">
+      ${n.projectPath?`<button type="button" class="btn sm vscode-btn" data-vscode-path="${esc(n.projectPath)}" title="VS Code 새 창으로 프로젝트 폴더 열기">📁 VSCODE로 열기</button>`:''}
       ${n.url?`<button class="btn sm" onclick="window.open('${esc(n.url)}','_blank')">링크 열기</button>`:''}
       <button class="btn sm" style="color:#c62828;border-color:#f1c0c0" onclick="del()">삭제</button>
     </div>`;
@@ -664,10 +796,13 @@ async function loadDoc(){
     if(rows&&rows.length&&rows[0].data){ DATA=rows[0].data; }
     else { DATA=JSON.parse(JSON.stringify(DEFAULT_DATA)); created=true; toast('기본 관계도를 클라우드에 생성했습니다.'); }
     const planMigrated=applySubmissionPlan20260806(DATA);
+    const graphMigrated=applyGraphNodes20260811(DATA);
+    const dedupMigrated=applyDedup20260811(DATA);
+    const metaMigrated=applyGraphMeta20260811(DATA);
     const kindsMigrated=normalizeKinds(DATA);
     showRel=DATA.showRel!==false; document.getElementById('relBtn').textContent='관계선 '+(showRel?'✓':'✕');
     sel=null; render(); renderEdit(); fitView(); setSaveState('');
-    if(created||planMigrated||kindsMigrated) await saveDoc(true);
+    if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||kindsMigrated) await saveDoc(true);
   }catch(e){
     const b=document.getElementById('banner'); b.style.display='block';
     if(/relation|does not exist|42P01|PGRST205|404/i.test(e.message))
@@ -675,7 +810,7 @@ async function loadDoc(){
     else if(!isLoggedIn() && /401|403|PGRST301|permission denied/i.test(e.message))
       b.textContent='공개 열람 권한이 없습니다. Supabase에서 enable_rls_mindmaps.sql 을 다시 실행해 anon SELECT 정책을 적용하세요.';
     else b.textContent='데이터를 불러오지 못했습니다: '+e.message.slice(0,140);
-    applySubmissionPlan20260806(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
+    applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
   }
 }
 async function saveDoc(silent){
@@ -693,7 +828,7 @@ function download(name,text,type){ const b=new Blob([text],{type:type||'applicat
 function exportJSON(){ download('mindmap_backup.json', JSON.stringify(DATA,null,2)); toast('백업 JSON을 내려받았습니다.'); }
 function importJSON(input){
   const f=input.files[0]; if(!f)return; const r=new FileReader();
-  r.onload=()=>{ try{ const d=JSON.parse(r.result); applySubmissionPlan20260806(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
     if(!confirm('백업으로 현재 클라우드 관계도를 덮어쓸까요?'))return;
     pushHistory();
     DATA=d; showRel=DATA.showRel!==false; sel=null; render(); renderEdit(); saveDoc(false);
