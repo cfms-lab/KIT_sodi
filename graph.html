@@ -108,8 +108,6 @@
       <option value="LR">배치: 계층 ←→</option>
       <option value="UD">배치: 계층 ↑↓</option>
     </select>
-    <label style="font-size:14px;margin-left:6px;cursor:pointer"><input type="checkbox" id="focus-cb">포커스</label>
-    <label style="font-size:14px;margin-left:6px;cursor:pointer"><input type="checkbox" id="collapse-cb">허브 접기</label>
     <label style="font-size:14px;margin-left:6px;cursor:pointer" title="paper quality 하 = 1년 내 투고 계획 없음"><input type="checkbox" id="horizon-cb">원거리(하) 표시</label>
     <label style="font-size:14px;margin-left:6px;cursor:pointer" title="노드 간 연결선 표시/숨김"><input type="checkbox" id="edges-cb" checked>edge 보기</label>
     <label style="font-size:14px;margin-left:6px;cursor:pointer" title="발견/BASE/역할 영역과 영역 간 의존선 표시/숨김"><input type="checkbox" id="hyper-cb" checked>hyperedge 보기</label>
@@ -397,42 +395,8 @@ document.getElementById('layout-sel').addEventListener('change', ev => {
   applyLayout(ev.target.value);
 });
 
-// === 포커스 모드 =======================================================
-// 노드를 클릭하면 1-hop 이웃만 남기고 나머지를 흐리게 한다.
-// 허브(PFTF 차수 16, Tomo_SFTF 차수 14)를 볼 때 특히 효과가 크다.
-let focusOn = false;
-const DIM_OPACITY = 0.12;
-
-function clearFocus() {
-  nodesDS.update(RAW_NODES.map(n => ({ id: n.id, opacity: 1 })));
-  edgesDS.update(RAW_EDGES.map((e, i) => ({ id: i, hidden: false })));
-  if (typeof applyCollapse === 'function') applyCollapse();   // 접힌 허브는 접힌 채로
-}
-
-function applyFocus(rootId) {
-  const keep = new Set(network.getConnectedNodes(rootId));
-  keep.add(rootId);
-  nodesDS.update(RAW_NODES.map(n => ({
-    id: n.id, opacity: keep.has(n.id) ? 1 : DIM_OPACITY,
-  })));
-  edgesDS.update(RAW_EDGES.map((e, i) => ({
-    id: i, hidden: !(e.from === rootId || e.to === rootId),
-  })));
-}
-
-document.getElementById('focus-cb').addEventListener('change', ev => {
-  focusOn = ev.target.checked;
-  if (!focusOn) clearFocus();
-  else {
-    const sel = network.getSelectedNodes();
-    if (sel.length) applyFocus(sel[0]);
-  }
-});
-
-network.on('selectNode', params => {
-  if (focusOn && params.nodes.length) applyFocus(params.nodes[0]);
-});
-network.on('deselectNode', () => { if (focusOn) clearFocus(); });
+// 포커스 모드(1-hop 이웃만 남기고 흐리게)는 2026-08-17 제거했다.
+// 클릭한 노드의 엣지만 드러내는 규칙이 아래 '레이어 토글' 절로 옮겨갔다.
 
 // === 허브 분해(satellite collapse) =====================================
 // PFTF(차수 16)·Tomo_SFTF(차수 14)에 매달린 "차수 1" 위성 노드들은
@@ -520,16 +484,9 @@ function applyCollapse() {
   updateStatsLine();
 }
 
-function setCollapsed(on) {
-  collapsed.clear();
-  if (on) HUBS.forEach(h => collapsed.add(h));
-  else {
-    // 펼칠 때는 숨겨둔 위성과 엣지를 되살린다.
-    nodesDS.update(HUBS.flatMap(h => HUB_SAT[h].map(s => ({ id: s, hidden: !(showFar || !FAR.has(s)) }))));
-    edgesDS.update(RAW_EDGES.map((e, i) => ({ id: i, hidden: false })));
-  }
-  applyCollapse();
-}
+// '허브 접기' 체크박스는 2026-08-17 제거했다. collapsed 는 항상 비어 있으므로
+// 대리 노드는 나타나지 않지만, applyCollapse 는 원거리(하) 노드 숨김 경로로
+// 계속 쓰이므로 아래 기계는 그대로 둔다.
 
 document.getElementById('horizon-cb').addEventListener('change', ev => {
   showFar = ev.target.checked;
@@ -541,40 +498,68 @@ document.getElementById('horizon-cb').addEventListener('change', ev => {
   network.fit({ animation: { duration: 400 } });
 });
 
-document.getElementById('collapse-cb').addEventListener('change', ev => {
-  setCollapsed(ev.target.checked);
-  network.fit({ animation: { duration: 400 } });
-});
-
 // === 레이어 토글: edge / hyperedge ====================================
-// 포커스·허브 접기·원거리 로직이 엣지별 hidden 을 직접 갱신하므로 전역
-// edges.hidden 옵션 하나로는 토글이 곧바로 되돌려진다. edge 보기가 꺼진
-// 동안에는 update() 를 감싸 hidden:true 를 강제하고, 다른 로직이 요청한
-// 원래 hidden 값은 따로 기억해 두었다가 다시 켤 때 복원한다.
+// 엣지 가시성의 단일 규칙:
+//   1) 원거리(하)·허브 접기 로직이 숨긴 엣지는 언제나 숨김
+//   2) 'edge 보기' 가 켜져 있으면 나머지는 모두 표시
+//   3) 꺼져 있으면 모두 숨기되, 노드를 클릭하면 그 노드에 붙은 엣지만
+//      드러낸다 (graph3d.html 의 '선택 노드' 모드와 같은 규칙)
+// 저 로직들이 엣지별 hidden 을 직접 갱신하므로 전역 edges.hidden 옵션
+// 하나로는 토글이 곧바로 되돌려진다. 그래서 update() 를 감싸 요청된 값은
+// _edgeHiddenMemo 에 기억해 두고, 실제 hidden 은 항상 여기서 계산한다.
 let showEdges = true;
 let showHyper = true;                       // afterDrawing 훅에서 참조
-const _edgeHiddenMemo = {};
+let edgeFocusId = null;                     // 클릭으로 엣지를 드러낸 노드
+const _edgeHiddenMemo = {};                 // 엣지 id -> 모드 로직이 요청한 hidden
+const _edgeEnds = {};                       // 엣지 id -> {from, to}
+RAW_EDGES.forEach((e, i) => { _edgeEnds[i] = { from: e.from, to: e.to }; });
+HUBS.forEach(h => { _edgeEnds['c:' + h] = { from: h, to: CLUSTER_ID(h) }; });
+
+function edgeVisible(id) {
+  if (_edgeHiddenMemo[id]) return false;
+  if (showEdges) return true;
+  const ends = _edgeEnds[id];
+  if (!edgeFocusId || !ends) return false;
+  if (ends.from !== edgeFocusId && ends.to !== edgeFocusId) return false;
+  // 숨은 노드(원거리·대리 노드)로 가는 엣지는 드러내지 않는다.
+  const other = nodesDS.get(ends.from === edgeFocusId ? ends.to : ends.from);
+  return !!(other && !other.hidden);
+}
+
 const _edgesUpdate = edgesDS.update.bind(edgesDS);
+// 대리 노드 엣지는 add() 로 hidden 상태를 갖고 태어나므로 현재 값을 먼저 기억해 둔다.
+edgesDS.get().forEach(e => { _edgeHiddenMemo[e.id] = !!e.hidden; });
 edgesDS.update = function (data, senderId) {
-  if (showEdges) return _edgesUpdate(data, senderId);
   const items = (Array.isArray(data) ? data : [data]).filter(Boolean);
   items.forEach(d => { if (d.id !== undefined && d.hidden !== undefined) _edgeHiddenMemo[d.id] = !!d.hidden; });
-  return _edgesUpdate(items.map(d => ({ ...d, hidden: true })), senderId);
+  const out = items.map(d => (d.hidden === undefined ? d : { ...d, hidden: !edgeVisible(d.id) }));
+  return _edgesUpdate(Array.isArray(data) ? out : out[0], senderId);
 };
+
+function applyEdgeVisibility() {
+  _edgesUpdate(edgesDS.getIds().map(id => ({ id, hidden: !edgeVisible(id) })));
+  updateStatsLine();
+}
 
 document.getElementById('edges-cb').addEventListener('change', ev => {
   showEdges = ev.target.checked;
-  if (!showEdges) {
-    edgesDS.get().forEach(e => { _edgeHiddenMemo[e.id] = !!e.hidden; });
-    _edgesUpdate(edgesDS.getIds().map(id => ({ id, hidden: true })));
-  } else {
-    _edgesUpdate(edgesDS.getIds().map(id => ({ id, hidden: !!_edgeHiddenMemo[id] })));
-  }
+  applyEdgeVisibility();
 });
 
 document.getElementById('hyper-cb').addEventListener('change', ev => {
   showHyper = ev.target.checked;
   network.redraw();
+});
+
+// 노드를 클릭하면 그 노드의 엣지가 보인다 (edge 보기가 꺼져 있을 때).
+// 빈 곳을 클릭해 선택을 풀면 다시 감춘다.
+network.on('selectNode', params => {
+  edgeFocusId = (params.nodes && params.nodes.length) ? params.nodes[0] : null;
+  if (!showEdges) applyEdgeVisibility();
+});
+network.on('deselectNode', () => {
+  edgeFocusId = null;
+  if (!showEdges) applyEdgeVisibility();
 });
 
 // 대리 노드를 클릭하면 그 허브만 펼친다.
@@ -589,7 +574,6 @@ network.on('click', params => {
     (SAT_OF[e.from] === h || SAT_OF[e.to] === h) ? { id: i, hidden: false } : null
   ).filter(Boolean));
   applyCollapse();
-  document.getElementById('collapse-cb').checked = collapsed.size > 0;
 });
 
 // === 인접행렬 뷰 =======================================================
@@ -705,7 +689,7 @@ document.getElementById('view-sel').addEventListener('change', ev => {
   document.getElementById('graph').style.display = isMatrix ? 'none' : '';
   document.getElementById('matrix-wrap').classList.toggle('on', isMatrix);
   document.getElementById('matrix-sort').style.display = isMatrix ? '' : 'none';
-  ['layout-sel', 'focus-cb', 'collapse-cb', 'reset-pos-btn', 'copy-pos-btn'].forEach(id => {
+  ['layout-sel', 'edges-cb', 'hyper-cb', 'reset-pos-btn', 'copy-pos-btn'].forEach(id => {
     const el = document.getElementById(id); if (el) el.disabled = isMatrix;
   });
   if (isMatrix) buildMatrix(); else network.fit({ animation: { duration: 300 } });
