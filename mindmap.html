@@ -636,13 +636,59 @@ function renderLegend(){
     +`<span class="lg"><i style="border-color:#9d9c98;background:#e3e2de"></i><s>cancelled(취소)</s></span>`;
 }
 
-/* ====== VSCODE 버튼: 선택 패널에서 클릭 시 VS Code 새 창으로 프로젝트 폴더 열기 (graph.html과 동일) ====== */
+/* ====== VSCODE·링크 버튼: 모든 노드에 동일하게 만들고, 값이 유효할 때만 눌리게 한다 ====== */
+const VSCODE_HINT='프로젝트 폴더 위치가 비어 있거나 형식이 올바르지 않습니다 (예: D:\\__VSCode_Projects\\myapp)';
+const LINK_HINT='링크 URL 이 비어 있거나 형식이 올바르지 않습니다 (예: https://...)';
+function isValidProjectPath(p){
+  const s=(p||'').trim();
+  if(!s) return false;
+  if(/[<>"|?*]/.test(s)) return false;
+  return /^[a-zA-Z]:[\\/]/.test(s)        // D:\ 또는 D:/ 로 시작하는 절대경로
+      || /^\\\\[^\\]+/.test(s)            // \\서버\공유 (UNC)
+      || /^\/[^/]/.test(s);               // /Users/... (macOS·Linux)
+}
+function escAttr(s){ return esc(s).replace(/"/g,'&quot;'); }   // 속성값용: esc + 따옴표
+function isValidUrl(u){ return /^(https?|vscode):\/\/\S+/i.test((u||'').trim()); }
+function vscodeBtnHtml(n, style){          // 모든 노드에 동일하게 생성. 경로가 유효할 때만 활성화.
+  const p=(n.projectPath||'').trim(), ok=isValidProjectPath(p);
+  return `<button type="button" class="btn sm vscode-btn"${ok?` data-vscode-path="${escAttr(p)}"`:' disabled'}`
+    +` title="${escAttr(ok?('VS Code 새 창으로 열기: '+p):VSCODE_HINT)}"${style?` style="${style}"`:''}>📁 VSCODE로 열기</button>`;
+}
+function linkBtnHtml(n, style){            // 링크 버튼도 같은 규칙(항상 생성, 유효할 때만 활성화)
+  const u=(n.url||'').trim(), ok=isValidUrl(u);
+  return `<button type="button" class="btn sm link-btn"${ok?` data-url="${escAttr(u)}"`:' disabled'}`
+    +` title="${escAttr(ok?('링크 열기: '+u):LINK_HINT)}"${style?` style="${style}"`:''}>🔗 링크 열기</button>`;
+}
+function syncActionBtns(n){                // 입력 중 패널을 다시 그리지 않고(포커스 유지) 버튼 상태만 갱신
+  const vb=document.querySelector('#editArea .vscode-btn');
+  if(vb){
+    const p=(n.projectPath||'').trim(), ok=isValidProjectPath(p);
+    vb.disabled=!ok;
+    if(ok) vb.dataset.vscodePath=p; else delete vb.dataset.vscodePath;
+    vb.title=ok?('VS Code 새 창으로 열기: '+p):VSCODE_HINT;
+  }
+  const lb=document.querySelector('#editArea .link-btn');
+  if(lb){
+    const u=(n.url||'').trim(), ok=isValidUrl(u);
+    lb.disabled=!ok;
+    if(ok) lb.dataset.url=u; else delete lb.dataset.url;
+    lb.title=ok?('링크 열기: '+u):LINK_HINT;
+  }
+}
 document.addEventListener('click', e=>{
   const b=e.target.closest('.vscode-btn'); if(!b) return;
   e.preventDefault(); e.stopPropagation();
-  const p=b.dataset.vscodePath; if(!p) return;
-  const norm=p.replace(/\\/g,'/').replace(/\/+$/,'');
+  if(b.disabled) return;
+  const p=b.dataset.vscodePath; if(!isValidProjectPath(p)) return;
+  const norm=p.trim().replace(/\\/g,'/').replace(/\/+$/,'');
   window.open('vscode://file/'+encodeURI(norm)+'/?windowId=_blank','_blank','noopener');
+});
+document.addEventListener('click', e=>{
+  const b=e.target.closest('.link-btn'); if(!b) return;
+  e.preventDefault(); e.stopPropagation();
+  if(b.disabled) return;
+  const u=b.dataset.url; if(!isValidUrl(u)) return;
+  window.open(u.trim(),'_blank','noopener');
 });
 
 /* ====================== 편집 패널 ====================== */
@@ -655,9 +701,9 @@ function renderEdit(){
     area.innerHTML=`<h4 style="margin:0 0 6px">${esc(n.title)}</h4>
       <p class="muted" style="margin:0 0 8px">${esc(KIND[n.kind]?KIND[n.kind].label:(n.kind||''))} · ${esc(STATUS[n.status]||n.status||'')}</p>
       ${n.brief?`<p style="font-size:13px;color:#334155;margin:0 0 8px">${esc(n.brief)}</p>`:''}
-      ${n.projectPath?`<button type="button" class="btn sm vscode-btn" data-vscode-path="${esc(n.projectPath)}" title="VS Code 새 창으로 프로젝트 폴더 열기" style="margin:0 0 8px">📁 VSCODE로 열기</button>`:''}
       ${n.note?`<p style="font-size:12px;line-height:1.6;white-space:pre-wrap">${esc(n.note)}</p>`:''}
-      ${n.url?`<button class="btn sm" onclick="window.open('${esc(n.url)}','_blank')">링크 열기</button>`:''}
+      ${n.projectPath?`<p class="muted" style="margin:8px 0 0;font-size:11px;word-break:break-all">📁 ${esc(n.projectPath)}</p>`:''}
+      <div class="row" style="margin-top:8px">${vscodeBtnHtml(n)}${linkBtnHtml(n)}</div>
       <p class="help" style="margin-top:12px">편집하려면 오른쪽 위에서 로그인하세요.</p>`;
     return;
   }
@@ -671,7 +717,8 @@ function renderEdit(){
       <label style="flex:1">Paper quality<select id="fKind">${kinds}</select></label>
       <label style="flex:1">상태<select id="fStatus">${stats}</select></label>
     </div>
-    <label>링크 URL (선택)<input id="fUrl" value="${esc(n.url||'')}" placeholder="https://..."></label>
+    <label>링크 URL (선택)<input id="fUrl" value="${escAttr(n.url||'')}" placeholder="https://..."></label>
+    <label>프로젝트 폴더 위치 (선택 · VSCODE)<input id="fPath" value="${escAttr(n.projectPath||'')}" placeholder="D:\\__VSCode_Projects\\myapp"></label>
     <label>메모<textarea id="fNote" rows="3">${esc(n.note||'')}</textarea></label>
     <label>하위 배치 (단축키 D)<select id="fDir">
       <option value="h" ${n.dir!=='v'?'selected':''}>가로 → (자식을 오른쪽에)</option>
@@ -684,11 +731,11 @@ function renderEdit(){
       <button class="btn sm" onclick="mv(1)">▼아래</button>
     </div>
     <div class="row">
-      ${n.projectPath?`<button type="button" class="btn sm vscode-btn" data-vscode-path="${esc(n.projectPath)}" title="VS Code 새 창으로 프로젝트 폴더 열기">📁 VSCODE로 열기</button>`:''}
-      ${n.url?`<button class="btn sm" onclick="window.open('${esc(n.url)}','_blank')">링크 열기</button>`:''}
+      ${vscodeBtnHtml(n)}
+      ${linkBtnHtml(n)}
       <button class="btn sm" style="color:#c62828;border-color:#f1c0c0" onclick="del()">삭제</button>
     </div>`;
-  ['fTitle','fKind','fStatus','fUrl','fNote','fDir'].forEach(idf=>{const el=document.getElementById(idf);if(el)el.addEventListener('input',commitEdit);});
+  ['fTitle','fKind','fStatus','fUrl','fPath','fNote','fDir'].forEach(idf=>{const el=document.getElementById(idf);if(el)el.addEventListener('input',commitEdit);});
 }
 function commitEdit(){
   const n=findNode(DATA.root, sel); if(!n)return;
@@ -697,9 +744,10 @@ function commitEdit(){
   n.kind=document.getElementById('fKind').value;
   n.status=document.getElementById('fStatus').value;
   n.url=document.getElementById('fUrl').value.trim()||undefined;
+  const fp=document.getElementById('fPath'); if(fp) n.projectPath=fp.value.trim()||undefined;
   n.note=document.getElementById('fNote').value;
   const fd=document.getElementById('fDir'); if(fd) n.dir=(fd.value==='v'?'v':undefined);
-  scheduleSave(); render();
+  scheduleSave(); render(); syncActionBtns(n);
 }
 function addNodeRel(how, inline){
   if(!sel)return;
