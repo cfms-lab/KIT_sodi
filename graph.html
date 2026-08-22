@@ -1023,5 +1023,106 @@ function _glyph(ctx, type, x, y) {
 // FINDING_DEPS_END
 });
 </script>
+<script>
+/* ====================== 투고 진도 아이콘 ======================
+   mindmap.html 과 같은 규칙: 투고 1/2 · 게재확정 3/4 · 인쇄중 7/8 · 출판 꽉 찬 원+체크.
+   값은 노트 frontmatter 의 mindmap_status 이고, layout_findings.py 가 아래
+   MINDMAP_STATUS 를 채운다(빈 객체면 아직 생성 전이라는 뜻).
+
+   afterDrawing 을 hull 쪽과 **따로** 등록한다. 그쪽 핸들러는 맨 앞에
+   `if (!showHyper) return;` 가 있어서 같이 넣으면 'hyperedge' 를 끌 때 배지까지
+   사라진다. 나중에 등록해야 hull 위에 그려지는 것도 이 자리라야 한다. */
+const MINDMAP_STATUS = {"SFTF_DrapePrior": "submitted", "Tomo_SFTF": "submitted", "cfmsCIPC": "submitted"};
+const PROG = {
+  submitted: { frac: 0.5,   label: '투고(submitted)' },
+  accepted:  { frac: 0.75,  label: '게재확정(accepted)' },
+  inprint:   { frac: 0.875, label: '인쇄중(in print)' },
+  published: { done: true,  label: '출판(published)' },
+};
+const PROG_GREEN = '#16a34a';
+const PROG_R = 10;          // 배지 반지름(그래프 좌표). 노드 반지름은 20~36 이다.
+
+/* mindmap.html progIcon() 의 비율을 그대로 옮긴 것. r=6 기준으로
+   초록 링 폭 1.6(0.267r) · 흰 테두리 중심 7.4(1.233r)·폭 1.2(0.2r) · 완료형 6.6(1.1r). */
+function drawProgBadge(ctx, cx, cy, R, p) {
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  const outline = (rad) => {                 // 어느 배경에서도 실루엣이 떨어지게
+    ctx.beginPath();
+    ctx.arc(cx, cy, rad, 0, 2 * Math.PI);
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 0.2 * R;
+    ctx.stroke();
+  };
+  if (p.done) {
+    outline(1.1 * R);
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, 2 * Math.PI);
+    ctx.fillStyle = PROG_GREEN;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx - 0.48 * R, cy + 0.03 * R);
+    ctx.lineTo(cx - 0.13 * R, cy + 0.40 * R);
+    ctx.lineTo(cx + 0.52 * R, cy - 0.33 * R);
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 0.30 * R;
+    ctx.stroke();
+  } else {
+    outline(1.233 * R);
+    ctx.beginPath();                          // 12시에서 시계방향으로 채운다
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * p.frac);
+    ctx.closePath();
+    ctx.fillStyle = PROG_GREEN;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, 2 * Math.PI);
+    ctx.strokeStyle = PROG_GREEN;
+    ctx.lineWidth = 0.267 * R;
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+network.on('afterDrawing', function (ctx) {
+  nodesDS.get({ filter: (n) => !n.hidden }).forEach((n) => {
+    const p = PROG[MINDMAP_STATUS[n.id]];
+    if (!p) return;
+    const pos = network.getPositions([n.id])[n.id];
+    if (!pos) return;
+    const k = Math.SQRT1_2;                   // 45도 — 노드 오른쪽 위 어깨
+    const r = n.size || 12;
+    drawProgBadge(ctx, pos.x + r * k, pos.y - r * k, PROG_R, p);
+  });
+});
+
+/* 범례: Paper quality 아래에 한 줄. 아이콘은 위 drawProgBadge 를 그대로 써서
+   작은 캔버스에 그린다 — 그림을 두 벌 유지하지 않으려고. */
+(function () {
+  const wrap = document.getElementById('legend-wrap');
+  if (!wrap) return;
+  const box = document.createElement('div');
+  box.style.cssText = 'margin-top:10px;padding-top:8px;border-top:1px solid #e6e6e6';
+  const h = document.createElement('h3');
+  h.textContent = '투고 진도';
+  box.appendChild(h);
+  const S = 16, dpr = window.devicePixelRatio || 1;
+  Object.keys(PROG).forEach((k) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:6px;margin:3px 0;font-size:13px;color:#555';
+    const cv = document.createElement('canvas');
+    cv.width = S * dpr; cv.height = S * dpr;
+    cv.style.width = S + 'px'; cv.style.height = S + 'px'; cv.style.flex = 'none';
+    const c = cv.getContext('2d');
+    c.scale(dpr, dpr);
+    drawProgBadge(c, S / 2, S / 2, S / 2 / 1.25, PROG[k]);   // 흰 테두리까지 들어가게
+    row.appendChild(cv);
+    row.appendChild(document.createTextNode(PROG[k].label));
+    box.appendChild(row);
+  });
+  wrap.appendChild(box);
+})();
+</script>
 </body>
 </html>
