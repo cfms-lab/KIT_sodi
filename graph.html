@@ -839,10 +839,79 @@ LEGEND.forEach(c => {
 <script>
 // Render hyperedges as shaded regions
 const hyperedges = [{"label": "발견1", "nodes": ["SFTF_InjMold", "SFTF_SewerPOC"]}, {"label": "발견2", "nodes": ["SFTF_Composite", "PFTF_Compression"]}, {"label": "발견3'", "nodes": ["PFTF_Terrain", "ColdOndol"]}, {"label": "발견4·5·6", "nodes": ["PFTF_VisCull_kDop"]}, {"label": "BASE", "kind": "base", "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering", "PFTF"], "color": "#0f766e", "labelColor": "#115e59", "fillAlpha": 0.1, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.18}, {"label": "METHOD / 이론·추론 확장", "kind": "role", "nodes": ["Tomo_DiffSupport", "SFTFSoft_GNN", "PFTF_AsymTensor"], "color": "#7c3aed", "labelColor": "#6d28d9", "fillAlpha": 0.035, "strokeAlpha": 0.75, "labelAlpha": 0.95, "lineWidth": 2, "dash": [4, 6], "scale": 1.12}, {"label": "PIPELINE / 다단계 통합", "kind": "role", "nodes": ["SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop", "SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint", "DFSVR_VisCull", "SFTFSoft_GNN_DFSVR", "ColdOndol"], "color": "#0891b2", "labelColor": "#0e7490", "fillAlpha": 0.025, "strokeAlpha": 0.7, "labelAlpha": 0.95, "lineWidth": 2, "dash": [16, 8], "scale": 1.08}, {"label": "의복 시뮬레이션", "kind": "domain", "nodes": ["SFTF_DrapePrior", "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape", "cfmsMiindo", "cfmsPINNCAD"], "color": "#db2777", "labelColor": "#be185d", "fillAlpha": 0.035, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}];
+
+function _hyperOverlapArea(a, b) {
+    const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
+    const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+    return w * h;
+}
+
+function _hyperRotatedBox(x, y, width, height, angle) {
+    const c = Math.abs(Math.cos(angle)), s = Math.abs(Math.sin(angle));
+    const halfW = (width * c + height * s) / 2;
+    const halfH = (width * s + height * c) / 2;
+    return {left: x - halfW, right: x + halfW, top: y - halfH, bottom: y + halfH};
+}
+
+function _hyperMajorAxis(points) {
+    const mx = points.reduce((sum, p) => sum + p.x, 0) / points.length;
+    const my = points.reduce((sum, p) => sum + p.y, 0) / points.length;
+    let xx = 0, yy = 0, xy = 0;
+    points.forEach(p => {
+        const dx = p.x - mx, dy = p.y - my;
+        xx += dx * dx; yy += dy * dy; xy += dx * dy;
+    });
+    return 0.5 * Math.atan2(2 * xy, xx - yy);
+}
+
+function _chooseHyperLabel(ctx, h, expanded, positions, obstacles) {
+    const fontSize = h.labelFontSize || 18;
+    ctx.font = `bold ${fontSize}px sans-serif`;
+    const textWidth = ctx.measureText(h.label).width;
+    const boxWidth = textWidth + 14, boxHeight = fontSize + 8;
+    const major = _hyperMajorAxis(positions);
+    let best = null;
+
+    expanded.forEach((a, i) => {
+        const b = expanded[(i + 1) % expanded.length];
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const length = Math.hypot(dx, dy);
+        if (length < 1) return;
+        let angle = Math.atan2(dy, dx);
+        if (angle > Math.PI / 2) angle -= Math.PI;
+        if (angle < -Math.PI / 2) angle += Math.PI;
+        const alignment = Math.abs(Math.cos(angle - major));
+
+        [0.3, 0.5, 0.7].forEach(t => {
+            const x = a.x + dx * t, y = a.y + dy * t;
+            const box = _hyperRotatedBox(x, y, boxWidth, boxHeight, angle);
+            let collisionCount = 0, collisionArea = 0;
+            obstacles.forEach(obstacle => {
+                const area = _hyperOverlapArea(box, obstacle);
+                if (area > 0) { collisionCount++; collisionArea += area; }
+            });
+            const shortfall = Math.max(0, boxWidth + 8 - length);
+            const score = collisionCount * 1e7 + collisionArea * 1e3
+                        + shortfall * 500 + (1 - alignment) * 1200 - length;
+            if (!best || score < best.score) best = {x, y, angle, box, boxWidth, boxHeight, fontSize, score};
+        });
+    });
+    return best;
+}
+
 // afterDrawing passes ctx already transformed to network coordinate space.
 // Draw node positions raw — no manual pan/zoom/DPR math needed.
 network.on('afterDrawing', function(ctx) {
     if (!showHyper) return;   // 'hyperedge' 체크박스 — hull 과 영역 간 화살표를 함께 끈다
+    const placedHyperLabels = [];
+    const nodeLabelBoxes = RAW_NODES.flatMap(n => {
+        const dsNode = nodesDS.get(n.id);
+        if (!dsNode || dsNode.hidden === true) return [];
+        try {
+            const b = network.getBoundingBox(n.id);
+            return [{left: b.left - 5, right: b.right + 5, top: b.top - 5, bottom: b.bottom + 5}];
+        } catch (e) { return []; }
+    });
     // Draw the base hull first so application-region hulls remain readable
     // where the two sets overlap.  Array order is preserved for the finding
     // dependency indices below.
@@ -908,15 +977,26 @@ network.on('afterDrawing', function(ctx) {
         ctx.fill();
         ctx.globalAlpha = strokeAlpha;
         ctx.stroke();
-        // Label
-        ctx.globalAlpha = labelAlpha;
-        ctx.fillStyle = h.labelColor || color;
-        ctx.font = 'bold 20px sans-serif';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'bottom';
-        const leftX = Math.min.apply(null, expanded.map(p => p.x));
-        const topY = Math.min.apply(null, expanded.map(p => p.y));
-        ctx.fillText(h.label, leftX, topY);
+        // Place the title on a hull segment. Prefer a segment aligned with the
+        // region's major axis, but make collision avoidance the stronger rule.
+        const label = _chooseHyperLabel(ctx, h, expanded, positions, nodeLabelBoxes.concat(placedHyperLabels));
+        if (label) {
+            ctx.save();
+            ctx.translate(label.x, label.y);
+            ctx.rotate(label.angle);
+            ctx.setLineDash([]);
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = `bold ${label.fontSize}px sans-serif`;
+            ctx.globalAlpha = 0.88;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(-label.boxWidth / 2, -label.boxHeight / 2, label.boxWidth, label.boxHeight);
+            ctx.globalAlpha = labelAlpha;
+            ctx.fillStyle = h.labelColor || color;
+            ctx.fillText(h.label, 0, 0);
+            ctx.restore();
+            placedHyperLabels.push(label.box);
+        }
         ctx.setLineDash([]);
         ctx.restore();
     });
