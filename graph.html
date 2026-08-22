@@ -156,6 +156,10 @@ const STATUS_BADGES = {
   "Tomo_SFTFSoft": "RPJ,draft",
   "cfmsAutoSew": "해외 SCIE,draft",
   "cfmsCIPC": "TSE 투고 완료 (2026-08-21, 원고번호 26M-08-029)",
+  "cfmsPINNDrape": "한국섬유공학회지(TSE) 국문 투고본으로 전환(2026-08-21, 사용자 지정 — TDP 해외 투고는…"
+};
+// 줄인 배지의 원문 — 툴팁에만 쓴다 (줄인 항목만 싣는다).
+const STATUS_BADGES_FULL = {
   "cfmsPINNDrape": "**한국섬유공학회지(TSE) 국문 투고본으로 전환**(2026-08-21, 사용자 지정 — TDP 해외 투고는 접었다). 정본 `draft/src/PINNDrape_2_검토용한글.md`, 영문 Maintext 는 `draft/src/_archive/` 로 보관. 빌드 14면(한도 20). 저자 설인환 단독·NRF-2022R1A2C1010072. 구 기록: **TDP 포맷으로 집필 착수**(2026-08-17). G1~G6 종주 완료, 긍정 효과 확보 — 목표 착의 품질 도달 시간 cold 대비 +92~98 %·엔진 대조군 대비 +78~92 %, 예측 비용 3.7~14 ms. 검토본은 TDP 구조 + 한글. 원격 PC 원고는 병합하지 않는다"
 };
 const STATUS_COLORS = { draft: "#64748b", submit: "#d4a017", revision: "#e06e10", accepted: "#12a150", printed: "#7a3fd1" };
@@ -163,7 +167,7 @@ RAW_NODES.forEach(n => {
   const b = STATUS_BADGES[n.id];
   if (!b) return;
   n.label = n.label + "\n[" + b + "]";
-  n.title = (n.title || n.id) + " — 투고 상태: " + b;
+  n.title = (n.title || n.id) + " — 투고 상태: " + (STATUS_BADGES_FULL[n.id] || b);
   const st = (b.split(",")[1] || "").trim();
   const c = STATUS_COLORS[st] || "#64748b";
   n.color = Object.assign({}, n.color, { border: c, highlight: Object.assign({}, (n.color && n.color.highlight) || {}, { border: c }) });
