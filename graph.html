@@ -108,8 +108,8 @@
       <option value="LR">배치: 계층 ←→</option>
       <option value="UD">배치: 계층 ↑↓</option>
     </select>
-    <label style="font-size:14px;margin-left:6px;cursor:pointer"><input type="checkbox" id="focus-cb">포커스</label>
-    <label style="font-size:14px;margin-left:6px;cursor:pointer"><input type="checkbox" id="collapse-cb">허브 접기</label>
+    <label style="font-size:14px;margin-left:6px;cursor:pointer" title="노드 사이의 의존 엣지"><input type="checkbox" id="edge-cb" checked>에지</label>
+    <label style="font-size:14px;margin-left:6px;cursor:pointer" title="발견·BASE·METHOD·PIPELINE 영역(hull)과 영역 간 의존 화살표"><input type="checkbox" id="hyper-cb" checked>hyperedge</label>
     <label style="font-size:14px;margin-left:6px;cursor:pointer" title="paper quality 하 = 1년 내 투고 계획 없음"><input type="checkbox" id="horizon-cb">원거리(하) 표시</label>
     &nbsp;<select id="view-sel" style="font-size:14px;padding:2px 6px;border:1px solid #999;border-radius:4px;background:#f4f4f4">
       <option value="graph">뷰: 노드-링크</option>
@@ -400,49 +400,13 @@ document.getElementById('layout-sel').addEventListener('change', ev => {
   applyLayout(ev.target.value);
 });
 
-// === 포커스 모드 =======================================================
-// 노드를 클릭하면 1-hop 이웃만 남기고 나머지를 흐리게 한다.
-// 허브(PFTF 차수 16, Tomo_SFTF 차수 14)를 볼 때 특히 효과가 크다.
-let focusOn = false;
-const DIM_OPACITY = 0.12;
+// === 가시성 토글 (에지 / hyperedge / 원거리) ==========================
+// 2026-08-22: '포커스'·'허브 접기' 를 걷어내고 '에지'·'hyperedge' 로 바꿨다.
+// 가시성은 항상 applyVisibility() 를 거친다. 노드에는 숨김만 얹고 hidden:false 로
+// 되돌리지 않는다 — 커뮤니티 필터가 내린 결정을 덮어쓰지 않기 위해서다.
+// 엣지는 커뮤니티 필터를 타지 않으므로 매번 전량 다시 계산한다.
 
-function clearFocus() {
-  nodesDS.update(RAW_NODES.map(n => ({ id: n.id, opacity: 1 })));
-  edgesDS.update(RAW_EDGES.map((e, i) => ({ id: i, hidden: false })));
-  if (typeof applyCollapse === 'function') applyCollapse();   // 접힌 허브는 접힌 채로
-}
-
-function applyFocus(rootId) {
-  const keep = new Set(network.getConnectedNodes(rootId));
-  keep.add(rootId);
-  nodesDS.update(RAW_NODES.map(n => ({
-    id: n.id, opacity: keep.has(n.id) ? 1 : DIM_OPACITY,
-  })));
-  edgesDS.update(RAW_EDGES.map((e, i) => ({
-    id: i, hidden: !(e.from === rootId || e.to === rootId),
-  })));
-}
-
-document.getElementById('focus-cb').addEventListener('change', ev => {
-  focusOn = ev.target.checked;
-  if (!focusOn) clearFocus();
-  else {
-    const sel = network.getSelectedNodes();
-    if (sel.length) applyFocus(sel[0]);
-  }
-});
-
-network.on('selectNode', params => {
-  if (focusOn && params.nodes.length) applyFocus(params.nodes[0]);
-});
-network.on('deselectNode', () => { if (focusOn) clearFocus(); });
-
-// === 허브 분해(satellite collapse) =====================================
-// PFTF(차수 16)·Tomo_SFTF(차수 14)에 매달린 "차수 1" 위성 노드들은
-// 사실상 응용 사례 목록이다. 이들을 하나의 대리 노드로 접으면
-// 허브에서 뻗어나가는 스포크 수가 급감해 교차가 크게 줄어든다.
-// 노드를 지우는 게 아니라 숨겼다 폈다 하므로 데이터 손실은 없다.
-
+// DEGREE/NEIGH 는 인접행렬 뷰의 '정렬: 차수' 가 쓴다.
 const DEGREE = {};
 const NEIGH = {};
 RAW_NODES.forEach(n => { DEGREE[n.id] = 0; NEIGH[n.id] = new Set(); });
@@ -452,116 +416,47 @@ RAW_EDGES.forEach(e => {
   NEIGH[e.from].add(e.to); NEIGH[e.to].add(e.from);
 });
 
-const MIN_SATELLITES = 3;          // 위성이 이보다 적으면 접어도 이득이 없다
-const HUB_SAT = {};                // 허브 id -> 위성 id 배열
-RAW_NODES.forEach(n => {
-  const sats = [...NEIGH[n.id]].filter(m => DEGREE[m] === 1);
-  if (DEGREE[n.id] >= 5 && sats.length >= MIN_SATELLITES) HUB_SAT[n.id] = sats.sort();
-});
-const HUBS = Object.keys(HUB_SAT);
-const SAT_OF = {};                 // 위성 id -> 소속 허브
-HUBS.forEach(h => HUB_SAT[h].forEach(s => { SAT_OF[s] = h; }));
-
-const CLUSTER_ID = h => '\u25b8' + h;      // '▸PFTF'
-const collapsed = new Set();
-
-// 대리 노드/엣지를 미리 만들어 두고 hidden 으로만 토글한다.
-HUBS.forEach(h => {
-  const hub = RAW_NODES.find(n => n.id === h);
-  const sats = HUB_SAT[h];
-  const pts = sats.map(s => savedPos[s] || POS[s]).filter(Boolean);
-  const cx = pts.length ? Math.round(pts.reduce((a, q) => a + q.x, 0) / pts.length) : 0;
-  const cy = pts.length ? Math.round(pts.reduce((a, q) => a + q.y, 0) / pts.length) : 0;
-  nodesDS.add({
-    id: CLUSTER_ID(h), label: h + ' 응용 ' + sats.length + '개',
-    shape: 'box', x: cx, y: cy, hidden: true,
-    color: { background: '#ffffff', border: (hub.color && hub.color.border) || '#888888' },
-    borderWidth: 3, shapeProperties: { borderDashes: [6, 4] },
-    font: { size: 17, color: '#444444' },
-    title: h + ' 에만 연결된 노드 ' + sats.length + '개 — 클릭하면 펼쳐집니다\n· ' + sats.join('\n· '),
-    level: Math.max(...sats.map(s => LEVEL[s])),
-    _isCluster: true, _hub: h,
-    _display_label: h + ' \uc751\uc6a9 ' + sats.length + '\uac1c',
-    _file_type: 'cluster', _degree: sats.length,
-    _intro: h + '\uc5d0\ub9cc \uc5f0\uacb0\ub41c \ucc28\uc218 1 \ub178\ub4dc\ub97c \ubb36\uc740 \ub300\ub9ac \ub178\ub4dc\uc785\ub2c8\ub2e4. \ud074\ub9ad\ud558\uba74 \ud3bc\uccd0\uc9d1\ub2c8\ub2e4.',
-    _quality: '\u2014', _bottleneck: '\u2014', _source_file: '(collapsed)',
-  });
-  edgesDS.add({
-    id: 'c:' + h, from: h, to: CLUSTER_ID(h), hidden: true,
-    width: 4, dashes: [6, 4],
-    color: { color: '#aaaaaa', highlight: '#777777', inherit: false },
-    arrows: { to: { enabled: true, scaleFactor: 1.0 } },
-  });
-});
-
-// 커뮤니티 필터·포커스와 충돌하지 않도록, 가시성은 항상 이 함수를 거친다.
-let showFar = false;
+let showEdges = true;   // 노드 간 의존 엣지
+let showHyper = true;   // 영역(hull) + 영역 간 의존 화살표 — afterDrawing 이 읽는다
+let showFar = false;    // 원거리(하)
 const FAR = new Set(RAW_NODES.filter(n => n._horizon === 'far').map(n => n.id));
 
-function applyCollapse() {
-  const satUpdates = [], edgeUpdates = [], clusterUpdates = [];
-  if (!showFar) {
-    RAW_NODES.forEach(n => { if (FAR.has(n.id)) satUpdates.push({ id: n.id, hidden: true }); });
-    RAW_EDGES.forEach((e, i) => {
-      if (FAR.has(e.from) || FAR.has(e.to)) edgeUpdates.push({ id: i, hidden: true });
-    });
-  }
-  HUBS.forEach(h => {
-    const on = collapsed.has(h);
-    HUB_SAT[h].forEach(s => { if (on) satUpdates.push({ id: s, hidden: true }); });
-    clusterUpdates.push({ id: CLUSTER_ID(h), hidden: !on });
-    edgeUpdates.push({ id: 'c:' + h, hidden: !on });
-  });
-  RAW_EDGES.forEach((e, i) => {
-    const hit = (SAT_OF[e.from] && collapsed.has(SAT_OF[e.from]))
-             || (SAT_OF[e.to] && collapsed.has(SAT_OF[e.to]));
-    if (hit) edgeUpdates.push({ id: i, hidden: true });
-  });
-  if (satUpdates.length) nodesDS.update(satUpdates);
-  nodesDS.update(clusterUpdates);
-  edgesDS.update(edgeUpdates);
+// 엣지만 다시 계산한다. 노드는 건드리지 않는다 — '에지'·'hyperedge' 토글이
+// 커뮤니티 필터나 원거리 필터의 결정을 흔들면 안 된다.
+// 엣지는 양 끝 노드의 **실제** 가시성을 따르므로, 어느 필터로 숨었든 알아서 따라 숨는다.
+function applyEdgeVisibility() {
+  const nodeHidden = id => { const n = nodesDS.get(id); return !n || n.hidden === true; };
+  edgesDS.update(RAW_EDGES.map((e, i) => ({
+    id: i,
+    hidden: !showEdges || nodeHidden(e.from) || nodeHidden(e.to),
+  })));
+  network.redraw();   // hull 은 캔버스 오버레이라 데이터만 갱신해서는 다시 그려지지 않는다
   updateStatsLine();
 }
 
-function setCollapsed(on) {
-  collapsed.clear();
-  if (on) HUBS.forEach(h => collapsed.add(h));
-  else {
-    // 펼칠 때는 숨겨둔 위성과 엣지를 되살린다.
-    nodesDS.update(HUBS.flatMap(h => HUB_SAT[h].map(s => ({ id: s, hidden: !(showFar || !FAR.has(s)) }))));
-    edgesDS.update(RAW_EDGES.map((e, i) => ({ id: i, hidden: false })));
+// 원거리(하) 노드 숨김까지 포함한 전체 가시성. 커뮤니티 필터·원거리 토글이 부른다.
+function applyVisibility() {
+  if (!showFar) {
+    nodesDS.update(RAW_NODES.filter(n => FAR.has(n.id)).map(n => ({ id: n.id, hidden: true })));
   }
-  applyCollapse();
+  applyEdgeVisibility();
 }
+
+document.getElementById('edge-cb').addEventListener('change', ev => {
+  showEdges = ev.target.checked;
+  applyEdgeVisibility();
+});
+
+document.getElementById('hyper-cb').addEventListener('change', ev => {
+  showHyper = ev.target.checked;
+  applyEdgeVisibility();
+});
 
 document.getElementById('horizon-cb').addEventListener('change', ev => {
   showFar = ev.target.checked;
-  if (showFar) {
-    nodesDS.update([...FAR].map(id => ({ id, hidden: false })));
-    edgesDS.update(RAW_EDGES.map((e, i) => ({ id: i, hidden: false })));
-  }
-  applyCollapse();
+  if (showFar) nodesDS.update([...FAR].map(id => ({ id, hidden: false })));
+  applyVisibility();
   network.fit({ animation: { duration: 400 } });
-});
-
-document.getElementById('collapse-cb').addEventListener('change', ev => {
-  setCollapsed(ev.target.checked);
-  network.fit({ animation: { duration: 400 } });
-});
-
-// 대리 노드를 클릭하면 그 허브만 펼친다.
-network.on('click', params => {
-  if (!params.nodes || !params.nodes.length) return;
-  const hit = nodesDS.get(params.nodes[0]);
-  if (!hit || !hit._isCluster) return;
-  const h = hit._hub;
-  collapsed.delete(h);
-  nodesDS.update(HUB_SAT[h].map(s => ({ id: s, hidden: false })));
-  edgesDS.update(RAW_EDGES.map((e, i) =>
-    (SAT_OF[e.from] === h || SAT_OF[e.to] === h) ? { id: i, hidden: false } : null
-  ).filter(Boolean));
-  applyCollapse();
-  document.getElementById('collapse-cb').checked = collapsed.size > 0;
 });
 
 // === 인접행렬 뷰 =======================================================
@@ -677,7 +572,7 @@ document.getElementById('view-sel').addEventListener('change', ev => {
   document.getElementById('graph').style.display = isMatrix ? 'none' : '';
   document.getElementById('matrix-wrap').classList.toggle('on', isMatrix);
   document.getElementById('matrix-sort').style.display = isMatrix ? '' : 'none';
-  ['layout-sel', 'focus-cb', 'collapse-cb', 'reset-pos-btn', 'copy-pos-btn'].forEach(id => {
+  ['layout-sel', 'edge-cb', 'hyper-cb', 'reset-pos-btn', 'copy-pos-btn'].forEach(id => {
     const el = document.getElementById(id); if (el) el.disabled = isMatrix;
   });
   if (isMatrix) buildMatrix(); else network.fit({ animation: { duration: 300 } });
@@ -688,7 +583,9 @@ function updateStatsLine() {
   const ve = edgesDS.get({ filter: e => !e.hidden }).length;
   const el = document.getElementById('stats');
   if (!el || !el.firstChild) return;
-  el.firstChild.nodeValue = vn + ' nodes \u00b7 ' + ve + ' edges \u00b7 5 communities\u00a0';
+  // 커뮤니티 수는 하드코딩하지 않는다. 범례가 늘면('그룹' 추가 등) 바로 어긋난다.
+  el.firstChild.nodeValue = vn + ' nodes \u00b7 ' + ve + ' edges \u00b7 '
+                          + LEGEND.length + ' communities\u00a0';
 }
 
 
@@ -871,7 +768,7 @@ function toggleAllCommunities(hide) {
   });
   const updates = RAW_NODES.map(n => ({ id: n.id, hidden: hide }));
   nodesDS.update(updates);
-  if (typeof applyCollapse === 'function') applyCollapse();
+  applyVisibility();
   updateSelectAllState();
 }
 
@@ -896,7 +793,7 @@ LEGEND.forEach(c => {
       .filter(n => n.community === c.cid)
       .map(n => ({ id: n.id, hidden: !cb.checked }));
     nodesDS.update(updates);
-    if (typeof applyCollapse === 'function') applyCollapse();
+    applyVisibility();
     updateSelectAllState();
   });
   item.innerHTML = `<div class="legend-dot" style="background:${c.color};border:1px solid ${c.border || c.color}"></div>
@@ -917,6 +814,7 @@ const hyperedges = [{"label": "발견1", "nodes": ["SFTF_InjMold", "SFTF_SewerPO
 // afterDrawing passes ctx already transformed to network coordinate space.
 // Draw node positions raw — no manual pan/zoom/DPR math needed.
 network.on('afterDrawing', function(ctx) {
+    if (!showHyper) return;   // 'hyperedge' 체크박스 — hull 과 영역 간 화살표를 함께 끈다
     // Draw the base hull first so application-region hulls remain readable
     // where the two sets overlap.  Array order is preserved for the finding
     // dependency indices below.
