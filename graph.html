@@ -108,7 +108,7 @@
       <option value="LR">배치: 계층 ←→</option>
       <option value="UD">배치: 계층 ↑↓</option>
     </select>
-    <label style="font-size:14px;margin-left:6px;cursor:pointer" title="노드 사이의 의존 엣지"><input type="checkbox" id="edge-cb" checked>에지</label>
+    <label style="font-size:14px;margin-left:6px;cursor:pointer" title="노드 사이의 의존 엣지. 끈 상태에서 노드를 클릭하면 그 노드의 엣지만 보입니다"><input type="checkbox" id="edge-cb" checked>에지</label>
     <label style="font-size:14px;margin-left:6px;cursor:pointer" title="발견·BASE·METHOD·PIPELINE 영역(hull)과 영역 간 의존 화살표"><input type="checkbox" id="hyper-cb" checked>hyperedge</label>
     <label style="font-size:14px;margin-left:6px;cursor:pointer" title="paper quality 하 = 1년 내 투고 계획 없음"><input type="checkbox" id="horizon-cb">원거리(하) 표시</label>
     &nbsp;<select id="view-sel" style="font-size:14px;padding:2px 6px;border:1px solid #999;border-radius:4px;background:#f4f4f4">
@@ -421,18 +421,36 @@ let showHyper = true;   // 영역(hull) + 영역 간 의존 화살표 — afterD
 let showFar = false;    // 원거리(하)
 const FAR = new Set(RAW_NODES.filter(n => n._horizon === 'far').map(n => n.id));
 
+// '에지' 를 끈 상태에서 노드를 클릭하면 그 노드에 붙은 엣지만 보여준다.
+// 빈 곳을 클릭하면 다시 전부 숨는다. ('에지' 가 켜져 있으면 아무 영향이 없다.)
+let edgeFocusId = null;   // 이름 주의: 아래 인접행렬의 focusNode() 와 겹치면 안 된다
+
 // 엣지만 다시 계산한다. 노드는 건드리지 않는다 — '에지'·'hyperedge' 토글이
 // 커뮤니티 필터나 원거리 필터의 결정을 흔들면 안 된다.
 // 엣지는 양 끝 노드의 **실제** 가시성을 따르므로, 어느 필터로 숨었든 알아서 따라 숨는다.
 function applyEdgeVisibility() {
   const nodeHidden = id => { const n = nodesDS.get(id); return !n || n.hidden === true; };
-  edgesDS.update(RAW_EDGES.map((e, i) => ({
-    id: i,
-    hidden: !showEdges || nodeHidden(e.from) || nodeHidden(e.to),
-  })));
+  edgesDS.update(RAW_EDGES.map((e, i) => {
+    const incident = edgeFocusId !== null && (e.from === edgeFocusId || e.to === edgeFocusId);
+    return {
+      id: i,
+      hidden: (!showEdges && !incident) || nodeHidden(e.from) || nodeHidden(e.to),
+    };
+  }));
   network.redraw();   // hull 은 캔버스 오버레이라 데이터만 갱신해서는 다시 그려지지 않는다
   updateStatsLine();
 }
+
+// 클릭 대상 판정은 아래 정보패널 핸들러와 같은 규칙을 쓴다: vis 가 params.nodes 를
+// 비워 보내는 경우가 있어 hoveredNodeId 로 보완한다(hover 판정이 더 안정적이다).
+network.on('click', params => {
+  const hovered = (typeof hoveredNodeId !== 'undefined') ? hoveredNodeId : null;
+  const hit = (params.nodes && params.nodes.length) ? params.nodes[0] : hovered;
+  const next = (hit === undefined) ? null : hit;
+  if (next === edgeFocusId) return;
+  edgeFocusId = next;
+  if (!showEdges) applyEdgeVisibility();   // '에지' 가 켜져 있으면 화면이 바뀔 게 없다
+});
 
 // 원거리(하) 노드 숨김까지 포함한 전체 가시성. 커뮤니티 필터·원거리 토글이 부른다.
 function applyVisibility() {
