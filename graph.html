@@ -236,9 +236,9 @@ const INDUSTRIAL_EFFECTS = {"Tomo_SFTF": "복셀·광선 계산의 안정화로 
 const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
   ...((savedPos[n.id] || POS[n.id]) ? { x: (savedPos[n.id] || POS[n.id]).x, y: (savedPos[n.id] || POS[n.id]).y } : {}),
   id: n.id, label: n.label, shape: n.shape || 'dot', color: n.color, size: n.size, borderWidth: n.borderWidth || 1,
-  font: { ...(n.font || {}), size: Math.max(18.7, (n.font && n.font.size) || 0), bold: false }, title: n.title,
+  font: { ...(n.font || {}), size: Math.max(18.7, (n.font && n.font.size) || 0), bold: false }, title: n._display_label || n.label,
   _community: n.community, _community_name: n.community_name,
-  _source_file: n.source_file, _file_type: n.file_type, _project_role: n._project_role, _display_label: n._display_label || n.label, _graph_role: n._graph_role, _finding_candidate: n._finding_candidate, _closed: n._closed, _degree: n.degree, _project_path: n._project_path, _intro: INDUSTRIAL_EFFECTS[n.id] || n._intro, _quality: n._quality, _quality_note: n._quality_note, _bottleneck: n._bottleneck,
+  _source_file: n.source_file, _file_type: n.file_type, _project_role: n._project_role, _display_label: n._display_label || n.label, _graph_role: n._graph_role, _finding_candidate: n._finding_candidate, _closed: n._closed, _degree: n.degree, _project_path: n._project_path, _intro: INDUSTRIAL_EFFECTS[n.id] || n._intro, _quality: n._quality,
 })));
 
 // 엣지 색은 vis 기본값(color.inherit='from')에 따라 출발 노드의 테두리색을 물려받는다.
@@ -641,12 +641,10 @@ function showInfo(nodeId) {
   document.getElementById('info-content').innerHTML = `
     <div class="field"><b>${esc(n._display_label || n.label)}</b> ${n._project_path ? `<button type="button" class="vscode-btn" style="margin-left:8px;padding:2px 6px;border:1px solid #888;border-radius:3px;background:#fff;color:#333;font-size:13px;cursor:pointer;vertical-align:middle" data-vscode-path="${esc(n._project_path)}" title="Open project in a new VS Code window">VSCODE</button>` : ""}</div>
     <div class="field">Type: ${esc(n._project_role || n._file_type || 'unknown')}</div>
-   <div class="field">남은 병목: ${esc(n._bottleneck || '—')}</div>
     ${n._intro ? `<div class="field"><b>소개:</b> ${esc(n._intro)}</div>` : ''}
     ${n._graph_role ? `<div class="field">Graph role: <b>${esc(n._graph_role)}</b></div>` : ''}
     ${n._finding_candidate ? `<div class="field">Finding candidate: <b>${esc(n._finding_candidate)}</b></div>` : ''}
     <div class="field">Paper quality: <b>${esc(n._quality || '—')}</b></div>
-    ${n._quality_note ? `<div class="field" style="font-size:14px;color:#666">${esc(n._quality_note)}</div>` : ''}
     <div class="field">Source: ${esc(n._source_file || '-')}</div>
     <div class="field">Degree: ${n._degree}</div>
     ${neighborIds.length ? `<div class="field" style="margin-top:8px;color:#aaa;font-size:14px">Neighbors (${neighborIds.length})</div><div id="neighbors-list">${neighborItems}</div>` : ''}
