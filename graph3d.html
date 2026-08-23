@@ -332,13 +332,6 @@
       return Function(`"use strict"; return (${literal});`)();
     }
 
-    function hiddenNodeIds(source) {
-      const match = /\b(?:const|let|var)\s+HIDDEN_NODE_IDS\s*=\s*new\s+Set\s*\(/.exec(source);
-      if (!match) return new Set();
-      const values = Function(`"use strict"; return (${balancedLiteral(source, match.index + match[0].length)});`)();
-      return new Set((Array.isArray(values) ? values : []).map(String));
-    }
-
     function parseGraphHtml(source) {
       const positions = { ...variableValue(source, 'POS') };
       const assignRe = /Object\.assign\s*\(\s*POS\s*,/g;
@@ -346,20 +339,11 @@
       while ((assign = assignRe.exec(source)) !== null) {
         Object.assign(positions, Function(`"use strict"; return (${balancedLiteral(source, assignRe.lastIndex)});`)());
       }
-      const hidden = hiddenNodeIds(source);
-      const nodes = variableValue(source, 'RAW_NODES').filter(node => !hidden.has(String(node.id)));
-      const visibleIds = new Set(nodes.map(node => String(node.id)));
-      const edges = variableValue(source, 'RAW_EDGES')
-        .filter(edge => visibleIds.has(String(edge.from)) && visibleIds.has(String(edge.to)));
-      const hyperedges = (variableValue(source, 'hyperedges', false) || []).map(hyperedge => ({
-        ...hyperedge,
-        nodes: (hyperedge.nodes || []).filter(id => visibleIds.has(String(id)))
-      }));
       return {
-        nodes,
-        edges,
+        nodes: variableValue(source, 'RAW_NODES'),
+        edges: variableValue(source, 'RAW_EDGES'),
         positions,
-        hyperedges,
+        hyperedges: variableValue(source, 'hyperedges', false) || [],
         findingDeps: variableValue(source, 'FINDING_DEPS', false) || []
       };
     }
@@ -737,10 +721,7 @@
       } catch (error) {
         if (!model) {
           statusEl.textContent = 'graph.html을 자동으로 읽지 못했습니다.';
-          const message = location.protocol === 'file:'
-            ? '로컬 서버가 필요합니다: uv run python -m http.server 8000 → http://localhost:8000/graph3d.html (또는 graph.html 선택)'
-            : `graph.html 읽기 실패: ${error.message}`;
-          showToast(message, 9000);
+          showToast(`로컬 서버가 필요합니다: uv run python -m http.server 8000 → http://localhost:8000/graph3d.html (또는 graph.html 선택)`, 9000);
         } else if (force) showToast(`다시 읽기 실패: ${error.message}`);
       } finally {
         pollBusy = false;
@@ -798,4 +779,5 @@
   </script>
 </body>
 </html>
+
 
