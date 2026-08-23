@@ -1170,6 +1170,11 @@ network.on('afterDrawing', function (ctx) {
   });
   wrap.appendChild(box);
 })();
+// HYPEREDGE_INITIAL_REDRAW_BEGIN
+// The network can finish its first frame before the overlay listeners above
+// are registered. Draw once more so hulls and rotated labels appear on load.
+network.redraw();
+// HYPEREDGE_INITIAL_REDRAW_END
 </script>
 </body>
 </html>

@@ -26,6 +26,7 @@ SRC = "graph.html"
 # graph.html is the canonical deployed graph.  graph_발견.html is a frozen
 # findings view and is intentionally not touched by new-project onboarding.
 DSTS = ["graph.html"]
+HIDDEN_NODE_IDS = {"PFTF_subMarine", "PFTF_Terrain"}
 
 # Project notes are the single source of truth for local VS Code paths.  The
 # graph node id normally matches the Obsidian project-note stem, so the button
@@ -188,6 +189,10 @@ HYPEREDGES = [
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
 ]
+HYPEREDGES = [
+    {**h, "nodes": [node_id for node_id in h["nodes"] if node_id not in HIDDEN_NODE_IDS]}
+    for h in HYPEREDGES
+]
 
 # 2026-07-30 quality snapshot, synchronized from the KIT_sodi mindmap backup. Quality is the single classification axis
 # used by both the node colors and the Communities legend.
@@ -235,6 +240,7 @@ QUALITY_ROWS = [
     ("SFTFSoft_GNN_DFSVR", "SFTFSoft_GNN_DFSVR", "ToDo",
      "profile-conditioned GNN proposer → DFSVR first-hit refiner → held-out slicer verifier; frozen budget-matched A–E benchmark 전"),
 ]
+QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
 
 # 대학원생이 처음 그래프를 읽을 때 바로 이해할 수 있도록, 각 프로젝트를
 # 전문용어 없이 한 문장으로 설명한다.  이 문장은 논문의 성능 주장이 아니라
@@ -316,9 +322,9 @@ QUALITY_CSS = r'''/* QUALITY_BOARD_BEGIN */
 # 영역 간 의존성 (인덱스 = HYPEREDGES 순서: 0=발견1 1=발견2 2=발견3 3=발견3' 4=발견4·5·6)
 DEPS_JS = """// FINDING_DEPS_BEGIN — 발견 간 의존성 (분류표 노트의 DAG, layout_findings.py 정본)
 const FINDING_DEPS = [
-  {from:0, to:1, style:"solid",    label:"전제(사다리·레이스)"},
-  {from:0, to:2, style:"solid",    label:"전제"},
-  {from:0, to:4, style:"solid",    label:"전제", labelT:0.22},
+  {from:0, to:1, style:"solid"},
+  {from:0, to:2, style:"solid"},
+  {from:0, to:4, style:"solid"},
   {from:2, to:1, style:"dotted",   label:"\\u2124\\u2082 보조정리", labelT:0.78},
   {from:2, to:4, style:"double",   label:"\\u2124\\u2082 쌍대(\\u00b1d)"},
   {from:2, to:3, style:"contrast", label:"소거 \\u2194 생존 대비"},
@@ -357,11 +363,6 @@ function _regionCentroid(h) {
       ctx.globalAlpha = 0.32;
       ctx.fillStyle = ctx.strokeStyle; ctx.fill();
     }
-    ctx.globalAlpha = 0.95;
-    ctx.fillStyle = "#4a4dbf";
-    ctx.font = "18px sans-serif"; ctx.textAlign = "center";
-    const t = dp.labelT === undefined ? 0.5 : dp.labelT;
-    ctx.fillText(dp.label, x1+(x2-x1)*t, y1+(y2-y1)*t - 6);
   });
   ctx.restore();
 })(ctx);
@@ -425,6 +426,66 @@ function _glyph(ctx, type, x, y) {
   });
 })(ctx);
 // FINDING_DEPS_END"""
+
+HYPEREDGE_LABEL_HELPERS_JS = r'''// HYPEREDGE_LABEL_HELPERS_BEGIN
+function _boxOverlapArea(a, b) {
+  const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
+  const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+  return w * h;
+}
+function _nodeLabelBoxes() {
+  return RAW_NODES.map(n => {
+    const b = network.getBoundingBox(n.id);
+    return b && {left: b.left - 6, right: b.right + 6, top: b.top - 6, bottom: b.bottom + 6};
+  }).filter(Boolean);
+}
+function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes) {
+  ctx.font = 'bold 20px sans-serif';
+  const textWidth = ctx.measureText(h.label).width;
+  const textHeight = 22;
+  let best = null;
+  for (let i = 0; i < polygon.length; i++) {
+    const a = polygon[i], b = polygon[(i + 1) % polygon.length];
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const length = Math.hypot(dx, dy);
+    if (length < 1) continue;
+    const ux = dx / length, uy = dy / length;
+    let nx = -uy, ny = ux;
+    const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    if (nx * (mx - cx) + ny * (my - cy) < 0) { nx = -nx; ny = -ny; }
+    let angle = Math.atan2(dy, dx);
+    if (angle > Math.PI / 2) angle -= Math.PI;
+    if (angle < -Math.PI / 2) angle += Math.PI;
+    const ca = Math.abs(Math.cos(angle)), sa = Math.abs(Math.sin(angle));
+    const halfW = (ca * textWidth + sa * textHeight) / 2;
+    const halfH = (sa * textWidth + ca * textHeight) / 2;
+    for (const offset of [14, 26, 40, 56, 74]) {
+      const x = mx + nx * offset, y = my + ny * offset;
+      const box = {left: x - halfW, right: x + halfW, top: y - halfH, bottom: y + halfH};
+      const nodeOverlap = nodeBoxes.reduce((sum, other) => sum + _boxOverlapArea(box, other), 0);
+      const labelOverlap = placedBoxes.reduce((sum, other) => sum + _boxOverlapArea(box, other), 0);
+      const shortfall = Math.max(0, textWidth + 18 - length);
+      const score = nodeOverlap * 1000 + labelOverlap * 200 + shortfall * shortfall * 2 + offset;
+      if (!best || score < best.score) best = {x, y, angle, box, score};
+    }
+  }
+  if (!best) return;
+  placedBoxes.push(best.box);
+  ctx.save();
+  ctx.translate(best.x, best.y);
+  ctx.rotate(best.angle);
+  ctx.globalAlpha = h.labelAlpha == null ? 0.8 : h.labelAlpha;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+  ctx.strokeText(h.label, 0, 0);
+  ctx.fillStyle = h.labelColor || h.color || '#6366f1';
+  ctx.fillText(h.label, 0, 0);
+  ctx.restore();
+}
+// HYPEREDGE_LABEL_HELPERS_END'''
 
 s = io.open(SRC, encoding="utf-8").read()
 
@@ -779,6 +840,7 @@ def _reclassify_raw_nodes(match):
                 },
             )
             node["color"] = node_color
+    nodes = [node for node in nodes if node.get("id") not in HIDDEN_NODE_IDS]
     return "const RAW_NODES = " + json.dumps(nodes, ensure_ascii=False) + ";"
 
 s, nraw = re.subn(r"const RAW_NODES = (\[.*?\]);", _reclassify_raw_nodes,
@@ -790,6 +852,10 @@ def _inject_todo_edges(match):
     for edge in TODO_EDGES:
         if (edge["from"], edge["to"]) not in existing:
             edges.append(edge)
+    edges = [
+        edge for edge in edges
+        if edge.get("from") not in HIDDEN_NODE_IDS and edge.get("to") not in HIDDEN_NODE_IDS
+    ]
     return "const RAW_EDGES = " + json.dumps(edges, ensure_ascii=False) + ";"
 
 s, nedge = re.subn(r"const RAW_EDGES = (\[.*?\]);", _inject_todo_edges,
@@ -894,20 +960,44 @@ s = s.replace(
     "font: { ...(n.font || {}), size: Math.max(18.7, (n.font && n.font.size) || 0), bold: false }, title:",
 )
 
-# hull 라벨 위치: 중심(cy-5) → convex hull 중앙-상단 바깥 (노드 캡션 겹침 회피)
-# 멱등: 이전 주입을 먼저 원형으로 되돌린 뒤 다시 적용 (const 중복 선언 방지)
-s = s.replace("const topY = Math.min.apply(null, expanded.map(p => p.y)); "
-              "ctx.fillText(h.label, cx, topY - 16);",
-              "ctx.fillText(h.label, cx, cy - 5);")
+# Hull labels follow a polygon edge and choose the least-overlapping outward
+# position against vis-network's actual node/label bounding boxes.
+s = re.sub(r"\n// HYPEREDGE_LABEL_HELPERS_BEGIN.*?// HYPEREDGE_LABEL_HELPERS_END\n?",
+           "\n", s, flags=re.S)
+label_helper_anchor = "// afterDrawing passes ctx already transformed to network coordinate space."
+assert label_helper_anchor in s
+s = s.replace(label_helper_anchor,
+              HYPEREDGE_LABEL_HELPERS_JS + "\n" + label_helper_anchor, 1)
+s = re.sub(
+    r"\n    const nodeLabelBoxes = _nodeLabelBoxes\(\);\n"
+    r"    const placedHyperedgeLabelBoxes = \[\];",
+    "", s, count=1,
+)
+s, nlabel_frame = re.subn(
+    r"(network\.on\('afterDrawing', function\(ctx\) \{\n"
+    r"    if \(!showHyper\) return;[^\n]*\n)",
+    r"\1    const nodeLabelBoxes = _nodeLabelBoxes();\n"
+    r"    const placedHyperedgeLabelBoxes = [];\n",
+    s, count=1,
+)
 s, nf3 = re.subn(
-    r"ctx\.fillText\(h\.label, cx, [^)]+\);",
-    "const topY = Math.min.apply(null, expanded.map(p => p.y)); "
-    "ctx.fillText(h.label, cx, topY - 16);", s)
-if nf3 == 0:
-    # The deployed 37-node baseline already uses the newer left/top label
-    # placement, so no conversion is required.
-    nf3 = len(re.findall(r"ctx\.fillText\(h\.label, leftX, topY\);", s))
-assert nf3 >= 1, nf3
+    r"        // Label[^\n]*\n.*?        ctx\.setLineDash\(\[\]\);",
+    "        // Label: choose a hull edge and follow its direction while avoiding nodes.\n"
+    "        _drawHyperedgeLabel(ctx, h, expanded, cx, cy, nodeLabelBoxes, placedHyperedgeLabelBoxes);\n"
+    "        ctx.setLineDash([]);",
+    s, count=1, flags=re.S,
+)
+redraw_js = '''// HYPEREDGE_INITIAL_REDRAW_BEGIN
+// The network can finish its first frame before the overlay listeners above
+// are registered. Draw once more so hulls and rotated labels appear on load.
+network.redraw();
+// HYPEREDGE_INITIAL_REDRAW_END'''
+s = re.sub(r"\n// HYPEREDGE_INITIAL_REDRAW_BEGIN.*?// HYPEREDGE_INITIAL_REDRAW_END\n?",
+           "\n", s, flags=re.S)
+redraw_anchor = "</script>\n</body>\n</html>"
+assert redraw_anchor in s
+s = s.replace(redraw_anchor, redraw_js + "\n" + redraw_anchor, 1)
+assert nlabel_frame == nf3 == 1, (nlabel_frame, nf3)
 
 # ------------------------------------------------- 프린터 친화 라이트 테마 (2026-07-19d)
 # 배경 white, 기존 white 요소(베이스 노드·하이라이트·legend 점)는 #c8c8c8.
