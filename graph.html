@@ -134,7 +134,7 @@ function esc(s) {
 }
 
 // Build vis datasets (deterministic radial layout: apps ring around their base hub)
-const POS = {"Tomo_SFTF": {"x": -234, "y": 168}, "Tomo_SFTFSoft": {"x": -20, "y": 207}, "SFTF_Clustering": {"x": 109, "y": 508}, "PFTF": {"x": 101, "y": 390}, "SFTF_Composite": {"x": 349, "y": 706}, "SFTF_HeatMethod": {"x": 430, "y": 790}, "SFTF_InjMold": {"x": -417, "y": 0}, "PFTF_Compression": {"x": 530, "y": 578}, "Tomo_DFSVR": {"x": 259, "y": 135}, "PFTF_VisCull_kDop": {"x": 395, "y": 422}, "SFTF_SewerPOC": {"x": -121, "y": -142}, "PFTF_Terrain": {"x": -132, "y": 572}, "PFTF_subMarine": {"x": -244, "y": 549}, "SFTFSoft_GNN": {"x": 135, "y": 65}, "SFTF_DrapePrior": {"x": 207, "y": 304}, "PFTF_AsymTensor": {"x": 146, "y": 173}, "PFTF_DrapePrior_VisCull_kDop": {"x": 275, "y": 263}, "PFTF_ResearchOptimize": {"x": -70, "y": 423}, "PFTF_alpha": {"x": 170, "y": -202}, "SFTF_QEM": {"x": 14, "y": -82}, "SFTF_DynamicTargetSearch": {"x": -119, "y": 50}, "SFTF_ActiveOverprint": {"x": -67, "y": 112}, "DFSVR_VisCull": {"x": 458, "y": 229}, "SFTFSoft_GNN_DFSVR": {"x": 244, "y": 1}, "ColdOndol": {"x": -177, "y": 356}, "ColdOndol_Positioning": {"x": -228, "y": 269}, "cfmsCIPC": {"x": 500, "y": 315}, "TSE_SEM": {"x": 206, "y": 759}, "cfmsPINNDrape": {"x": 368, "y": 318}, "cfmsPINNCAD": {"x": 485, "y": 382}, "cfmsDrape": {"x": 615, "y": 335}, "cfmsMiindo": {"x": 690, "y": 425}};
+const POS = {"Tomo_SFTF": {"x": -254, "y": 216}, "Tomo_SFTFSoft": {"x": -29, "y": 255}, "SFTF_Clustering": {"x": 109, "y": 508}, "PFTF": {"x": 119, "y": 411}, "SFTF_Composite": {"x": 349, "y": 706}, "SFTF_InjMold": {"x": 79, "y": 730}, "PFTF_Compression": {"x": 530, "y": 578}, "Tomo_DFSVR": {"x": 259, "y": 135}, "PFTF_VisCull_kDop": {"x": 354, "y": 441}, "SFTF_SewerPOC": {"x": -78, "y": 653}, "SFTFSoft_GNN": {"x": 135, "y": 65}, "SFTF_DrapePrior": {"x": 207, "y": 304}, "PFTF_AsymTensor": {"x": 146, "y": 173}, "PFTF_DrapePrior_VisCull_kDop": {"x": 300, "y": 350}, "PFTF_ResearchOptimize": {"x": 34, "y": 367}, "PFTF_alpha": {"x": -42, "y": 506}, "SFTF_QEM": {"x": -122, "y": 477}, "SFTF_DynamicTargetSearch": {"x": -119, "y": 50}, "DFSVR_VisCull": {"x": 412, "y": 120}, "SFTFSoft_GNN_DFSVR": {"x": 244, "y": 1}, "SFTF_ActiveOverprint": {"x": -67, "y": 112}, "ColdOndol": {"x": -207, "y": 427}, "ColdOndol_Positioning": {"x": -279, "y": 390}, "cfmsCIPC": {"x": 520, "y": 289}, "TSE_SEM": {"x": 264, "y": 553}, "SFTF_HeatMethod": {"x": 430, "y": 790}, "cfmsPINNDrape": {"x": 387, "y": 298}, "cfmsDrape": {"x": 615, "y": 335}, "cfmsMiindo": {"x": 690, "y": 425}, "cfmsPINNCAD": {"x": 496, "y": 428}};
 // 사용자 지정 기본 배치 (2026-08-02b)
 // === 투고 상태 배지 (draft / submit / revision / accepted / printed) ===
 // 값 형식: "저널,상태[,MM-DD]". draft는 예정 저널이 정해진 노드만 표기.
@@ -872,7 +872,9 @@ function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes, vi
     const ca = Math.abs(Math.cos(angle)), sa = Math.abs(Math.sin(angle));
     const halfW = (ca * textWidth + sa * textHeight) / 2;
     const halfH = (sa * textWidth + ca * textHeight) / 2;
-    for (const offset of [14, 26, 40, 56, 74]) {
+    // 12px puts the 22px text box about 1px outside the hull edge. Larger
+    // offsets are fallbacks only when a node/title collision requires them.
+    for (const offset of [12, 18, 26, 38, 52]) {
       const x = mx + nx * offset, y = my + ny * offset;
       const box = {left: x - halfW, right: x + halfW, top: y - halfH, bottom: y + halfH};
       const nodeOverlap = nodeBoxes.reduce((sum, other) => sum + _boxOverlapArea(box, other), 0);
@@ -880,8 +882,9 @@ function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes, vi
       const overflow = Math.max(0, viewport.left - box.left) + Math.max(0, box.right - viewport.right)
                      + Math.max(0, viewport.top - box.top) + Math.max(0, box.bottom - viewport.bottom);
       const shortfall = Math.max(0, textWidth + 18 - length);
+      const proximityPenalty = (offset - 12) * 2000;
       const score = nodeOverlap * 1000 + labelOverlap * 200 + overflow * overflow * 1000
-                  + shortfall * shortfall * 2 + offset;
+                  + shortfall * shortfall * 2 + proximityPenalty;
       if (!best || score < best.score) best = {x, y, angle, box, score};
     }
   }

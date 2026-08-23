@@ -97,45 +97,37 @@ NODE_SOURCE_FILES = {
 
 # ----------------------------------------------------------------- 좌표 (발견 기준)
 POS = {
-    # 2026-08-06: 사용자가 graph.html에서 조정한 배치를 정본으로 승격.
-    "Tomo_SFTF": (-210, 192),
-    "Tomo_SFTFSoft": (-20, 207),
+    # 2026-08-23: 사용자가 graph.html에서 조정한 배치를 정본으로 승격.
+    "Tomo_SFTF": (-254, 216),
+    "Tomo_SFTFSoft": (-29, 255),
     "SFTF_Clustering": (109, 508),
-    "PFTF": (101, 390),
+    "PFTF": (119, 411),
     "SFTF_Composite": (349, 706),
-    "SFTF_InjMold": (-417, 0),
+    "SFTF_InjMold": (79, 730),
     "PFTF_Compression": (530, 578),
-    "SFTF_ThermalChip": (-366, -185),
-    "PFTF_Mold": (508, 667),
-    "Tomo_DiffSupport": (259, 135),
-    "PFTF_VisCull_kDop": (395, 422),
-    "SFTF_SewerPOC": (-121, -142),
-    "PFTF_FXShock": (155, 653),
-    "SFTF_BatteryThermal": (-172, -250),
-    "SFTF_PDNElectric": (-330, -90),
-    "PFTF_Inspection": (533, 394),
-    "PFTF_RainNowcast": (6, 635),
-    "PFTF_Terrain": (-132, 572),
-    "PFTF_Solar": (56, 708),
-    "PFTF_subMarine": (-244, 549),
-    "PFTF_Assembly": (-127, 687),
-    "PFTF_CNC": (74, -222),
-    "PFTF_Radiotherapy": (348, 615),
-    "SFTF_DataCenterTraffic": (-281, 464),
-    "SFTF_UrbanTraffic": (-345, 226),
-    "SFTF_WarehouseAGV": (-429, 151),
-    "PFTF_AssetShock": (-361, 337),
-    "SFTFSoft_GNN": (149, 69),
+    "Tomo_DFSVR": (259, 135),
+    "PFTF_VisCull_kDop": (354, 441),
+    "SFTF_SewerPOC": (-78, 653),
+    "SFTFSoft_GNN": (135, 65),
     "SFTF_DrapePrior": (207, 304),
     "PFTF_AsymTensor": (146, 173),
-    "PFTF_DrapePrior_VisCull_kDop": (275, 263),
-    "PFTF_ResearchOptimize": (-70, 423),
-    "PFTF_alpha": (182, -238),
-    "SFTF_QEM": (34, 1),
-    "SFTF_DynamicTargetSearch": (-142, 41),
+    "PFTF_DrapePrior_VisCull_kDop": (300, 350),
+    "PFTF_ResearchOptimize": (34, 367),
+    "PFTF_alpha": (-42, 506),
+    "SFTF_QEM": (-122, 477),
+    "SFTF_DynamicTargetSearch": (-119, 50),
+    "DFSVR_VisCull": (412, 120),
+    "SFTFSoft_GNN_DFSVR": (244, 1),
     "SFTF_ActiveOverprint": (-67, 112),
-    "DFSVR_VisCull": (458, 229),
-    "SFTFSoft_GNN_DFSVR": (300, -36),
+    "ColdOndol": (-207, 427),
+    "ColdOndol_Positioning": (-279, 390),
+    "cfmsCIPC": (520, 289),
+    "TSE_SEM": (264, 553),
+    "SFTF_HeatMethod": (430, 790),
+    "cfmsPINNDrape": (387, 298),
+    "cfmsDrape": (615, 335),
+    "cfmsMiindo": (690, 425),
+    "cfmsPINNCAD": (496, 428),
 }
 
 HYPEREDGES = [
@@ -467,7 +459,9 @@ function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes, vi
     const ca = Math.abs(Math.cos(angle)), sa = Math.abs(Math.sin(angle));
     const halfW = (ca * textWidth + sa * textHeight) / 2;
     const halfH = (sa * textWidth + ca * textHeight) / 2;
-    for (const offset of [14, 26, 40, 56, 74]) {
+    // 12px puts the 22px text box about 1px outside the hull edge. Larger
+    // offsets are fallbacks only when a node/title collision requires them.
+    for (const offset of [12, 18, 26, 38, 52]) {
       const x = mx + nx * offset, y = my + ny * offset;
       const box = {left: x - halfW, right: x + halfW, top: y - halfH, bottom: y + halfH};
       const nodeOverlap = nodeBoxes.reduce((sum, other) => sum + _boxOverlapArea(box, other), 0);
@@ -475,8 +469,9 @@ function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes, vi
       const overflow = Math.max(0, viewport.left - box.left) + Math.max(0, box.right - viewport.right)
                      + Math.max(0, viewport.top - box.top) + Math.max(0, box.bottom - viewport.bottom);
       const shortfall = Math.max(0, textWidth + 18 - length);
+      const proximityPenalty = (offset - 12) * 2000;
       const score = nodeOverlap * 1000 + labelOverlap * 200 + overflow * overflow * 1000
-                  + shortfall * shortfall * 2 + offset;
+                  + shortfall * shortfall * 2 + proximityPenalty;
       if (!best || score < best.score) best = {x, y, angle, box, score};
     }
   }
