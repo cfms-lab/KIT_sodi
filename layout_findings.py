@@ -439,7 +439,15 @@ function _nodeLabelBoxes() {
     return b && {left: b.left - 6, right: b.right + 6, top: b.top - 6, bottom: b.bottom + 6};
   }).filter(Boolean);
 }
-function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes) {
+function _hyperedgeViewportBounds() {
+  const pad = 14;
+  const tl = network.DOMtoCanvas({x: pad, y: pad});
+  const br = network.DOMtoCanvas({x: Math.max(pad, container.clientWidth - pad),
+                                  y: Math.max(pad, container.clientHeight - pad)});
+  return {left: Math.min(tl.x, br.x), right: Math.max(tl.x, br.x),
+          top: Math.min(tl.y, br.y), bottom: Math.max(tl.y, br.y)};
+}
+function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes, viewport) {
   ctx.font = 'bold 20px sans-serif';
   const textWidth = ctx.measureText(h.label).width;
   const textHeight = 22;
@@ -464,8 +472,11 @@ function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes) {
       const box = {left: x - halfW, right: x + halfW, top: y - halfH, bottom: y + halfH};
       const nodeOverlap = nodeBoxes.reduce((sum, other) => sum + _boxOverlapArea(box, other), 0);
       const labelOverlap = placedBoxes.reduce((sum, other) => sum + _boxOverlapArea(box, other), 0);
+      const overflow = Math.max(0, viewport.left - box.left) + Math.max(0, box.right - viewport.right)
+                     + Math.max(0, viewport.top - box.top) + Math.max(0, box.bottom - viewport.bottom);
       const shortfall = Math.max(0, textWidth + 18 - length);
-      const score = nodeOverlap * 1000 + labelOverlap * 200 + shortfall * shortfall * 2 + offset;
+      const score = nodeOverlap * 1000 + labelOverlap * 200 + overflow * overflow * 1000
+                  + shortfall * shortfall * 2 + offset;
       if (!best || score < best.score) best = {x, y, angle, box, score};
     }
   }
@@ -970,20 +981,22 @@ s = s.replace(label_helper_anchor,
               HYPEREDGE_LABEL_HELPERS_JS + "\n" + label_helper_anchor, 1)
 s = re.sub(
     r"\n    const nodeLabelBoxes = _nodeLabelBoxes\(\);\n"
-    r"    const placedHyperedgeLabelBoxes = \[\];",
+    r"    const placedHyperedgeLabelBoxes = \[\];"
+    r"(?:\n    const hyperedgeViewport = _hyperedgeViewportBounds\(\);)?",
     "", s, count=1,
 )
 s, nlabel_frame = re.subn(
     r"(network\.on\('afterDrawing', function\(ctx\) \{\n"
     r"    if \(!showHyper\) return;[^\n]*\n)",
     r"\1    const nodeLabelBoxes = _nodeLabelBoxes();\n"
-    r"    const placedHyperedgeLabelBoxes = [];\n",
+    r"    const placedHyperedgeLabelBoxes = [];\n"
+    r"    const hyperedgeViewport = _hyperedgeViewportBounds();\n",
     s, count=1,
 )
 s, nf3 = re.subn(
     r"        // Label[^\n]*\n.*?        ctx\.setLineDash\(\[\]\);",
     "        // Label: choose a hull edge and follow its direction while avoiding nodes.\n"
-    "        _drawHyperedgeLabel(ctx, h, expanded, cx, cy, nodeLabelBoxes, placedHyperedgeLabelBoxes);\n"
+    "        _drawHyperedgeLabel(ctx, h, expanded, cx, cy, nodeLabelBoxes, placedHyperedgeLabelBoxes, hyperedgeViewport);\n"
     "        ctx.setLineDash([]);",
     s, count=1, flags=re.S,
 )

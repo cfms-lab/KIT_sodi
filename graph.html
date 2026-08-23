@@ -844,7 +844,15 @@ function _nodeLabelBoxes() {
     return b && {left: b.left - 6, right: b.right + 6, top: b.top - 6, bottom: b.bottom + 6};
   }).filter(Boolean);
 }
-function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes) {
+function _hyperedgeViewportBounds() {
+  const pad = 14;
+  const tl = network.DOMtoCanvas({x: pad, y: pad});
+  const br = network.DOMtoCanvas({x: Math.max(pad, container.clientWidth - pad),
+                                  y: Math.max(pad, container.clientHeight - pad)});
+  return {left: Math.min(tl.x, br.x), right: Math.max(tl.x, br.x),
+          top: Math.min(tl.y, br.y), bottom: Math.max(tl.y, br.y)};
+}
+function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes, viewport) {
   ctx.font = 'bold 20px sans-serif';
   const textWidth = ctx.measureText(h.label).width;
   const textHeight = 22;
@@ -869,8 +877,11 @@ function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes) {
       const box = {left: x - halfW, right: x + halfW, top: y - halfH, bottom: y + halfH};
       const nodeOverlap = nodeBoxes.reduce((sum, other) => sum + _boxOverlapArea(box, other), 0);
       const labelOverlap = placedBoxes.reduce((sum, other) => sum + _boxOverlapArea(box, other), 0);
+      const overflow = Math.max(0, viewport.left - box.left) + Math.max(0, box.right - viewport.right)
+                     + Math.max(0, viewport.top - box.top) + Math.max(0, box.bottom - viewport.bottom);
       const shortfall = Math.max(0, textWidth + 18 - length);
-      const score = nodeOverlap * 1000 + labelOverlap * 200 + shortfall * shortfall * 2 + offset;
+      const score = nodeOverlap * 1000 + labelOverlap * 200 + overflow * overflow * 1000
+                  + shortfall * shortfall * 2 + offset;
       if (!best || score < best.score) best = {x, y, angle, box, score};
     }
   }
@@ -897,6 +908,7 @@ network.on('afterDrawing', function(ctx) {
     if (!showHyper) return;   // 'hyperedge' 체크박스 — hull 과 영역 간 화살표를 함께 끈다
     const nodeLabelBoxes = _nodeLabelBoxes();
     const placedHyperedgeLabelBoxes = [];
+    const hyperedgeViewport = _hyperedgeViewportBounds();
     // Draw the base hull first so application-region hulls remain readable
     // where the two sets overlap.  Array order is preserved for the finding
     // dependency indices below.
@@ -963,7 +975,7 @@ network.on('afterDrawing', function(ctx) {
         ctx.globalAlpha = strokeAlpha;
         ctx.stroke();
         // Label: choose a hull edge and follow its direction while avoiding nodes.
-        _drawHyperedgeLabel(ctx, h, expanded, cx, cy, nodeLabelBoxes, placedHyperedgeLabelBoxes);
+        _drawHyperedgeLabel(ctx, h, expanded, cx, cy, nodeLabelBoxes, placedHyperedgeLabelBoxes, hyperedgeViewport);
         ctx.setLineDash([]);
         ctx.restore();
     });
