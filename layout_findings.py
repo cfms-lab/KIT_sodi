@@ -177,6 +177,16 @@ HYPEREDGES = [
      "color": "#0891b2", "labelColor": "#0e7490",
      "fillAlpha": 0.025, "strokeAlpha": 0.70, "labelAlpha": 0.95,
      "lineWidth": 2, "dash": [16, 8], "scale": 1.08},
+    # Garment-simulation domain overlay. Keep this in the generator so a later
+    # refresh cannot erase the manually curated public grouping.
+    {"label": "의복 시뮬레이션",
+     "kind": "domain",
+     "nodes": ["SFTF_DrapePrior", "PFTF_Compression", "PFTF_VisCull_kDop",
+               "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape", "cfmsMiindo",
+               "cfmsPINNCAD"],
+     "color": "#db2777", "labelColor": "#be185d",
+     "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
+     "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
 ]
 
 # 2026-07-30 quality snapshot, synchronized from the KIT_sodi mindmap backup. Quality is the single classification axis
