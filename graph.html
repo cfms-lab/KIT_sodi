@@ -100,7 +100,7 @@
     </div>
     <div id="legend"></div>
   </div>
-  <div id="stats">30 nodes &middot; 55 edges &middot; 6 communities
+  <div id="stats">30 nodes &middot; 0 edges &middot; 6 communities
     &nbsp;<button id="reset-pos-btn" style="font-size:14px;padding:2px 8px;cursor:pointer;border:1px solid #999;border-radius:4px;background:#f4f4f4">위치 초기화</button>
     <button id="copy-pos-btn" style="font-size:14px;padding:2px 8px;cursor:pointer;border:1px solid #999;border-radius:4px;background:#f4f4f4">위치 복사</button>
     &nbsp;<select id="layout-sel" style="font-size:14px;padding:2px 6px;border:1px solid #999;border-radius:4px;background:#f4f4f4">
@@ -108,7 +108,7 @@
       <option value="LR">배치: 계층 ←→</option>
       <option value="UD">배치: 계층 ↑↓</option>
     </select>
-    <label style="font-size:14px;margin-left:6px;cursor:pointer" title="노드 사이의 의존 엣지. 끈 상태에서 노드를 클릭하면 그 노드의 엣지만 보입니다"><input type="checkbox" id="edge-cb" checked>에지</label>
+    <label style="font-size:14px;margin-left:6px;cursor:pointer" title="노드 사이의 의존 엣지. 끈 상태에서 노드를 클릭하면 그 노드의 엣지만 보입니다"><input type="checkbox" id="edge-cb">에지</label>
     <label style="font-size:14px;margin-left:6px;cursor:pointer" title="발견·BASE·METHOD·PIPELINE 영역(hull)과 영역 간 의존 화살표"><input type="checkbox" id="hyper-cb" checked>hyperedge</label>
     <label style="font-size:14px;margin-left:6px;cursor:pointer" title="paper quality 하 = 1년 내 투고 계획 없음"><input type="checkbox" id="horizon-cb">원거리(하) 표시</label>
     &nbsp;<select id="view-sel" style="font-size:14px;padding:2px 6px;border:1px solid #999;border-radius:4px;background:#f4f4f4">
@@ -292,6 +292,7 @@ function dimmedEdgeColor(e) {
 }
 const edgesDS = new vis.DataSet(RAW_EDGES.map((e, i) => ({
   id: i, from: e.from, to: e.to,
+  hidden: true,
   label: '',
   title: e.title,
   dashes: e.dashes,
@@ -419,7 +420,7 @@ RAW_EDGES.forEach(e => {
   NEIGH[e.from].add(e.to); NEIGH[e.to].add(e.from);
 });
 
-let showEdges = true;   // 노드 간 의존 엣지
+let showEdges = false;  // 노드 간 의존 엣지
 let showHyper = true;   // 영역(hull) + 영역 간 의존 화살표 — afterDrawing 이 읽는다
 let showFar = false;    // 원거리(하)
 const FAR = new Set(RAW_NODES.filter(n => n._horizon === 'far').map(n => n.id));

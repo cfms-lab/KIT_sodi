@@ -495,6 +495,24 @@ function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes, vi
 
 s = io.open(SRC, encoding="utf-8").read()
 
+# Dependency edges start hidden. The checkbox, runtime state, and DataSet must
+# agree on the first frame; otherwise vis-network briefly renders every edge.
+s, nedge_checkbox = re.subn(
+    r'(<input type="checkbox" id="edge-cb")(?: checked)?(>에지</label>)',
+    r'\1\2', s, count=1,
+)
+s, nedge_state = re.subn(
+    r"let showEdges = (?:true|false);",
+    "let showEdges = false;", s, count=1,
+)
+s, nedge_initial_hidden = re.subn(
+    r"(id: i, from: e\.from, to: e\.to,\n)(?:  hidden: true,\n)?",
+    r"\1  hidden: true,\n", s, count=1,
+)
+assert nedge_checkbox == nedge_state == nedge_initial_hidden == 1, (
+    nedge_checkbox, nedge_state, nedge_initial_hidden
+)
+
 # Preserve the extended quality overlay used by the deployed graph (Closed
 # nodes, bottlenecks, project roles, and bracket-caption rims).  Older/fresh
 # graphify exports may only have the compact overlay, in which case the
@@ -924,7 +942,7 @@ s, nleg = re.subn(r"const LEGEND = (\[.*?\]);", _quality_legend, s, count=1, fla
 raw_nodes_for_stats = json.loads(re.search(r"const RAW_NODES = (\[.*?\]);", s, flags=re.S).group(1))
 raw_edges_for_stats = json.loads(re.search(r"const RAW_EDGES = (\[.*?\]);", s, flags=re.S).group(1))
 stats_text = (
-    f"{len(raw_nodes_for_stats)} nodes &middot; {len(raw_edges_for_stats)} edges "
+    f"{len(raw_nodes_for_stats)} nodes &middot; 0 edges "
     f"&middot; {len(quality_legend) + (1 if preserve_extended_quality else 0)} communities"
 )
 s, nstats = re.subn(r"\d+ nodes &middot; \d+ edges &middot; \d+ communities",
