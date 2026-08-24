@@ -144,7 +144,7 @@ HYPEREDGES = [
      "nodes": ["SFTF_Composite", "PFTF_Compression", "PFTF_Mold",
                "PFTF_Radiotherapy"]},
     {"label": "발견3",
-     "nodes": ["SFTF_WarehouseAGV", "PFTF_AssetShock", "SFTF_UrbanTraffic"]},
+     "nodes": ["SFTF_UrbanTraffic"]},
     {"label": "발견3'",
      "nodes": ["SFTF_DataCenterTraffic", "PFTF_subMarine", "PFTF_Assembly",
                "PFTF_RainNowcast", "PFTF_Terrain", "PFTF_Solar",
@@ -1015,7 +1015,9 @@ for hyperedge in HYPEREDGES:
         for node_id in hyperedge.get("nodes", [])
         if str(node_id) in node_ids_for_hyperedges
     ]
-    if len(members) >= 2:
+    # A restored single project can still be a meaningful findings region;
+    # graph.py renders one-node hulls as padded 3D shells.
+    if members:
         hyperedges_for_graph.append({**hyperedge, "nodes": members})
 stats_text = (
     f"{len(raw_nodes_for_stats)} nodes &middot; 0 edges "
