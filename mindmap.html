@@ -68,6 +68,7 @@
   .legend{display:flex;flex-wrap:wrap;gap:6px}
   .lg{display:flex;align-items:center;gap:5px;font-size:11px;color:#555}
   .lg i{width:12px;height:12px;border-radius:3px;border:2px solid #999;display:inline-block}
+  .lg svg{width:12px;height:12px;flex:none;display:block}   /* 진도 아이콘 — 위 색 견본과 같은 크기 */
   .sec{border-top:1px solid #eef2f6;padding-top:10px}
   .links-list{display:flex;flex-direction:column;gap:4px;max-height:150px;overflow:auto;font-size:11px}
   .links-list .li{display:flex;gap:6px;align-items:center;justify-content:space-between;background:#f8fafc;border:1px solid #eef2f6;border-radius:6px;padding:3px 6px}
@@ -159,7 +160,7 @@
 
 <script>
 /* ====================== 버전 (배포 확인용) ====================== */
-const APP_VERSION='v2026-08-13a';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
+const APP_VERSION='v2026-08-22e';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
 
 /* ====================== 기본 데이터 (첫 실행 시드) ====================== */
 const DEFAULT_DATA = /*DATA_START*/{"version":1,"title":"CFMS 프로젝트 관계도 2026","showRel":true,"root":{"id":"root","title":"CFMS 연구실 2026","kind":"root","note":"두 워크스페이스의 세부 프로젝트 관계도","children":[{"id":"sftf","title":"__SFTF_Projects(2026)","kind":"group","note":"3D 프린팅 Support Flow Tensor Field 연구군 (D:\\__SFTF_Projects(2026))","children":[{"id":"tomo_sftf","title":"Tomo_SFTF_dev","kind":"core","status":"active","note":"SFTF 본체: 빌드방향 후보 생성(coarse-to-refine) + TOMO_CPU/GPU 엔진(DLL). 표준 템플릿의 기원."},{"id":"clustering","title":"SFTF_Clustering_dev","kind":"app","status":"active","note":"면별 SFTF 특징 → 출판지향 메쉬 분할(clustering). 한국섬유공학회지 투고."},{"id":"derivative","title":"SFTF_Derivative_dev","kind":"app","status":"active","note":"미분가능 SFTF 손실항 + GNN + 경사기반 빌드방향 최적화. TOMO 교차검증."},{"id":"composite","title":"SFTF_Composite_dev","kind":"app","status":"stub","note":"복합재 적용 (신규 스캐폴드)."},{"id":"injmold","title":"SFTF_InjMold_dev","kind":"app","status":"stub","note":"사출성형 적용 (신규 스캐폴드)."}]},{"id":"vscode","title":"__VSCode_Projects","kind":"group","note":"의복 CAD·영상계측·랩 웹앱·인프라 (D:\\__VSCode_Projects)","children":[{"id":"cadsuite","title":"의복 CAD 스위트","kind":"subgroup","note":"Clo3D 오픈소스 대안","children":[{"id":"cfmscad","title":"cfmsCAD2026_dev","kind":"app","status":"active","note":"3D 의복 CAD 에디터 (UI/패턴)."},{"id":"cfmsdrape","title":"cfmsDrape2026_dev","kind":"app","status":"active","note":"암시적 옷감 드레이프 솔버(DLL). SCAD/GarmentCode 입력, 인체 충돌·자기충돌."},{"id":"cfmssew","title":"cfmsSew2026_dev","kind":"app","status":"active","note":"2D 패턴 봉제대응 자동인식(휴리스틱→GNN). CAD/Drape에 병합 예정."},{"id":"cfmsshared","title":"cfmsShared2026_dev","kind":"infra","status":"infra","note":"CAD↔Drape 인터페이스 단일진실(contract/messages) 공유 git 채널."}]},{"id":"measure","title":"영상 계측","kind":"subgroup","children":[{"id":"dispersity","title":"cfmsDispersity2026_Dev","kind":"app","status":"active","note":"광학현미경 입자 분산도 정량화(정적 kNN 에너지). C++Builder(Baraff 클로스심) 포팅."},{"id":"sem","title":"TSE_SEM2026_dev","kind":"app","status":"active","note":"SEM 섬유 영상 정량화(반지름·배향·기공) + metaball 3D 재구성."}]},{"id":"webapps","title":"랩 웹앱 (cfms-lab/KIT_sodi · Supabase)","kind":"subgroup","children":[{"id":"upjuk","title":"논문관리 (upjuk)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/upjuk.html","note":"업적 리스트 CRUD + PDF. draft는 RLS로 비로그인 숨김."},{"id":"timetable","title":"수업시간표 (TimeTable)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/timetable.html","note":"학기별 시간표 드래그 편성."},{"id":"jobgis","title":"취업현황 (JobGIS)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/jobgis.html","note":"졸업생 취업처 지도."},{"id":"mindmap","title":"이 관계도 (Mindmap)","kind":"web","status":"active","note":"프로젝트 관계도 (이 페이지, 로그인 전용)."}]},{"id":"infra","title":"인프라/템플릿","kind":"subgroup","children":[{"id":"template","title":"__vscode_AI_template","kind":"infra","status":"infra","note":"표준 프로젝트 템플릿(코드+논문, uv/xelatex/훅). 모든 *_dev의 기반. Tomo_SFTF에서 기원."},{"id":"hooks","title":"__클로드코드_훅설정","kind":"infra","status":"infra","note":"Claude Code 전역 훅 설정."}]}]}]},"links":[{"from":"tomo_sftf","to":"clustering","label":"코어 분리"},{"from":"tomo_sftf","to":"derivative","label":"코어 재사용"},{"from":"tomo_sftf","to":"composite","label":"파생"},{"from":"tomo_sftf","to":"injmold","label":"파생"},{"from":"clustering","to":"derivative","label":"코드 재사용"},{"from":"tomo_sftf","to":"template","label":"템플릿 기원"},{"from":"cfmsshared","to":"cfmscad","label":"contract"},{"from":"cfmsshared","to":"cfmsdrape","label":"contract"},{"from":"cfmssew","to":"cfmscad","label":"병합 예정"},{"from":"cfmssew","to":"cfmsdrape","label":"병합 예정"},{"from":"derivative","to":"cfmsdrape","label":"드레이프 응용 연계"},{"from":"dispersity","to":"cfmsdrape","label":"클로스심 계보"}]}/*DATA_END*/;
@@ -179,8 +180,13 @@ function truncW(s, maxW, fs){ // 추정 폭 기준으로 잘라 '…' 붙임
   for(const ch of s){ const cw=charW(ch,fs); if(w+cw>maxW-ell) break; out+=ch; w+=cw; }
   return out+'…';
 }
-function nodeWidth(n, minW, maxW){ // 박스 폭 = 제목 폭 + 좌우 여백(+링크 아이콘)
-  const tw=textEstW(n.title,12.5)+24+(n.url?16:0);
+// 진도 아이콘을 붙일 노드인가. 그룹은 논문이 아니라 구조 노드라 뺀다
+// (KIND 주석 참고). 취소된 노드도 취소선으로 이미 구분되므로 뺀다.
+function hasProg(n){
+  return !!PROGRESS[progStatus(n.status)] && n.kind!=='group' && n.status!=='cancelled';
+}
+function nodeWidth(n, minW, maxW){ // 박스 폭 = 제목 폭 + 좌우 여백(+링크·진도 아이콘)
+  const tw=textEstW(n.title,12.5)+24+(n.url?16:0)+(hasProg(n)?PROG_W:0);
   return Math.max(minW, Math.min(maxW, Math.ceil(tw)));
 }
 function walk(node, fn, parent){ fn(node, parent); (node.children||[]).forEach(c=>walk(c, fn, node)); }
@@ -475,6 +481,112 @@ function applyGraphMeta20260811(data){
   data.graphMetaVersion=GRAPH_META_VERSION;
   return changed;
 }
+/* ====== 링크 url · 프로젝트 폴더 위치 채우기 (2026-08-20) ======
+   볼트(cfms-research-vault)의 Projects/*.md frontmatter 에 있는 repository / path 를
+   노드로 옮겨 넣는다. **빈 칸만 채우고 이미 값이 있으면 건드리지 않는다** — 웹에서
+   일부러 다르게 둔 경로(예: 원고 폴더를 가리키는 cfmsCIPC)를 덮지 않기 위해서다.
+   생성: cfms-research-vault/scripts/fill-mindmap-links.mjs --emit-migration */
+const LINK_FILL_VERSION='2026-08-20c';
+function applyLinkFill20260820(data){
+  if(!data||!data.root) return false;
+  if(data.linkFillVersion===LINK_FILL_VERSION) return false;
+  const root=data.root;
+  const FILL={
+    'pftf_submission_lane_20260806':{u:"https://github.com/cfms-lab/PFTF_dev",p:"D:\\__PFTF_Projects(2026)\\PFTF_dev"},   // PFTF (투고경로 노드)  ← PFTF
+    'nowmyrt1':                       {p:"D:\\__SFTF_Projects(2026)\\Tomo_Shell2026-dev"},   // Tomo_Shell2026의 draft2/3  ← Tomo_Shell2026
+    'nc593kj6':                       {p:"D:\\__VSCode_Projects\\cfmsDispersity2026_Dev"},   // Dispersity  ← cfmsDispersity
+    'nro5uca3':                       {p:"D:\\__SFTF_Projects(2026)\\SFTF_HeatMethod_dev"},   // SFTF_HeatMethod  ← SFTF_HeatMethod
+    'nd8ctbq4':                       {u:"https://github.com/cfms-lab/SFTF_PDNElectric_dev"},   // PDNElectric  ← SFTF_PDNElectric
+    'n8q2k963':                       {u:"https://github.com/cfms-lab/SFTF_ThermalChip_dev"},   // ThermalChip  ← SFTF_ThermalChip
+    'nca3mrq1':                       {u:"https://github.com/cfms-lab/SFTF_BatteryThermal_dev"},   // BatteryThermal  ← SFTF_BatteryThermal
+    'pftf_mold_submission':           {u:"https://github.com/cfms-lab/PFTF_Mold_dev"},   // PFTF_Mold  ← PFTF_Mold
+    'n8t2x7d2':                       {u:"https://github.com/cfms-lab/SFTF_InjMold_dev"},   // InjectionMold  ← SFTF_InjMold
+    'no1b3vw4':                       {u:"https://github.com/cfms-lab/SFTF_WarehouseAGV_dev"},   // WarehouseAGV  ← SFTF_WarehouseAGV
+    'nbarkbz3':                       {u:"https://github.com/cfms-lab/SFTF_DataCenterTraffic_dev"},   // DataCenterTraffic  ← SFTF_DataCenterTraffic
+    'sftf':                           {u:"https://github.com/cfms-lab/Tomo_SFTF_dev"},   // #1 Tomo_SFTF  ← Tomo_SFTF
+    'nh2ivjs1':                       {u:"https://github.com/cfms-lab/PFTF_VisCull_kDop_dev"},   // PFTF_VisCull_kDop  ← PFTF_VisCull_kDop
+    'gx_pftf_drapeprior_viscull_kdop':{u:"https://github.com/cfms-lab/PFTF_DrapePrior_VisCull_kDop_dev"},   // PFTF_DrapePrior_VisCull_kDop  ← PFTF_DrapePrior_VisCull_kDop
+    'n0llvuh1':                       {u:"https://github.com/cfms-lab/PFTF_dev"},   // PFTF framework  ← PFTF
+    'n1krev41':                       {u:"https://github.com/cfms-lab/PFTF_Assembly_dev"},   // PFTF_Assembly  ← PFTF_Assembly
+    'n28uhcb7':                       {u:"https://github.com/cfms-lab/PFTF_FXShock_dev"},   // PFTF_FXShock  ← PFTF_FXShock
+    'n9udaty3':                       {u:"https://github.com/cfms-lab/PFTF_Solar_dev"},   // PFTF_Solar  ← PFTF_Solar
+    'nywj24v4':                       {u:"https://github.com/cfms-lab/PFTF_Terrain_dev"},   // PFTF_Terrain  ← PFTF_Terrain
+    'nece2i15':                       {u:"https://github.com/cfms-lab/PFTF_Radiotherapy_dev"},   // PFTF_Radiotherapry  ← PFTF_Radiotherapy
+    'nj8l68c8':                       {u:"https://github.com/cfms-lab/PFTF_RainNowcast_dev"},   // PFTF_RainNowcast  ← PFTF_RainNowcast
+    'n2jvi7n6':                       {u:"https://github.com/cfms-lab/PFTF_Inspection_dev"},   // PFTF_Inspection  ← PFTF_Inspection
+    'nqov6ls1':                       {u:"https://github.com/cfms-lab/PFTF_subMarine_dev"},   // PFTF_subMarine  ← PFTF_subMarine
+    'gx_pftf_cnc':                    {u:"https://github.com/cfms-lab/PFTF_CNC_dev"},   // PFTF_CNC  ← PFTF_CNC
+    'gx_pftf_assetshock':             {u:"https://github.com/cfms-lab/PFTF_AssetShock_dev"},   // PFTF_AssetShock  ← PFTF_AssetShock
+    'gx_pftf_researchoptimize':       {u:"https://github.com/cfms-lab/PFTF_ResearchOptimize_dev"},   // PFTF_ResearchOptimize  ← PFTF_ResearchOptimize
+    'nkbfa3m1':                       {u:"https://github.com/cfms-lab/SFTF_DynamicTargetSearch_dev"},   // SFTF_DynamicTargetSearch  ← SFTF_DynamicTargetSearch
+    'n7hixqe5':                       {u:"https://github.com/cfms-lab/SFTF_ActiveOverprint_dev"},   // SFTF_ActiveOverprint  ← SFTF_ActiveOverprint
+    'n3k56wq4':                       {p:"D:\\__VSCode_Projects\\cfmsAutoSew2026_dev"},   // AutoSew  ← cfmsAutoSew
+    'njkskwe4':                       {u:"https://github.com/cfms-lab/SFTF_DrapePrior_dev"},   // SFTF_DrapePrior  ← SFTF_DrapePrior
+    'n2dzarb3':                       {u:"https://github.com/cfms-lab/cfmsCIPC_dev"},   // cfmsCIPC  ← cfmsCIPC
+    'nzk1z3i1':                       {p:"D:\\__VSCode_Projects\\cfmsContactTensor_dev"},   // Contact Tensor  ← cfmsContactTensor
+    'nsisy8l1':                       {p:"D:\\__VSCode_Projects\\cfmsBlockPrecond_dev"},   // cfmsBlockPrecond   ← cfmsBlockPrecond
+  };
+  // 웹에 값이 있지만 볼트와 어긋나 **덮어쓸** 것. 사용자 확인을 받은 것만 넣는다.
+  const FIX={
+    'njkskwe4': {p:"D:\\__VSCode_Projects\\SFTF_DrapePrior_dev"},   // SFTF_DrapePrior — 2026-08-19 폴더 이동
+    'n2dzarb3': {p:"D:\\__VSCode_Projects\\cfmsCIPC_dev"},   // cfmsCIPC — 원고 폴더가 아니라 프로젝트 폴더
+  };
+  let changed=false;
+  Object.keys(FILL).forEach(id=>{
+    const n=findNode(root,id); if(!n) return;
+    const f=FILL[id];
+    if(f.u && !n.url){ n.url=f.u; changed=true; }
+    if(f.p && !n.projectPath){ n.projectPath=f.p; changed=true; }
+  });
+  Object.keys(FIX).forEach(id=>{
+    const n=findNode(root,id); if(!n) return;
+    const f=FIX[id];
+    if(f.u && n.url!==f.u){ n.url=f.u; changed=true; }
+    if(f.p && n.projectPath!==f.p){ n.projectPath=f.p; changed=true; }
+  });
+  data.linkFillVersion=LINK_FILL_VERSION;
+  return changed;
+}
+
+/* ====================== status 정리 (2026-08-22) ======================
+   진도 아이콘을 붙이면서 드러난 것 둘.
+   ① 구조 노드(root·group)가 논문 상태를 달고 있었다. 분류/공간 노드라 논문이
+      아닌데 published·inprint 로 잡혀 '출판된 논문'처럼 보였다. 비표준 값
+      (active·infra)도 같이 지운다. 구조 노드에는 status 자체가 필요 없다.
+   ② Tomo_SFTF 가 'submitted' 가 아니라 'submit' 이었다(오타). 정작 찾고 싶은
+      노드라 아이콘이 안 붙었다. progStatus() 별칭은 임시 방편이고 여기서 데이터를
+      바로잡는다.
+   지울 값을 하나하나 적어 두고 **현재 값이 그대로일 때만** 손댄다. 그 뒤에 다른
+   값으로 바꿔 두셨다면 건드리지 않는다(applyLinkFill 의 FIX 맵과 같은 규율).
+   pull-mindmap.mjs 는 root·group 을 건너뛰므로 ①은 볼트에 영향이 없다. */
+const STATUS_CLEANUP_VERSION='2026-08-22';
+function applyStatusCleanup20260822(data){
+  if(!data||!data.root) return false;
+  if(data.statusCleanupVersion===STATUS_CLEANUP_VERSION) return false;
+  const DROP={                       // id: 지울 때 기대하는 현재 값
+    'root':     'active',            // CFMS 연구실 2026 (루트)
+    'cfmsdrape':'infra',             // 미인도 프로젝트 (그룹)
+    'nkrb7xj2': 'published',         // 이희란 교수님방
+    'nffg4ou5': 'published',         // 은종현 교수님방
+    'nu2cia21': 'inprint',           // 건축/토목
+    'nt767xg6': 'inprint',           // 전기/전자
+    'nrl6vop4': 'published',         // 금형 설계
+    'n89bqgy7': 'inprint'            // 공장 설계
+  };
+  const RETAG={ 'sftf':{from:'submit', to:'submitted'} };   // Tomo_SFTF
+  let changed=false;
+  Object.keys(DROP).forEach(id=>{
+    const n=findNode(data.root,id);
+    if(n && n.status===DROP[id]){ delete n.status; changed=true; }
+  });
+  Object.keys(RETAG).forEach(id=>{
+    const n=findNode(data.root,id), r=RETAG[id];
+    if(n && n.status===r.from){ n.status=r.to; changed=true; }
+  });
+  data.statusCleanupVersion=STATUS_CLEANUP_VERSION;
+  return changed;
+}
+
 //==PURE_END
 
 /* ====================== Supabase 설정/세션 (upjuk과 공유) ====================== */
@@ -539,6 +651,45 @@ function normalizeKinds(data){
   return changed;
 }
 const STATUS={published:'published',inprint:'in print',accepted:'accepted',submitted:'submitted',draft:'draft',cancelled:'cancelled'};
+
+/* ====================== 진도 아이콘 (XMind 풍 파이) ======================
+   노드가 많아 어느 것이 투고/출판인지 안 보이는 문제. 논문 진행선만 아이콘으로
+   드러낸다. draft 는 점선 테두리, cancelled 는 취소선으로 이미 구분되므로 뺐다.
+   frac = 채워지는 비율, done = 꽉 찬 원 + 체크. */
+const PROGRESS={
+  submitted:{frac:0.5,   label:'투고(submitted)'},
+  accepted: {frac:0.75,  label:'게재확정(accepted)'},
+  inprint:  {frac:0.875, label:'인쇄중(in print)'},
+  published:{done:true,  label:'출판(published)'}
+};
+// 옛 표기. 읽을 때만 받아준다(데이터는 그대로 둔다). 예: Tomo_SFTF 의 'submit'.
+const LEGACY_STATUS={submit:'submitted'};
+const progStatus=st=>LEGACY_STATUS[st]||st;
+const PROG_W=16;                       // 아이콘이 차지하는 가로폭(제목을 그만큼 민다)
+const PROG_GREEN='#16a34a';            // 밝은 배경일 때. 채색 박스에서는 글자색(흰색)을 쓴다.
+function progIcon(status, cx, cy, color, checkColor, outline){
+  const p=PROGRESS[progStatus(status)]; if(!p) return '';
+  const r=6;
+  /* outline 을 주면 아이콘 바깥에 그 색 링을 깔아 배경에서 떼어 놓는다.
+     빨강 '상' 박스 위의 초록처럼 명도가 비슷한 조합에서 필요하다.
+     링의 안쪽 가장자리를 아이콘 바깥선에 붙인다(파이형 6.8, 완료형 6.0).
+     범례는 밝은 배경이라 안 넘긴다 — 넘기면 아이콘이 커져 viewBox 를 키워야 하고
+     그만큼 12px 안에서 그림이 작아진다. */
+  const halo=or=>outline
+    ? `<circle cx="${cx}" cy="${cy}" r="${or}" fill="none" stroke="${outline}" stroke-width="1.2"/>`
+    : '';
+  if(p.done){                          // 완료: 꽉 찬 원 + 배경색 체크
+    return halo(6.6)
+         + `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}"/>`
+         + `<path d="M${cx-2.9},${cy+0.2} l2.1,2.2 l3.9,-4.4" fill="none" stroke="${checkColor}"`
+         + ` stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+  const a=2*Math.PI*p.frac;            // 12시에서 시계방향으로 채운다
+  const ex=cx+r*Math.sin(a), ey=cy-r*Math.cos(a), big=p.frac>0.5?1:0;
+  return halo(7.4)
+       + `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="1.6"/>`
+       + `<path d="M${cx},${cy} L${cx},${cy-r} A${r},${r} 0 ${big} 1 ${ex},${ey} Z" fill="${color}"/>`;
+}
 let DATA=JSON.parse(JSON.stringify(DEFAULT_DATA));
 normalizeKinds(DATA);
 applySubmissionPlan20260806(DATA);
@@ -615,12 +766,17 @@ function render(){
     const hasKids=(n.children||[]).length>0;
     const sub=truncW(n.brief||n.note||'', p.w-24, 10);   // 제목 아래: graph 소개(brief) 우선, 없으면 메모 (박스 폭에 맞게 자름)
     const titleY=sub?19:(lay.nodeH/2+4.5);
+    const prog=hasProg(n);
+    const titleX=prog?12+PROG_W:12;
     h+=`<g class="${cls}" data-id="${n.id}" transform="translate(${p.x},${p.y})">`;
     h+=`<rect class="box" width="${p.w}" height="${lay.nodeH}" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="2" ${dash} data-act="sel" data-id="${n.id}"/>`;
-    h+=`<text x="12" y="${titleY}" font-size="12.5" font-weight="700" fill="${textColor}" ${cancelled?'text-decoration="line-through"':''}>${esc(truncW(n.title, p.w-24-(n.url?16:0), 12.5))}</text>`;
+    // 아이콘 색은 박스 색과 무관하게 범례와 같은 초록으로 고정한다.
+    // 흰색으로 하면 채색 박스(상/중/하/Closed)에서 배경에 묻혀 잘 안 보인다.
+    if(prog)h+=progIcon(n.status, 18, titleY-4.5, PROG_GREEN, '#ffffff', '#ffffff');
+    h+=`<text x="${titleX}" y="${titleY}" font-size="12.5" font-weight="700" fill="${textColor}" ${cancelled?'text-decoration="line-through"':''}>${esc(truncW(n.title, p.w-24-(n.url?16:0)-(prog?PROG_W:0), 12.5))}</text>`;
     if(sub)h+=`<text x="12" y="${lay.nodeH-11}" font-size="10" fill="${cancelled?INK2:textColor}">${esc(sub)}</text>`;
     if(n.url)h+=`<text x="${p.w-7}" y="15" text-anchor="end" font-size="10">🔗</text>`;
-    h+=`<title>${esc(n.title)}${n.brief?'\n'+esc(n.brief):''}${n.note?'\n'+esc(n.note):''}${n.url?'\n'+esc(n.url):''}</title>`;
+    h+=`<title>${esc(n.title)}${n.status?'\n상태: '+esc(STATUS[n.status]||n.status):''}${n.brief?'\n'+esc(n.brief):''}${n.note?'\n'+esc(n.note):''}${n.url?'\n'+esc(n.url):''}</title>`;
     if(hasKids){ const tx=-10,ty=lay.nodeH/2;
       h+=`<g class="toggle" data-act="toggle" data-id="${n.id}"><circle cx="${tx}" cy="${ty}" r="8.5" fill="#fcfcfb" stroke="${stroke}" stroke-width="1.6"/>`+
          `<text x="${tx}" y="${ty+4}" text-anchor="middle" font-size="12" font-weight="700" fill="${stroke}">${n.collapsed?'+':'–'}</text></g>`;
@@ -633,7 +789,10 @@ function renderLegend(){
   document.getElementById('legend').innerHTML=Object.keys(KIND).map(k=>
     `<span class="lg"><i style="border-color:${KIND[k].stroke};background:${KIND[k].fill}"></i>${KIND[k].label}</span>`).join('')
     +`<span class="lg"><i style="border-style:dashed;border-color:#999;background:#fff"></i>draft(초안)</span>`
-    +`<span class="lg"><i style="border-color:#9d9c98;background:#e3e2de"></i><s>cancelled(취소)</s></span>`;
+    +`<span class="lg"><i style="border-color:#9d9c98;background:#e3e2de"></i><s>cancelled(취소)</s></span>`
+    +Object.keys(PROGRESS).map(k=>
+      `<span class="lg"><svg viewBox="0 0 13 13">`
+      +progIcon(k, 6.5, 6.5, PROG_GREEN, '#ffffff')+`</svg>${PROGRESS[k].label}</span>`).join('');
 }
 
 /* ====== VSCODE·링크 버튼: 모든 노드에 동일하게 만들고, 값이 유효할 때만 눌리게 한다 ====== */
@@ -847,10 +1006,12 @@ async function loadDoc(){
     const graphMigrated=applyGraphNodes20260811(DATA);
     const dedupMigrated=applyDedup20260811(DATA);
     const metaMigrated=applyGraphMeta20260811(DATA);
+    const linkMigrated=applyLinkFill20260820(DATA);
+    const statusMigrated=applyStatusCleanup20260822(DATA);
     const kindsMigrated=normalizeKinds(DATA);
     showRel=DATA.showRel!==false; document.getElementById('relBtn').textContent='관계선 '+(showRel?'✓':'✕');
     sel=null; render(); renderEdit(); fitView(); setSaveState('');
-    if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||kindsMigrated) await saveDoc(true);
+    if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||linkMigrated||statusMigrated||kindsMigrated) await saveDoc(true);
   }catch(e){
     const b=document.getElementById('banner'); b.style.display='block';
     if(/relation|does not exist|42P01|PGRST205|404/i.test(e.message))
@@ -858,7 +1019,7 @@ async function loadDoc(){
     else if(!isLoggedIn() && /401|403|PGRST301|permission denied/i.test(e.message))
       b.textContent='공개 열람 권한이 없습니다. Supabase에서 enable_rls_mindmaps.sql 을 다시 실행해 anon SELECT 정책을 적용하세요.';
     else b.textContent='데이터를 불러오지 못했습니다: '+e.message.slice(0,140);
-    applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
+    applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
   }
 }
 async function saveDoc(silent){
@@ -876,7 +1037,7 @@ function download(name,text,type){ const b=new Blob([text],{type:type||'applicat
 function exportJSON(){ download('mindmap_backup.json', JSON.stringify(DATA,null,2)); toast('백업 JSON을 내려받았습니다.'); }
 function importJSON(input){
   const f=input.files[0]; if(!f)return; const r=new FileReader();
-  r.onload=()=>{ try{ const d=JSON.parse(r.result); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); applyLinkFill20260820(d); applyStatusCleanup20260822(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
     if(!confirm('백업으로 현재 클라우드 관계도를 덮어쓸까요?'))return;
     pushHistory();
     DATA=d; showRel=DATA.showRel!==false; sel=null; render(); renderEdit(); saveDoc(false);

@@ -27,6 +27,7 @@ SRC = "graph.html"
 # graph.html is the canonical deployed graph.  graph_발견.html is a frozen
 # findings view and is intentionally not touched by new-project onboarding.
 DSTS = ["graph.html"]
+HIDDEN_NODE_IDS = {"PFTF_subMarine", "PFTF_Terrain"}
 
 # Project notes are the single source of truth for local VS Code paths.  The
 # graph node id normally matches the Obsidian project-note stem, so the button
@@ -97,45 +98,37 @@ NODE_SOURCE_FILES = {
 
 # ----------------------------------------------------------------- 좌표 (발견 기준)
 POS = {
-    # 2026-08-06: 사용자가 graph.html에서 조정한 배치를 정본으로 승격.
-    "Tomo_SFTF": (-210, 192),
-    "Tomo_SFTFSoft": (-20, 207),
+    # 2026-08-23: 사용자가 graph.html에서 조정한 배치를 정본으로 승격.
+    "Tomo_SFTF": (-254, 216),
+    "Tomo_SFTFSoft": (-29, 255),
     "SFTF_Clustering": (109, 508),
-    "PFTF": (101, 390),
+    "PFTF": (119, 411),
     "SFTF_Composite": (349, 706),
-    "SFTF_InjMold": (-417, 0),
+    "SFTF_InjMold": (79, 730),
     "PFTF_Compression": (530, 578),
-    "SFTF_ThermalChip": (-366, -185),
-    "PFTF_Mold": (508, 667),
-    "Tomo_DiffSupport": (259, 135),
-    "PFTF_VisCull_kDop": (395, 422),
-    "SFTF_SewerPOC": (-121, -142),
-    "PFTF_FXShock": (155, 653),
-    "SFTF_BatteryThermal": (-172, -250),
-    "SFTF_PDNElectric": (-330, -90),
-    "PFTF_Inspection": (533, 394),
-    "PFTF_RainNowcast": (6, 635),
-    "PFTF_Terrain": (-132, 572),
-    "PFTF_Solar": (56, 708),
-    "PFTF_subMarine": (-244, 549),
-    "PFTF_Assembly": (-127, 687),
-    "PFTF_CNC": (74, -222),
-    "PFTF_Radiotherapy": (348, 615),
-    "SFTF_DataCenterTraffic": (-281, 464),
-    "SFTF_UrbanTraffic": (-345, 226),
-    "SFTF_WarehouseAGV": (-429, 151),
-    "PFTF_AssetShock": (-361, 337),
-    "SFTFSoft_GNN": (149, 69),
+    "Tomo_DFSVR": (259, 135),
+    "PFTF_VisCull_kDop": (354, 441),
+    "SFTF_SewerPOC": (-78, 653),
+    "SFTFSoft_GNN": (135, 65),
     "SFTF_DrapePrior": (207, 304),
     "PFTF_AsymTensor": (146, 173),
-    "PFTF_DrapePrior_VisCull_kDop": (275, 263),
-    "PFTF_ResearchOptimize": (-70, 423),
-    "PFTF_alpha": (182, -238),
-    "SFTF_QEM": (34, 1),
-    "SFTF_DynamicTargetSearch": (-142, 41),
+    "PFTF_DrapePrior_VisCull_kDop": (300, 350),
+    "PFTF_ResearchOptimize": (34, 367),
+    "PFTF_alpha": (-42, 506),
+    "SFTF_QEM": (-122, 477),
+    "SFTF_DynamicTargetSearch": (-119, 50),
+    "DFSVR_VisCull": (412, 120),
+    "SFTFSoft_GNN_DFSVR": (244, 1),
     "SFTF_ActiveOverprint": (-67, 112),
-    "DFSVR_VisCull": (458, 229),
-    "SFTFSoft_GNN_DFSVR": (300, -36),
+    "ColdOndol": (-207, 427),
+    "ColdOndol_Positioning": (-279, 390),
+    "cfmsCIPC": (520, 289),
+    "TSE_SEM": (264, 553),
+    "SFTF_HeatMethod": (430, 790),
+    "cfmsPINNDrape": (387, 298),
+    "cfmsDrape": (615, 335),
+    "cfmsMiindo": (690, 425),
+    "cfmsPINNCAD": (496, 428),
 }
 
 HYPEREDGES = [
@@ -178,6 +171,20 @@ HYPEREDGES = [
      "color": "#0891b2", "labelColor": "#0e7490",
      "fillAlpha": 0.025, "strokeAlpha": 0.70, "labelAlpha": 0.95,
      "lineWidth": 2, "dash": [16, 8], "scale": 1.08},
+    # Garment-simulation domain overlay. Keep this in the generator so a later
+    # refresh cannot erase the manually curated public grouping.
+    {"label": "의복 시뮬레이션",
+     "kind": "domain",
+     "nodes": ["SFTF_DrapePrior", "PFTF_Compression", "PFTF_VisCull_kDop",
+               "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape", "cfmsMiindo",
+               "cfmsPINNCAD"],
+     "color": "#db2777", "labelColor": "#be185d",
+     "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
+     "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
+]
+HYPEREDGES = [
+    {**h, "nodes": [node_id for node_id in h["nodes"] if node_id not in HIDDEN_NODE_IDS]}
+    for h in HYPEREDGES
 ]
 
 # 2026-07-30 quality snapshot, synchronized from the KIT_sodi mindmap backup. Quality is the single classification axis
@@ -226,6 +233,7 @@ QUALITY_ROWS = [
     ("SFTFSoft_GNN_DFSVR", "SFTFSoft_GNN_DFSVR", "ToDo",
      "profile-conditioned GNN proposer → DFSVR first-hit refiner → held-out slicer verifier; frozen budget-matched A–E benchmark 전"),
 ]
+QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
 
 # 대학원생이 처음 그래프를 읽을 때 바로 이해할 수 있도록, 각 프로젝트를
 # 전문용어 없이 한 문장으로 설명한다.  이 문장은 논문의 성능 주장이 아니라
@@ -307,9 +315,9 @@ QUALITY_CSS = r'''/* QUALITY_BOARD_BEGIN */
 # 영역 간 의존성 (인덱스 = HYPEREDGES 순서: 0=발견1 1=발견2 2=발견3 3=발견3' 4=발견4·5·6)
 DEPS_JS = """// FINDING_DEPS_BEGIN — 발견 간 의존성 (분류표 노트의 DAG, layout_findings.py 정본)
 const FINDING_DEPS = [
-  {from:0, to:1, style:"solid",    label:"전제(사다리·레이스)"},
-  {from:0, to:2, style:"solid",    label:"전제"},
-  {from:0, to:4, style:"solid",    label:"전제", labelT:0.22},
+  {from:0, to:1, style:"solid"},
+  {from:0, to:2, style:"solid"},
+  {from:0, to:4, style:"solid"},
   {from:2, to:1, style:"dotted",   label:"\\u2124\\u2082 보조정리", labelT:0.78},
   {from:2, to:4, style:"double",   label:"\\u2124\\u2082 쌍대(\\u00b1d)"},
   {from:2, to:3, style:"contrast", label:"소거 \\u2194 생존 대비"},
@@ -348,11 +356,6 @@ function _regionCentroid(h) {
       ctx.globalAlpha = 0.32;
       ctx.fillStyle = ctx.strokeStyle; ctx.fill();
     }
-    ctx.globalAlpha = 0.95;
-    ctx.fillStyle = "#4a4dbf";
-    ctx.font = "18px sans-serif"; ctx.textAlign = "center";
-    const t = dp.labelT === undefined ? 0.5 : dp.labelT;
-    ctx.fillText(dp.label, x1+(x2-x1)*t, y1+(y2-y1)*t - 6);
   });
   ctx.restore();
 })(ctx);
@@ -417,19 +420,85 @@ function _glyph(ctx, type, x, y) {
 })(ctx);
 // FINDING_DEPS_END"""
 
+HYPEREDGE_LABEL_HELPERS_JS = r'''// HYPEREDGE_LABEL_HELPERS_BEGIN
+function _boxOverlapArea(a, b) {
+  const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
+  const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+  return w * h;
+}
+function _nodeLabelBoxes() {
+  return RAW_NODES.map(n => {
+    const b = network.getBoundingBox(n.id);
+    return b && {left: b.left - 6, right: b.right + 6, top: b.top - 6, bottom: b.bottom + 6};
+  }).filter(Boolean);
+}
+function _hyperedgeViewportBounds() {
+  const pad = 14;
+  const tl = network.DOMtoCanvas({x: pad, y: pad});
+  const br = network.DOMtoCanvas({x: Math.max(pad, container.clientWidth - pad),
+                                  y: Math.max(pad, container.clientHeight - pad)});
+  return {left: Math.min(tl.x, br.x), right: Math.max(tl.x, br.x),
+          top: Math.min(tl.y, br.y), bottom: Math.max(tl.y, br.y)};
+}
+function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes, viewport) {
+  ctx.font = 'bold 20px sans-serif';
+  const textWidth = ctx.measureText(h.label).width;
+  const textHeight = 22;
+  let best = null;
+  for (let i = 0; i < polygon.length; i++) {
+    const a = polygon[i], b = polygon[(i + 1) % polygon.length];
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const length = Math.hypot(dx, dy);
+    if (length < 1) continue;
+    const ux = dx / length, uy = dy / length;
+    let nx = -uy, ny = ux;
+    const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    if (nx * (mx - cx) + ny * (my - cy) < 0) { nx = -nx; ny = -ny; }
+    let angle = Math.atan2(dy, dx);
+    if (angle > Math.PI / 2) angle -= Math.PI;
+    if (angle < -Math.PI / 2) angle += Math.PI;
+    const ca = Math.abs(Math.cos(angle)), sa = Math.abs(Math.sin(angle));
+    const halfW = (ca * textWidth + sa * textHeight) / 2;
+    const halfH = (sa * textWidth + ca * textHeight) / 2;
+    // 12px puts the 22px text box about 1px outside the hull edge. Larger
+    // offsets are fallbacks only when a node/title collision requires them.
+    for (const offset of [12, 18, 26, 38, 52]) {
+      const x = mx + nx * offset, y = my + ny * offset;
+      const box = {left: x - halfW, right: x + halfW, top: y - halfH, bottom: y + halfH};
+      const nodeOverlap = nodeBoxes.reduce((sum, other) => sum + _boxOverlapArea(box, other), 0);
+      const labelOverlap = placedBoxes.reduce((sum, other) => sum + _boxOverlapArea(box, other), 0);
+      const overflow = Math.max(0, viewport.left - box.left) + Math.max(0, box.right - viewport.right)
+                     + Math.max(0, viewport.top - box.top) + Math.max(0, box.bottom - viewport.bottom);
+      const shortfall = Math.max(0, textWidth + 18 - length);
+      const proximityPenalty = (offset - 12) * 2000;
+      const score = nodeOverlap * 1000 + labelOverlap * 200 + overflow * overflow * 1000
+                  + shortfall * shortfall * 2 + proximityPenalty;
+      if (!best || score < best.score) best = {x, y, angle, box, score};
+    }
+  }
+  if (!best) return;
+  placedBoxes.push(best.box);
+  ctx.save();
+  ctx.translate(best.x, best.y);
+  ctx.rotate(best.angle);
+  ctx.globalAlpha = h.labelAlpha == null ? 0.8 : h.labelAlpha;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+  ctx.strokeText(h.label, 0, 0);
+  ctx.fillStyle = h.labelColor || h.color || '#6366f1';
+  ctx.fillText(h.label, 0, 0);
+  ctx.restore();
+}
+// HYPEREDGE_LABEL_HELPERS_END'''
+
 s = io.open(SRC, encoding="utf-8").read()
 
 
 def _prefer_local_graph_side(text):
-    """Remove stale Git conflict wrappers before regenerating the graph.
-
-    ``graph.html`` is a generated artifact, so a merge conflict must never be
-    copied into the next generated artifact.  The local side is the current
-    graph snapshot that this layout pass is already operating on; preserve it
-    and discard the stale remote duplicate.  A stray opening marker is also
-    removed because older interrupted merges left one without its closing
-    pair.
-    """
+    """Keep the current generated snapshot and discard stale merge wrappers."""
     conflict = re.compile(
         r"(?ms)^<<<<<<< HEAD\r?\n(?P<local>.*?)^=======\r?\n"
         r".*?^>>>>>>> origin/main\r?\n?"
@@ -444,6 +513,24 @@ def _prefer_local_graph_side(text):
 
 
 s = _prefer_local_graph_side(s)
+
+# Dependency edges start hidden. The checkbox, runtime state, and DataSet must
+# agree on the first frame; otherwise vis-network briefly renders every edge.
+s, nedge_checkbox = re.subn(
+    r'(<input type="checkbox" id="edge-cb")(?: checked)?(>에지</label>)',
+    r'\1\2', s, count=1,
+)
+s, nedge_state = re.subn(
+    r"let showEdges = (?:true|false);",
+    "let showEdges = false;", s, count=1,
+)
+s, nedge_initial_hidden = re.subn(
+    r"(id: i, from: e\.from, to: e\.to,\n)(?:  hidden: true,\n)?",
+    r"\1  hidden: true,\n", s, count=1,
+)
+assert nedge_checkbox == nedge_state == nedge_initial_hidden == 1, (
+    nedge_checkbox, nedge_state, nedge_initial_hidden
+)
 
 # Preserve the extended quality overlay used by the deployed graph (Closed
 # nodes, bottlenecks, project roles, and bracket-caption rims).  Older/fresh
@@ -796,6 +883,7 @@ def _reclassify_raw_nodes(match):
                 },
             )
             node["color"] = node_color
+    nodes = [node for node in nodes if node.get("id") not in HIDDEN_NODE_IDS]
     return "const RAW_NODES = " + json.dumps(nodes, ensure_ascii=False) + ";"
 
 s, nraw = re.subn(r"const RAW_NODES = (\[.*?\]);", _reclassify_raw_nodes,
@@ -807,10 +895,10 @@ def _inject_todo_edges(match):
     for edge in TODO_EDGES:
         if (edge["from"], edge["to"]) not in existing:
             edges.append(edge)
-    # The graph snapshot can drop a project while an older edge survives in
-    # the exported edge list.  Never emit an edge whose endpoint is absent;
-    # vis-network otherwise reports an initialization error and may render no
-    # graph at all.
+    edges = [
+        edge for edge in edges
+        if edge.get("from") not in HIDDEN_NODE_IDS and edge.get("to") not in HIDDEN_NODE_IDS
+    ]
     node_match = re.search(r"const RAW_NODES = (\[.*?\]);", s, flags=re.S)
     if node_match:
         node_ids = {str(node["id"]) for node in json.loads(node_match.group(1))}
@@ -880,10 +968,9 @@ s, nleg = re.subn(r"const LEGEND = (\[.*?\]);", _quality_legend, s, count=1, fla
 raw_nodes_for_stats = json.loads(re.search(r"const RAW_NODES = (\[.*?\]);", s, flags=re.S).group(1))
 raw_edges_for_stats = json.loads(re.search(r"const RAW_EDGES = (\[.*?\]);", s, flags=re.S).group(1))
 
-# A graph export can add a project before a hand-tuned POS entry exists.  Do
-# not leave those nodes at the origin with physics disabled: give only the
-# missing IDs a deterministic outer-ring position and preserve every manual
-# coordinate above.
+# New project nodes may arrive before a hand-tuned POS entry.  Give only
+# missing IDs a deterministic outer-ring position so physics-disabled
+# vis-network does not stack them at the origin.
 position_map = dict(POS)
 missing_position_ids = [
     str(node["id"])
@@ -910,7 +997,7 @@ for hyperedge in HYPEREDGES:
     if len(members) >= 2:
         hyperedges_for_graph.append({**hyperedge, "nodes": members})
 stats_text = (
-    f"{len(raw_nodes_for_stats)} nodes &middot; {len(raw_edges_for_stats)} edges "
+    f"{len(raw_nodes_for_stats)} nodes &middot; 0 edges "
     f"&middot; {len(quality_legend) + (1 if preserve_extended_quality else 0)} communities"
 )
 s, nstats = re.subn(r"\d+ nodes &middot; \d+ edges &middot; \d+ communities",
@@ -952,24 +1039,46 @@ s = s.replace(
     "font: { ...(n.font || {}), size: Math.max(18.7, (n.font && n.font.size) || 0), bold: false }, title:",
 )
 
-# hull 라벨 위치: 중심(cy-5) → convex hull 중앙-상단 바깥 (노드 캡션 겹침 회피)
-# 멱등: 이전 주입을 먼저 원형으로 되돌린 뒤 다시 적용 (const 중복 선언 방지)
-s = s.replace("const topY = Math.min.apply(null, expanded.map(p => p.y)); "
-              "ctx.fillText(h.label, cx, topY - 16);",
-              "ctx.fillText(h.label, cx, cy - 5);")
+# Hull labels follow a polygon edge and choose the least-overlapping outward
+# position against vis-network's actual node/label bounding boxes.
+s = re.sub(r"\n// HYPEREDGE_LABEL_HELPERS_BEGIN.*?// HYPEREDGE_LABEL_HELPERS_END\n?",
+           "\n", s, flags=re.S)
+label_helper_anchor = "// afterDrawing passes ctx already transformed to network coordinate space."
+assert label_helper_anchor in s
+s = s.replace(label_helper_anchor,
+              HYPEREDGE_LABEL_HELPERS_JS + "\n" + label_helper_anchor, 1)
+s = re.sub(
+    r"\n    const nodeLabelBoxes = _nodeLabelBoxes\(\);\n"
+    r"    const placedHyperedgeLabelBoxes = \[\];"
+    r"(?:\n    const hyperedgeViewport = _hyperedgeViewportBounds\(\);)?",
+    "", s, count=1,
+)
+s, nlabel_frame = re.subn(
+    r"(network\.on\('afterDrawing', function\(ctx\) \{\n"
+    r"    if \(!showHyper\) return;[^\n]*\n)",
+    r"\1    const nodeLabelBoxes = _nodeLabelBoxes();\n"
+    r"    const placedHyperedgeLabelBoxes = [];\n"
+    r"    const hyperedgeViewport = _hyperedgeViewportBounds();\n",
+    s, count=1,
+)
 s, nf3 = re.subn(
-    r"ctx\.fillText\(h\.label, cx, [^)]+\);",
-    "const topY = Math.min.apply(null, expanded.map(p => p.y)); "
-    "ctx.fillText(h.label, cx, topY - 16);", s)
-if nf3 == 0:
-    # The deployed 37-node baseline already uses the newer left/top label
-    # placement, so no conversion is required.
-    nf3 = len(re.findall(r"ctx\.fillText\(h\.label, leftX, topY\);", s))
-if nf3 == 0:
-    # Newer exports draw the measured label position through the shared
-    # helper, which receives the label at the local origin.
-    nf3 = len(re.findall(r"ctx\.fillText\(h\.label, 0, 0\);", s))
-assert nf3 >= 1, nf3
+    r"        // Label[^\n]*\n.*?        ctx\.setLineDash\(\[\]\);",
+    "        // Label: choose a hull edge and follow its direction while avoiding nodes.\n"
+    "        _drawHyperedgeLabel(ctx, h, expanded, cx, cy, nodeLabelBoxes, placedHyperedgeLabelBoxes, hyperedgeViewport);\n"
+    "        ctx.setLineDash([]);",
+    s, count=1, flags=re.S,
+)
+redraw_js = '''// HYPEREDGE_INITIAL_REDRAW_BEGIN
+// The network can finish its first frame before the overlay listeners above
+// are registered. Draw once more so hulls and rotated labels appear on load.
+network.redraw();
+// HYPEREDGE_INITIAL_REDRAW_END'''
+s = re.sub(r"\n// HYPEREDGE_INITIAL_REDRAW_BEGIN.*?// HYPEREDGE_INITIAL_REDRAW_END\n?",
+           "\n", s, flags=re.S)
+redraw_anchor = "</script>\n</body>\n</html>"
+assert redraw_anchor in s
+s = s.replace(redraw_anchor, redraw_js + "\n" + redraw_anchor, 1)
+assert nlabel_frame == nf3 == 1, (nlabel_frame, nf3)
 
 # ------------------------------------------------- 프린터 친화 라이트 테마 (2026-07-19d)
 # 배경 white, 기존 white 요소(베이스 노드·하이라이트·legend 점)는 #c8c8c8.
