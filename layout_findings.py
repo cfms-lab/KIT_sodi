@@ -17,6 +17,7 @@ graph_발견.html 두 파일을 동일 내용으로 갱신한다.
 """
 import io
 import json
+import math
 import os
 import re
 from pathlib import Path
@@ -418,6 +419,32 @@ function _glyph(ctx, type, x, y) {
 
 s = io.open(SRC, encoding="utf-8").read()
 
+
+def _prefer_local_graph_side(text):
+    """Remove stale Git conflict wrappers before regenerating the graph.
+
+    ``graph.html`` is a generated artifact, so a merge conflict must never be
+    copied into the next generated artifact.  The local side is the current
+    graph snapshot that this layout pass is already operating on; preserve it
+    and discard the stale remote duplicate.  A stray opening marker is also
+    removed because older interrupted merges left one without its closing
+    pair.
+    """
+    conflict = re.compile(
+        r"(?ms)^<<<<<<< HEAD\r?\n(?P<local>.*?)^=======\r?\n"
+        r".*?^>>>>>>> origin/main\r?\n?"
+    )
+    text = conflict.sub(lambda match: match.group("local"), text)
+    text = re.sub(r"(?m)^<<<<<<< HEAD\r?\n?", "", text)
+    text = re.sub(r"(?m)^=======\r?\n?", "", text)
+    text = re.sub(r"(?m)^>>>>>>> origin/main\r?\n?", "", text)
+    if re.search(r"(?m)^(<<<<<<<|=======|>>>>>>>)", text):
+        raise ValueError("graph.html still contains unresolved Git conflict markers")
+    return text
+
+
+s = _prefer_local_graph_side(s)
+
 # Preserve the extended quality overlay used by the deployed graph (Closed
 # nodes, bottlenecks, project roles, and bracket-caption rims).  Older/fresh
 # graphify exports may only have the compact overlay, in which case the
@@ -780,6 +807,17 @@ def _inject_todo_edges(match):
     for edge in TODO_EDGES:
         if (edge["from"], edge["to"]) not in existing:
             edges.append(edge)
+    # The graph snapshot can drop a project while an older edge survives in
+    # the exported edge list.  Never emit an edge whose endpoint is absent;
+    # vis-network otherwise reports an initialization error and may render no
+    # graph at all.
+    node_match = re.search(r"const RAW_NODES = (\[.*?\]);", s, flags=re.S)
+    if node_match:
+        node_ids = {str(node["id"]) for node in json.loads(node_match.group(1))}
+        edges = [
+            edge for edge in edges
+            if str(edge.get("from")) in node_ids and str(edge.get("to")) in node_ids
+        ]
     return "const RAW_EDGES = " + json.dumps(edges, ensure_ascii=False) + ";"
 
 s, nedge = re.subn(r"const RAW_EDGES = (\[.*?\]);", _inject_todo_edges,
@@ -841,6 +879,36 @@ s, nleg = re.subn(r"const LEGEND = (\[.*?\]);", _quality_legend, s, count=1, fla
 # Keep the sidebar summary consistent with the quality-only graph.
 raw_nodes_for_stats = json.loads(re.search(r"const RAW_NODES = (\[.*?\]);", s, flags=re.S).group(1))
 raw_edges_for_stats = json.loads(re.search(r"const RAW_EDGES = (\[.*?\]);", s, flags=re.S).group(1))
+
+# A graph export can add a project before a hand-tuned POS entry exists.  Do
+# not leave those nodes at the origin with physics disabled: give only the
+# missing IDs a deterministic outer-ring position and preserve every manual
+# coordinate above.
+position_map = dict(POS)
+missing_position_ids = [
+    str(node["id"])
+    for node in raw_nodes_for_stats
+    if str(node["id"]) not in position_map
+]
+if missing_position_ids:
+    radius = 850
+    count = len(missing_position_ids)
+    for index, node_id in enumerate(missing_position_ids):
+        angle = (2 * math.pi * index) / count
+        position_map[node_id] = (
+            round(radius * math.cos(angle)),
+            round(radius * math.sin(angle)),
+        )
+node_ids_for_hyperedges = {str(node["id"]) for node in raw_nodes_for_stats}
+hyperedges_for_graph = []
+for hyperedge in HYPEREDGES:
+    members = [
+        str(node_id)
+        for node_id in hyperedge.get("nodes", [])
+        if str(node_id) in node_ids_for_hyperedges
+    ]
+    if len(members) >= 2:
+        hyperedges_for_graph.append({**hyperedge, "nodes": members})
 stats_text = (
     f"{len(raw_nodes_for_stats)} nodes &middot; {len(raw_edges_for_stats)} edges "
     f"&middot; {len(quality_legend) + (1 if preserve_extended_quality else 0)} communities"
@@ -849,10 +917,10 @@ s, nstats = re.subn(r"\d+ nodes &middot; \d+ edges &middot; \d+ communities",
                     stats_text, s, count=1)
 
 pos_js = "const POS = " + json.dumps(
-    {k: {"x": v[0], "y": v[1]} for k, v in POS.items()}, ensure_ascii=False) + ";"
+    {k: {"x": v[0], "y": v[1]} for k, v in position_map.items()}, ensure_ascii=False) + ";"
 s, n1 = re.subn(r"const POS = \{.*?\};", lambda _m: pos_js, s, count=1,
                 flags=re.S)
-hyper_js = "const hyperedges = " + json.dumps(HYPEREDGES, ensure_ascii=False) + ";"
+hyper_js = "const hyperedges = " + json.dumps(hyperedges_for_graph, ensure_ascii=False) + ";"
 s, n2 = re.subn(r"const hyperedges = \[.*?\];", lambda _m: hyper_js, s, count=1,
                 flags=re.S)
 s, n3 = re.subn(r"<title>.*?</title>",
@@ -897,6 +965,10 @@ if nf3 == 0:
     # The deployed 37-node baseline already uses the newer left/top label
     # placement, so no conversion is required.
     nf3 = len(re.findall(r"ctx\.fillText\(h\.label, leftX, topY\);", s))
+if nf3 == 0:
+    # Newer exports draw the measured label position through the shared
+    # helper, which receives the label at the local origin.
+    nf3 = len(re.findall(r"ctx\.fillText\(h\.label, 0, 0\);", s))
 assert nf3 >= 1, nf3
 
 # ------------------------------------------------- 프린터 친화 라이트 테마 (2026-07-19d)
