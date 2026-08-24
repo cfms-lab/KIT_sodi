@@ -77,6 +77,8 @@ NODE_TITLES = {
                             "surface·next-view 계약 테스트 8개 완료; "
                             "Physical AI 의복 시뮬레이션 직접 통합선; "
                             "RGB-D replay·controlled textile print 전",
+    "SFTF_UrbanTraffic": "SFTF_UrbanTraffic — 하: 도시 도로 교통 흐름 warm-start 응용; "
+                         "M2–M4 계획·solver gap 미해결·추가 DP 필요",
     "PFTF_alpha": "PFTF_alpha — 중: positive two-layer draft; "
                   "Phase 50/51C frozen evidence, B5/M1 상대 207/207 paired wins·"
                   "topology error 0. PFTF/local-SPD 우월성은 주장하지 않으며 "
@@ -129,6 +131,9 @@ POS = {
     "cfmsDrape": (615, 335),
     "cfmsMiindo": (690, 425),
     "cfmsPINNCAD": (496, 428),
+    "cfmsDrapeSCAN": (648, 218),
+    # Restored from the last pre-archive graph snapshot.
+    "SFTF_UrbanTraffic": (-345, 226),
 }
 
 HYPEREDGES = [
@@ -177,7 +182,7 @@ HYPEREDGES = [
      "kind": "domain",
      "nodes": ["SFTF_DrapePrior", "PFTF_Compression", "PFTF_VisCull_kDop",
                "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape", "cfmsMiindo",
-               "cfmsPINNCAD"],
+               "cfmsPINNCAD", "cfmsDrapeSCAN"],
      "color": "#db2777", "labelColor": "#be185d",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
@@ -704,6 +709,21 @@ SFTFSOFT_GNN_DFSVR_NODE = {
     "degree": 2,
 }
 
+URBAN_TRAFFIC_NODE = {
+    "id": "SFTF_UrbanTraffic",
+    "label": "SFTF_UrbanTraffic",
+    "color": {"background": "#2a78d6", "border": "#2a78d6",
+               "highlight": {"background": "#2a78d6", "border": "#2a78d6"}},
+    "size": 13.7,
+    "font": {"size": 13, "color": "#333333"},
+    "title": NODE_TITLES["SFTF_UrbanTraffic"],
+    "community": 3,
+    "community_name": "하",
+    "source_file": "SFTF_UrbanTraffic.md",
+    "file_type": "concept",
+    "degree": 1,
+}
+
 # 2026-07-30: mindmap Paper quality 기준 상으로 동기화. 원고 2편+설명서가 있고
 # 게이트 T·T2·G2·S·X 가 닫혔다.  라벨에 [draft] 를 병기하는 이유는 등급이
 # 상이어도 아직 미투고이기 때문이다.
@@ -734,6 +754,7 @@ TODO_NODES = [
     ACTIVE_OVERPRINT_NODE,
     DFSVR_VIS_CULL_NODE,
     SFTFSOFT_GNN_DFSVR_NODE,
+    URBAN_TRAFFIC_NODE,
 ]
 
 TODO_EDGES = [
