@@ -63,11 +63,48 @@ const danglingHyperedges = hyperedges.flatMap((hyperedge) =>
     .filter((nodeId) => !ids.has(String(nodeId)))
     .map((nodeId) => `${hyperedge.label}:${nodeId}`),
 );
+const urbanNode = nodes.find((node) => node.id === "SFTF_UrbanTraffic");
+const urbanEdges = edges.filter(
+  (edge) => edge.from === "SFTF_UrbanTraffic" || edge.to === "SFTF_UrbanTraffic",
+);
+const finding3 = hyperedges.find((hyperedge) => hyperedge.label === "발견3");
+const garmentSimulation = hyperedges.find(
+  (hyperedge) => hyperedge.label === "의복 시뮬레이션",
+);
+const expectedGarmentNodes = [
+  "PFTF", "SFTF_Composite", "SFTF_DrapePrior", "PFTF_Compression",
+  "PFTF_VisCull_kDop", "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape",
+  "cfmsMiindo", "cfmsPINNCAD",
+];
+const buildingEnergy = hyperedges.find(
+  (hyperedge) => hyperedge.label === "온돌 냉방 / 건물 에너지",
+);
+const expectedBuildingEnergyNodes = ["ColdOndol", "ColdOndol_Positioning"];
 
 if (duplicateIds || danglingEdges.length || missingPositions.length || danglingHyperedges.length) {
   throw new Error(
     JSON.stringify({ duplicateIds, danglingEdges: danglingEdges.length, missingPositions: missingPositions.map((node) => node.id), danglingHyperedges }),
   );
+}
+if (!urbanNode || urbanEdges.length < 1 || finding3?.nodes?.join(",") !== "SFTF_UrbanTraffic") {
+  throw new Error("SFTF_UrbanTraffic node, relation edge, or singleton 발견3 hyperedge is missing");
+}
+if (
+  !garmentSimulation
+  || expectedGarmentNodes.some((nodeId) => !garmentSimulation.nodes.includes(nodeId))
+  || new Set(garmentSimulation.nodes).size !== garmentSimulation.nodes.length
+) {
+  throw new Error("의복 시뮬레이션 hyperedge membership is incomplete or duplicated");
+}
+if (
+  !buildingEnergy
+  || buildingEnergy.kind !== "domain"
+  || buildingEnergy.nodes.join(",") !== expectedBuildingEnergyNodes.join(",")
+) {
+  throw new Error("온돌 냉방 / 건물 에너지 domain membership is missing or incorrect");
+}
+if (!html.includes("if (positions.length < 1) return;") || !html.includes("if (ps.length < 1) return;")) {
+  throw new Error("singleton hyperedge rendering guards are missing");
 }
 
 console.log(JSON.stringify({

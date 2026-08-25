@@ -77,8 +77,7 @@ NODE_TITLES = {
                             "surface·next-view 계약 테스트 8개 완료; "
                             "Physical AI 의복 시뮬레이션 직접 통합선; "
                             "RGB-D replay·controlled textile print 전",
-    "SFTF_UrbanTraffic": "SFTF_UrbanTraffic — 하: 도시 도로 교통 흐름 warm-start 응용; "
-                         "M2–M4 계획·solver gap 미해결·추가 DP 필요",
+    "SFTF_UrbanTraffic": "SFTF_UrbanTraffic — 도시 교통 가역차로 방향장 응용",
     "PFTF_alpha": "PFTF_alpha — 중: positive two-layer draft; "
                   "Phase 50/51C frozen evidence, B5/M1 상대 207/207 paired wins·"
                   "topology error 0. PFTF/local-SPD 우월성은 주장하지 않으며 "
@@ -100,40 +99,41 @@ NODE_SOURCE_FILES = {
 
 # ----------------------------------------------------------------- 좌표 (발견 기준)
 POS = {
-    # 2026-08-23: 사용자가 graph.html에서 조정한 배치를 정본으로 승격.
+    # 2026-08-25: 사용자가 graph.html에서 조정한 배치를 정본으로 승격.
     "Tomo_SFTF": (-254, 216),
     "Tomo_SFTFSoft": (-29, 255),
-    "SFTF_Clustering": (109, 508),
+    "SFTF_Clustering": (97, 523),
     "PFTF": (119, 411),
     "SFTF_Composite": (349, 706),
-    "SFTF_InjMold": (79, 730),
-    "PFTF_Compression": (530, 578),
-    "Tomo_DFSVR": (259, 135),
-    "PFTF_VisCull_kDop": (354, 441),
-    "SFTF_SewerPOC": (-78, 653),
-    "SFTFSoft_GNN": (135, 65),
+    "SFTF_InjMold": (-81, 738),
+    "PFTF_Compression": (557, 712),
+    "Tomo_DFSVR": (265, 67),
+    "PFTF_VisCull_kDop": (335, 516),
+    "SFTF_SewerPOC": (-246, 721),
+    "SFTFSoft_GNN": (125, 59),
     "SFTF_DrapePrior": (207, 304),
-    "PFTF_AsymTensor": (146, 173),
-    "PFTF_DrapePrior_VisCull_kDop": (300, 350),
-    "PFTF_ResearchOptimize": (34, 367),
-    "PFTF_alpha": (-42, 506),
-    "SFTF_QEM": (-122, 477),
-    "SFTF_DynamicTargetSearch": (-119, 50),
-    "DFSVR_VisCull": (412, 120),
-    "SFTFSoft_GNN_DFSVR": (244, 1),
-    "SFTF_ActiveOverprint": (-67, 112),
-    "ColdOndol": (-207, 427),
-    "ColdOndol_Positioning": (-279, 390),
-    "cfmsCIPC": (520, 289),
-    "TSE_SEM": (264, 553),
-    "SFTF_HeatMethod": (430, 790),
-    "cfmsPINNDrape": (387, 298),
-    "cfmsDrape": (615, 335),
-    "cfmsMiindo": (690, 425),
-    "cfmsPINNCAD": (496, 428),
+    "PFTF_AsymTensor": (189, 183),
+    "PFTF_DrapePrior_VisCull_kDop": (319, 357),
+    "PFTF_ResearchOptimize": (33, 372),
+    "PFTF_alpha": (-31, 583),
+    "SFTF_QEM": (-88, 506),
+    "SFTF_DynamicTargetSearch": (-126, 19),
+    "DFSVR_VisCull": (424, 99),
+    "SFTFSoft_GNN_DFSVR": (231, -79),
+    "SFTF_ActiveOverprint": (-28, 99),
+    "ColdOndol": (-199, 459),
+    "ColdOndol_Positioning": (-360, 474),
+    "cfmsCIPC": (626, 289),
+    "TSE_SEM": (147, 647),
+    "SFTF_HeatMethod": (151, 749),
+    "cfmsPINNDrape": (451, 249),
+    "cfmsDrape": (598, 490),
+    "cfmsMiindo": (758, 495),
+    "cfmsPINNCAD": (505, 391),
+    "SFTFSoft_DFSVR": (21, 175),
     "cfmsDrapeSCAN": (648, 218),
     # Restored from the last pre-archive graph snapshot.
-    "SFTF_UrbanTraffic": (-345, 226),
+    "SFTF_UrbanTraffic": (-400, 314),
 }
 
 HYPEREDGES = [
@@ -148,7 +148,7 @@ HYPEREDGES = [
     {"label": "발견3'",
      "nodes": ["SFTF_DataCenterTraffic", "PFTF_subMarine", "PFTF_Assembly",
                "PFTF_RainNowcast", "PFTF_Terrain", "PFTF_Solar",
-               "PFTF_FXShock"]},
+               "PFTF_FXShock", "ColdOndol"]},
     {"label": "발견4·5·6",
      "nodes": ["PFTF_VisCull_kDop", "PFTF_Inspection"]},
     # The four method-level foundations are intentionally separate from the
@@ -172,7 +172,7 @@ HYPEREDGES = [
      "kind": "role",
      "nodes": ["SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop",
                "SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint", "DFSVR_VisCull",
-               "SFTFSoft_GNN_DFSVR"],
+               "SFTFSoft_GNN_DFSVR", "ColdOndol"],
      "color": "#0891b2", "labelColor": "#0e7490",
      "fillAlpha": 0.025, "strokeAlpha": 0.70, "labelAlpha": 0.95,
      "lineWidth": 2, "dash": [16, 8], "scale": 1.08},
@@ -180,10 +180,19 @@ HYPEREDGES = [
     # refresh cannot erase the manually curated public grouping.
     {"label": "의복 시뮬레이션",
      "kind": "domain",
-     "nodes": ["SFTF_DrapePrior", "PFTF_Compression", "PFTF_VisCull_kDop",
+     "nodes": ["PFTF", "SFTF_Composite", "SFTF_DrapePrior",
+               "PFTF_Compression", "PFTF_VisCull_kDop",
                "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape", "cfmsMiindo",
                "cfmsPINNCAD", "cfmsDrapeSCAN"],
      "color": "#db2777", "labelColor": "#be185d",
+     "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
+     "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
+    # Building-energy domain overlay for the two distinct paper tracks that
+    # share ColdOndol_dev: hidden-cooling detection and capacity allocation.
+    {"label": "온돌 냉방 / 건물 에너지",
+     "kind": "domain",
+     "nodes": ["ColdOndol", "ColdOndol_Positioning"],
+     "color": "#2563eb", "labelColor": "#1d4ed8",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
 ]
@@ -412,11 +421,13 @@ function _glyph(ctx, type, x, y) {
     const glyphs = REGION_GLYPHS[i] || [];
     if (!glyphs.length) return;
     const ps = h.nodes.map(nid => network.getPositions([nid])[nid]).filter(p => p);
-    if (ps.length < 2) return;
+    if (ps.length < 1) return;
     const cy = ps.reduce((s, p) => s + p.y, 0) / ps.length;
     const cx = ps.reduce((s, p) => s + p.x, 0) / ps.length;
     const minY = Math.min.apply(null, ps.map(p => p.y));
-    const topY = cy + (minY - cy) * 1.25;          // hull 라벨과 동일한 확장 규칙
+    const topY = ps.length === 1
+      ? cy - 60                                   // 단일 노드 padded hull의 상단
+      : cy + (minY - cy) * 1.25;                  // hull 라벨과 동일한 확장 규칙
     ctx.font = "bold 20px sans-serif";
     const w = ctx.measureText(h.label).width;
     const gx = cx - w / 2 - 26, gy = topY - 23;    // 라벨 baseline(topY-16) 좌측
@@ -758,6 +769,17 @@ TODO_NODES = [
 ]
 
 TODO_EDGES = [
+    # The vault note explicitly links UrbanTraffic to Tomo_SFTF and describes
+    # it as a directed-SFTF field instance.  DataCenterTraffic is also linked
+    # there, but remains outside the current public graph snapshot.
+    {"from": "Tomo_SFTF", "to": "SFTF_UrbanTraffic",
+     "label": "application",
+     "title": "Tomo_SFTF → SFTF_UrbanTraffic\n"
+              "Directed-SFTF 도시 교통 응용\n"
+              "출처: 볼트 관련 프로젝트·프로젝트 개요",
+     "dashes": False, "width": 2, "color": {"opacity": 0.9},
+     "confidence": "EXTRACTED", "_rel": "instantiates",
+     "_detail": "directed-SFTF urban-traffic application", "_tentative": False},
     {"from": "PFTF_DrapePrior_VisCull_kDop", "to": "SFTF_DrapePrior",
      "label": "complements", "title": "complements [INFERRED]", "dashes": True,
      "width": 2, "color": {"opacity": 0.7}, "confidence": "INFERRED"},
