@@ -20,6 +20,7 @@ import json
 import math
 import os
 import re
+import sys
 from pathlib import Path
 from html import escape as html_escape
 
@@ -101,39 +102,39 @@ NODE_SOURCE_FILES = {
 POS = {
     # 2026-08-25: 사용자가 graph.html에서 조정한 배치를 정본으로 승격.
     "Tomo_SFTF": (-254, 216),
-    "Tomo_SFTFSoft": (-52, 239),
-    "SFTF_Clustering": (55, 503),
+    "Tomo_SFTFSoft": (-54, 227),
+    "SFTF_Clustering": (87, 558),
     "PFTF": (141, 423),
     "SFTF_Composite": (365, 735),
-    "SFTF_InjMold": (-21, 770),
-    "PFTF_Compression": (545, 711),
-    "Tomo_DFSVR": (269, 68),
-    "PFTF_VisCull_kDop": (339, 545),
-    "SFTF_SewerPOC": (-160, 748),
-    "SFTFSoft_GNN": (114, 56),
-    "SFTF_DrapePrior": (288, 289),
-    "PFTF_AsymTensor": (195, 192),
-    "PFTF_DrapePrior_VisCull_kDop": (350, 391),
-    "PFTF_ResearchOptimize": (-8, 373),
-    "PFTF_alpha": (46, 177),
-    "SFTF_QEM": (-58, 89),
-    "SFTF_DynamicTargetSearch": (-187, 12),
-    "DFSVR_VisCull": (447, 95),
-    "SFTFSoft_GNN_DFSVR": (248, -68),
-    "SFTF_ActiveOverprint": (-28, -109),
-    "ColdOndol": (-183, 499),
-    "ColdOndol_Positioning": (-270, 413),
-    "cfmsCIPC": (448, 400),
-    "TSE_SEM": (188, 597),
-    "SFTF_HeatMethod": (235, 806),
-    "cfmsPINNDrape": (546, 216),
-    "cfmsDrape": (565, 512),
+    "SFTF_InjMold": (-331, 461),
+    "PFTF_Compression": (557, 712),
+    "Tomo_DFSVR": (274, 104),
+    "PFTF_VisCull_kDop": (373, 522),
+    "SFTF_SewerPOC": (-230, 486),
+    "SFTFSoft_GNN": (139, 75),
+    "SFTF_DrapePrior": (289, 278),
+    "PFTF_AsymTensor": (174, 209),
+    "PFTF_DrapePrior_VisCull_kDop": (359, 357),
+    "PFTF_ResearchOptimize": (69, 353),
+    "PFTF_alpha": (54, 243),
+    "SFTF_QEM": (-87, 126),
+    "SFTF_DynamicTargetSearch": (-166, 15),
+    "DFSVR_VisCull": (424, 99),
+    "SFTFSoft_GNN_DFSVR": (231, -79),
+    "SFTF_ActiveOverprint": (-33, -89),
+    "ColdOndol": (-158, 676),
+    "ColdOndol_Positioning": (-47, 735),
+    "cfmsCIPC": (626, 289),
+    "TSE_SEM": (193, 684),
+    "SFTF_HeatMethod": (175, 764),
+    "cfmsPINNDrape": (466, 224),
+    "cfmsDrape": (572, 492),
     "cfmsMiindo": (758, 495),
-    "cfmsPINNCAD": (592, 411),
-    "SFTFSoft_DFSVR": (321, 168),
+    "cfmsPINNCAD": (562, 385),
+    "SFTFSoft_DFSVR": (63, 150),
     "cfmsDrapeSCAN": (648, 218),
     # Restored from the last pre-archive graph snapshot.
-    "SFTF_UrbanTraffic": (-53, 587),
+    "SFTF_UrbanTraffic": (-396, 278),
 }
 
 HYPEREDGES = [
@@ -511,6 +512,7 @@ function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes, vi
 // HYPEREDGE_LABEL_HELPERS_END'''
 
 s = io.open(SRC, encoding="utf-8").read()
+ORIGINAL_S = s
 
 
 def _prefer_local_graph_side(text):
@@ -864,6 +866,103 @@ TODO_EDGES = [
      "_tentative": True},
 ]
 
+# Curated project-to-project arrows audited against the current Obsidian
+# Projects notes.  Entries here replace an existing pair as well as add a
+# missing pair, so regenerated graph.html cannot silently restore stale
+# confidence/semantics from its embedded RAW_EDGES snapshot.
+def _curated_edge(source, target, label, detail, *, relation="provides",
+                  dashes=True, width=2.5, confidence="EXTRACTED",
+                  source_note="옵시디언 볼트 Projects 노트"):
+    return {
+        "from": source,
+        "to": target,
+        "label": label,
+        "title": f"{source} → {target}\n{detail}\n출처: {source_note} [{confidence}]",
+        "dashes": dashes,
+        "width": width,
+        "color": {"opacity": 0.75 if dashes else 0.9},
+        "confidence": confidence,
+        "_rel": relation,
+        "_detail": detail,
+        "_tentative": confidence != "EXTRACTED",
+    }
+
+
+CURATED_EDGE_UPDATES = [
+    # Newly missing direct relationships.
+    _curated_edge("PFTF", "SFTF_Composite", "tensor instance",
+                  "Advani–Tucker 복합재 배향의 PFTF 인스턴스화 레시피",
+                  relation="instantiates"),
+    _curated_edge("cfmsDrape", "PFTF_Compression", "contact solver",
+                  "접촉압 FE와 지속 접촉력 기반 마찰 요구를 제공",
+                  dashes=False, width=3),
+    _curated_edge("cfmsCIPC", "cfmsPINNDrape", "cross-engine verifier",
+                  "C-IPC에서 봉제 과도기 교란 증폭과 접촉 포화를 독립 재현",
+                  relation="validates", dashes=False, width=3),
+    _curated_edge("SFTF_DrapePrior", "cfmsPINNCAD", "negative control",
+                  "warm-start의 solver 의존성과 worn-garment prior 붕괴를 음성 대조로 계승",
+                  relation="validates"),
+
+    # Existing arrows whose current notes now state the relationship directly.
+    _curated_edge("PFTF_VisCull_kDop", "PFTF_Compression",
+                  "candidate accelerator",
+                  "GPU G1-full 압박 계산과 production GPU contact gate가 아직 만나지 않은 backend-blocked 통합 후보",
+                  relation="accelerates", confidence="INFERRED",
+                  source_note="볼트 그래프와 현재 두 저장소·cfmsDrape backend 감사"),
+    _curated_edge("Tomo_SFTFSoft", "Tomo_DFSVR", "baseline / proposer",
+                  "soft receiver를 섞지 않고 동결 기준선과 후보 제안기로만 사용"),
+    _curated_edge("Tomo_DFSVR", "DFSVR_VisCull", "scalability gate",
+                  "DFSVR exact first-hit 앞단의 보수적 BVH 확장"),
+    _curated_edge("PFTF_VisCull_kDop", "DFSVR_VisCull", "conservative gate",
+                  "방향 텐서 gate 뒤에 exact DFSVR fallback을 유지"),
+    _curated_edge("SFTFSoft_GNN", "SFTFSoft_GNN_DFSVR", "top-K proposer",
+                  "profile-conditioned top-K 방향 후보를 제안"),
+    _curated_edge("Tomo_DFSVR", "SFTFSoft_GNN_DFSVR", "DFSVR refiner",
+                  "first-hit support-volume으로 후보를 정련"),
+    _curated_edge("SFTF_QEM", "SFTFSoft_GNN", "tessellation audit",
+                  "remeshing·tessellation 강건성 감사 방법론을 제공",
+                  relation="validates"),
+    _curated_edge("PFTF_AsymTensor", "SFTFSoft_GNN", "directed messages",
+                  "source→receiver 방향성 message의 명시적 후속 후보"),
+    _curated_edge("SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint",
+                  "active-search engine", "후보 불확실성과 next-view 엔진을 제공",
+                  relation="instantiates"),
+    _curated_edge("Tomo_SFTFSoft", "SFTFSoft_DFSVR", "slicer gate",
+                  "프로파일 임계각 기반 soft slicer gate를 제공"),
+    _curated_edge("Tomo_DFSVR", "SFTFSoft_DFSVR", "first-hit union",
+                  "가시성 일관 first-hit와 공간 합집합을 제공"),
+    _curated_edge("Tomo_SFTF", "SFTF_QEM", "ranking surrogate",
+                  "hard-SFTF 배향 순위를 저비용 QEM 대리모델로 감사",
+                  relation="accelerates", dashes=False, width=3),
+    _curated_edge("PFTF_alpha", "SFTF_QEM", "problem boundary",
+                  "two-layer 분리와 목적함수 보존 문제의 경계를 명시",
+                  relation="complements"),
+    _curated_edge("Tomo_SFTF", "SFTF_DynamicTargetSearch", "candidate evidence",
+                  "후보 생성·평가와 support path를 제공"),
+    _curated_edge("Tomo_SFTFSoft", "SFTF_DynamicTargetSearch", "soft evidence",
+                  "시간 감쇠와 soft evidence weighting을 제공"),
+    _curated_edge("SFTF_Clustering", "SFTF_DynamicTargetSearch", "candidate basins",
+                  "후보 basin 압축을 제공"),
+    _curated_edge("Tomo_SFTF", "SFTF_ActiveOverprint", "support evidence",
+                  "support-aware printable 후보 평가 계보를 제공"),
+    _curated_edge("SFTF_Clustering", "SFTF_ActiveOverprint", "surface basins",
+                  "조밀한 표면 후보를 printable basin으로 압축"),
+    _curated_edge("SFTF_DrapePrior", "SFTF_ActiveOverprint", "garment state",
+                  "접촉·clearance prior의 인접 의복 상태를 제공"),
+    _curated_edge("SFTF_DrapePrior", "cfmsCIPC", "collision benchmark",
+                  "접촉 prior의 solver 경계를 C-IPC 충돌 기준과 대조",
+                  relation="validates"),
+    _curated_edge("PFTF_VisCull_kDop", "cfmsCIPC", "collision oracle",
+                  "보수적 충돌 컬링을 penetration-free 기준과 대조",
+                  relation="validates"),
+    _curated_edge("cfmsMiindo", "cfmsPINNDrape", "engine / benchmark host",
+                  "drape 엔진과 재현성 benchmark의 소유 계보",
+                  dashes=False, width=3),
+    _curated_edge("cfmsMiindo", "cfmsPINNCAD", "CAD / body provenance",
+                  "cad·body·drape 원천 자산과 fixture를 제공",
+                  dashes=False, width=3),
+]
+
 def _reclassify_raw_nodes(match):
     nodes = json.loads(match.group(1))
     for todo_node in TODO_NODES:
@@ -938,6 +1037,22 @@ def _inject_todo_edges(match):
     for edge in TODO_EDGES:
         if (edge["from"], edge["to"]) not in existing:
             edges.append(edge)
+    curated_by_pair = {
+        (edge["from"], edge["to"]): edge
+        for edge in CURATED_EDGE_UPDATES
+    }
+    updated_edges = []
+    applied_pairs = set()
+    for edge in edges:
+        pair = (edge.get("from"), edge.get("to"))
+        if pair in curated_by_pair:
+            edge = curated_by_pair[pair].copy()
+            applied_pairs.add(pair)
+        updated_edges.append(edge)
+    for pair, edge in curated_by_pair.items():
+        if pair not in applied_pairs:
+            updated_edges.append(edge.copy())
+    edges = updated_edges
     edges = [
         edge for edge in edges
         if edge.get("from") not in HIDDEN_NODE_IDS and edge.get("to") not in HIDDEN_NODE_IDS
@@ -951,8 +1066,47 @@ def _inject_todo_edges(match):
         ]
     return "const RAW_EDGES = " + json.dumps(edges, ensure_ascii=False) + ";"
 
+edges_only = "--edges-only" in sys.argv[1:]
+if edges_only:
+    # Scoped graph maintenance: preserve all current node, quality, position,
+    # hyperedge, and UI data while refreshing only RAW_EDGES.
+    s = ORIGINAL_S
 s, nedge = re.subn(r"const RAW_EDGES = (\[.*?\]);", _inject_todo_edges,
                    s, count=1, flags=re.S)
+if edges_only:
+    assert nedge == 1, "RAW_EDGES block not found"
+    # Edge additions change the hover summary as well as the drawn arrows.
+    # Recompute only degree metadata; preserve every other node field verbatim.
+    node_match = re.search(r"const RAW_NODES = (\[.*?\]);", s, flags=re.S)
+    edge_match = re.search(r"const RAW_EDGES = (\[.*?\]);", s, flags=re.S)
+    assert node_match and edge_match, "RAW_NODES/RAW_EDGES block not found"
+    nodes = json.loads(node_match.group(1))
+    edges = json.loads(edge_match.group(1))
+    degree = {str(node["id"]): {"in": 0, "out": 0} for node in nodes}
+    for edge in edges:
+        source = str(edge.get("from"))
+        target = str(edge.get("to"))
+        if source in degree:
+            degree[source]["out"] += 1
+        if target in degree:
+            degree[target]["in"] += 1
+    for node in nodes:
+        counts = degree[str(node["id"])]
+        node["degree"] = counts["in"] + counts["out"]
+        node["_in"] = counts["in"]
+        node["_out"] = counts["out"]
+        node["title"] = re.sub(
+            r"차수 \d+ \(in \d+ / out \d+\)",
+            f'차수 {node["degree"]} (in {counts["in"]} / out {counts["out"]})',
+            node.get("title") or "",
+        )
+    nodes_js = "const RAW_NODES = " + json.dumps(nodes, ensure_ascii=False) + ";"
+    s = re.sub(r"const RAW_NODES = \[.*?\];", lambda _m: nodes_js,
+               s, count=1, flags=re.S)
+    for dst in DSTS:
+        io.open(dst, "w", encoding="utf-8", newline="").write(s)
+    print(f"wrote {', '.join(str(dst) for dst in DSTS)} | edges only")
+    raise SystemExit(0)
 quality_html_rows = "".join(
     f'<tr><td>{html_escape(label)}</td>'
     f'<td><span class="quality-grade" style="background:{GRADE_COLORS[grade]};color:{"#333333" if grade == "ToDo" else "#ffffff"}">{grade}</span></td>'
