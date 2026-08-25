@@ -17,6 +17,7 @@ graph_발견.html 두 파일을 동일 내용으로 갱신한다.
 """
 import io
 import json
+import math
 import os
 import re
 from pathlib import Path
@@ -76,6 +77,8 @@ NODE_TITLES = {
                             "surface·next-view 계약 테스트 8개 완료; "
                             "Physical AI 의복 시뮬레이션 직접 통합선; "
                             "RGB-D replay·controlled textile print 전",
+    "SFTF_UrbanTraffic": "SFTF_UrbanTraffic — 하: 도시 도로 교통 흐름 warm-start 응용; "
+                         "M2–M4 계획·solver gap 미해결·추가 DP 필요",
     "PFTF_alpha": "PFTF_alpha — 중: positive two-layer draft; "
                   "Phase 50/51C frozen evidence, B5/M1 상대 207/207 paired wins·"
                   "topology error 0. PFTF/local-SPD 우월성은 주장하지 않으며 "
@@ -128,6 +131,9 @@ POS = {
     "cfmsDrape": (615, 335),
     "cfmsMiindo": (690, 425),
     "cfmsPINNCAD": (496, 428),
+    "cfmsDrapeSCAN": (648, 218),
+    # Restored from the last pre-archive graph snapshot.
+    "SFTF_UrbanTraffic": (-345, 226),
 }
 
 HYPEREDGES = [
@@ -138,7 +144,7 @@ HYPEREDGES = [
      "nodes": ["SFTF_Composite", "PFTF_Compression", "PFTF_Mold",
                "PFTF_Radiotherapy"]},
     {"label": "발견3",
-     "nodes": ["SFTF_WarehouseAGV", "PFTF_AssetShock", "SFTF_UrbanTraffic"]},
+     "nodes": ["SFTF_UrbanTraffic"]},
     {"label": "발견3'",
      "nodes": ["SFTF_DataCenterTraffic", "PFTF_subMarine", "PFTF_Assembly",
                "PFTF_RainNowcast", "PFTF_Terrain", "PFTF_Solar",
@@ -176,7 +182,7 @@ HYPEREDGES = [
      "kind": "domain",
      "nodes": ["SFTF_DrapePrior", "PFTF_Compression", "PFTF_VisCull_kDop",
                "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape", "cfmsMiindo",
-               "cfmsPINNCAD"],
+               "cfmsPINNCAD", "cfmsDrapeSCAN"],
      "color": "#db2777", "labelColor": "#be185d",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
@@ -495,6 +501,24 @@ function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes, vi
 
 s = io.open(SRC, encoding="utf-8").read()
 
+
+def _prefer_local_graph_side(text):
+    """Keep the current generated snapshot and discard stale merge wrappers."""
+    conflict = re.compile(
+        r"(?ms)^<<<<<<< HEAD\r?\n(?P<local>.*?)^=======\r?\n"
+        r".*?^>>>>>>> origin/main\r?\n?"
+    )
+    text = conflict.sub(lambda match: match.group("local"), text)
+    text = re.sub(r"(?m)^<<<<<<< HEAD\r?\n?", "", text)
+    text = re.sub(r"(?m)^=======\r?\n?", "", text)
+    text = re.sub(r"(?m)^>>>>>>> origin/main\r?\n?", "", text)
+    if re.search(r"(?m)^(<<<<<<<|=======|>>>>>>>)", text):
+        raise ValueError("graph.html still contains unresolved Git conflict markers")
+    return text
+
+
+s = _prefer_local_graph_side(s)
+
 # Dependency edges start hidden. The checkbox, runtime state, and DataSet must
 # agree on the first frame; otherwise vis-network briefly renders every edge.
 s, nedge_checkbox = re.subn(
@@ -685,6 +709,21 @@ SFTFSOFT_GNN_DFSVR_NODE = {
     "degree": 2,
 }
 
+URBAN_TRAFFIC_NODE = {
+    "id": "SFTF_UrbanTraffic",
+    "label": "SFTF_UrbanTraffic",
+    "color": {"background": "#2a78d6", "border": "#2a78d6",
+               "highlight": {"background": "#2a78d6", "border": "#2a78d6"}},
+    "size": 13.7,
+    "font": {"size": 13, "color": "#333333"},
+    "title": NODE_TITLES["SFTF_UrbanTraffic"],
+    "community": 3,
+    "community_name": "하",
+    "source_file": "SFTF_UrbanTraffic.md",
+    "file_type": "concept",
+    "degree": 1,
+}
+
 # 2026-07-30: mindmap Paper quality 기준 상으로 동기화. 원고 2편+설명서가 있고
 # 게이트 T·T2·G2·S·X 가 닫혔다.  라벨에 [draft] 를 병기하는 이유는 등급이
 # 상이어도 아직 미투고이기 때문이다.
@@ -715,6 +754,7 @@ TODO_NODES = [
     ACTIVE_OVERPRINT_NODE,
     DFSVR_VIS_CULL_NODE,
     SFTFSOFT_GNN_DFSVR_NODE,
+    URBAN_TRAFFIC_NODE,
 ]
 
 TODO_EDGES = [
@@ -880,6 +920,13 @@ def _inject_todo_edges(match):
         edge for edge in edges
         if edge.get("from") not in HIDDEN_NODE_IDS and edge.get("to") not in HIDDEN_NODE_IDS
     ]
+    node_match = re.search(r"const RAW_NODES = (\[.*?\]);", s, flags=re.S)
+    if node_match:
+        node_ids = {str(node["id"]) for node in json.loads(node_match.group(1))}
+        edges = [
+            edge for edge in edges
+            if str(edge.get("from")) in node_ids and str(edge.get("to")) in node_ids
+        ]
     return "const RAW_EDGES = " + json.dumps(edges, ensure_ascii=False) + ";"
 
 s, nedge = re.subn(r"const RAW_EDGES = (\[.*?\]);", _inject_todo_edges,
@@ -941,6 +988,37 @@ s, nleg = re.subn(r"const LEGEND = (\[.*?\]);", _quality_legend, s, count=1, fla
 # Keep the sidebar summary consistent with the quality-only graph.
 raw_nodes_for_stats = json.loads(re.search(r"const RAW_NODES = (\[.*?\]);", s, flags=re.S).group(1))
 raw_edges_for_stats = json.loads(re.search(r"const RAW_EDGES = (\[.*?\]);", s, flags=re.S).group(1))
+
+# New project nodes may arrive before a hand-tuned POS entry.  Give only
+# missing IDs a deterministic outer-ring position so physics-disabled
+# vis-network does not stack them at the origin.
+position_map = dict(POS)
+missing_position_ids = [
+    str(node["id"])
+    for node in raw_nodes_for_stats
+    if str(node["id"]) not in position_map
+]
+if missing_position_ids:
+    radius = 850
+    count = len(missing_position_ids)
+    for index, node_id in enumerate(missing_position_ids):
+        angle = (2 * math.pi * index) / count
+        position_map[node_id] = (
+            round(radius * math.cos(angle)),
+            round(radius * math.sin(angle)),
+        )
+node_ids_for_hyperedges = {str(node["id"]) for node in raw_nodes_for_stats}
+hyperedges_for_graph = []
+for hyperedge in HYPEREDGES:
+    members = [
+        str(node_id)
+        for node_id in hyperedge.get("nodes", [])
+        if str(node_id) in node_ids_for_hyperedges
+    ]
+    # A restored single project can still be a meaningful findings region;
+    # graph.py renders one-node hulls as padded 3D shells.
+    if members:
+        hyperedges_for_graph.append({**hyperedge, "nodes": members})
 stats_text = (
     f"{len(raw_nodes_for_stats)} nodes &middot; 0 edges "
     f"&middot; {len(quality_legend) + (1 if preserve_extended_quality else 0)} communities"
@@ -949,10 +1027,10 @@ s, nstats = re.subn(r"\d+ nodes &middot; \d+ edges &middot; \d+ communities",
                     stats_text, s, count=1)
 
 pos_js = "const POS = " + json.dumps(
-    {k: {"x": v[0], "y": v[1]} for k, v in POS.items()}, ensure_ascii=False) + ";"
+    {k: {"x": v[0], "y": v[1]} for k, v in position_map.items()}, ensure_ascii=False) + ";"
 s, n1 = re.subn(r"const POS = \{.*?\};", lambda _m: pos_js, s, count=1,
                 flags=re.S)
-hyper_js = "const hyperedges = " + json.dumps(HYPEREDGES, ensure_ascii=False) + ";"
+hyper_js = "const hyperedges = " + json.dumps(hyperedges_for_graph, ensure_ascii=False) + ";"
 s, n2 = re.subn(r"const hyperedges = \[.*?\];", lambda _m: hyper_js, s, count=1,
                 flags=re.S)
 s, n3 = re.subn(r"<title>.*?</title>",
