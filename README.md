@@ -20,7 +20,7 @@
 | `timetable.html` | 학기별 수업 시간표, 드래그 이동/복사, 학기 복제 |
 | `jobgis.html` | 졸업생 취업 현황 지도, 공개 조회 시 이름 마스킹 |
 | `mindmap.html` | 연구/개발 프로젝트 관계도, 공개 열람 · 편집은 로그인 |
-| `graph.html` | 옵시디언 볼트 기반 프로젝트 그래프, 공개 열람 (정적 파일) |
+| `graph.html` | 옵시디언 볼트 내용을 조회해 관리하는 공개 프로젝트 그래프 (정적 파일) |
 | `graph3d.html` | `graph.html`을 실시간으로 읽는 WebGL 3D 그래프 뷰어 |
 | `backup.html` | Supabase 데이터 백업 도구 |
 | `scripts/build-vault-graph.mjs` | Markdown/Obsidian 볼트에서 `vault-graph.json` 생성 |
@@ -54,19 +54,22 @@
 
 모든 편집은 Supabase에 바로 저장되며, 다른 PC에서는 새로고침 후 반영됩니다.
 
-## 프로젝트 그래프 갱신
+## 연구 그래프·마인드맵 운영
 
-Markdown/Obsidian 볼트에서 그래프 JSON을 다시 만들 때:
+`graph.html`과 `mindmap.html`의 공개 정본은 이 저장소 루트에만 둡니다. Obsidian 볼트
+`D:\cfms-research-vault`는 연구 노트 입력이며, 볼트 루트에 별도 `graphify-out` 그래프를
+유지하지 않습니다. 상세 경계와 명령은 [`graphify-out/README.md`](graphify-out/README.md)에 있습니다.
 
-```powershell
-node scripts/build-vault-graph.mjs D:\path\to\_Research_Vault vault-graph.json
-```
-
-`graph.html`은 graphify가 만든 그래프를 파일 안에 내장한 정적 페이지입니다. 갱신은 아래로 합니다.
+볼트 프로젝트 노트와 두 HTML의 포함 여부를 읽기 전용으로 점검하고 구문을 검증하려면:
 
 ```powershell
-node update-graph-embed.mjs
+node scripts/audit-vault-projects.mjs D:\cfms-research-vault
+pwsh -File scripts/publish-research-views.ps1 -VaultPath D:\cfms-research-vault
 ```
+
+검증한 `graph.html`·`mindmap.html` 변경만 `cfms-lab/KIT_sodi`의 `main`으로 올리려면
+마지막 명령에 `-Push`를 붙입니다. 스크립트는 원격이 앞서 있거나 관련 없는 작업 파일이
+있으면 push를 중단합니다.
 
 ## graph.html 로컬 3D 뷰어
 

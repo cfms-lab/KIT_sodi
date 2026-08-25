@@ -9,7 +9,7 @@ POS(고정 좌표)와 hyperedges(영역 hull)만 발견 기준으로 교체해 �
   - 발견 4·5·6은 같은 보수성 레이스의 세 판정이라 한 영역으로 묶음
   - 발견 3 옆에 대조 지대(1차가 사는 곳)를 붙여 소거/생존을 인접 대비
 
-실행:  python layout_findings.py            (graphify-out 폴더에서)
+실행:  python layout_findings.py            (KIT_sodi 저장소에서)
 
 2026-07-19b: 발견 영역 간 **의존성 화살표** 추가 (분류표 노트의 DAG).
 멱등: 같은 파일에 재실행해도 안전(마커 블록 교체). graph.html과
@@ -23,18 +23,18 @@ import re
 from pathlib import Path
 from html import escape as html_escape
 
-SRC = "graph.html"
+HERE = Path(__file__).resolve().parent
+SRC = HERE / "graph.html"
 # graph.html is the canonical deployed graph.  graph_발견.html is a frozen
 # findings view and is intentionally not touched by new-project onboarding.
-DSTS = ["graph.html"]
+DSTS = [HERE / "graph.html"]
 HIDDEN_NODE_IDS = {"PFTF_subMarine", "PFTF_Terrain"}
 
 # Project notes are the single source of truth for local VS Code paths.  The
 # graph node id normally matches the Obsidian project-note stem, so the button
 # stays correct when a project is moved without hard-coding 30+ paths here.
-PROJECTS_DIR = Path(r"D:\cfms-research-vault\Projects")
-if not PROJECTS_DIR.is_dir():
-    PROJECTS_DIR = Path(__file__).resolve().parents[1] / "Projects"
+VAULT_ROOT = Path(os.environ.get("CFMS_RESEARCH_VAULT", r"D:\cfms-research-vault"))
+PROJECTS_DIR = VAULT_ROOT / "Projects"
 
 def _load_project_paths():
     paths = {}
@@ -1398,27 +1398,6 @@ assert n1 == n2 == n3 == n4 == nleg == nraw == nedge == nstats == 1, (
 missing = [k for k in POS if f'"{k}"' not in s]
 for dst in DSTS:
     io.open(dst, "w", encoding="utf-8", newline="").write(s)
-print(f"wrote {', '.join(DSTS)} | POS {len(POS)} nodes, "
+print(f"wrote {', '.join(str(dst) for dst in DSTS)} | POS {len(POS)} nodes, "
       f"hulls {len(HYPEREDGES)}, deps 6 | missing ids: {missing}")
-
-
-# ---------------------------------------------------------------- 자동 배포
-# 2026-07-22: graph.html 재생성 시 홈페이지(KIT_sodi)로 자동 복사 — 별도
-# 복사 단계 불요. Windows 절대경로 → (원격 세션 VM) 상대경로 순서로 시도.
-def _deploy_to_homepage():
-    import shutil
-    from pathlib import Path as _P
-    here = _P(__file__).resolve().parent
-    cands = [_P(r"D:\OneDrive\Documents\IIS_Home\KIT_sodi"),
-             here.parents[1] / "KIT_sodi"]
-    for c in cands:
-        if (c / "index.html").exists():
-            shutil.copyfile(here / "graph.html", c / "graph.html")
-            print(f"deployed -> {c / 'graph.html'} (git commit/push는 수동)")
-            return
-    print("deploy 대상(KIT_sodi) 미발견 — 복사 생략")
-
-if os.environ.get("SFTF_SKIP_GRAPH_DEPLOY") == "1":
-    print("deploy skipped: SFTF_SKIP_GRAPH_DEPLOY=1")
-else:
-    _deploy_to_homepage()
+print(f"canonical output stays in KIT_sodi: {HERE / 'graph.html'}")
