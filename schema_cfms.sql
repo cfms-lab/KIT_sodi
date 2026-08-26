@@ -84,6 +84,26 @@ create table if not exists public.mindmaps (
   updated_at timestamptz not null default now()
 );
 
+-- graph.html / mindmap.html / upjuk.html 공유 프로젝트 노드 (자세한 설명: schema_project_nodes.sql)
+create table if not exists public.project_nodes (
+  id text primary key,
+  mindmap_id text,
+  title text,
+  grade text,
+  status text,
+  badge text,
+  grade_note text,
+  bottleneck text,
+  brief text,
+  note text,
+  url text,
+  project_path text,
+  pos_x integer,
+  pos_y integer,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create or replace view public.jobgis_jobs_public as
 select
   id,
@@ -108,6 +128,8 @@ create index if not exists tt_courses_semester_idx on public.tt_courses (semeste
 create index if not exists tt_professors_semester_idx on public.tt_professors (semester);
 create index if not exists tt_rooms_semester_idx on public.tt_rooms (semester);
 create index if not exists jobgis_jobs_office_type_idx on public.jobgis_jobs ("sOfficeType");
+create index if not exists project_nodes_grade_idx on public.project_nodes (grade);
+create index if not exists project_nodes_mindmap_idx on public.project_nodes (mindmap_id);
 
 insert into storage.buckets (id, name, public)
 values ('pdfs', 'pdfs', false)

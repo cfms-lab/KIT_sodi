@@ -159,6 +159,20 @@ const STATUS_BADGES = {
   "cfmsPINNDrape": "**한국섬유공학회지(TSE) 국문 투고본으로 전환**(2026-08-21, 사용자 지정 — TDP 해외 투고는 접었다). 정본 `draft/src/PINNDrape_2_검토용한글.md`, 영문 Maintext 는 `draft/src/_archive/` 로 보관. 빌드 14면(한도 20). 저자 설인환 단독·NRF-2022R1A2C1010072. 구 기록: **TDP 포맷으로 집필 착수**(2026-08-17). G1~G6 종주 완료, 긍정 효과 확보 — 목표 착의 품질 도달 시간 cold 대비 +92~98 %·엔진 대조군 대비 +78~92 %, 예측 비용 3.7~14 ms. 검토본은 TDP 구조 + 한글. 원격 PC 원고는 병합하지 않는다"
 };
 const STATUS_COLORS = { draft: "#64748b", submit: "#d4a017", revision: "#e06e10", accepted: "#12a150", printed: "#7a3fd1" };
+// Supabase(project_nodes) 오버라이드 뒤 같은 규칙으로 다시 장식할 수 있도록,
+// 장식(배지·등급·테두리)이 손대기 전의 원본을 보존해 둔다. decorateNodes() 참고.
+RAW_NODES.forEach(n => {
+  n._base = { title: n.title, label: n.label, shape: n.shape, borderWidth: n.borderWidth,
+              color: JSON.parse(JSON.stringify(n.color || {})), font: JSON.parse(JSON.stringify(n.font || {})) };
+});
+function resetNodesFromBase() {
+  RAW_NODES.forEach(n => {
+    const b = n._base;
+    n.title = b.title; n.label = b.label; n.shape = b.shape; n.borderWidth = b.borderWidth;
+    n.color = JSON.parse(JSON.stringify(b.color)); n.font = JSON.parse(JSON.stringify(b.font));
+  });
+}
+function applyBadgeDecoration() {
 RAW_NODES.forEach(n => {
   const b = STATUS_BADGES[n.id];
   if (!b) return;
@@ -171,15 +185,18 @@ RAW_NODES.forEach(n => {
   n.color = Object.assign({}, n.color, { border: c, highlight: Object.assign({}, (n.color && n.color.highlight) || {}, { border: c }) });
   n.borderWidth = 5;
 });
+}
 
 // 논문 submit 우선 고려 대상.
 // 2026-08-22: 캡션에 [draft] 를 덧붙이던 것을 그만뒀다 — 노드 캡션은 프로젝트
 // 영문명 한 줄로 고정한다. 표식은 검정 테두리와 아래 툴팁 문구로 남는다.
 const PRIORITY_DRAFT_IDS = new Set(["PFTF_Compression"]);
+function applyPriorityDecoration() {
 RAW_NODES.forEach(n => {
   if (!PRIORITY_DRAFT_IDS.has(n.id)) return;
   n.title = (n.title || n.id) + " — 투고 우선 고려: [draft]";
 });
+}
 
 // QUALITY_BOARD_BEGIN
 const QUALITY_ROWS = [{"id": "Tomo_SFTF", "label": "Tomo_SFTF", "grade": "상", "note": "TDP v2.1·외부 60-mesh 감사·budget–complexity·PiAM 연속성"}, {"id": "Tomo_SFTFSoft", "label": "Tomo_SFTFSoft", "grade": "상", "note": "TDP v2.1·현대/legacy Cura·receiver 반례·조건부 first-hit 수렴"}, {"id": "SFTFSoft_GNN", "label": "SFTFSoft_GNN", "grade": "상", "note": "3,817 mesh·held-out·Cura 재라벨·Prusa 교차검증"}, {"id": "SFTF_Clustering", "label": "SFTF_Clustering", "grade": "상", "note": "SFTFCluster 계열 TDP 원고·cross-slicer/partition 자산; 독립성 게이트 잔여"}, {"id": "PFTF", "label": "PFTF", "grade": "중", "note": "⛔ 투고 보류(2026-08-20) — 확실한 긍정적 효과가 생길 때까지. PFTF v0.9 이론·family synthesis; 삼형제 V2/V3/V4 synchronization TODO"}, {"id": "SFTF_DrapePrior", "label": "SFTF_DrapePrior", "grade": "하", "note": "2026-08-14 재검증에서 강등. 예산 일치 시 M3 이득이 솔버 의존(ppf 우세/자체엔진 열세)으로 확정 — 방법 논문 불가. 측정·프로토콜 논문으로 전환"}, {"id": "SFTF_Composite", "label": "SFTF_Composite", "grade": "상", "note": "한·영문 완성·191 tests·R9–R13 사전등록/독립감사; R11 합성 held-out 음성, 공식 CAD·물리 검증 잔여"}, {"id": "SFTF_HeatMethod", "label": "SFTF_HeatMethod", "grade": "중", "note": "A단계만 통과해 Composite main 에 머지(PR #1). 다섯 접목점 중 넷은 기준선을 제대로 세우자 무너졌다. 원고 3종·DOCX 완성, 미투고"}, {"id": "SFTF_InjMold", "label": "SFTF_InjMold", "grade": "ToDo", "note": "B24·exact integration·set-cover·B-rep·blind protocol; 원고 조립 잔여"}, {"id": "Tomo_DFSVR", "label": "Tomo_DFSVR", "grade": "중", "note": "claim–evidence matrix·JAX gradient·fail-closed; T2 확증 v1·v2 모두 NO-GO"}, {"id": "PFTF_AsymTensor", "label": "PFTF_AsymTensor", "grade": "ToDo", "note": "9/9 meshes·6 figures·TDP v1; 응용 held-out 부족"}, {"id": "PFTF_Compression", "label": "PFTF_Compression", "grade": "상", "note": "역설계·orthotropic contact·friction·held-out 원고; 임상 cohort 잔여"}, {"id": "PFTF_VisCull_kDop", "label": "PFTF_VisCull_kDop", "grade": "중", "note": "G1–G23 검증선·원고 3종(소개/검토용한글/Maintext, draft/src 정본 .md); 2026-08-20 헤드라인 교체 — 주 기여가 '리프 분할이 게이트 수익성을 결정'(홀드아웃 1.102배·11/14승)으로 바뀌고 음성 timing 은 같은 법칙의 r≈0 경계로 강등; distinct-CPU 층 폐쇄, GPU contact 미구현"}, {"id": "SFTF_SewerPOC", "label": "SFTF_SewerPOC", "grade": "하", "note": "수식 매핑·AVE·PoC 원고; 실제 관망/수리모형 검증 부족"}, {"id": "PFTF_DrapePrior_VisCull_kDop", "label": "PFTF_DrapePrior_VisCull_kDop", "grade": "ToDo", "note": "M3→kDOP gate+exact fallback 설계선; 실제 cloth solver end-to-end benchmark 전"}, {"id": "PFTF_ResearchOptimize", "label": "PFTF_ResearchOptimize", "grade": "ToDo", "note": "연구 그래프 기반 evidence-aware 투고 순서 설계; 실제 back-test·가중치 calibration 전"}, {"id": "PFTF_alpha", "label": "PFTF_alpha", "grade": "ToDo", "note": "Phase 50 합성 144건·Phase 51C S3DIS 63건 frozen held-out, B5/M1 상대 207/207 paired wins·topology error 0; PFTF/local-SPD 우월성 제외"}, {"id": "SFTF_QEM", "label": "SFTF_QEM", "grade": "상", "note": "2026-08-21 주 기여 교체 완료. 양성 2건: 슬라이서 대비 ρ=+0.905로 천장(+0.754) 초과·배향당 1/103 비용, ε-정지가 형상별 alpha 손튜닝 대체(중앙 6.05배·손해 0.0000·ASA 0/34). SFTF 텐서 구조는 무기여(게이트 P)라 신규성 주장 안 함. 원고 개정 중"}, {"id": "SFTF_DynamicTargetSearch", "label": "SFTF_DynamicTargetSearch", "grade": "ToDo", "note": "G16 independent controlled-physical acquisition readiness: 16-cell/48-run matrix와 result hash 두 실행 재현·159 tests 유지. 현재 독립 상수관망 현장 확보 불가로 physical lane parked, hold commit 3457c62; access constraint이지 failed experiment가 아니며 operation·sensor outcome read·measurement 0. 실제 독립 site/operator/reviewer 전 재개 금지, confirmation/performance·graph 비교·localization 주장 차단"}, {"id": "SFTF_ActiveOverprint", "label": "SFTF_ActiveOverprint", "grade": "ToDo", "note": "commit 74ea437의 finite-nozzle virtual replay와 통합 capture readiness 35 tests. software-only preparation은 완료됐지만 실제 operator preflight·measured input이 없어 blocked-capture-readiness; named operator·device·consent·holdout·safety 입력 전 추가 코드·결과와 controlled textile overprint 증거 없음. Physical AI 직접 통합선은 물리 증거를 대신하지 않음"}, {"id": "DFSVR_VisCull", "label": "DFSVR_VisCull", "grade": "ToDo", "note": "DFSVR exact first-hit용 conservative BVH scalability 설계선; 값·gradient parity·거짓음성 0·end-to-end utility gate 전"}, {"id": "SFTFSoft_GNN_DFSVR", "label": "SFTFSoft_GNN_DFSVR", "grade": "ToDo", "note": "profile-conditioned GNN proposer → DFSVR first-hit refiner → held-out slicer verifier; frozen budget-matched A–E benchmark 전"}, {"id": "SFTFSoft_DFSVR", "label": "SFTFSoft_DFSVR", "grade": "ToDo", "note": "게이트된 합집합 지지부피 설계선; 2D 모델 문제 GO(2026-08-24), DFSVR 동결 64방향 패널에서 절제 사다리 4변형 same-panel 실측 전"}, {"id": "ColdOndol", "label": "ColdOndol", "grade": "하", "note": "숨은 세대냉방 검출 논문 초안 3종·37게이트·302테스트·peer-blind; 실측 0.3 kW 검출한계와 제어 포화 천장(中上), 게재지 미정(Building Simulation/JBE 권고)·본문 4,000단어 조정 잔여"}, {"id": "ColdOndol_Positioning", "label": "ColdOndol_Positioning", "grade": "하", "note": "축3 배분 formulation·충분통계 명제·EnergyPlus 폐루프 공동시뮬 39게이트/405테스트; 독립 논문 원고 미착수·게재지 미정, A3a 구현·단방향 액추에이터 반영 잔여"}, {"id": "cfmsCIPC", "label": "cfmsCIPC", "grade": "하", "note": "cfmsDrape 충돌 강건성 벤치마크 원고·C-IPC 관통-free 오라클 대조. 조건 맞춘 6씬 정면 대조 완료(3무승부/2패), 결함 4종 검출·3종 수정, 준정적 안착의 조기 종료 규명. 한국섬유공학회지 목표 20면. 잔여는 긍정 효과 규칙 판정 하나"}, {"id": "TSE_SEM", "label": "TSE_SEM", "grade": "하", "note": "한국섬유공학회지 3편 트랙. Bezier·Tensor는 원고 완성(中上), AutoTune은 자체 SCI(E) 사전심사 major revision으로 보류"}, {"id": "cfmsPINNDrape", "label": "cfmsPINNDrape", "grade": "중", "note": "2026-08-21 갱신(저녁). **G1~G6 종주 완료**: G6 2/3 성립(cold 대비 +84~99.8 %, 대조군 +92~99.8 %, 예측 비용 4.5~14.6 ms, 도달률 8/8·8/8·4/8), G5 는 등록 관문 0/3 이나 착의 지표로는 세 의복 모두 허용치 안. GNN·물리손실·런타임 신뢰도는 음성 — 최종 예측기는 kNN+투영. **불확정성이 장애물에서 기여로 재구성됨**: σ=0.01 cm 배치 잡음이 봉제 과도기에서 **20~58배로 증폭된 뒤 포화**(구 「80배」는 분모 오류). **반증 시험 완료 — 도메인 성질로 판정**: 솔버 계열이 전혀 다른 C-IPC 에서 최종 40·213·58배(0.31·1.62·0.44 cm)로 재현, 봉제 구간 정점 뒤 유계까지 같은 구조. 접촉을 빼면 372~1005배로 포화 없음 → **차이를 가두는 것은 접촉**. 배수의 크기는 엔진 종속이므로 일반화되는 것은 현상이지 숫자가 아니다. **등급 상향 근거 성립 — 값은 사용자 결정 대기.** 남은 한계: 독립 엔진 1종·의복 1벌·시드 3개, T16 은 아직 구 엔진 수치, 봉제 수정본 나오면 재측정 필요. 상세 [[2026-08-21 봉제 과도기의 증폭 배수 — 크기·선례·등급 재검토]]"}, {"id": "cfmsPINNCAD", "label": "cfmsPINNCAD", "grade": "ToDo", "note": "2026-08-23 G1-P69: a two-scale THB control-net protection-nullspace is preregistered for a no-fit audit; 0/8 requirements are yet validated; 357 tests"}, {"id": "cfmsDrape", "label": "cfmsDrape", "grade": "ToDo", "note": "엔진 본체(C++/OpenMP DLL) — 독립 논문 대상이 아니라 논문들이 올라타는 기반이다. 이 엔진을 소재로 한 논문은 cfmsCIPC 가 따로 있다. ToDo 는 검증 전이라는 뜻이 아니라 논문 등급 판정 대상이 아니라는 뜻이다"}, {"id": "cfmsMiindo", "label": "cfmsMiindo", "grade": "ToDo", "note": "모노레포 허브(cad·drape·body·miindo·metamiin; sew 는 2026-08-16 분리) — 독립 논문 대상이 아니라 리포 구조다. 미인도 재현 벤치마크와 hash_reps 재현성 규율이 여기 산다. ToDo 는 검증 전이라는 뜻이 아니라 논문 등급 판정 대상이 아니라는 뜻이다"}];
@@ -197,6 +214,7 @@ const CLOSED_IDS = new Set(["PFTF_ResearchOptimize", "PFTF_DrapePrior_VisCull_kD
 const todoLegend = LEGEND.find(c => c.label === 'ToDo');
 if (todoLegend) todoLegend.count = Math.max(0, todoLegend.count - CLOSED_IDS.size);
 LEGEND.push({cid: 5, color: '#6b7280', label: 'Closed', count: CLOSED_IDS.size});
+function applyQualityDecoration() {
 RAW_NODES.forEach(n => {
   const q = QUALITY_BY_ID[n.id];
   if (!q) return;
@@ -205,7 +223,7 @@ RAW_NODES.forEach(n => {
  n._quality = q.grade; n._quality_note = q.note; n._bottleneck = REMAINING_BOTTLENECKS[n.id] || ''; n._project_role = PROJECT_ROLES[n.id] || '';
   if (n._project_role === 'research tool') { n._quality_note = 'Closed — 논문 등급 미적용 · 연구 보조 도구'; }
   if (n.id === 'PFTF_subMarine') n._project_path = 'D:\\__PFTF_Projects(2026)\\PFTF_subMarine_dev';
-  n._closed = CLOSED_IDS.has(n.id);
+  n._closed = CLOSED_IDS.has(n.id) || q.grade === 'Closed';
   n._display_label = n.label;
   if (n._closed) {
     n.shape = 'circle';
@@ -217,10 +235,12 @@ RAW_NODES.forEach(n => {
   n.color = Object.assign({}, n.color, {background: c, border: border, highlight: Object.assign({}, (n.color && n.color.highlight) || {}, {background: c, border: border})});
   n.title = (n.title || n.label) + ' — quality ' + q.grade + ': ' + q.note;
 });
+}
 // A bracketed caption (for example [RPJ,submit,07-20] or [draft]) marks a
 // submission-priority node. Keep its fill/quality color, but use a black rim
 // so the caption marker remains visually obvious.
 const BRACKET_CAPTION_RE = /\[[^\]\r\n]*\]/;
+function applyBracketDecoration() {
 RAW_NODES.forEach(n => {
   if (!BRACKET_CAPTION_RE.test(n.label || '')) return;
   n._caption_has_bracket = true;
@@ -231,6 +251,17 @@ RAW_NODES.forEach(n => {
   });
   n.borderWidth = Math.max(1, (n.borderWidth || 1) / 2);
 });
+}
+// 장식 전체를 한 번에: 원본 복원 → 배지 → 우선 고려 → 등급 → 대괄호 테두리.
+// 처음 로드 때 한 번 돌고, Supabase(project_nodes) 오버라이드가 오면 다시 돈다.
+function decorateNodes() {
+  resetNodesFromBase();
+  applyBadgeDecoration();
+  applyPriorityDecoration();
+  applyQualityDecoration();
+  applyBracketDecoration();
+}
+decorateNodes();
 // QUALITY_BOARD_END
 function syncQualityBoard() {
   document.querySelectorAll('#quality-board tbody tr').forEach(tr => {
@@ -1198,6 +1229,61 @@ network.on('afterDrawing', function (ctx) {
 // are registered. Draw once more so hulls and rotated labels appear on load.
 network.redraw();
 // HYPEREDGE_INITIAL_REDRAW_END
+</script>
+<script>
+/* ====== Supabase 공유 노드(project_nodes) 오버라이드 ======================
+   upjuk.html·mindmap.html 과 같은 테이블을 읽어, 파일에 내장된 등급(QUALITY)·
+   투고 배지(STATUS_BADGES)·병목·소개·프로젝트 경로·투고 진도(MINDMAP_STATUS)를
+   최신 값으로 덮어쓴다. mindmap 에서 노트를 고치면 새로고침만으로 반영된다.
+   실패(오프라인·테이블 미설치)하면 내장 데이터 그대로 동작한다.
+   범례의 커뮤니티별 개수는 파일 생성 시점 값을 유지한다(장식·색·보드는 갱신됨). */
+(async function () {
+  const normUrl = u => (u || "").trim().replace(/\/+$/, "").replace(/\/rest\/v1$/i, "").replace(/\/auth\/v1$/i, "").replace(/\/+$/, "");
+  const BAKED_URL = "https://ijutjirouxgqcldjyhma.supabase.co";
+  const BAKED_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdXRqaXJvdXhncWNsZGp5aG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDk4MDAsImV4cCI6MjA5Nzk4NTgwMH0.gIAwf6a2oY-DkTXaf5eM2L4ROMCKim5WsevGfjol7tE";
+  const url = normUrl(localStorage.getItem("cfms_url") || BAKED_URL);
+  const key = (localStorage.getItem("cfms_key") || BAKED_KEY).trim();
+  try {
+    const res = await fetch(url + '/rest/v1/project_nodes?select=*', {
+      headers: { apikey: key, Authorization: 'Bearer ' + key }
+    });
+    if (!res.ok) return;
+    const rows = await res.json();
+    if (!Array.isArray(rows) || !rows.length) return;
+    let touched = false;
+    rows.forEach(r => {
+      const n = NODE_BY_ID[r.id];
+      if (!n) return;
+      touched = true;
+      // '그룹'은 mindmap의 구조 노드 표시일 뿐 논문 등급이 아니다 — 내장 등급을 유지한다.
+      if (r.grade && r.grade !== '그룹' && QUALITY_COLORS[r.grade]) {
+        const q = QUALITY_BY_ID[r.id] || (QUALITY_BY_ID[r.id] = { id: r.id, label: n._base.label, grade: r.grade, note: '' });
+        q.grade = r.grade;
+        if (r.grade_note) q.note = r.grade_note;
+      }
+      if (r.badge) STATUS_BADGES[r.id] = r.badge;
+      if (r.bottleneck) REMAINING_BOTTLENECKS[r.id] = r.bottleneck;
+      if (r.brief) n._intro = r.brief;
+      if (r.project_path) n._project_path = r.project_path;
+      if (r.status && PROG[r.status]) MINDMAP_STATUS[r.id] = r.status;
+    });
+    if (!touched) return;
+    decorateNodes();
+    // vis DataSet.update 는 부분 갱신(merge)이라, 장식이 손대는 필드만 넘긴다.
+    nodesDS.update(RAW_NODES.map(n => ({
+      id: n.id, label: n.label, shape: n.shape || 'dot', color: n.color,
+      borderWidth: n.borderWidth || 1,
+      font: { ...(n.font || {}), size: Math.max(18.7, (n.font && n.font.size) || 0), bold: false },
+      title: n.title,
+      _community: n.community, _community_name: n.community_name,
+      _quality: n._quality, _quality_note: n._quality_note,
+      _bottleneck: n._bottleneck, _project_path: n._project_path,
+      _intro: INDUSTRIAL_EFFECTS[n.id] || n._intro, _closed: n._closed,
+    })));
+    syncQualityBoard();
+    network.redraw();
+  } catch (e) { /* 오프라인/미설치 — 내장 데이터로 동작 */ }
+})();
 </script>
 </body>
 </html>

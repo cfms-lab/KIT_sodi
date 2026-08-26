@@ -21,6 +21,11 @@ revoke all on public.mindmaps from anon;
 grant select on public.mindmaps to anon;
 grant select, insert, update, delete on public.mindmaps to authenticated;
 
+-- 공유 프로젝트 노드도 같은 규칙 (공개 열람 / 편집은 로그인).
+revoke all on public.project_nodes from anon;
+grant select on public.project_nodes to anon;
+grant select, insert, update, delete on public.project_nodes to authenticated;
+
 grant usage, select on all sequences in schema public to authenticated;
 
 alter table public.papers enable row level security;
@@ -30,6 +35,7 @@ alter table public.tt_rooms enable row level security;
 alter table public.jobgis_jobs enable row level security;
 alter table public.jobgis_office_types enable row level security;
 alter table public.mindmaps enable row level security;
+alter table public.project_nodes enable row level security;
 
 drop policy if exists "papers anon read published" on public.papers;
 create policy "papers anon read published"
@@ -112,6 +118,19 @@ using (true);
 drop policy if exists "mindmaps authenticated full access" on public.mindmaps;
 create policy "mindmaps authenticated full access"
 on public.mindmaps for all
+to authenticated
+using (true)
+with check (true);
+
+drop policy if exists "project_nodes anon read" on public.project_nodes;
+create policy "project_nodes anon read"
+on public.project_nodes for select
+to anon
+using (true);
+
+drop policy if exists "project_nodes authenticated full access" on public.project_nodes;
+create policy "project_nodes authenticated full access"
+on public.project_nodes for all
 to authenticated
 using (true)
 with check (true);

@@ -32,6 +32,8 @@
 1. `schema_cfms.sql`: 테이블, 공개 취업 뷰, PDF 버킷 생성
 2. `enable_rls_cfms.sql`: RLS, anon/authenticated 권한, PDF storage 정책 적용
 3. `enable_rls_mindmaps.sql`: 관계도 테이블만 빠르게 보강할 때 쓰는 최소 정책 파일 (anon 열람 + 로그인 편집)
+4. `schema_project_nodes.sql`: graph/mindmap/upjuk 공유 프로젝트 노드 테이블 + 권한 (단독 실행 가능)
+5. `seed_project_nodes.sql`: 공유 노드 초기 데이터 (graph.html 등급·배지 + mindmap 클라우드 병합, 재실행 안전)
 
 기본 내장 연결 정보는 각 HTML의 `BAKED_URL`, `BAKED_KEY`에 있습니다. 공개 저장소에 들어간 키는 Supabase `anon` 키이며, 실제 보안은 RLS와 storage 정책이 담당합니다.
 
@@ -53,6 +55,18 @@
 - 새 학기: `학기 복제`에서 원본 학기를 대상 학기로 복사합니다.
 
 모든 편집은 Supabase에 바로 저장되며, 다른 PC에서는 새로고침 후 반영됩니다.
+
+## 공유 프로젝트 노드 (project_nodes)
+
+`graph.html`, `mindmap.html`, `upjuk.html`은 Supabase의 `project_nodes` 테이블을 공유합니다.
+id는 프로젝트 키워드(`Tomo_SFTF`, `PFTF_VisCull_kDop` 등)로 세 페이지가 동일하게 씁니다.
+
+- `mindmap.html`: 노드(제목·노트·등급·상태·링크·폴더)를 편집하면 관계도 저장과 함께
+  `project_nodes`에 즉시 upsert됩니다. mindmap 노드 id와의 대응은 `mindmap_id` 열에 있습니다.
+- `graph.html`: 로드 시 `project_nodes`를 읽어 내장된 등급·투고 배지·병목·소개·투고 진도를
+  최신 값으로 덮어씁니다. 테이블이 없거나 오프라인이면 내장 데이터로 동작합니다.
+- `upjuk.html`: `grade='ToDo'`인 노드를 `TODO`(할일) 카테고리로 목록에 보여줍니다.
+  통계 테이블에는 포함하지 않습니다. 수정은 mindmap에서 합니다.
 
 ## 연구 그래프·마인드맵 운영
 

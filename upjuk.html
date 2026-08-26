@@ -195,6 +195,7 @@ const BAKED_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 let CFG={url:normUrl(localStorage.getItem("cfms_url")||BAKED_URL),key:(localStorage.getItem("cfms_key")||BAKED_KEY).trim()};
 let SESSION=JSON.parse(localStorage.getItem("cfms_session")||"null"); // {access_token,email}
 let PAPERS=[];
+let NODES=[]; // graph/mindmap과 공유하는 프로젝트 노드 (Supabase project_nodes)
 
 function authHeaders(useUser){
   const h={"apikey":CFG.key,"Content-Type":"application/json"};
@@ -233,7 +234,14 @@ async function api(path,opts={}){
 }
 
 /* ===== 데이터 로드 ===== */
-async function reload(){ await loadPapers(); }
+async function reload(){ await loadNodes(); await loadPapers(); }
+// graph.html / mindmap.html 과 공유하는 프로젝트 노드. grade='ToDo' 인 것을
+// TODO 카테고리로 보여준다. 테이블이 아직 없어도 논문 기능은 그대로 동작한다.
+async function loadNodes(){
+  try{ NODES=await api('/rest/v1/project_nodes?select=*&order=id',{headers:authHeaders(true)})||[]; }
+  catch(e){ NODES=[]; }
+}
+function todoNodes(){ return NODES.filter(n=>n.grade==="ToDo"); }
 async function loadPapers(){
   try{
     // 로그인 시 사용자 토큰으로 읽어야 RLS가 draft(5)를 내려준다. 비로그인은 anon 키로 fallback.
@@ -293,6 +301,7 @@ function checkName(Str,author,first,second,last){
 
 /* ===== UI ===== */
 function presentCategs(){const set=new Set(PAPERS.map(p=>p.CATEG).filter(Boolean));
+  if(todoNodes().length)set.add("TODO"); // 프로젝트 ToDo 노드가 있으면 카테고리 노출
   const o=CATEG_ORDER.filter(c=>set.has(c));for(const c of set)if(!o.includes(c))o.push(c);return o;}
 // 평가연도 Y는 Y년 3월부터 Y+1년 2월까지이다.
 // 월 정보가 없는 자료(P_MONTH=0)는 기존 연도(P_YEAR)에 포함한다.
@@ -322,13 +331,33 @@ function doSearch(){const f=getFilters();renderList(searchPapers(f),f);}
 function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function renderList(res,f){
   const info=document.getElementById("countInfo");
+  // TODO(프로젝트 노드)는 연도·저자와 무관한 할일 목록이라, 전체 보기 또는 TODO 선택 시에만 붙인다.
+  const todos=(f.categ==="ALL"||f.categ==="TODO")&&f.author==="ALL"?todoNodes():[];
   const label=(f.categ==="ALL"?"전체 종류":(CATEG_KOR[f.categ]||f.categ))+` · 평가연도 ${f.from}~${f.to} (3월~다음해 2월)`+(f.author!=="ALL"?` · 저자: ${f.author}`:"");
-  info.textContent=`${label} — 총 ${res.length}건`;
+  info.textContent=`${label} — 총 ${res.length}건`+(todos.length?` · ToDo ${todos.length}건`:"");
   const area=document.getElementById("listArea");
-  if(!res.length){area.innerHTML='<p style="color:#888">검색 결과가 없습니다.</p>';return;}
-  let html="",py=null,i=1;
+  if(!res.length&&!todos.length){area.innerHTML='<p style="color:#888">검색 결과가 없습니다.</p>';return;}
+  let html="";
+  if(todos.length){
+    html+=`<div class="yearsep"><span class="y">할일 (ToDo) — 프로젝트 노드</span><span class="ln"></span></div>`;
+    todos.forEach((n,j)=>{html+=renderTodoNode(n,j+1);});
+  }
+  let py=null,i=1;
   for(const p of res){const y=evalYear(p);if(py!==y){html+=`<div class="yearsep"><span class="y">평가연도 ${y} (${y}.3~${y+1}.2)</span><span class="ln"></span></div>`;py=y;}html+=renderPaper(p,i++);}
   area.innerHTML=html;
+}
+// 프로젝트 ToDo 노드 한 줄. 논문이 아니므로 저자·저널 대신 소개(brief)·메모를 보여주고,
+// 수정은 mindmap.html에서 한다 (여기서는 열람 전용).
+function renderTodoNode(n,i){
+  const x=[];
+  x.push(`<span class="badge" style="background:#fff;color:#333;border:1px solid #000">ToDo</span>`);
+  x.push(`<span class="authors">${esc(n.title||n.id)}</span>`);
+  if(n.id&&n.title!==n.id)x.push(` <span style="color:#888;font-size:12px">(${esc(n.id)})</span>`);
+  const sub=n.brief||n.note||"";
+  if(sub)x.push(`<br><span style="color:#555;font-size:12px">${esc(sub)}</span>`);
+  const link=n.url?`<a class="doi" href="${esc(n.url)}" target="_blank" rel="noopener">LINK</a>`:"";
+  const mm=`<a class="doi" href="mindmap.html" title="mindmap에서 편집">관계도</a>`;
+  return `<div class="paper st5" style="background:#fff;border-style:dashed"><div class="num">${i}.</div><div class="body">${x.join("")} ${link} ${mm}</div></div>`;
 }
 function renderPaper(p,i){const st=p.PrintStatus;let x=[];
   if(p.FUNDING)x.push(`<span class="funding">[${esc(p.FUNDING)}]</span>`);
@@ -357,7 +386,7 @@ function publicationCounts(items){
   return items.reduce((n,p)=>{p.PrintStatus===1?n.published++:n.other++;return n;},{published:0,other:0});
 }
 function formatPublicationCounts(n){return n.other>0?`${n.published}(${n.other})`:`${n.published}`;}
-function renderStats(){const cats=presentCategs();
+function renderStats(){const cats=presentCategs().filter(c=>c!=="TODO"); // ToDo는 통계 테이블에서 제외
   const years=[...new Set(PAPERS.map(evalYear))].filter(Boolean).sort((a,b)=>b-a);
   const sums={};cats.forEach(c=>sums[c]={published:0,other:0});
   const grand={published:0,other:0};
@@ -528,7 +557,7 @@ let toastTimer;function toast(m){const t=document.getElementById("toast");t.text
 /* ===== 부팅 ===== */
 function boot(){renderAuthbar();
   if(!CFG.url||!CFG.key){showBanner("처음이신가요? 우측 상단 ⚙ 버튼으로 Supabase 연결정보를 입력하세요. (설정 안내 파일 참고)");openConfig();return;}
-  loadPapers();
+  loadNodes().then(loadPapers);
 }
 boot();
 </script>
