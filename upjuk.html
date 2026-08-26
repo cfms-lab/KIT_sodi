@@ -121,7 +121,11 @@
     <label>DOI<input id="eDOI"></label>
     <label>PDF 파일명<input id="ePDF"></label>
     <label class="full">지원/펀딩 (FUNDING)<input id="eFunding"></label>
-    <label class="full">메모 (MEMO)<textarea id="eMemo" rows="2"></textarea></label>
+    <label class="full projfield">연결 프로젝트 (graph/mindmap 노드)<select id="eProject" onchange="fillNodeFields(this.value,true)"></select></label>
+    <label class="full projfield">링크 URL (프로젝트)<input id="eNodeUrl" placeholder="https://github.com/..."></label>
+    <label class="full projfield">프로젝트 폴더 위치 (VSCODE)<input id="eNodePath" placeholder="D:\__VSCode_Projects\myapp"></label>
+    <label class="full">메모 (MEMO)<textarea id="eMemo" rows="2"></textarea>
+      <span class="hint projfield" style="margin-top:2px">프로젝트가 연결되면 출판상태·메모·링크·폴더가 mindmap 노드와 동기화됩니다.</span></label>
   </div>
   <div class="err" id="editErr"></div>
   <div class="modal-actions">
@@ -242,12 +246,56 @@ async function loadNodes(){
   catch(e){ NODES=[]; }
 }
 function todoNodes(){ return NODES.filter(n=>n.grade==="ToDo"); }
+function nodeById(id){ return id?NODES.find(n=>n.id===id):null; }
+
+/* ===== 논문 ↔ 프로젝트 노드 연동 =====
+   PROJECT_ID 가 연결된 논문은 출판상태·메모를 mindmap 노드의 상태·메모로 맞춰
+   보여주고(정본 = project_nodes), 논문 수정 창에서 저장하면 역방향으로도 쓴다. */
+const STATUS_TO_PRINT={published:1,inprint:2,accepted:3,submitted:4,draft:5};
+const PRINT_TO_STATUS={1:"published",2:"inprint",3:"accepted",4:"submitted",5:"draft"};
+let HAS_PROJECT_COL=false;          // papers 테이블에 PROJECT_ID 열이 있는가 (add_papers_project_link.sql)
+function applyNodeOverrides(){
+  if(!NODES.length)return;
+  PAPERS.forEach(p=>{
+    const n=nodeById(p.PROJECT_ID); if(!n)return;
+    const ps=STATUS_TO_PRINT[n.status]; if(ps)p.PrintStatus=ps;
+    if(n.note)p.MEMO=n.note;
+  });
+}
+// 저장 후 역방향 동기화: project_nodes 를 고치고, mindmap 이 자체 JSON(mindmaps.data)을
+// 정본으로 읽으므로 그 문서 안의 해당 노드도 같이 고친다.
+async function syncLinkedNode(projectId,f){
+  const node=nodeById(projectId); if(!node)return;
+  const body={updated_at:new Date().toISOString()};
+  if(f.status)body.status=f.status;
+  if(f.url)body.url=f.url;                 // 빈 값으로 실수로 지우지 않도록, 값이 있을 때만 덮어쓴다
+  if(f.project_path)body.project_path=f.project_path;
+  body.note=f.note||null;                  // 메모는 논문 수정 창의 값이 그대로 정본이 된다
+  await api('/rest/v1/project_nodes?id=eq.'+encodeURIComponent(projectId),
+    {method:"PATCH",headers:Object.assign(authHeaders(true),{Prefer:"return=minimal"}),body:JSON.stringify(body)});
+  Object.assign(node,body);
+  if(!node.mindmap_id)return;
+  const rows=await api('/rest/v1/mindmaps?id=eq.cfms&select=data',{headers:authHeaders(true)});
+  if(!(rows&&rows.length&&rows[0].data&&rows[0].data.root))return;
+  const doc=rows[0].data; let hit=null;
+  (function w(n){ if(!n)return; if(n.id===node.mindmap_id)hit=n; (n.children||[]).forEach(w); })(doc.root);
+  if(!hit)return;
+  if(f.status)hit.status=f.status;
+  if(f.url)hit.url=f.url;
+  if(f.project_path)hit.projectPath=f.project_path;
+  hit.note=f.note||"";
+  await api('/rest/v1/mindmaps',{method:"POST",
+    headers:Object.assign(authHeaders(true),{Prefer:"resolution=merge-duplicates,return=minimal"}),
+    body:JSON.stringify({id:"cfms",data:doc,updated_at:new Date().toISOString()})});
+}
 async function loadPapers(){
   try{
     // 로그인 시 사용자 토큰으로 읽어야 RLS가 draft(5)를 내려준다. 비로그인은 anon 키로 fallback.
     const data=await api('/rest/v1/papers?select=*',
       {headers:authHeaders(true)});
+    HAS_PROJECT_COL=!!(data.length&&Object.prototype.hasOwnProperty.call(data[0],"PROJECT_ID"));
     PAPERS=data.map(normalizePaper);
+    applyNodeOverrides(); // 연결된 논문의 출판상태·메모를 프로젝트 노드에 맞춤
     // 방어적 클라이언트 필터: 비로그인은 draft 숨김. (실제 보안은 Supabase RLS가 담당)
     if(!isLoggedIn()) PAPERS=PAPERS.filter(p=>p.PrintStatus!==5);
     document.getElementById("banner").style.display="none";
@@ -263,7 +311,8 @@ function normalizePaper(r){
     CATEG:(r.CATEG||"").trim().toUpperCase()==="ETC"?"ETC":(r.CATEG||"").trim(),
     AUTHORS:r.AUTHORS||"",TITLE:r.TITLE||"",JOURNAL_NAME:r.JOURNAL_NAME||"",VOLUME:r.VOLUME||"",
     PAGE:r.PAGE||"",DOI:r.DOI||"",MEMO:r.MEMO||"",PrintStatus:num(r.PrintStatus)||1,
-    SCIFACTOR:r.SCIFACTOR||"",PDF:r.PDF||"",COUNTRY:r.COUNTRY||"",SCISTATUS:num(r.SCISTATUS),FUNDING:r.FUNDING||""};
+    SCIFACTOR:r.SCIFACTOR||"",PDF:r.PDF||"",COUNTRY:r.COUNTRY||"",SCISTATUS:num(r.SCISTATUS),FUNDING:r.FUNDING||"",
+    PROJECT_ID:r.PROJECT_ID||""};
 }
 
 /* ===== CheckName (저자 매칭, 원본 이식) ===== */
@@ -311,6 +360,8 @@ function initUI(){
   document.getElementById("fCateg").innerHTML='<option value="ALL">ALL (전체)</option>'+
     cats.map(c=>`<option value="${c}">${CATEG_KOR[c]||c} (${c})</option>`).join("");
   document.getElementById("eCateg").innerHTML=CATEG_ORDER.map(c=>`<option value="${c}">${CATEG_KOR[c]||c} (${c})</option>`).join("");
+  document.getElementById("eProject").innerHTML='<option value="">(연결 없음)</option>'+
+    NODES.filter(n=>n.grade!=="그룹").map(n=>`<option value="${esc(n.id)}">${esc(n.id)}${n.title&&n.title!==n.id?" — "+esc(n.title):""}</option>`).join("");
   document.getElementById("fAuthor").innerHTML='<option value="ALL" selected>ALL</option>'+
     PEOPLE.map(p=>`<option value="${p.NAME}">${p.NAME} (${[p.ENGNAME_FIRST,p.ENGNAME_SECOND,p.ENGNAME_LAST].filter(Boolean).join(" ")})</option>`).join("");
   const now=new Date();
@@ -418,13 +469,26 @@ function openEdit(id){
   g("eVolume",p?p.VOLUME:"");g("ePage",p?p.PAGE:"");g("eYear",p?p.P_YEAR:new Date().getFullYear());
   g("eMonth",p?p.P_MONTH:0);g("eDay",p?p.P_DAY:0);g("eSci",p?p.SCIFACTOR:"");
   g("eDOI",p?p.DOI:"");g("ePDF",p?p.PDF:"");g("eFunding",p?p.FUNDING:"");g("eMemo",p?p.MEMO:"");
+  // 프로젝트 연결 필드: PROJECT_ID 열이 없으면(마이그레이션 전) 숨긴다
+  document.querySelectorAll(".projfield").forEach(el=>el.style.display=HAS_PROJECT_COL?"":"none");
+  g("eProject",p&&p.PROJECT_ID?p.PROJECT_ID:"");
+  fillNodeFields(p?p.PROJECT_ID:"",false);
+}
+// 연결 프로젝트 선택 시 노드의 링크·폴더(·메모)를 편집 창에 채운다.
+function fillNodeFields(id,overwriteMemo){
+  const n=nodeById(id);
+  document.getElementById("eNodeUrl").value=n?(n.url||""):"";
+  document.getElementById("eNodePath").value=n?(n.project_path||""):"";
+  if(overwriteMemo&&n)document.getElementById("eMemo").value=n.note||"";
 }
 function closeEdit(){document.getElementById("modalBg").style.display="none";}
 function formObj(){const v=k=>document.getElementById(k).value;
-  return{CATEG:v("eCateg"),PrintStatus:parseInt(v("ePrint"),10),AUTHORS:v("eAuthors"),TITLE:v("eTitle"),
+  const o={CATEG:v("eCateg"),PrintStatus:parseInt(v("ePrint"),10),AUTHORS:v("eAuthors"),TITLE:v("eTitle"),
     JOURNAL_NAME:v("eJournal"),VOLUME:v("eVolume"),PAGE:v("ePage"),P_YEAR:parseInt(v("eYear"),10)||0,
     P_MONTH:parseInt(v("eMonth"),10)||0,P_DAY:parseInt(v("eDay"),10)||0,SCIFACTOR:v("eSci"),
-    DOI:v("eDOI"),PDF:v("ePDF"),FUNDING:v("eFunding"),MEMO:v("eMemo"),COUNTRY:"",SCISTATUS:0};}
+    DOI:v("eDOI"),PDF:v("ePDF"),FUNDING:v("eFunding"),MEMO:v("eMemo"),COUNTRY:"",SCISTATUS:0};
+  if(HAS_PROJECT_COL)o.PROJECT_ID=v("eProject")||null;   // 열이 없으면 보내지 않는다 (400 방지)
+  return o;}
 async function savePaper(){
   if(!requireLogin())return;
   const idVal=document.getElementById("eID").value;const obj=formObj();
@@ -438,6 +502,16 @@ async function savePaper(){
       await api('/rest/v1/papers',
         {method:"POST",headers:Object.assign(authHeaders(true),{Prefer:"return=representation"}),body:JSON.stringify(obj)});
       toast("추가되었습니다.");
+    }
+    // 연결된 프로젝트 노드로 역방향 동기화 (출판상태→status, 메모→note, 링크·폴더)
+    if(HAS_PROJECT_COL&&obj.PROJECT_ID){
+      try{
+        await syncLinkedNode(obj.PROJECT_ID,{status:PRINT_TO_STATUS[obj.PrintStatus],
+          url:document.getElementById("eNodeUrl").value.trim(),
+          project_path:document.getElementById("eNodePath").value.trim(),
+          note:obj.MEMO});
+        await loadNodes();
+      }catch(e){ toast("프로젝트 노드 동기화 실패: "+e.message.slice(0,80)); }
     }
     closeEdit();await loadPapers();
   }catch(e){document.getElementById("editErr").textContent="저장 실패: "+e.message.slice(0,160);}

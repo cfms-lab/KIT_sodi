@@ -21,6 +21,7 @@ create table if not exists public.papers (
   "COUNTRY" text,
   "SCISTATUS" integer,
   "SCIFACTOR" text,
+  "PROJECT_ID" text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -124,6 +125,7 @@ from public.jobgis_jobs;
 
 create index if not exists papers_year_idx on public.papers ("P_YEAR" desc);
 create index if not exists papers_categ_idx on public.papers ("CATEG");
+create index if not exists papers_project_idx on public.papers ("PROJECT_ID");
 create index if not exists tt_courses_semester_idx on public.tt_courses (semester);
 create index if not exists tt_professors_semester_idx on public.tt_professors (semester);
 create index if not exists tt_rooms_semester_idx on public.tt_rooms (semester);

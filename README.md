@@ -34,6 +34,7 @@
 3. `enable_rls_mindmaps.sql`: 관계도 테이블만 빠르게 보강할 때 쓰는 최소 정책 파일 (anon 열람 + 로그인 편집)
 4. `schema_project_nodes.sql`: graph/mindmap/upjuk 공유 프로젝트 노드 테이블 + 권한 (단독 실행 가능)
 5. `seed_project_nodes.sql`: 공유 노드 초기 데이터 (graph.html 등급·배지 + mindmap 클라우드 병합, 재실행 안전)
+6. `add_papers_project_link.sql`: `papers.PROJECT_ID` 열 추가 + 기존 논문 4건 노드 연결 (재실행 안전)
 
 기본 내장 연결 정보는 각 HTML의 `BAKED_URL`, `BAKED_KEY`에 있습니다. 공개 저장소에 들어간 키는 Supabase `anon` 키이며, 실제 보안은 RLS와 storage 정책이 담당합니다.
 
@@ -67,6 +68,11 @@ id는 프로젝트 키워드(`Tomo_SFTF`, `PFTF_VisCull_kDop` 등)로 세 페이
   최신 값으로 덮어씁니다. 테이블이 없거나 오프라인이면 내장 데이터로 동작합니다.
 - `upjuk.html`: `grade='ToDo'`인 노드를 `TODO`(할일) 카테고리로 목록에 보여줍니다.
   통계 테이블에는 포함하지 않습니다. 수정은 mindmap에서 합니다.
+- 논문 ↔ 노드 연결: `add_papers_project_link.sql`이 `papers.PROJECT_ID` 열을 추가합니다.
+  연결된 논문은 upjuk에서 출판상태·메모가 mindmap 노드의 상태·메모로 표시되고,
+  논문 수정 창(연결 프로젝트·링크 URL·프로젝트 폴더 위치·메모)에서 저장하면
+  `project_nodes`와 mindmap 문서(`mindmaps.data`) 양쪽에 역방향으로 반영됩니다.
+  같은 노드를 mindmap과 upjuk에서 동시에 열어 두고 편집하면 나중에 저장한 쪽이 이깁니다.
 
 ## 연구 그래프·마인드맵 운영
 
