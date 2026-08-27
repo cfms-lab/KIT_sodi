@@ -640,6 +640,15 @@ const KIND={
 const LEGACY_KIND={
   root:'group', subgroup:'group', core:'high', app:'medium', web:'high', infra:'closed'
 };
+/* graph.html 과 같은 규칙: status 가 draft 인 노드는 미완성이라 등급(kind) 색을
+   원색 그대로 칠하면 과장돼 보인다(예: PFTF_Compression, 上·빨강). 채색·테두리에
+   투명도 50%를 얹고, 글자는 흐린 배경에서도 읽히게 잉크색으로 바꾼다. */
+function withAlpha(hex,alpha){
+  const v=hex.replace('#','');
+  const ch=v.length===3?v.split('').map(c=>c+c):[v.slice(0,2),v.slice(2,4),v.slice(4,6)];
+  const [r,g,b]=ch.map(c=>parseInt(c,16));
+  return `rgba(${r},${g},${b},${alpha})`;
+}
 function normalizeKinds(data){
   let changed=false;
   if(!data||!data.root) return changed;
@@ -757,9 +766,10 @@ function render(){
   });}
   lay.placed.forEach(p=>{
     const n=p.node, st=KIND[n.kind]||KIND.todo;
-    const cancelled=(n.status==='cancelled');
-    const fill=cancelled?'#e3e2de':st.fill, stroke=cancelled?'#9d9c98':st.stroke;
-    const textColor=cancelled?INK2:st.text;
+    const cancelled=(n.status==='cancelled'), draft=(n.status==='draft');
+    const fill=cancelled?'#e3e2de':draft?withAlpha(st.fill,0.5):st.fill;
+    const stroke=cancelled?'#9d9c98':draft?withAlpha(st.stroke,0.5):st.stroke;
+    const textColor=cancelled?INK2:draft?INK:st.text;
     const dash=(n.status==='draft')?'stroke-dasharray="6 4"':'';
     const isMatch=q&&((n.title||'').toLowerCase().includes(q)||(n.note||'').toLowerCase().includes(q));
     const cls='node'+(n.id===sel?' sel':'')+(isMatch?' match':'');
@@ -788,7 +798,7 @@ function render(){
 function renderLegend(){
   document.getElementById('legend').innerHTML=Object.keys(KIND).map(k=>
     `<span class="lg"><i style="border-color:${KIND[k].stroke};background:${KIND[k].fill}"></i>${KIND[k].label}</span>`).join('')
-    +`<span class="lg"><i style="border-style:dashed;border-color:#999;background:#fff"></i>draft(초안)</span>`
+    +`<span class="lg"><i style="border-style:dashed;border-color:#999;background:#fff"></i>draft(초안·채색 50%)</span>`
     +`<span class="lg"><i style="border-color:#9d9c98;background:#e3e2de"></i><s>cancelled(취소)</s></span>`
     +Object.keys(PROGRESS).map(k=>
       `<span class="lg"><svg viewBox="0 0 13 13">`
