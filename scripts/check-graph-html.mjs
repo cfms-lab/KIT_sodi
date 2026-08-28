@@ -64,9 +64,6 @@ const danglingHyperedges = hyperedges.flatMap((hyperedge) =>
     .map((nodeId) => `${hyperedge.label}:${nodeId}`),
 );
 const urbanNode = nodes.find((node) => node.id === "SFTF_UrbanTraffic");
-const urbanEdges = edges.filter(
-  (edge) => edge.from === "SFTF_UrbanTraffic" || edge.to === "SFTF_UrbanTraffic",
-);
 const finding3 = hyperedges.find((hyperedge) => hyperedge.label === "발견3");
 const garmentSimulation = hyperedges.find(
   (hyperedge) => hyperedge.label === "의복 시뮬레이션",
@@ -86,8 +83,20 @@ if (duplicateIds || danglingEdges.length || missingPositions.length || danglingH
     JSON.stringify({ duplicateIds, danglingEdges: danglingEdges.length, missingPositions: missingPositions.map((node) => node.id), danglingHyperedges }),
   );
 }
-if (!urbanNode || urbanEdges.length < 1 || finding3?.nodes?.join(",") !== "SFTF_UrbanTraffic") {
-  throw new Error("SFTF_UrbanTraffic node, relation edge, or singleton 발견3 hyperedge is missing");
+if (!urbanNode || finding3?.nodes?.join(",") !== "SFTF_UrbanTraffic") {
+  throw new Error("SFTF_UrbanTraffic node or singleton 발견3 hyperedge is missing");
+}
+// 2026-08-28: 엣지는 활용 분야가 아니라 '개발 목표'만 담는다.
+// 응용 전용 노드(SFTF_UrbanTraffic 등)는 연결 0개가 정상이므로 차수를 검사하지 않는다.
+const GOAL_CATEGORIES = new Set(["확장", "가속", "정확도", "통합"]);
+const badGoalEdges = edges.filter(
+  (edge) => !edge.label || !GOAL_CATEGORIES.has(edge._rel),
+);
+if (badGoalEdges.length) {
+  throw new Error(
+    "edges missing a 개발 목표 label or category: "
+    + badGoalEdges.map((edge) => `${edge.from}->${edge.to}`).join(", "),
+  );
 }
 if (
   !garmentSimulation
