@@ -134,8 +134,8 @@ function esc(s) {
 }
 
 // Build vis datasets (deterministic radial layout: apps ring around their base hub)
-const POS = {"Tomo_SFTF": {"x": -254, "y": 216}, "Tomo_SFTFSoft": {"x": -54, "y": 227}, "SFTF_Clustering": {"x": 87, "y": 558}, "PFTF": {"x": 141, "y": 423}, "SFTF_Composite": {"x": 365, "y": 735}, "SFTF_InjMold": {"x": -331, "y": 461}, "PFTF_Compression": {"x": 557, "y": 712}, "Tomo_DFSVR": {"x": 274, "y": 104}, "PFTF_VisCull_kDop": {"x": 373, "y": 522}, "SFTF_SewerPOC": {"x": -230, "y": 486}, "SFTFSoft_GNN": {"x": 139, "y": 75}, "SFTF_DrapePrior": {"x": 289, "y": 278}, "PFTF_AsymTensor": {"x": 174, "y": 209}, "PFTF_DrapePrior_VisCull_kDop": {"x": 359, "y": 357}, "PFTF_ResearchOptimize": {"x": 69, "y": 353}, "PFTF_alpha": {"x": 54, "y": 243}, "SFTF_QEM": {"x": -87, "y": 126}, "SFTF_DynamicTargetSearch": {"x": -166, "y": 15}, "DFSVR_VisCull": {"x": 424, "y": 99}, "SFTFSoft_GNN_DFSVR": {"x": 231, "y": -79}, "SFTF_ActiveOverprint": {"x": -33, "y": -89}, "ColdOndol": {"x": -158, "y": 676}, "ColdOndol_Positioning": {"x": -47, "y": 735}, "cfmsCIPC": {"x": 626, "y": 289}, "TSE_SEM": {"x": 193, "y": 684}, "SFTF_HeatMethod": {"x": 175, "y": 764}, "cfmsPINNDrape": {"x": 466, "y": 224}, "cfmsDrape": {"x": 572, "y": 492}, "cfmsMiindo": {"x": 758, "y": 495}, "cfmsPINNCAD": {"x": 562, "y": 385}, "SFTFSoft_DFSVR": {"x": 63, "y": 150}, "SFTF_UrbanTraffic": {"x": -396, "y": 278}};
-// 2026-08-29: cfmsAutoSew2026 프로젝트와 의복 CAD 데이터 흐름을 공개 그래프에 편입.
+const POS = {"Tomo_SFTF": {"x": -254, "y": 216}, "Tomo_SFTFSoft": {"x": -54, "y": 227}, "SFTF_Clustering": {"x": 87, "y": 558}, "PFTF": {"x": 141, "y": 423}, "SFTF_Composite": {"x": 365, "y": 735}, "SFTF_InjMold": {"x": -331, "y": 461}, "PFTF_Compression": {"x": 557, "y": 712}, "Tomo_DFSVR": {"x": 274, "y": 104}, "PFTF_VisCull_kDop": {"x": 373, "y": 522}, "SFTF_SewerPOC": {"x": -230, "y": 486}, "SFTFSoft_GNN": {"x": 139, "y": 75}, "SFTF_DrapePrior": {"x": 289, "y": 278}, "PFTF_AsymTensor": {"x": 174, "y": 209}, "PFTF_DrapePrior_VisCull_kDop": {"x": 359, "y": 357}, "PFTF_ResearchOptimize": {"x": 69, "y": 353}, "PFTF_alpha": {"x": 54, "y": 243}, "SFTF_QEM": {"x": -87, "y": 126}, "SFTF_DynamicTargetSearch": {"x": -166, "y": 15}, "DFSVR_VisCull": {"x": 424, "y": 99}, "SFTFSoft_GNN_DFSVR": {"x": 231, "y": -79}, "SFTF_ActiveOverprint": {"x": -33, "y": -89}, "ColdOndol": {"x": -158, "y": 676}, "ColdOndol_Positioning": {"x": -47, "y": 735}, "cfmsCIPC": {"x": 611, "y": 283}, "TSE_SEM": {"x": 193, "y": 684}, "SFTF_HeatMethod": {"x": 175, "y": 764}, "cfmsPINNDrape": {"x": 466, "y": 224}, "cfmsDrape": {"x": 584, "y": 511}, "cfmsMiindo": {"x": 682, "y": 644}, "cfmsPINNCAD": {"x": 520, "y": 380}, "SFTFSoft_DFSVR": {"x": 63, "y": 150}, "SFTF_UrbanTraffic": {"x": -396, "y": 278}, "cfmsAutoSew": {"x": 735, "y": 385}, "cfmsAutoPlace": {"x": 745, "y": 527}};
+// 2026-08-30: cfmsAutoSew2026·cfmsAutoPlace2026 프로젝트와 의복 CAD 데이터 흐름을 공개 그래프에 편입.
 // 원본 JSON 상수는 배포 스냅숏을 보존하고, 아래 curated 블록을 멱등 적용한다.
 const CFMS_AUTOSEW_NODE = {
   "id": "cfmsAutoSew",
@@ -166,7 +166,38 @@ const CFMS_AUTOSEW_NODE = {
 };
 if (!RAW_NODES.some(n => n.id === CFMS_AUTOSEW_NODE.id)) RAW_NODES.push(CFMS_AUTOSEW_NODE);
 
+const CFMS_AUTOPLACE_NODE = {
+  "id": "cfmsAutoPlace",
+  "label": "cfmsAutoPlace",
+  "color": {"background": "#ffffff", "border": "#000000", "highlight": {"background": "#ffffff", "border": "#000000"}},
+  "size": 15.4,
+  "font": {"size": 13, "color": "#333333", "bold": false},
+  "title": "cfmsAutoPlace — ToDo\n입력: DXF 패널·봉제 후보 · 출력: 전역 조립 가설·신체 배치\n위상 제약으로 조립 유효성을 검사하고 cfmsDrape short-rollout으로 후보를 재정렬한다",
+  "community": 4,
+  "community_name": "ToDo",
+  "source_file": "cfmsAutoPlace.md",
+  "file_type": "concept",
+  "degree": 2,
+  "_intro": "라벨이 없는 의복 패턴 DXF에서 패널의 신체 부위와 전역 조립 유효성을 추정하고, 물리 시뮬레이션으로 초기 배치 후보를 검증한다.",
+  "_project_path": "D:\\__CFMS_Projects\\cfmsAutoPlace2026_dev",
+  "_grade": "ToDo",
+  "_stage": "active",
+  "_horizon": "near",
+  "_level": 0,
+  "_family": "cfms",
+  "_in": 1,
+  "_out": 1,
+  "_quality": "ToDo",
+  "_quality_note": "전역 조립·신체 배치 PoC; 독립 holdout 검증 전",
+  "_bottleneck": null,
+  "_graph_role": "",
+  "_finding_candidate": ""
+};
+if (!RAW_NODES.some(n => n.id === CFMS_AUTOPLACE_NODE.id)) RAW_NODES.push(CFMS_AUTOPLACE_NODE);
+
 const CURATED_GARMENT_EDGES = [
+  {"from": "cfmsAutoSew", "to": "cfmsAutoPlace", "label": "전역 배치", "title": "cfmsAutoSew → cfmsAutoPlace\n개발 목표: 전역 배치 (통합)\nAutoSew의 pairwise 봉제 후보를 위상 제약으로 검사해 유효한 전역 조립과 신체 배치 가설로 만든다", "dashes": false, "width": 2, "color": {"opacity": 0.65}, "confidence": "GOAL", "_rel": "통합", "_detail": "봉제 후보를 전역 조립 유효성·신체 배치 가설로 확장한다", "_goal": "전역 배치", "_tentative": false},
+  {"from": "cfmsAutoPlace", "to": "cfmsDrape", "label": "물리 검증", "title": "cfmsAutoPlace → cfmsDrape\n개발 목표: 물리 검증 (정확도)\n전역 조립과 초기 pose 후보를 cfmsDrape short-rollout에 넘겨 물리적으로 안정적인 순서로 재정렬한다", "dashes": false, "width": 2, "color": {"opacity": 0.65}, "confidence": "GOAL", "_rel": "정확도", "_detail": "전역 조립·초기 pose 후보를 short-rollout 물리 오라클로 검증한다", "_goal": "물리 검증", "_tentative": false},
   {"from": "cfmsAutoSew", "to": "cfmsPINNCAD", "label": "봉제 대응", "title": "cfmsAutoSew → cfmsPINNCAD\n개발 목표: 봉제 대응 (통합)\n2D 패턴·DXF에서 제안·확정한 panel seam correspondence를 정적 3D 의복 CAD의 E_seam 제약으로 넘긴다", "dashes": false, "width": 2, "color": {"opacity": 0.65}, "confidence": "GOAL", "_rel": "통합", "_detail": "2D 패턴·DXF의 봉제 대응정보를 정적 3D 의복 CAD 제약으로 전달한다", "_goal": "봉제 대응", "_tentative": false},
   {"from": "cfmsAutoSew", "to": "cfmsPINNDrape", "label": "봉제 실험", "title": "cfmsAutoSew → cfmsPINNDrape\n개발 목표: 봉제 실험 (정확도)\nAutoSew가 만든 봉제 대응을 닫힘·조립가능성과 봉제 과도기 실험의 입력으로 넘긴다", "dashes": false, "width": 2, "color": {"opacity": 0.65}, "confidence": "GOAL", "_rel": "정확도", "_detail": "봉제 대응을 PINNDrape의 닫힘·조립가능성 실험 입력으로 전달한다", "_goal": "봉제 실험", "_tentative": false},
   {"from": "cfmsDrape", "to": "cfmsPINNCAD", "label": "저차원 예측", "title": "cfmsDrape → cfmsPINNCAD\n개발 목표: 저차원 예측 (가속)\n장기적으로 드레이프 시뮬레이터의 결과를 저차원 예측 모델로 축약해 정적 3D 의복 CAD를 직접 생성한다", "dashes": true, "width": 2, "color": {"opacity": 0.65}, "confidence": "GOAL", "_rel": "가속", "_detail": "장기적으로 드레이프 결과를 저차원 예측으로 축약해 정적 3D 의복 CAD를 직접 만든다", "_goal": "저차원 예측", "_tentative": true}
@@ -177,7 +208,7 @@ CURATED_GARMENT_EDGES.forEach(curated => {
   else RAW_EDGES.push(curated);
 });
 
-const CURATED_POSITIONS = {"cfmsAutoSew": {"x": 748, "y": 385}};
+const CURATED_POSITIONS = {"cfmsAutoSew": {"x": 735, "y": 385}, "cfmsAutoPlace": {"x": 745, "y": 527}};
 Object.assign(POS, CURATED_POSITIONS);
 
 // 새 관계를 반영해 모든 노드의 차수 메타데이터도 같은 실행에서 맞춘다.
@@ -959,7 +990,7 @@ LEGEND.forEach(c => {
 <script>
 // Render hyperedges as shaded regions
 const hyperedges = [{"label": "발견1", "nodes": ["SFTF_InjMold", "SFTF_SewerPOC"]}, {"label": "발견2", "nodes": ["SFTF_Composite", "PFTF_Compression"]}, {"label": "발견3", "nodes": ["SFTF_UrbanTraffic"]}, {"label": "발견3'", "nodes": ["ColdOndol"]}, {"label": "발견4·5·6", "nodes": ["PFTF_VisCull_kDop"]}, {"label": "BASE", "kind": "base", "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering", "PFTF"], "color": "#0f766e", "labelColor": "#115e59", "fillAlpha": 0.1, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.18}, {"label": "METHOD / 이론·추론 확장", "kind": "role", "nodes": ["Tomo_DFSVR", "SFTFSoft_GNN", "PFTF_AsymTensor"], "color": "#7c3aed", "labelColor": "#6d28d9", "fillAlpha": 0.035, "strokeAlpha": 0.75, "labelAlpha": 0.95, "lineWidth": 2, "dash": [4, 6], "scale": 1.12}, {"label": "PIPELINE / 다단계 통합", "kind": "role", "nodes": ["SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop", "SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint", "DFSVR_VisCull", "SFTFSoft_GNN_DFSVR", "ColdOndol"], "color": "#0891b2", "labelColor": "#0e7490", "fillAlpha": 0.025, "strokeAlpha": 0.7, "labelAlpha": 0.95, "lineWidth": 2, "dash": [16, 8], "scale": 1.08}, {"label": "의복 시뮬레이션", "kind": "domain", "nodes": ["PFTF", "SFTF_Composite", "SFTF_DrapePrior", "PFTF_Compression", "PFTF_VisCull_kDop", "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape", "cfmsMiindo", "cfmsPINNCAD"], "color": "#db2777", "labelColor": "#be185d", "fillAlpha": 0.035, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}, {"label": "온돌 냉방 / 건물 에너지", "kind": "domain", "nodes": ["ColdOndol", "ColdOndol_Positioning"], "color": "#2563eb", "labelColor": "#1d4ed8", "fillAlpha": 0.035, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}];
-const CURATED_HYPEREDGE_MEMBERS = {"의복 시뮬레이션": ["cfmsAutoSew"]};
+const CURATED_HYPEREDGE_MEMBERS = {"의복 시뮬레이션": ["cfmsAutoSew", "cfmsAutoPlace"]};
 Object.entries(CURATED_HYPEREDGE_MEMBERS).forEach(([label, nodeIds]) => {
   const hyperedge = hyperedges.find(item => item.label === label);
   if (!hyperedge) return;

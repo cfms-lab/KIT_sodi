@@ -100,7 +100,7 @@ NODE_SOURCE_FILES = {
 
 # ----------------------------------------------------------------- 좌표 (발견 기준)
 POS = {
-    # 2026-08-25: 사용자가 graph.html에서 조정한 배치를 정본으로 승격.
+    # 2026-08-30: 사용자가 graph.html에서 조정한 34-node 배치를 정본으로 승격.
     "Tomo_SFTF": (-254, 216),
     "Tomo_SFTFSoft": (-54, 227),
     "SFTF_Clustering": (87, 558),
@@ -124,17 +124,18 @@ POS = {
     "SFTF_ActiveOverprint": (-33, -89),
     "ColdOndol": (-158, 676),
     "ColdOndol_Positioning": (-47, 735),
-    "cfmsCIPC": (626, 289),
+    "cfmsCIPC": (611, 283),
     "TSE_SEM": (193, 684),
     "SFTF_HeatMethod": (175, 764),
     "cfmsPINNDrape": (466, 224),
-    "cfmsDrape": (572, 492),
-    "cfmsMiindo": (758, 495),
-    "cfmsPINNCAD": (562, 385),
+    "cfmsDrape": (584, 511),
+    "cfmsMiindo": (682, 644),
+    "cfmsPINNCAD": (520, 380),
     "SFTFSoft_DFSVR": (63, 150),
-    "cfmsDrapeSCAN": (648, 218),
     # Restored from the last pre-archive graph snapshot.
     "SFTF_UrbanTraffic": (-396, 278),
+    "cfmsAutoSew": (735, 385),
+    "cfmsAutoPlace": (745, 527),
 }
 
 HYPEREDGES = [

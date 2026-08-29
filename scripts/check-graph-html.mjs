@@ -49,8 +49,13 @@ function readJsonConstant(name, opening) {
 }
 
 const nodes = readJsonConstant("RAW_NODES", "[");
-const curatedNode = readJsonConstant("CFMS_AUTOSEW_NODE", "{");
-if (!nodes.some((node) => node.id === curatedNode.id)) nodes.push(curatedNode);
+const curatedNodes = [
+  readJsonConstant("CFMS_AUTOSEW_NODE", "{"),
+  readJsonConstant("CFMS_AUTOPLACE_NODE", "{"),
+];
+for (const curatedNode of curatedNodes) {
+  if (!nodes.some((node) => node.id === curatedNode.id)) nodes.push(curatedNode);
+}
 
 const edges = readJsonConstant("RAW_EDGES", "[");
 const curatedEdges = readJsonConstant("CURATED_GARMENT_EDGES", "[");
@@ -94,7 +99,7 @@ const garmentSimulation = hyperedges.find(
 const expectedGarmentNodes = [
   "PFTF", "SFTF_Composite", "SFTF_DrapePrior", "PFTF_Compression",
   "PFTF_VisCull_kDop", "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape",
-  "cfmsMiindo", "cfmsPINNCAD", "cfmsAutoSew",
+  "cfmsMiindo", "cfmsPINNCAD", "cfmsAutoSew", "cfmsAutoPlace",
 ];
 const buildingEnergy = hyperedges.find(
   (hyperedge) => hyperedge.label === "온돌 냉방 / 건물 에너지",
@@ -122,6 +127,8 @@ if (badGoalEdges.length) {
   );
 }
 const expectedGarmentEdges = [
+  ["cfmsAutoSew", "cfmsAutoPlace", "전역 배치", "통합", false],
+  ["cfmsAutoPlace", "cfmsDrape", "물리 검증", "정확도", false],
   ["cfmsAutoSew", "cfmsPINNCAD", "봉제 대응", "통합", false],
   ["cfmsAutoSew", "cfmsPINNDrape", "봉제 실험", "정확도", false],
   ["cfmsDrape", "cfmsPINNCAD", "저차원 예측", "가속", true],
