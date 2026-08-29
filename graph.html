@@ -100,7 +100,7 @@
     </div>
     <div id="legend"></div>
   </div>
-  <div id="stats">32 nodes &middot; 0 edges &middot; 6 communities
+  <div id="stats">33 nodes &middot; 0 edges &middot; 6 communities
     &nbsp;<button id="reset-pos-btn" style="font-size:14px;padding:2px 8px;cursor:pointer;border:1px solid #999;border-radius:4px;background:#f4f4f4">위치 초기화</button>
     <button id="copy-pos-btn" style="font-size:14px;padding:2px 8px;cursor:pointer;border:1px solid #999;border-radius:4px;background:#f4f4f4">위치 복사</button>
     &nbsp;<select id="layout-sel" style="font-size:14px;padding:2px 6px;border:1px solid #999;border-radius:4px;background:#f4f4f4">
@@ -135,6 +135,71 @@ function esc(s) {
 
 // Build vis datasets (deterministic radial layout: apps ring around their base hub)
 const POS = {"Tomo_SFTF": {"x": -254, "y": 216}, "Tomo_SFTFSoft": {"x": -54, "y": 227}, "SFTF_Clustering": {"x": 87, "y": 558}, "PFTF": {"x": 141, "y": 423}, "SFTF_Composite": {"x": 365, "y": 735}, "SFTF_InjMold": {"x": -331, "y": 461}, "PFTF_Compression": {"x": 557, "y": 712}, "Tomo_DFSVR": {"x": 274, "y": 104}, "PFTF_VisCull_kDop": {"x": 373, "y": 522}, "SFTF_SewerPOC": {"x": -230, "y": 486}, "SFTFSoft_GNN": {"x": 139, "y": 75}, "SFTF_DrapePrior": {"x": 289, "y": 278}, "PFTF_AsymTensor": {"x": 174, "y": 209}, "PFTF_DrapePrior_VisCull_kDop": {"x": 359, "y": 357}, "PFTF_ResearchOptimize": {"x": 69, "y": 353}, "PFTF_alpha": {"x": 54, "y": 243}, "SFTF_QEM": {"x": -87, "y": 126}, "SFTF_DynamicTargetSearch": {"x": -166, "y": 15}, "DFSVR_VisCull": {"x": 424, "y": 99}, "SFTFSoft_GNN_DFSVR": {"x": 231, "y": -79}, "SFTF_ActiveOverprint": {"x": -33, "y": -89}, "ColdOndol": {"x": -158, "y": 676}, "ColdOndol_Positioning": {"x": -47, "y": 735}, "cfmsCIPC": {"x": 626, "y": 289}, "TSE_SEM": {"x": 193, "y": 684}, "SFTF_HeatMethod": {"x": 175, "y": 764}, "cfmsPINNDrape": {"x": 466, "y": 224}, "cfmsDrape": {"x": 572, "y": 492}, "cfmsMiindo": {"x": 758, "y": 495}, "cfmsPINNCAD": {"x": 562, "y": 385}, "SFTFSoft_DFSVR": {"x": 63, "y": 150}, "SFTF_UrbanTraffic": {"x": -396, "y": 278}};
+// 2026-08-29: cfmsAutoSew2026 프로젝트와 의복 CAD 데이터 흐름을 공개 그래프에 편입.
+// 원본 JSON 상수는 배포 스냅숏을 보존하고, 아래 curated 블록을 멱등 적용한다.
+const CFMS_AUTOSEW_NODE = {
+  "id": "cfmsAutoSew",
+  "label": "cfmsAutoSew",
+  "color": {"background": "#2a78d6", "border": "#2a78d6", "highlight": {"background": "#2a78d6", "border": "#2a78d6"}},
+  "size": 15.4,
+  "font": {"size": 13, "color": "#333333"},
+  "title": "cfmsAutoSew — 하\n입력: 2D 패턴/DXF · 출력: 봉제 대응정보\n학습 없는 기하 매칭과 GNN 보조로 패널 경계의 봉제 짝을 제안한다",
+  "community": 3,
+  "community_name": "하",
+  "source_file": "cfmsAutoSew.md",
+  "file_type": "concept",
+  "degree": 2,
+  "_intro": "2D 패턴·DXF에서 어느 패널의 어느 경계를 서로 봉제할지 자동으로 제안하고, 확정된 봉제 대응정보를 3D 의복 CAD와 드레이프 실험에 넘긴다.",
+  "_project_path": "D:\\__VSCode_Projects\\cfmsAutoSew2026_dev",
+  "_grade": "하",
+  "_stage": "active",
+  "_horizon": "near",
+  "_level": 0,
+  "_family": "cfms",
+  "_in": 0,
+  "_out": 2,
+  "_quality": "하",
+  "_quality_note": "Tier B 봉제 매처 원고·빌드 완료; 확정 단계 edge F1 측정이 남은 핵심 게이트",
+  "_bottleneck": null,
+  "_graph_role": "",
+  "_finding_candidate": ""
+};
+if (!RAW_NODES.some(n => n.id === CFMS_AUTOSEW_NODE.id)) RAW_NODES.push(CFMS_AUTOSEW_NODE);
+
+const CURATED_GARMENT_EDGES = [
+  {"from": "cfmsAutoSew", "to": "cfmsPINNCAD", "label": "봉제 대응", "title": "cfmsAutoSew → cfmsPINNCAD\n개발 목표: 봉제 대응 (통합)\n2D 패턴·DXF에서 제안·확정한 panel seam correspondence를 정적 3D 의복 CAD의 E_seam 제약으로 넘긴다", "dashes": false, "width": 2, "color": {"opacity": 0.65}, "confidence": "GOAL", "_rel": "통합", "_detail": "2D 패턴·DXF의 봉제 대응정보를 정적 3D 의복 CAD 제약으로 전달한다", "_goal": "봉제 대응", "_tentative": false},
+  {"from": "cfmsAutoSew", "to": "cfmsPINNDrape", "label": "봉제 실험", "title": "cfmsAutoSew → cfmsPINNDrape\n개발 목표: 봉제 실험 (정확도)\nAutoSew가 만든 봉제 대응을 닫힘·조립가능성과 봉제 과도기 실험의 입력으로 넘긴다", "dashes": false, "width": 2, "color": {"opacity": 0.65}, "confidence": "GOAL", "_rel": "정확도", "_detail": "봉제 대응을 PINNDrape의 닫힘·조립가능성 실험 입력으로 전달한다", "_goal": "봉제 실험", "_tentative": false},
+  {"from": "cfmsDrape", "to": "cfmsPINNCAD", "label": "저차원 예측", "title": "cfmsDrape → cfmsPINNCAD\n개발 목표: 저차원 예측 (가속)\n장기적으로 드레이프 시뮬레이터의 결과를 저차원 예측 모델로 축약해 정적 3D 의복 CAD를 직접 생성한다", "dashes": true, "width": 2, "color": {"opacity": 0.65}, "confidence": "GOAL", "_rel": "가속", "_detail": "장기적으로 드레이프 결과를 저차원 예측으로 축약해 정적 3D 의복 CAD를 직접 만든다", "_goal": "저차원 예측", "_tentative": true}
+];
+CURATED_GARMENT_EDGES.forEach(curated => {
+  const index = RAW_EDGES.findIndex(edge => edge.from === curated.from && edge.to === curated.to);
+  if (index >= 0) RAW_EDGES[index] = curated;
+  else RAW_EDGES.push(curated);
+});
+
+const CURATED_POSITIONS = {"cfmsAutoSew": {"x": 748, "y": 385}};
+Object.assign(POS, CURATED_POSITIONS);
+
+// 새 관계를 반영해 모든 노드의 차수 메타데이터도 같은 실행에서 맞춘다.
+const CURATED_DEGREE = Object.fromEntries(RAW_NODES.map(node => [node.id, {in: 0, out: 0}]));
+RAW_EDGES.forEach(edge => {
+  if (CURATED_DEGREE[edge.from]) CURATED_DEGREE[edge.from].out += 1;
+  if (CURATED_DEGREE[edge.to]) CURATED_DEGREE[edge.to].in += 1;
+});
+RAW_NODES.forEach(node => {
+  const counts = CURATED_DEGREE[node.id];
+  node._in = counts.in;
+  node._out = counts.out;
+  node.degree = counts.in + counts.out;
+  node.title = String(node.title || node.id).replace(
+    /차수 \d+ \(in \d+ \/ out \d+\)/,
+    `차수 ${node.degree} (in ${counts.in} / out ${counts.out})`,
+  );
+});
+LEGEND.forEach(item => {
+  if (item.cid !== 5) item.count = RAW_NODES.filter(node => node.community === item.cid).length;
+});
+
 // 사용자 지정 기본 배치 (2026-08-02b)
 // === 투고 상태 배지 (draft / submit / revision / accepted / printed) ===
 // 값 형식: "저널,상태[,MM-DD]". draft는 예정 저널이 정해진 노드만 표기.
@@ -200,6 +265,17 @@ RAW_NODES.forEach(n => {
 
 // QUALITY_BOARD_BEGIN
 const QUALITY_ROWS = [{"id": "Tomo_SFTF", "label": "Tomo_SFTF", "grade": "상", "note": "TDP v2.1·외부 60-mesh 감사·budget–complexity·PiAM 연속성"}, {"id": "Tomo_SFTFSoft", "label": "Tomo_SFTFSoft", "grade": "상", "note": "TDP v2.1·현대/legacy Cura·receiver 반례·조건부 first-hit 수렴"}, {"id": "SFTFSoft_GNN", "label": "SFTFSoft_GNN", "grade": "상", "note": "3,817 mesh·held-out·Cura 재라벨·Prusa 교차검증"}, {"id": "SFTF_Clustering", "label": "SFTF_Clustering", "grade": "상", "note": "SFTFCluster 계열 TDP 원고·cross-slicer/partition 자산; 독립성 게이트 잔여"}, {"id": "PFTF", "label": "PFTF", "grade": "중", "note": "⛔ 투고 보류(2026-08-20) — 확실한 긍정적 효과가 생길 때까지. PFTF v0.9 이론·family synthesis; 삼형제 V2/V3/V4 synchronization TODO"}, {"id": "SFTF_DrapePrior", "label": "SFTF_DrapePrior", "grade": "하", "note": "2026-08-14 재검증에서 강등. 예산 일치 시 M3 이득이 솔버 의존(ppf 우세/자체엔진 열세)으로 확정 — 방법 논문 불가. 측정·프로토콜 논문으로 전환"}, {"id": "SFTF_Composite", "label": "SFTF_Composite", "grade": "상", "note": "한·영문 완성·191 tests·R9–R13 사전등록/독립감사; R11 합성 held-out 음성, 공식 CAD·물리 검증 잔여"}, {"id": "SFTF_HeatMethod", "label": "SFTF_HeatMethod", "grade": "중", "note": "A단계만 통과해 Composite main 에 머지(PR #1). 다섯 접목점 중 넷은 기준선을 제대로 세우자 무너졌다. 원고 3종·DOCX 완성, 미투고"}, {"id": "SFTF_InjMold", "label": "SFTF_InjMold", "grade": "ToDo", "note": "B24·exact integration·set-cover·B-rep·blind protocol; 원고 조립 잔여"}, {"id": "Tomo_DFSVR", "label": "Tomo_DFSVR", "grade": "중", "note": "claim–evidence matrix·JAX gradient·fail-closed; T2 확증 v1·v2 모두 NO-GO"}, {"id": "PFTF_AsymTensor", "label": "PFTF_AsymTensor", "grade": "ToDo", "note": "9/9 meshes·6 figures·TDP v1; 응용 held-out 부족"}, {"id": "PFTF_Compression", "label": "PFTF_Compression", "grade": "상", "note": "역설계·orthotropic contact·friction·held-out 원고; 임상 cohort 잔여"}, {"id": "PFTF_VisCull_kDop", "label": "PFTF_VisCull_kDop", "grade": "중", "note": "G1–G23 검증선·원고 3종(소개/검토용한글/Maintext, draft/src 정본 .md); 2026-08-20 헤드라인 교체 — 주 기여가 '리프 분할이 게이트 수익성을 결정'(홀드아웃 1.102배·11/14승)으로 바뀌고 음성 timing 은 같은 법칙의 r≈0 경계로 강등; distinct-CPU 층 폐쇄, GPU contact 미구현"}, {"id": "SFTF_SewerPOC", "label": "SFTF_SewerPOC", "grade": "하", "note": "수식 매핑·AVE·PoC 원고; 실제 관망/수리모형 검증 부족"}, {"id": "PFTF_DrapePrior_VisCull_kDop", "label": "PFTF_DrapePrior_VisCull_kDop", "grade": "ToDo", "note": "M3→kDOP gate+exact fallback 설계선; 실제 cloth solver end-to-end benchmark 전"}, {"id": "PFTF_ResearchOptimize", "label": "PFTF_ResearchOptimize", "grade": "ToDo", "note": "연구 그래프 기반 evidence-aware 투고 순서 설계; 실제 back-test·가중치 calibration 전"}, {"id": "PFTF_alpha", "label": "PFTF_alpha", "grade": "ToDo", "note": "Phase 50 합성 144건·Phase 51C S3DIS 63건 frozen held-out, B5/M1 상대 207/207 paired wins·topology error 0; PFTF/local-SPD 우월성 제외"}, {"id": "SFTF_QEM", "label": "SFTF_QEM", "grade": "상", "note": "2026-08-21 주 기여 교체 완료. 양성 2건: 슬라이서 대비 ρ=+0.905로 천장(+0.754) 초과·배향당 1/103 비용, ε-정지가 형상별 alpha 손튜닝 대체(중앙 6.05배·손해 0.0000·ASA 0/34). SFTF 텐서 구조는 무기여(게이트 P)라 신규성 주장 안 함. 원고 개정 중"}, {"id": "SFTF_DynamicTargetSearch", "label": "SFTF_DynamicTargetSearch", "grade": "ToDo", "note": "G16 independent controlled-physical acquisition readiness: 16-cell/48-run matrix와 result hash 두 실행 재현·159 tests 유지. 현재 독립 상수관망 현장 확보 불가로 physical lane parked, hold commit 3457c62; access constraint이지 failed experiment가 아니며 operation·sensor outcome read·measurement 0. 실제 독립 site/operator/reviewer 전 재개 금지, confirmation/performance·graph 비교·localization 주장 차단"}, {"id": "SFTF_ActiveOverprint", "label": "SFTF_ActiveOverprint", "grade": "ToDo", "note": "commit 74ea437의 finite-nozzle virtual replay와 통합 capture readiness 35 tests. software-only preparation은 완료됐지만 실제 operator preflight·measured input이 없어 blocked-capture-readiness; named operator·device·consent·holdout·safety 입력 전 추가 코드·결과와 controlled textile overprint 증거 없음. Physical AI 직접 통합선은 물리 증거를 대신하지 않음"}, {"id": "DFSVR_VisCull", "label": "DFSVR_VisCull", "grade": "ToDo", "note": "DFSVR exact first-hit용 conservative BVH scalability 설계선; 값·gradient parity·거짓음성 0·end-to-end utility gate 전"}, {"id": "SFTFSoft_GNN_DFSVR", "label": "SFTFSoft_GNN_DFSVR", "grade": "ToDo", "note": "profile-conditioned GNN proposer → DFSVR first-hit refiner → held-out slicer verifier; frozen budget-matched A–E benchmark 전"}, {"id": "SFTFSoft_DFSVR", "label": "SFTFSoft_DFSVR", "grade": "ToDo", "note": "게이트된 합집합 지지부피 설계선; 2D 모델 문제 GO(2026-08-24), DFSVR 동결 64방향 패널에서 절제 사다리 4변형 same-panel 실측 전"}, {"id": "ColdOndol", "label": "ColdOndol", "grade": "하", "note": "숨은 세대냉방 검출 논문 초안 3종·37게이트·302테스트·peer-blind; 실측 0.3 kW 검출한계와 제어 포화 천장(中上), 게재지 미정(Building Simulation/JBE 권고)·본문 4,000단어 조정 잔여"}, {"id": "ColdOndol_Positioning", "label": "ColdOndol_Positioning", "grade": "하", "note": "축3 배분 formulation·충분통계 명제·EnergyPlus 폐루프 공동시뮬 39게이트/405테스트; 독립 논문 원고 미착수·게재지 미정, A3a 구현·단방향 액추에이터 반영 잔여"}, {"id": "cfmsCIPC", "label": "cfmsCIPC", "grade": "하", "note": "cfmsDrape 충돌 강건성 벤치마크 원고·C-IPC 관통-free 오라클 대조. 조건 맞춘 6씬 정면 대조 완료(3무승부/2패), 결함 4종 검출·3종 수정, 준정적 안착의 조기 종료 규명. 한국섬유공학회지 목표 20면. 잔여는 긍정 효과 규칙 판정 하나"}, {"id": "TSE_SEM", "label": "TSE_SEM", "grade": "하", "note": "한국섬유공학회지 3편 트랙. Bezier·Tensor는 원고 완성(中上), AutoTune은 자체 SCI(E) 사전심사 major revision으로 보류"}, {"id": "cfmsPINNDrape", "label": "cfmsPINNDrape", "grade": "중", "note": "2026-08-21 갱신(저녁). **G1~G6 종주 완료**: G6 2/3 성립(cold 대비 +84~99.8 %, 대조군 +92~99.8 %, 예측 비용 4.5~14.6 ms, 도달률 8/8·8/8·4/8), G5 는 등록 관문 0/3 이나 착의 지표로는 세 의복 모두 허용치 안. GNN·물리손실·런타임 신뢰도는 음성 — 최종 예측기는 kNN+투영. **불확정성이 장애물에서 기여로 재구성됨**: σ=0.01 cm 배치 잡음이 봉제 과도기에서 **20~58배로 증폭된 뒤 포화**(구 「80배」는 분모 오류). **반증 시험 완료 — 도메인 성질로 판정**: 솔버 계열이 전혀 다른 C-IPC 에서 최종 40·213·58배(0.31·1.62·0.44 cm)로 재현, 봉제 구간 정점 뒤 유계까지 같은 구조. 접촉을 빼면 372~1005배로 포화 없음 → **차이를 가두는 것은 접촉**. 배수의 크기는 엔진 종속이므로 일반화되는 것은 현상이지 숫자가 아니다. **등급 상향 근거 성립 — 값은 사용자 결정 대기.** 남은 한계: 독립 엔진 1종·의복 1벌·시드 3개, T16 은 아직 구 엔진 수치, 봉제 수정본 나오면 재측정 필요. 상세 [[2026-08-21 봉제 과도기의 증폭 배수 — 크기·선례·등급 재검토]]"}, {"id": "cfmsPINNCAD", "label": "cfmsPINNCAD", "grade": "ToDo", "note": "2026-08-23 G1-P69: a two-scale THB control-net protection-nullspace is preregistered for a no-fit audit; 0/8 requirements are yet validated; 357 tests"}, {"id": "cfmsDrape", "label": "cfmsDrape", "grade": "ToDo", "note": "엔진 본체(C++/OpenMP DLL) — 독립 논문 대상이 아니라 논문들이 올라타는 기반이다. 이 엔진을 소재로 한 논문은 cfmsCIPC 가 따로 있다. ToDo 는 검증 전이라는 뜻이 아니라 논문 등급 판정 대상이 아니라는 뜻이다"}, {"id": "cfmsMiindo", "label": "cfmsMiindo", "grade": "ToDo", "note": "모노레포 허브(cad·drape·body·miindo·metamiin; sew 는 2026-08-16 분리) — 독립 논문 대상이 아니라 리포 구조다. 미인도 재현 벤치마크와 hash_reps 재현성 규율이 여기 산다. ToDo 는 검증 전이라는 뜻이 아니라 논문 등급 판정 대상이 아니라는 뜻이다"}];
+const CFMS_AUTOSEW_QUALITY = {"id": "cfmsAutoSew", "label": "cfmsAutoSew", "grade": "하", "note": "Tier B 봉제 매처 원고·빌드 완료; 확정 단계 edge F1 측정이 남은 핵심 게이트"};
+if (!QUALITY_ROWS.some(row => row.id === CFMS_AUTOSEW_QUALITY.id)) QUALITY_ROWS.push(CFMS_AUTOSEW_QUALITY);
+const autoSewQualityBody = document.querySelector('#quality-board tbody');
+const autoSewQualityExists = autoSewQualityBody
+  && [...autoSewQualityBody.rows].some(row => row.cells[0]?.textContent.trim() === 'cfmsAutoSew');
+if (autoSewQualityBody && !autoSewQualityExists) {
+  const row = document.createElement('tr');
+  row.dataset.projectId = 'cfmsAutoSew';
+  row.innerHTML = '<td>cfmsAutoSew</td><td><span class="quality-grade" style="background:#2a78d6;color:#ffffff;border:1px solid #2a78d6">하</span></td><td>Tier B 봉제 매처 원고·빌드 완료; 확정 단계 edge F1 측정이 남은 핵심 게이트</td>';
+  autoSewQualityBody.appendChild(row);
+}
 const QUALITY_BY_ID = Object.fromEntries(QUALITY_ROWS.map(q => [q.id, q]));
 QUALITY_BY_ID.PFTF_subMarine = Object.assign({}, QUALITY_BY_ID.PFTF_subMarine, {grade: '하', note: 'Stage C/D 환경장·다중 표적·실 소나/해양환경 외부 검증'});
 // These repositories are intentionally outside the paper-quality ladder.
@@ -883,6 +959,14 @@ LEGEND.forEach(c => {
 <script>
 // Render hyperedges as shaded regions
 const hyperedges = [{"label": "발견1", "nodes": ["SFTF_InjMold", "SFTF_SewerPOC"]}, {"label": "발견2", "nodes": ["SFTF_Composite", "PFTF_Compression"]}, {"label": "발견3", "nodes": ["SFTF_UrbanTraffic"]}, {"label": "발견3'", "nodes": ["ColdOndol"]}, {"label": "발견4·5·6", "nodes": ["PFTF_VisCull_kDop"]}, {"label": "BASE", "kind": "base", "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering", "PFTF"], "color": "#0f766e", "labelColor": "#115e59", "fillAlpha": 0.1, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.18}, {"label": "METHOD / 이론·추론 확장", "kind": "role", "nodes": ["Tomo_DFSVR", "SFTFSoft_GNN", "PFTF_AsymTensor"], "color": "#7c3aed", "labelColor": "#6d28d9", "fillAlpha": 0.035, "strokeAlpha": 0.75, "labelAlpha": 0.95, "lineWidth": 2, "dash": [4, 6], "scale": 1.12}, {"label": "PIPELINE / 다단계 통합", "kind": "role", "nodes": ["SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop", "SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint", "DFSVR_VisCull", "SFTFSoft_GNN_DFSVR", "ColdOndol"], "color": "#0891b2", "labelColor": "#0e7490", "fillAlpha": 0.025, "strokeAlpha": 0.7, "labelAlpha": 0.95, "lineWidth": 2, "dash": [16, 8], "scale": 1.08}, {"label": "의복 시뮬레이션", "kind": "domain", "nodes": ["PFTF", "SFTF_Composite", "SFTF_DrapePrior", "PFTF_Compression", "PFTF_VisCull_kDop", "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape", "cfmsMiindo", "cfmsPINNCAD"], "color": "#db2777", "labelColor": "#be185d", "fillAlpha": 0.035, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}, {"label": "온돌 냉방 / 건물 에너지", "kind": "domain", "nodes": ["ColdOndol", "ColdOndol_Positioning"], "color": "#2563eb", "labelColor": "#1d4ed8", "fillAlpha": 0.035, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}];
+const CURATED_HYPEREDGE_MEMBERS = {"의복 시뮬레이션": ["cfmsAutoSew"]};
+Object.entries(CURATED_HYPEREDGE_MEMBERS).forEach(([label, nodeIds]) => {
+  const hyperedge = hyperedges.find(item => item.label === label);
+  if (!hyperedge) return;
+  nodeIds.forEach(nodeId => {
+    if (!hyperedge.nodes.includes(nodeId)) hyperedge.nodes.push(nodeId);
+  });
+});
 // HYPEREDGE_LABEL_HELPERS_BEGIN
 function _boxOverlapArea(a, b) {
   const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
