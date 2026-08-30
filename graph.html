@@ -134,7 +134,7 @@ function esc(s) {
 }
 
 // Build vis datasets (deterministic radial layout: apps ring around their base hub)
-const POS = {"Tomo_SFTF": {"x": -254, "y": 216}, "Tomo_SFTFSoft": {"x": -54, "y": 227}, "SFTF_Clustering": {"x": 87, "y": 558}, "PFTF": {"x": 141, "y": 423}, "SFTF_Composite": {"x": 365, "y": 735}, "SFTF_InjMold": {"x": -331, "y": 461}, "PFTF_Compression": {"x": 557, "y": 712}, "Tomo_DFSVR": {"x": 274, "y": 104}, "PFTF_VisCull_kDop": {"x": 373, "y": 522}, "SFTF_SewerPOC": {"x": -230, "y": 486}, "SFTFSoft_GNN": {"x": 139, "y": 75}, "SFTF_DrapePrior": {"x": 289, "y": 278}, "PFTF_AsymTensor": {"x": 174, "y": 209}, "PFTF_DrapePrior_VisCull_kDop": {"x": 359, "y": 357}, "PFTF_ResearchOptimize": {"x": 69, "y": 353}, "PFTF_alpha": {"x": 54, "y": 243}, "SFTF_QEM": {"x": -87, "y": 126}, "SFTF_DynamicTargetSearch": {"x": -166, "y": 15}, "DFSVR_VisCull": {"x": 424, "y": 99}, "SFTFSoft_GNN_DFSVR": {"x": 231, "y": -79}, "SFTF_ActiveOverprint": {"x": -33, "y": -89}, "ColdOndol": {"x": -158, "y": 676}, "ColdOndol_Positioning": {"x": -47, "y": 735}, "cfmsCIPC": {"x": 611, "y": 283}, "TSE_SEM": {"x": 193, "y": 684}, "SFTF_HeatMethod": {"x": 175, "y": 764}, "cfmsPINNDrape": {"x": 466, "y": 224}, "cfmsDrape": {"x": 584, "y": 511}, "cfmsMiindo": {"x": 682, "y": 644}, "cfmsPINNCAD": {"x": 520, "y": 380}, "SFTFSoft_DFSVR": {"x": 63, "y": 150}, "SFTF_UrbanTraffic": {"x": -396, "y": 278}, "cfmsAutoSew": {"x": 735, "y": 385}, "cfmsAutoPlace": {"x": 745, "y": 527}};
+const POS = {"Tomo_SFTF": {"x": -254, "y": 216}, "Tomo_SFTFSoft": {"x": -52, "y": 239}, "SFTF_Clustering": {"x": 55, "y": 503}, "PFTF": {"x": 141, "y": 423}, "SFTF_Composite": {"x": 369, "y": 770}, "SFTF_InjMold": {"x": -21, "y": 770}, "PFTF_Compression": {"x": 548, "y": 743}, "Tomo_DFSVR": {"x": 269, "y": 68}, "PFTF_VisCull_kDop": {"x": 339, "y": 545}, "SFTF_SewerPOC": {"x": -160, "y": 748}, "SFTFSoft_GNN": {"x": 114, "y": 56}, "SFTF_DrapePrior": {"x": 325, "y": 286}, "PFTF_AsymTensor": {"x": 195, "y": 192}, "PFTF_DrapePrior_VisCull_kDop": {"x": 434, "y": 375}, "PFTF_ResearchOptimize": {"x": 4, "y": 408}, "PFTF_alpha": {"x": 96, "y": 247}, "SFTF_QEM": {"x": -58, "y": 89}, "SFTF_DynamicTargetSearch": {"x": -187, "y": 12}, "DFSVR_VisCull": {"x": 447, "y": 95}, "SFTFSoft_GNN_DFSVR": {"x": 260, "y": -105}, "SFTF_ActiveOverprint": {"x": 1, "y": -111}, "ColdOndol": {"x": -166, "y": 446}, "ColdOndol_Positioning": {"x": -323, "y": 497}, "cfmsCIPC": {"x": 487, "y": 417}, "TSE_SEM": {"x": 213, "y": 790}, "SFTF_HeatMethod": {"x": 203, "y": 691}, "cfmsPINNDrape": {"x": 561, "y": 288}, "cfmsDrape": {"x": 528, "y": 589}, "cfmsMiindo": {"x": 670, "y": 655}, "cfmsPINNCAD": {"x": 612, "y": 482}, "SFTFSoft_DFSVR": {"x": 312, "y": 186}, "SFTF_UrbanTraffic": {"x": 0, "y": 612}, "cfmsAutoSew": {"x": 735, "y": 385}, "cfmsAutoPlace": {"x": 741, "y": 545}};
 // 2026-08-30: cfmsAutoSew2026·cfmsAutoPlace2026 프로젝트와 의복 CAD 데이터 흐름을 공개 그래프에 편입.
 // 원본 JSON 상수는 배포 스냅숏을 보존하고, 아래 curated 블록을 멱등 적용한다.
 const CFMS_AUTOSEW_NODE = {
@@ -208,7 +208,7 @@ CURATED_GARMENT_EDGES.forEach(curated => {
   else RAW_EDGES.push(curated);
 });
 
-const CURATED_POSITIONS = {"cfmsAutoSew": {"x": 735, "y": 385}, "cfmsAutoPlace": {"x": 745, "y": 527}};
+const CURATED_POSITIONS = {"cfmsAutoSew": {"x": 735, "y": 385}, "cfmsAutoPlace": {"x": 741, "y": 545}};
 Object.assign(POS, CURATED_POSITIONS);
 
 // 새 관계를 반영해 모든 노드의 차수 메타데이터도 같은 실행에서 맞춘다.
