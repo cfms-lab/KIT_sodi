@@ -203,25 +203,26 @@ HYPEREDGES = [
     for h in HYPEREDGES
 ]
 
-# 2026-07-30 quality snapshot, synchronized from the KIT_sodi mindmap backup. Quality is the single classification axis
-# used by both the node colors and the Communities legend.
+# Paper-quality snapshot synchronized from the Obsidian Projects frontmatter.
+# ``등급 없음`` is distinct from ToDo: it marks repositories that are useful
+# infrastructure/integration records but are not paper-quality candidates.
 QUALITY_ROWS = [
     ("Tomo_SFTF", "Tomo_SFTF", "상", "TDP v2.1·외부 60-mesh 감사·budget–complexity·PiAM 연속성"),
     ("Tomo_SFTFSoft", "Tomo_SFTFSoft", "상", "TDP v2.1·현대/legacy Cura·receiver 반례·조건부 first-hit 수렴"),
     ("SFTFSoft_GNN", "SFTFSoft_GNN", "상", "3,817 mesh·held-out·Cura 재라벨·Prusa 교차검증"),
     ("SFTF_Clustering", "SFTF_Clustering", "상", "SFTFCluster 계열 TDP 원고·cross-slicer/partition 자산; 독립성 게이트 잔여"),
     ("PFTF", "PFTF", "중", "PFTF v0.9 이론·family synthesis; 삼형제 V2/V3/V4 synchronization TODO"),
-    ("SFTF_DrapePrior", "SFTF_DrapePrior", "상", "IJCST 투고본·ESM·노이즈 플로어 방어된 M3; 판별자는 홀드아웃 과적합(20/32)"),
+    ("SFTF_DrapePrior", "SFTF_DrapePrior", "하", "IJCST 투고본·ESM·노이즈 플로어 방어된 M3; 판별자는 홀드아웃 과적합(20/32)"),
     ("SFTF_Composite", "SFTF_Composite", "상", "한·영문 완성·191 tests·R9–R13 사전등록/독립감사; R11 합성 held-out 음성, 공식 CAD·물리 검증 잔여"),
     ("SFTF_InjMold", "SFTF_InjMold", "중", "B24·exact integration·set-cover·B-rep·blind protocol; 원고 조립 잔여"),
     ("Tomo_DiffSupport", "Tomo_DiffSupport", "중", "claim–evidence matrix·JAX gradient·fail-closed; utility/print gate 미실행"),
     ("PFTF_AsymTensor", "PFTF_AsymTensor", "중", "9/9 meshes·6 figures·TDP v1; 응용 held-out 부족"),
-    ("PFTF_Compression", "PFTF_Compression", "상", "역설계·orthotropic contact·friction·held-out 원고; 임상 cohort 잔여"),
+    ("PFTF_Compression", "PFTF_Compression", "중", "역설계·orthotropic contact·friction·held-out 원고; 임상 cohort 잔여"),
     ("PFTF_Mold", "PFTF_Mold", "중", "IBOF gate·영문 원고; held-out 일반화 0%"),
     ("PFTF_FXShock", "PFTF_FXShock", "중", "frozen/event holdout/falsification; n=8·실제 시장/인과 근거 제한"),
     ("PFTF_VisCull_kDop", "PFTF_VisCull_kDop", "중", "G1–G22 검증선·원고 2편(en/kr); 음성 timing 결과가 2번째 CPU 모델에서 복제(사전등록 R0–R3 통과); GPU contact 미구현"),
     ("SFTF_ThermalChip", "SFTF_ThermalChip", "중", "재현 가능한 PoC 한·영 원고·그림; 외부 칩/열해석 검증 부족"),
-    ("SFTF_SewerPOC", "SFTF_SewerPOC", "중", "수식 매핑·AVE·PoC 원고; 실제 관망/수리모형 검증 부족"),
+    ("SFTF_SewerPOC", "SFTF_SewerPOC", "하", "수식 매핑·AVE·PoC 원고; 실제 관망/수리모형 검증 부족"),
     ("SFTF_BatteryThermal", "SFTF_BatteryThermal", "하", "배터리 열·유동 응용 PoC; 외부 열해석·실측·held-out 검증 미확보"),
     ("SFTF_PDNElectric", "SFTF_PDNElectric", "하", "전기/PDN 응용 PoC; 독립 baseline·재현 benchmark·원고 근거 부족"),
     ("PFTF_Inspection", "PFTF_Inspection", "하", "held-out coverage 0.991·oracle 0.998·latency 25%; 논문·외부 cohort 잔여"),
@@ -236,8 +237,8 @@ QUALITY_ROWS = [
     ("SFTF_UrbanTraffic", "SFTF_UrbanTraffic", "하", "M2–M4 계획·solver gap 미해결·추가 DP 필요; 완성 원고·외부 검증 부족"),
     ("SFTF_WarehouseAGV", "SFTF_WarehouseAGV", "하", "DES 초기 검증·proxy 실패·정책 비교 잔여; 실창고 trace·원고 부족"),
     ("PFTF_AssetShock", "PFTF_AssetShock", "하", "38 benchmark/provider rehearsal; draft 원고와 실제 provider outcome 없음"),
-    ("PFTF_DrapePrior_VisCull_kDop", "PFTF_DrapePrior_VisCull_kDop", "ToDo", "M3→kDOP gate+exact fallback 설계선; 실제 cloth solver end-to-end benchmark 전"),
-    ("PFTF_ResearchOptimize", "PFTF_ResearchOptimize", "ToDo", "연구 그래프 기반 evidence-aware 투고 순서 설계; 실제 back-test·가중치 calibration 전"),
+    ("PFTF_DrapePrior_VisCull_kDop", "PFTF_DrapePrior_VisCull_kDop", "등급 없음", "통합 evidence 저장소; 독립 논문 등급 미적용"),
+    ("PFTF_ResearchOptimize", "PFTF_ResearchOptimize", "등급 없음", "연구 보조 도구; 독립 논문 등급 미적용"),
     ("PFTF_alpha", "PFTF_alpha", "중", "Phase 50 합성 144건·Phase 51C S3DIS 63건 frozen held-out, B5/M1 상대 207/207 paired wins·topology error 0; PFTF/local-SPD 우월성 제외"),
     ("SFTF_QEM", "SFTF_QEM", "상", "여각 규약 오류 정정·Cura 교차검증(천장 ρ=+0.754)·코퍼스 50메쉬·원고 2편+설명서; 성능 우월 주장 없는 평가방법론 트랙, 미투고"),
     ("SFTF_DynamicTargetSearch", "SFTF_DynamicTargetSearch", "ToDo",
@@ -248,6 +249,19 @@ QUALITY_ROWS = [
      "DFSVR exact first-hit용 conservative BVH scalability 설계선; 값·gradient parity·거짓음성 0·end-to-end utility gate 전"),
     ("SFTFSoft_GNN_DFSVR", "SFTFSoft_GNN_DFSVR", "ToDo",
      "profile-conditioned GNN proposer → DFSVR first-hit refiner → held-out slicer verifier; frozen budget-matched A–E benchmark 전"),
+    ("ColdOndol", "ColdOndol", "하", "온돌 냉방 중 숨은 에어컨 검출 한계"),
+    ("ColdOndol_Positioning", "ColdOndol_Positioning", "하", "부하·이슬점 기반 냉방 배분 최적화"),
+    ("cfmsCIPC", "cfmsCIPC", "중", "의복 충돌 강건성 벤치마크"),
+    ("TSE_SEM", "TSE_SEM", "하", "섬유 영상 정량화 연구선"),
+    ("SFTF_HeatMethod", "SFTF_HeatMethod", "중", "열전달 기반 복합재 설계 연구선"),
+    ("cfmsPINNDrape", "cfmsPINNDrape", "하", "PINN 기반 드레이프 실험"),
+    ("cfmsDrape", "cfmsDrape", "등급 없음", "드레이프 엔진 기반 저장소; 독립 논문 등급 미적용"),
+    ("cfmsMiindo", "cfmsMiindo", "등급 없음", "의복 CAD·드레이프 모노레포; 독립 논문 등급 미적용"),
+    ("cfmsPINNCAD", "cfmsPINNCAD", "하", "PINN 기반 의복 CAD 연구선"),
+    ("SFTFSoft_DFSVR", "SFTFSoft_DFSVR", "중", "SFTFSoft와 DFSVR 결합 연구선"),
+    ("Tomo_DFSVR", "Tomo_DFSVR", "중", "미분 가능한 지지 구조 계산 연구선"),
+    ("cfmsAutoSew", "cfmsAutoSew", "하", "패턴 봉제 대응 자동화 연구선"),
+    ("cfmsAutoPlace", "cfmsAutoPlace", "하", "표본 내 검증 완료; 독립 holdout 미완"),
 ]
 QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
 
@@ -315,7 +329,10 @@ FINDING_CANDIDATES = {
     "DFSVR_VisCull": "발견4·5·6?",
 }
 
-GRADE_COLORS = {"상": "#e02020", "중": "#f28e2b", "하": "#2a78d6", "ToDo": "#ffffff"}
+GRADE_COLORS = {
+    "상": "#e02020", "중": "#f28e2b", "하": "#2a78d6", "ToDo": "#ffffff",
+    "등급 없음": "#94a3b8",
+}
 
 QUALITY_CSS = r'''/* QUALITY_BOARD_BEGIN */
 #quality-board { padding: 10px 12px; border-bottom: 1px solid #dddddd; max-height: 255px; overflow-y: auto; background: #fafafa; }
@@ -721,6 +738,8 @@ if preserve_extended_quality:
         "REMAINING_BOTTLENECKS",
         {
             "PFTF_alpha": "게재지·관련연구·서지·저자·declarations·data availability 확정; close-layer·outlier·N<160·automatic pair discovery와 PFTF/local-SPD 우월성 주장 금지",
+            "PFTF_DrapePrior_VisCull_kDop": "독립 논문 등급 미적용 — 통합 evidence 저장소",
+            "PFTF_ResearchOptimize": "독립 논문 등급 미적용 — 연구 보조 도구",
             "DFSVR_VisCull": "값·gradient parity·거짓음성 0 및 실제 end-to-end utility 검증",
             "SFTFSoft_GNN_DFSVR": "frozen budget-matched A–E baseline, held-out slicer 전이 및 latency/quality 동시 검증",
         },
@@ -748,7 +767,7 @@ quality_rows_json = json.dumps(
     ensure_ascii=False,
 )
 quality_lookup = {i: (grade, note) for i, _label, grade, note in QUALITY_ROWS}
-QUALITY_COMMUNITY_IDS = {"상": 1, "중": 2, "하": 3, "ToDo": 4}
+QUALITY_COMMUNITY_IDS = {"상": 1, "중": 2, "하": 3, "ToDo": 4, "등급 없음": 7}
 
 TODO_NODE = {
     "id": "PFTF_DrapePrior_VisCull_kDop",
@@ -1097,12 +1116,12 @@ CURATED_EDGE_UPDATES = [
 ]
 
 def _preserve_raw_nodes(match):
-    """Keep the current public node snapshot during layout-only generation.
+    """Keep the public node snapshot and synchronize its quality fields.
 
-    Node grades, summaries, roles, and captions now advance independently of
-    this layout script.  Reapplying the historical TODO_NODES/QUALITY_ROWS
-    tables here can roll those newer facts back, so this pass only removes
-    explicitly hidden IDs and duplicate records.
+    Relationships, captions, and summaries advance independently of this
+    layout script.  Grades are the exception: QUALITY_ROWS is the checked-in
+    public snapshot of the Obsidian frontmatter and must also be reflected in
+    RAW_NODES so non-browser consumers do not observe stale classifications.
     """
     nodes = json.loads(match.group(1))
     preserved_nodes = []
@@ -1112,6 +1131,32 @@ def _preserve_raw_nodes(match):
         if node_id in HIDDEN_NODE_IDS or node_id in seen_ids:
             continue
         seen_ids.add(node_id)
+        if node_id in quality_lookup:
+            grade, note = quality_lookup[node_id]
+            color = GRADE_COLORS[grade]
+            border = "#000000" if grade == "ToDo" else ("#64748b" if grade == "등급 없음" else color)
+            node["_grade"] = grade
+            node["_quality"] = grade
+            node["_quality_note"] = note
+            node["community"] = QUALITY_COMMUNITY_IDS[grade]
+            node["community_name"] = grade
+            node["color"] = {
+                **(node.get("color") or {}),
+                "background": color,
+                "border": border,
+                "highlight": {
+                    **((node.get("color") or {}).get("highlight") or {}),
+                    "background": color,
+                    "border": border,
+                },
+            }
+            title_lines = str(node.get("title") or node.get("label") or node_id).split("\n")
+            title_lines[0] = re.sub(
+                r"^(.*? — )(?:상|중|하|ToDo|Closed|등급 없음)(.*)$",
+                lambda title_match: f"{title_match.group(1)}{grade}{title_match.group(2)}",
+                title_lines[0],
+            )
+            node["title"] = "\n".join(title_lines)
         preserved_nodes.append(node)
     return "const RAW_NODES = " + json.dumps(preserved_nodes, ensure_ascii=False) + ";"
 
@@ -1201,9 +1246,9 @@ quality_html = (
     '<div id="quality-board">'
     # QUALITY_ROWS 를 손댈 때 이 날짜도 같이 올린다.  하드코딩이라, 갱신하지 않으면
     # 재생성이 graph.html 의 최신 날짜를 조용히 되돌린다(2026-07-27 에 실제로 발생).
-    '<h3>최근 논문 quality (2026-08-07)</h3>'
-    '<div class="quality-meta">상=상위권 심사 대응 가능 · 중=핵심 gate 잔여 · 하=PoC/원고 미완료 · ToDo=새 설계선/검증 전<br>'
-    '단순 VSCode 커밋은 제외 · 등급 정본: KIT_sodi/mindmap.html 백업(2026-07-30) · 세부 근거: Papers/투고가능성_재평가_2026-08-06.md</div>'
+    '<h3>최근 논문 quality (2026-08-31)</h3>'
+    '<div class="quality-meta">상=상위권 심사 대응 가능 · 중=핵심 gate 잔여 · 하=PoC/원고 미완료 · ToDo=새 설계선/검증 전 · 등급 없음=논문 판정 대상 아님<br>'
+    '등급 정본: Obsidian Projects frontmatter (2026-08-31) · 공개 화면에는 등급만 동기화</div>'
     '<table><thead><tr><th>프로젝트</th><th>등급</th><th>핵심 근거</th></tr></thead>'
     f'<tbody>{quality_html_rows}</tbody></table></div>'
 )
@@ -1238,7 +1283,7 @@ quality_legend = [
         "label": grade,
         "count": sum(1 for _id, _label, g, _note in QUALITY_ROWS if g == grade),
     }
-    for grade in ("상", "중", "하", "ToDo")
+    for grade in ("상", "중", "하", "ToDo", "등급 없음")
 ]
 def _quality_legend(_match):
     return "const LEGEND = " + json.dumps(quality_legend, ensure_ascii=False) + ";"

@@ -12,7 +12,7 @@ create table if not exists public.project_nodes (
   id text primary key,            -- 프로젝트 키워드 (graph.html 노드 id와 동일)
   mindmap_id text,                -- mindmaps 문서(id='cfms') 안의 노드 id (양방향 매핑)
   title text,                     -- 표시 이름 (mindmap에서 편집)
-  grade text,                     -- 상 / 중 / 하 / ToDo / Closed / 그룹 (graph paper quality = mindmap kind)
+  grade text,                     -- 상 / 중 / 하 / ToDo / 등급 없음 / Closed / 그룹 (graph paper quality = mindmap kind)
   status text,                    -- draft / submitted / accepted / inprint / published / cancelled
   badge text,                     -- 원고 상태 배지 (graph.html STATUS_BADGES, 예: 'TDP,submit,08-13')
   grade_note text,                -- 등급 근거 (graph.html QUALITY_ROWS note)

@@ -99,3 +99,57 @@ on conflict ("id") do update set
   "pos_x"       = excluded."pos_x",
   "pos_y"       = excluded."pos_y",
   updated_at    = now();
+
+-- 2026-08-31: Dashboards/프로젝트현황.md가 읽는 Projects/*.md 등급 스냅숏.
+-- 상세 grade_note/next_gate는 공개 시드로 복사하지 않고 등급만 맞춘다.
+insert into public.project_nodes
+  ("id", "mindmap_id", "title", "grade", "status", "brief", "note", "url", "project_path")
+values
+  ('cfmsAutoPlace', 'cfmsAutoPlace', 'cfmsAutoPlace', '하', 'draft',
+   '라벨 없는 의복 패턴의 신체 부위와 전역 조립 추정',
+   'AutoSew 봉제 후보를 위상 제약으로 검사하고 cfmsDrape 물리 검증으로 재정렬한다.',
+   'https://github.com/cfms-lab/cfmsAutoPlace2026_dev', 'D:\__CFMS_Projects\cfmsAutoPlace2026_dev')
+on conflict ("id") do update set
+  "mindmap_id" = excluded."mindmap_id",
+  "title" = excluded."title",
+  "grade" = excluded."grade",
+  "status" = excluded."status",
+  "brief" = excluded."brief",
+  "note" = excluded."note",
+  "url" = excluded."url",
+  "project_path" = excluded."project_path",
+  updated_at = now();
+
+update public.project_nodes as project
+set "grade" = snapshot."grade", updated_at = now()
+from (values
+  ('cfmsCIPC', '중'),
+  ('cfmsDrape', '등급 없음'),
+  ('cfmsMiindo', '등급 없음'),
+  ('cfmsPINNCAD', '하'),
+  ('cfmsPINNDrape', '하'),
+  ('PFTF_alpha', '중'),
+  ('PFTF_Assembly', '하'),
+  ('PFTF_AssetShock', '하'),
+  ('PFTF_AsymTensor', '중'),
+  ('PFTF_CNC', '중'),
+  ('PFTF_Compression', '중'),
+  ('PFTF_DrapePrior_VisCull_kDop', '등급 없음'),
+  ('PFTF_FXShock', '중'),
+  ('PFTF_Inspection', '하'),
+  ('PFTF_Mold', '중'),
+  ('PFTF_Radiotherapy', '하'),
+  ('PFTF_RainNowcast', '하'),
+  ('PFTF_ResearchOptimize', '등급 없음'),
+  ('PFTF_Solar', '하'),
+  ('PFTF_subMarine', '하'),
+  ('PFTF_Terrain', '하'),
+  ('SFTF_BatteryThermal', '하'),
+  ('SFTF_DataCenterTraffic', '하'),
+  ('SFTF_InjMold', '중'),
+  ('SFTF_PDNElectric', '하'),
+  ('SFTF_ThermalChip', '중'),
+  ('SFTF_WarehouseAGV', '하'),
+  ('SFTFSoft_DFSVR', '중')
+) as snapshot("id", "grade")
+where project."id" = snapshot."id";

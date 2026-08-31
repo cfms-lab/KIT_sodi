@@ -57,6 +57,33 @@ for (const curatedNode of curatedNodes) {
   if (!nodes.some((node) => node.id === curatedNode.id)) nodes.push(curatedNode);
 }
 
+const qualityRows = readJsonConstant("QUALITY_ROWS", "[");
+const qualityById = new Map(qualityRows.map((row) => [row.id, row.grade]));
+const expectedVaultGrades = {
+  cfmsAutoPlace: "하",
+  cfmsCIPC: "중",
+  cfmsDrape: "등급 없음",
+  cfmsMiindo: "등급 없음",
+  cfmsPINNCAD: "하",
+  cfmsPINNDrape: "하",
+  PFTF_alpha: "중",
+  PFTF_AsymTensor: "중",
+  PFTF_Compression: "중",
+  PFTF_DrapePrior_VisCull_kDop: "등급 없음",
+  PFTF_ResearchOptimize: "등급 없음",
+  SFTF_DrapePrior: "하",
+  SFTF_InjMold: "중",
+  SFTF_SewerPOC: "하",
+  SFTFSoft_DFSVR: "중",
+};
+for (const [nodeId, grade] of Object.entries(expectedVaultGrades)) {
+  const node = nodes.find((candidate) => candidate.id === nodeId);
+  if (!node) throw new Error(`vault-grade node ${nodeId} is missing`);
+  if (qualityById.get(nodeId) !== grade || node._quality !== grade || node._grade !== grade) {
+    throw new Error(`vault grade mismatch for ${nodeId}: row=${qualityById.get(nodeId)} node=${node._quality}/${node._grade} expected=${grade}`);
+  }
+}
+
 const edges = readJsonConstant("RAW_EDGES", "[");
 const curatedEdges = readJsonConstant("CURATED_GARMENT_EDGES", "[");
 for (const curatedEdge of curatedEdges) {
@@ -188,4 +215,5 @@ console.log(JSON.stringify({
   edges: edges.length,
   positions: Object.keys(positions).length,
   hyperedges: hyperedges.length,
+  vaultGrades: Object.keys(expectedVaultGrades).length,
 }));
