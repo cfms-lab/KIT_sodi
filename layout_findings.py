@@ -100,21 +100,21 @@ NODE_SOURCE_FILES = {
 
 # ----------------------------------------------------------------- 좌표 (발견 기준)
 POS = {
-    # 2026-08-30: 사용자가 graph.html에서 조정한 34-node 배치를 정본으로 승격.
+    # 2026-08-31: 사용자가 graph.html에서 조정한 34-node 배치를 정본으로 승격.
     "Tomo_SFTF": (-254, 216),
     "Tomo_SFTFSoft": (-52, 239),
     "SFTF_Clustering": (55, 503),
     "PFTF": (141, 423),
-    "SFTF_Composite": (369, 770),
+    "SFTF_Composite": (339, 772),
     "SFTF_InjMold": (-21, 770),
-    "PFTF_Compression": (548, 743),
+    "PFTF_Compression": (504, 743),
     "Tomo_DFSVR": (269, 68),
-    "PFTF_VisCull_kDop": (339, 545),
+    "PFTF_VisCull_kDop": (408, 548),
     "SFTF_SewerPOC": (-160, 748),
     "SFTFSoft_GNN": (114, 56),
     "SFTF_DrapePrior": (325, 286),
     "PFTF_AsymTensor": (195, 192),
-    "PFTF_DrapePrior_VisCull_kDop": (434, 375),
+    "PFTF_DrapePrior_VisCull_kDop": (426, 379),
     "PFTF_ResearchOptimize": (4, 408),
     "PFTF_alpha": (96, 247),
     "SFTF_QEM": (-58, 89),
@@ -124,18 +124,18 @@ POS = {
     "SFTF_ActiveOverprint": (1, -111),
     "ColdOndol": (-166, 446),
     "ColdOndol_Positioning": (-323, 497),
-    "cfmsCIPC": (487, 417),
-    "TSE_SEM": (213, 790),
-    "SFTF_HeatMethod": (203, 691),
-    "cfmsPINNDrape": (561, 288),
+    "cfmsCIPC": (530, 412),
+    "TSE_SEM": (200, 681),
+    "SFTF_HeatMethod": (208, 828),
+    "cfmsPINNDrape": (633, 273),
     "cfmsDrape": (528, 589),
     "cfmsMiindo": (670, 655),
-    "cfmsPINNCAD": (612, 482),
-    "SFTFSoft_DFSVR": (312, 186),
+    "cfmsPINNCAD": (678, 486),
+    "SFTFSoft_DFSVR": (337, 182),
     # Restored from the last pre-archive graph snapshot.
-    "SFTF_UrbanTraffic": (0, 612),
-    "cfmsAutoSew": (735, 385),
-    "cfmsAutoPlace": (741, 545),
+    "SFTF_UrbanTraffic": (103, 672),
+    "cfmsAutoSew": (831, 419),
+    "cfmsAutoPlace": (755, 569),
 }
 
 HYPEREDGES = [
@@ -512,6 +512,112 @@ function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes, vi
 }
 // HYPEREDGE_LABEL_HELPERS_END'''
 
+EDGE_LABEL_LAYOUT_JS = r'''// EDGE_LABEL_LAYOUT_BEGIN
+// Keep every edge caption at the lengthwise midpoint of its edge.  Only the
+// perpendicular offset changes, so dragging a node can resolve collisions
+// without making the caption look attached to either endpoint.
+function _edgeLabelOverlapArea(a, b) {
+  const width = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
+  const height = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+  return width * height;
+}
+
+function _edgeLabelViewportBounds() {
+  const pad = 12;
+  const topLeft = network.DOMtoCanvas({x: pad, y: pad});
+  const bottomRight = network.DOMtoCanvas({
+    x: Math.max(pad, container.clientWidth - pad),
+    y: Math.max(pad, container.clientHeight - pad),
+  });
+  return {
+    left: Math.min(topLeft.x, bottomRight.x),
+    right: Math.max(topLeft.x, bottomRight.x),
+    top: Math.min(topLeft.y, bottomRight.y),
+    bottom: Math.max(topLeft.y, bottomRight.y),
+  };
+}
+
+function _drawDynamicEdgeLabels(ctx) {
+  const visibleEdges = RAW_EDGES.map((edge, id) => ({edge, id, view: edgesDS.get(id)}))
+    .filter(({edge, view}) => edge.label && view && view.hidden !== true);
+  if (!visibleEdges.length) return;
+
+  const positions = network.getPositions();
+  const nodeBoxes = nodesDS.get({filter: node => node.hidden !== true})
+    .map(node => network.getBoundingBox(node.id))
+    .filter(Boolean)
+    .map(box => ({
+      left: box.left - 6, right: box.right + 6,
+      top: box.top - 6, bottom: box.bottom + 6,
+    }));
+  const viewport = _edgeLabelViewportBounds();
+  const placedBoxes = [];
+  const offsets = [0, 18, -18, 34, -34, 52, -52, 72, -72];
+
+  ctx.save();
+  ctx.font = '600 15px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.lineJoin = 'round';
+  visibleEdges.forEach(({edge}) => {
+    const from = positions[edge.from];
+    const to = positions[edge.to];
+    if (!from || !to) return;
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const length = Math.hypot(dx, dy);
+    if (length < 1) return;
+
+    // The along-edge coordinate is always 0.5 (the exact midpoint).
+    const midX = (from.x + to.x) / 2;
+    const midY = (from.y + to.y) / 2;
+    const normalX = -dy / length;
+    const normalY = dx / length;
+    const halfWidth = ctx.measureText(edge.label).width / 2 + 5;
+    const halfHeight = 11;
+    let best = null;
+
+    offsets.forEach(offset => {
+      const x = midX + normalX * offset;
+      const y = midY + normalY * offset;
+      const box = {
+        left: x - halfWidth, right: x + halfWidth,
+        top: y - halfHeight, bottom: y + halfHeight,
+      };
+      const nodeOverlap = nodeBoxes.reduce(
+        (sum, other) => sum + _edgeLabelOverlapArea(box, other), 0,
+      );
+      const labelOverlap = placedBoxes.reduce(
+        (sum, other) => sum + _edgeLabelOverlapArea(box, other), 0,
+      );
+      const overflow = Math.max(0, viewport.left - box.left)
+        + Math.max(0, box.right - viewport.right)
+        + Math.max(0, viewport.top - box.top)
+        + Math.max(0, box.bottom - viewport.bottom);
+      const score = nodeOverlap * 2000 + labelOverlap * 1200
+        + overflow * overflow * 1000 + Math.abs(offset) * 20;
+      if (!best || score < best.score) best = {x, y, box, score};
+    });
+
+    if (!best) return;
+    placedBoxes.push(best.box);
+    ctx.globalAlpha = 0.96;
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = 'rgba(255,255,255,0.94)';
+    ctx.strokeText(edge.label, best.x, best.y);
+    ctx.fillStyle = '#3a3a3a';
+    ctx.fillText(edge.label, best.x, best.y);
+  });
+  ctx.restore();
+}
+
+// vis-network redraws continuously while a node is dragged, so this handler
+// recomputes collision-free edge-caption positions on every rendered frame.
+network.on('afterDrawing', function(ctx) {
+  _drawDynamicEdgeLabels(ctx);
+});
+// EDGE_LABEL_LAYOUT_END'''
+
 s = io.open(SRC, encoding="utf-8").read()
 ORIGINAL_S = s
 
@@ -536,7 +642,7 @@ s = _prefer_local_graph_side(s)
 # Dependency edges start hidden. The checkbox, runtime state, and DataSet must
 # agree on the first frame; otherwise vis-network briefly renders every edge.
 s, nedge_checkbox = re.subn(
-    r'(<input type="checkbox" id="edge-cb")(?: checked)?(>에지</label>)',
+    r'(<input type="checkbox" id="edge-cb")(?: checked)?(>[^<]*</label>)',
     r'\1\2', s, count=1,
 )
 s, nedge_state = re.subn(
@@ -547,8 +653,34 @@ s, nedge_initial_hidden = re.subn(
     r"(id: i, from: e\.from, to: e\.to,\n)(?:  hidden: true,\n)?",
     r"\1  hidden: true,\n", s, count=1,
 )
+# vis-network's built-in edge labels can overlap endpoint captions.  Keep its
+# label payload empty; a custom afterDrawing pass below places each RAW_EDGES
+# caption at the edge midpoint and resolves collisions on every redraw.
+s, nedge_builtin_label = re.subn(
+    r"(const edgesDS = new vis\.DataSet\(RAW_EDGES\.map\(\(e, i\) => \(\{\n"
+    r"  id: i, from: e\.from, to: e\.to,\n"
+    r"  hidden: true,\n)"
+    r"  label: (?:e\.label \|\| ''|''),\n"
+    r"(?:  font: \{.*?\},\n)?",
+    r"\1  label: '',\n",
+    s,
+    count=1,
+    flags=re.S,
+)
+# A new canonical deployment must not be overridden by coordinates saved under
+# the previous key in localStorage.  Keeping v5 stable also makes regeneration
+# idempotent after this one-time reset.
+s, npos_store_key = re.subn(
+    r"const POS_STORE_KEY = 'graphify_graph_positions_v\d+';",
+    "const POS_STORE_KEY = 'graphify_graph_positions_v5';",
+    s,
+    count=1,
+)
 assert nedge_checkbox == nedge_state == nedge_initial_hidden == 1, (
     nedge_checkbox, nedge_state, nedge_initial_hidden
+)
+assert nedge_builtin_label == npos_store_key == 1, (
+    nedge_builtin_label, npos_store_key
 )
 
 # Preserve the extended quality overlay used by the deployed graph (Closed
@@ -964,96 +1096,38 @@ CURATED_EDGE_UPDATES = [
                   dashes=False, width=3),
 ]
 
-def _reclassify_raw_nodes(match):
-    nodes = json.loads(match.group(1))
-    for todo_node in TODO_NODES:
-        if not any(node.get("id") == todo_node["id"] for node in nodes):
-            nodes.append(todo_node.copy())
-    for node in nodes:
-        node_id = node.get("id")
-        node["_intro"] = INTRODUCTIONS.get(node_id, "")
-        node["_graph_role"] = GRAPH_ROLES.get(node_id, "")
-        node["_finding_candidate"] = FINDING_CANDIDATES.get(node_id, "")
-        label = node.get("label") or node_id
-        for old_candidate in FINDING_CANDIDATES.values():
-            label = re.sub(r"\n" + re.escape(old_candidate) + r"$", "", label)
-        candidate = FINDING_CANDIDATES.get(node_id)
-        if candidate:
-            label += "\n" + candidate
-            node["borderWidth"] = max(4, node.get("borderWidth") or 1)
-            shape_properties = dict(node.get("shapeProperties") or {})
-            shape_properties["borderDashes"] = [6, 4]
-            node["shapeProperties"] = shape_properties
-        node["label"] = label
-        suffix = CAPTION_SUFFIXES.get(node_id)
-        if suffix:
-            label = re.sub(r"\n\[draft\]$", "", node.get("label") or node["id"])
-            node["label"] = label + "\n" + suffix
-        title = NODE_TITLES.get(node_id)
-        if title:
-            node["title"] = title
-        source_file = NODE_SOURCE_FILES.get(node_id)
-        if source_file:
-            node["source_file"] = source_file
-        project_path = PROJECT_PATHS.get(node_id)
-        if project_path:
-            node["_project_path"] = project_path
-        else:
-            node.pop("_project_path", None)
-        q = quality_lookup.get(node_id)
-        if q:
-            # Historical hover titles sometimes embed the previous grade.
-            # Keep them synchronized with QUALITY_ROWS on every regeneration.
-            node["title"] = re.sub(
-                r" — [상중하上中下]:", f" — {q[0]}:", node.get("title") or node["id"], count=1
-            )
-            node["community"] = QUALITY_COMMUNITY_IDS[q[0]]
-            node["community_name"] = q[0]
-            node["_quality"] = q[0]
-            node["_quality_note"] = q[1]
-            if q[0] == "ToDo":
-                node["font"] = {**(node.get("font") or {}), "bold": False}
-            node_border = "#000000" if q[0] == "ToDo" else GRADE_COLORS[q[0]]
-            node_color = dict(node.get("color") or {})
-            highlight = dict(node_color.get("highlight") or {})
-            node_color.update(
-                background=GRADE_COLORS[q[0]],
-                border=node_border,
-                highlight={
-                    **highlight,
-                    "background": GRADE_COLORS[q[0]],
-                    "border": node_border,
-                },
-            )
-            node["color"] = node_color
-    nodes = [node for node in nodes if node.get("id") not in HIDDEN_NODE_IDS]
-    return "const RAW_NODES = " + json.dumps(nodes, ensure_ascii=False) + ";"
+def _preserve_raw_nodes(match):
+    """Keep the current public node snapshot during layout-only generation.
 
-s, nraw = re.subn(r"const RAW_NODES = (\[.*?\]);", _reclassify_raw_nodes,
+    Node grades, summaries, roles, and captions now advance independently of
+    this layout script.  Reapplying the historical TODO_NODES/QUALITY_ROWS
+    tables here can roll those newer facts back, so this pass only removes
+    explicitly hidden IDs and duplicate records.
+    """
+    nodes = json.loads(match.group(1))
+    preserved_nodes = []
+    seen_ids = set()
+    for node in nodes:
+        node_id = str(node.get("id"))
+        if node_id in HIDDEN_NODE_IDS or node_id in seen_ids:
+            continue
+        seen_ids.add(node_id)
+        preserved_nodes.append(node)
+    return "const RAW_NODES = " + json.dumps(preserved_nodes, ensure_ascii=False) + ";"
+
+s, nraw = re.subn(r"const RAW_NODES = (\[.*?\]);", _preserve_raw_nodes,
                   s, count=1, flags=re.S)
 
-def _inject_todo_edges(match):
+def _preserve_goal_edges(match):
+    """Keep the current development-goal edge snapshot without legacy growth.
+
+    The public graph switched from application/lineage relations to a compact
+    development-goal taxonomy on 2026-08-28.  Re-appending TODO_EDGES or
+    CURATED_EDGE_UPDATES here silently restored the retired relationship set on
+    every layout-only regeneration.  Positions and label rendering must leave
+    the current RAW_EDGES payload intact, apart from structural cleanup.
+    """
     edges = json.loads(match.group(1))
-    existing = {(edge.get("from"), edge.get("to")) for edge in edges}
-    for edge in TODO_EDGES:
-        if (edge["from"], edge["to"]) not in existing:
-            edges.append(edge)
-    curated_by_pair = {
-        (edge["from"], edge["to"]): edge
-        for edge in CURATED_EDGE_UPDATES
-    }
-    updated_edges = []
-    applied_pairs = set()
-    for edge in edges:
-        pair = (edge.get("from"), edge.get("to"))
-        if pair in curated_by_pair:
-            edge = curated_by_pair[pair].copy()
-            applied_pairs.add(pair)
-        updated_edges.append(edge)
-    for pair, edge in curated_by_pair.items():
-        if pair not in applied_pairs:
-            updated_edges.append(edge.copy())
-    edges = updated_edges
     edges = [
         edge for edge in edges
         if edge.get("from") not in HIDDEN_NODE_IDS and edge.get("to") not in HIDDEN_NODE_IDS
@@ -1065,6 +1139,15 @@ def _inject_todo_edges(match):
             edge for edge in edges
             if str(edge.get("from")) in node_ids and str(edge.get("to")) in node_ids
         ]
+    deduped_edges = []
+    seen_pairs = set()
+    for edge in edges:
+        pair = (str(edge.get("from")), str(edge.get("to")))
+        if pair in seen_pairs:
+            continue
+        seen_pairs.add(pair)
+        deduped_edges.append(edge)
+    edges = deduped_edges
     return "const RAW_EDGES = " + json.dumps(edges, ensure_ascii=False) + ";"
 
 edges_only = "--edges-only" in sys.argv[1:]
@@ -1072,7 +1155,7 @@ if edges_only:
     # Scoped graph maintenance: preserve all current node, quality, position,
     # hyperedge, and UI data while refreshing only RAW_EDGES.
     s = ORIGINAL_S
-s, nedge = re.subn(r"const RAW_EDGES = (\[.*?\]);", _inject_todo_edges,
+s, nedge = re.subn(r"const RAW_EDGES = (\[.*?\]);", _preserve_goal_edges,
                    s, count=1, flags=re.S)
 if edges_only:
     assert nedge == 1, "RAW_EDGES block not found"
@@ -1207,6 +1290,21 @@ pos_js = "const POS = " + json.dumps(
     {k: {"x": v[0], "y": v[1]} for k, v in position_map.items()}, ensure_ascii=False) + ";"
 s, n1 = re.subn(r"const POS = \{.*?\};", lambda _m: pos_js, s, count=1,
                 flags=re.S)
+curated_position_ids = ("cfmsAutoSew", "cfmsAutoPlace")
+curated_pos_js = "const CURATED_POSITIONS = " + json.dumps(
+    {
+        node_id: {"x": POS[node_id][0], "y": POS[node_id][1]}
+        for node_id in curated_position_ids
+    },
+    ensure_ascii=False,
+) + ";"
+s, ncurated_pos = re.subn(
+    r"const CURATED_POSITIONS = \{.*?\};",
+    lambda _m: curated_pos_js,
+    s,
+    count=1,
+    flags=re.S,
+)
 hyper_js = "const hyperedges = " + json.dumps(hyperedges_for_graph, ensure_ascii=False) + ";"
 s, n2 = re.subn(r"const hyperedges = \[.*?\];", lambda _m: hyper_js, s, count=1,
                 flags=re.S)
@@ -1281,12 +1379,10 @@ s = s.replace(redraw_anchor, redraw_js + "\n" + redraw_anchor, 1)
 assert nlabel_frame == nf3 == 1, (nlabel_frame, nf3)
 
 # ------------------------------------------------- 프린터 친화 라이트 테마 (2026-07-19d)
-# 배경 white, 기존 white 요소(베이스 노드·하이라이트·legend 점)는 #c8c8c8.
-# 단, 노드 캡션 글자(white)는 white 배경에서 판독 불가라 #333333으로 진하게
-# (사용자 규칙의 유일한 의도적 예외 — 회색을 원하면 아래 #333333을 #c8c8c8로).
+# 배경과 캡션 CSS만 정규화한다. 최신 public graph의 ToDo node fill은
+# 의도적으로 white이므로 JSON 전체의 #ffffff 값을 회색으로 바꾸지 않는다.
 s = re.sub(r'("font": \{"size": \d+, "color": )"(?:#ffffff|#333333)"',
            lambda m: m.group(1) + '"#333333"', s)
-s = s.replace('"#ffffff"', '"#c8c8c8"')            # 노드 fill·highlight·legend 점
 CSS_LIGHT = [
     ("body { background: #0f0f1a; color: #e0e0e0;",
      "body { background: #ffffff; color: #333333;"),
@@ -1562,6 +1658,19 @@ s = re.sub(r"\n// VSCODE_BUTTON_BEGIN.*?// VSCODE_BUTTON_END\n?", "\n", s, flags
 s = s.replace("// Track hovered node — hover detection is more reliable than click params",
               vscode_js + "\n// Track hovered node — hover detection is more reliable than click params", 1)
 
+# Draw edge captions after every other first-script overlay so the white text
+# halo remains legible above hull fills and progress badges.  Replacing the
+# marked block makes this safe to rerun after future graph refreshes.
+s = re.sub(r"\n// EDGE_LABEL_LAYOUT_BEGIN.*?// EDGE_LABEL_LAYOUT_END\n?",
+           "\n", s, flags=re.S)
+edge_label_anchor = "\n</script>\n<script>\n/* ====== Supabase 공유 노드(project_nodes) 오버라이드"
+assert edge_label_anchor in s, "Supabase script anchor not found"
+s = s.replace(
+    edge_label_anchor,
+    "\n" + EDGE_LABEL_LAYOUT_JS + edge_label_anchor,
+    1,
+)
+
 # 의존성 블록: 기존 블록 제거 후 afterDrawing 핸들러 끝에 삽입 (멱등)
 s = re.sub(r"\n// FINDING_DEPS_BEGIN.*?// FINDING_DEPS_END", "", s, flags=re.S)
 anchor = "        ctx.restore();\n    });\n});"
@@ -1569,8 +1678,8 @@ assert anchor in s, "afterDrawing anchor not found"
 repl = "        ctx.restore();\n    });\n" + DEPS_JS + "\n});"
 s, n4 = re.subn(re.escape(anchor), lambda _m: repl, s, count=1)
 
-assert n1 == n2 == n3 == n4 == nleg == nraw == nedge == nstats == 1, (
-    n1, n2, n3, n4, nleg, nraw, nedge, nstats
+assert n1 == ncurated_pos == n2 == n3 == n4 == nleg == nraw == nedge == nstats == 1, (
+    n1, ncurated_pos, n2, n3, n4, nleg, nraw, nedge, nstats
 )
 missing = [k for k in POS if f'"{k}"' not in s]
 for dst in DSTS:

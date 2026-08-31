@@ -71,6 +71,7 @@ const positions = Object.assign(
   readJsonConstant("POS", "{"),
   readJsonConstant("CURATED_POSITIONS", "{"),
 );
+const expectedPositions = {"Tomo_SFTF":{"x":-254,"y":216},"Tomo_SFTFSoft":{"x":-52,"y":239},"SFTF_Clustering":{"x":55,"y":503},"PFTF":{"x":141,"y":423},"SFTF_Composite":{"x":339,"y":772},"SFTF_InjMold":{"x":-21,"y":770},"PFTF_Compression":{"x":504,"y":743},"Tomo_DFSVR":{"x":269,"y":68},"PFTF_VisCull_kDop":{"x":408,"y":548},"SFTF_SewerPOC":{"x":-160,"y":748},"SFTFSoft_GNN":{"x":114,"y":56},"SFTF_DrapePrior":{"x":325,"y":286},"PFTF_AsymTensor":{"x":195,"y":192},"PFTF_DrapePrior_VisCull_kDop":{"x":426,"y":379},"PFTF_ResearchOptimize":{"x":4,"y":408},"PFTF_alpha":{"x":96,"y":247},"SFTF_QEM":{"x":-58,"y":89},"SFTF_DynamicTargetSearch":{"x":-187,"y":12},"DFSVR_VisCull":{"x":447,"y":95},"SFTFSoft_GNN_DFSVR":{"x":260,"y":-105},"SFTF_ActiveOverprint":{"x":1,"y":-111},"ColdOndol":{"x":-166,"y":446},"ColdOndol_Positioning":{"x":-323,"y":497},"cfmsCIPC":{"x":530,"y":412},"TSE_SEM":{"x":200,"y":681},"SFTF_HeatMethod":{"x":208,"y":828},"cfmsPINNDrape":{"x":633,"y":273},"cfmsDrape":{"x":528,"y":589},"cfmsMiindo":{"x":670,"y":655},"cfmsPINNCAD":{"x":678,"y":486},"SFTFSoft_DFSVR":{"x":337,"y":182},"SFTF_UrbanTraffic":{"x":103,"y":672},"cfmsAutoSew":{"x":831,"y":419},"cfmsAutoPlace":{"x":755,"y":569}};
 const hyperedges = readJsonConstant("hyperedges", "[");
 const curatedHyperedgeMembers = readJsonConstant("CURATED_HYPEREDGE_MEMBERS", "{");
 for (const [label, nodeIds] of Object.entries(curatedHyperedgeMembers)) {
@@ -110,6 +111,13 @@ if (duplicateIds || danglingEdges.length || missingPositions.length || danglingH
   throw new Error(
     JSON.stringify({ duplicateIds, danglingEdges: danglingEdges.length, missingPositions: missingPositions.map((node) => node.id), danglingHyperedges }),
   );
+}
+if (JSON.stringify(positions) !== JSON.stringify(expectedPositions)) {
+  const changed = Object.keys(expectedPositions).filter(
+    (nodeId) => JSON.stringify(positions[nodeId]) !== JSON.stringify(expectedPositions[nodeId]),
+  );
+  const extras = Object.keys(positions).filter((nodeId) => !(nodeId in expectedPositions));
+  throw new Error(`deployed POS differs from the exact 34-node map: changed=${changed.join(",")} extras=${extras.join(",")}`);
 }
 if (!urbanNode || finding3?.nodes?.join(",") !== "SFTF_UrbanTraffic") {
   throw new Error("SFTF_UrbanTraffic node or singleton 발견3 hyperedge is missing");
@@ -161,6 +169,17 @@ if (
 }
 if (!html.includes("if (positions.length < 1) return;") || !html.includes("if (ps.length < 1) return;")) {
   throw new Error("singleton hyperedge rendering guards are missing");
+}
+if (
+  !html.includes("// EDGE_LABEL_LAYOUT_BEGIN")
+  || !html.includes("const midX = (from.x + to.x) / 2;")
+  || !html.includes("_drawDynamicEdgeLabels(ctx);")
+  || !html.includes("const POS_STORE_KEY = 'graphify_graph_positions_v5';")
+) {
+  throw new Error("dynamic midpoint edge-label layout or fresh position-store key is missing");
+}
+if (!/hidden: true,\s*label: '',/.test(html)) {
+  throw new Error("vis-network built-in edge labels are still enabled");
 }
 
 console.log(JSON.stringify({
