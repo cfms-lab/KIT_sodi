@@ -51,7 +51,7 @@ function readJsonConstant(name, opening) {
 const nodes = readJsonConstant("RAW_NODES", "[");
 const curatedNodes = [
   readJsonConstant("CFMS_AUTOSEW_NODE", "{"),
-  readJsonConstant("CFMS_AUTOPLACE_NODE", "{"),
+  ...readJsonConstant("CFMS_AUTOPLACE_NODES", "["),
 ];
 for (const curatedNode of curatedNodes) {
   if (!nodes.some((node) => node.id === curatedNode.id)) nodes.push(curatedNode);
@@ -60,7 +60,8 @@ for (const curatedNode of curatedNodes) {
 const qualityRows = readJsonConstant("QUALITY_ROWS", "[");
 const qualityById = new Map(qualityRows.map((row) => [row.id, row.grade]));
 const expectedVaultGrades = {
-  cfmsAutoPlace: "하",
+  cfmsAutoPlace_1: "하",
+  cfmsAutoPlace_2: "하",
   cfmsCIPC: "중",
   cfmsDrape: "등급 없음",
   cfmsMiindo: "등급 없음",
@@ -98,7 +99,7 @@ const positions = Object.assign(
   readJsonConstant("POS", "{"),
   readJsonConstant("CURATED_POSITIONS", "{"),
 );
-const expectedPositions = {"Tomo_SFTF":{"x":-254,"y":216},"Tomo_SFTFSoft":{"x":-52,"y":239},"SFTF_Clustering":{"x":55,"y":503},"PFTF":{"x":141,"y":423},"SFTF_Composite":{"x":339,"y":772},"SFTF_InjMold":{"x":-21,"y":770},"PFTF_Compression":{"x":504,"y":743},"Tomo_DFSVR":{"x":269,"y":68},"PFTF_VisCull_kDop":{"x":408,"y":548},"SFTF_SewerPOC":{"x":-160,"y":748},"SFTFSoft_GNN":{"x":114,"y":56},"SFTF_DrapePrior":{"x":325,"y":286},"PFTF_AsymTensor":{"x":195,"y":192},"PFTF_DrapePrior_VisCull_kDop":{"x":426,"y":379},"PFTF_ResearchOptimize":{"x":4,"y":408},"PFTF_alpha":{"x":96,"y":247},"SFTF_QEM":{"x":-58,"y":89},"SFTF_DynamicTargetSearch":{"x":-187,"y":12},"DFSVR_VisCull":{"x":447,"y":95},"SFTFSoft_GNN_DFSVR":{"x":260,"y":-105},"SFTF_ActiveOverprint":{"x":1,"y":-111},"ColdOndol":{"x":-166,"y":446},"ColdOndol_Positioning":{"x":-323,"y":497},"cfmsCIPC":{"x":530,"y":412},"TSE_SEM":{"x":200,"y":681},"SFTF_HeatMethod":{"x":208,"y":828},"cfmsPINNDrape":{"x":633,"y":273},"cfmsDrape":{"x":528,"y":589},"cfmsMiindo":{"x":670,"y":655},"cfmsPINNCAD":{"x":678,"y":486},"SFTFSoft_DFSVR":{"x":337,"y":182},"SFTF_UrbanTraffic":{"x":103,"y":672},"cfmsAutoSew":{"x":831,"y":419},"cfmsAutoPlace":{"x":755,"y":569}};
+const expectedPositions = {"Tomo_SFTF":{"x":-254,"y":216},"Tomo_SFTFSoft":{"x":-52,"y":239},"SFTF_Clustering":{"x":55,"y":503},"PFTF":{"x":141,"y":423},"SFTF_Composite":{"x":339,"y":772},"SFTF_InjMold":{"x":-21,"y":770},"PFTF_Compression":{"x":504,"y":743},"Tomo_DFSVR":{"x":269,"y":68},"PFTF_VisCull_kDop":{"x":408,"y":548},"SFTF_SewerPOC":{"x":-160,"y":748},"SFTFSoft_GNN":{"x":114,"y":56},"SFTF_DrapePrior":{"x":325,"y":286},"PFTF_AsymTensor":{"x":195,"y":192},"PFTF_DrapePrior_VisCull_kDop":{"x":426,"y":379},"PFTF_ResearchOptimize":{"x":4,"y":408},"PFTF_alpha":{"x":96,"y":247},"SFTF_QEM":{"x":-58,"y":89},"SFTF_DynamicTargetSearch":{"x":-187,"y":12},"DFSVR_VisCull":{"x":447,"y":95},"SFTFSoft_GNN_DFSVR":{"x":260,"y":-105},"SFTF_ActiveOverprint":{"x":1,"y":-111},"ColdOndol":{"x":-166,"y":446},"ColdOndol_Positioning":{"x":-323,"y":497},"cfmsCIPC":{"x":530,"y":412},"TSE_SEM":{"x":200,"y":681},"SFTF_HeatMethod":{"x":208,"y":828},"cfmsPINNDrape":{"x":633,"y":273},"cfmsDrape":{"x":528,"y":589},"cfmsMiindo":{"x":670,"y":655},"cfmsPINNCAD":{"x":678,"y":486},"SFTFSoft_DFSVR":{"x":337,"y":182},"SFTF_UrbanTraffic":{"x":103,"y":672},"cfmsAutoSew":{"x":831,"y":419},"cfmsAutoPlace_1":{"x":807,"y":540},"cfmsAutoPlace_2":{"x":818,"y":675}};
 const hyperedges = readJsonConstant("hyperedges", "[");
 const curatedHyperedgeMembers = readJsonConstant("CURATED_HYPEREDGE_MEMBERS", "{");
 for (const [label, nodeIds] of Object.entries(curatedHyperedgeMembers)) {
@@ -127,7 +128,8 @@ const garmentSimulation = hyperedges.find(
 const expectedGarmentNodes = [
   "PFTF", "SFTF_Composite", "SFTF_DrapePrior", "PFTF_Compression",
   "PFTF_VisCull_kDop", "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape",
-  "cfmsMiindo", "cfmsPINNCAD", "cfmsAutoSew", "cfmsAutoPlace",
+  "cfmsMiindo", "cfmsPINNCAD", "cfmsAutoSew", "cfmsAutoPlace_1",
+  "cfmsAutoPlace_2",
 ];
 const buildingEnergy = hyperedges.find(
   (hyperedge) => hyperedge.label === "온돌 냉방 / 건물 에너지",
@@ -139,12 +141,15 @@ if (duplicateIds || danglingEdges.length || missingPositions.length || danglingH
     JSON.stringify({ duplicateIds, danglingEdges: danglingEdges.length, missingPositions: missingPositions.map((node) => node.id), danglingHyperedges }),
   );
 }
+if (ids.has("cfmsAutoPlace")) {
+  throw new Error("legacy cfmsAutoPlace node still exists after the two-paper split");
+}
 if (JSON.stringify(positions) !== JSON.stringify(expectedPositions)) {
   const changed = Object.keys(expectedPositions).filter(
     (nodeId) => JSON.stringify(positions[nodeId]) !== JSON.stringify(expectedPositions[nodeId]),
   );
   const extras = Object.keys(positions).filter((nodeId) => !(nodeId in expectedPositions));
-  throw new Error(`deployed POS differs from the exact 34-node map: changed=${changed.join(",")} extras=${extras.join(",")}`);
+  throw new Error(`deployed POS differs from the exact 35-node map: changed=${changed.join(",")} extras=${extras.join(",")}`);
 }
 if (!urbanNode || finding3?.nodes?.join(",") !== "SFTF_UrbanTraffic") {
   throw new Error("SFTF_UrbanTraffic node or singleton 발견3 hyperedge is missing");
@@ -162,8 +167,10 @@ if (badGoalEdges.length) {
   );
 }
 const expectedGarmentEdges = [
-  ["cfmsAutoSew", "cfmsAutoPlace", "전역 배치", "통합", false],
-  ["cfmsAutoPlace", "cfmsDrape", "물리 검증", "정확도", false],
+  ["cfmsAutoSew", "cfmsAutoPlace_1", "CAD 배치", "통합", false],
+  ["cfmsAutoPlace_1", "cfmsDrape", "CAD 물리 검증", "정확도", false],
+  ["cfmsAutoSew", "cfmsAutoPlace_2", "패턴 배치", "통합", false],
+  ["cfmsAutoPlace_2", "cfmsDrape", "패턴 물리 검증", "정확도", false],
   ["cfmsAutoSew", "cfmsPINNCAD", "봉제 대응", "통합", false],
   ["cfmsAutoSew", "cfmsPINNDrape", "봉제 실험", "정확도", false],
   ["cfmsDrape", "cfmsPINNCAD", "저차원 예측", "가속", true],

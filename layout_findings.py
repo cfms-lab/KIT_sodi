@@ -16,6 +16,7 @@ POS(고정 좌표)와 hyperedges(영역 hull)만 발견 기준으로 교체해 �
 graph_발견.html 두 파일을 동일 내용으로 갱신한다.
 """
 import io
+import copy
 import json
 import math
 import os
@@ -135,7 +136,8 @@ POS = {
     # Restored from the last pre-archive graph snapshot.
     "SFTF_UrbanTraffic": (103, 672),
     "cfmsAutoSew": (831, 419),
-    "cfmsAutoPlace": (755, 569),
+    "cfmsAutoPlace_1": (807, 540),
+    "cfmsAutoPlace_2": (818, 675),
 }
 
 HYPEREDGES = [
@@ -185,7 +187,8 @@ HYPEREDGES = [
      "nodes": ["PFTF", "SFTF_Composite", "SFTF_DrapePrior",
                "PFTF_Compression", "PFTF_VisCull_kDop",
                "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape", "cfmsMiindo",
-               "cfmsPINNCAD", "cfmsDrapeSCAN"],
+               "cfmsPINNCAD", "cfmsDrapeSCAN", "cfmsAutoSew",
+               "cfmsAutoPlace_1", "cfmsAutoPlace_2"],
      "color": "#db2777", "labelColor": "#be185d",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
@@ -261,7 +264,8 @@ QUALITY_ROWS = [
     ("SFTFSoft_DFSVR", "SFTFSoft_DFSVR", "중", "SFTFSoft와 DFSVR 결합 연구선"),
     ("Tomo_DFSVR", "Tomo_DFSVR", "중", "미분 가능한 지지 구조 계산 연구선"),
     ("cfmsAutoSew", "cfmsAutoSew", "하", "패턴 봉제 대응 자동화 연구선"),
-    ("cfmsAutoPlace", "cfmsAutoPlace", "하", "표본 내 검증 완료; 독립 holdout 미완"),
+    ("cfmsAutoPlace_1", "cfmsAutoPlace_1", "하", "CAD 논문 트랙; 독립 holdout 미완"),
+    ("cfmsAutoPlace_2", "cfmsAutoPlace_2", "하", "IJCST 패턴 논문 트랙; 독립 holdout 미완"),
 ]
 QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
 
@@ -307,6 +311,8 @@ INTRODUCTIONS = {
     "SFTF_ActiveOverprint": "카메라로 기존 물체나 로봇이 고정한 의복의 출력 가능 표면과 다음 관측 위치를 찾고 그 위에 안전하게 작은 형상을 덧출력하려는 연구다.",
     "DFSVR_VisCull": "정확한 지지 구조 계산 전에 안전하게 불필요한 교차 후보를 줄여 DFSVR을 빠르게 하려는 연구선이다.",
     "SFTFSoft_GNN_DFSVR": "GNN이 좋은 출력 방향 후보를 빠르게 고르고 DFSVR이 정밀하게 다듬은 뒤 슬라이서로 확인하는 후속 연구다.",
+    "cfmsAutoPlace_1": "의복 CAD 관점에서 패널의 신체 부위와 전역 조립·배치 가설을 다루는 논문 트랙이다.",
+    "cfmsAutoPlace_2": "IJCST 패턴 관점에서 라벨 없는 의복 패턴의 배치와 검증을 다루는 논문 트랙이다.",
 }
 
 # 발견을 확정하는 hyperedge와 구분되는 그래프 해석용 역할 및 후보 표지.
@@ -1115,6 +1121,156 @@ CURATED_EDGE_UPDATES = [
                   dashes=False, width=3),
 ]
 
+# cfmsAutoPlace2026_dev now supports two planned papers. Both public nodes
+# intentionally point to the same checkout, but their IDs and paper scopes are
+# distinct so graph/mindmap consumers do not collapse them back into one item.
+LEGACY_AUTOPLACE_ID = "cfmsAutoPlace"
+AUTOPLACE_TRACKS = [
+    {
+        "id": "cfmsAutoPlace_1",
+        "scope": "CAD 논문 트랙",
+        "summary": "의복 CAD 관점의 패널 신체 부위·전역 조립·초기 배치 추정",
+        "intro": INTRODUCTIONS["cfmsAutoPlace_1"],
+    },
+    {
+        "id": "cfmsAutoPlace_2",
+        "scope": "IJCST 패턴 논문 트랙",
+        "summary": "IJCST 패턴 관점의 라벨 없는 패턴 배치·조립 유효성 검증",
+        "intro": INTRODUCTIONS["cfmsAutoPlace_2"],
+    },
+]
+AUTOPLACE_IDS = {LEGACY_AUTOPLACE_ID, *(track["id"] for track in AUTOPLACE_TRACKS)}
+
+
+def _autoplace_node(track, template=None):
+    node = copy.deepcopy(template) if template else {}
+    grade, note = quality_lookup[track["id"]]
+    color = GRADE_COLORS[grade]
+    node.update({
+        "id": track["id"],
+        "label": track["id"],
+        "color": {
+            "background": color,
+            "border": color,
+            "highlight": {"background": color, "border": color},
+        },
+        "size": 15.4,
+        "font": {"size": 13, "color": "#333333", "bold": False},
+        "title": (
+            f'{track["id"]} — {grade}\n'
+            f'차수 2 (in 1 / out 1) · L0 · near\n'
+            f'{track["scope"]}: {track["summary"]}'
+        ),
+        "community": QUALITY_COMMUNITY_IDS[grade],
+        "community_name": grade,
+        "source_file": "cfmsAutoPlace.md",
+        "file_type": "concept",
+        "degree": 2,
+        "_intro": track["intro"],
+        "_project_path": r"D:\__CFMS_Projects\cfmsAutoPlace2026_dev",
+        "_grade": grade,
+        "_stage": "draft",
+        "_horizon": "near",
+        "_level": 0,
+        "_family": "cfms",
+        "_in": 1,
+        "_out": 1,
+        "_quality": grade,
+        "_quality_note": note,
+        "_bottleneck": None,
+        "_graph_role": "",
+        "_finding_candidate": "",
+    })
+    return node
+
+
+def _autoplace_goal_edge(source, target, label, detail, relation):
+    return {
+        "from": source,
+        "to": target,
+        "label": label,
+        "title": (
+            f"{source} → {target}\n"
+            f"개발 목표: {label} ({relation})\n{detail}"
+        ),
+        "dashes": False,
+        "width": 2,
+        "color": {"opacity": 0.65},
+        "confidence": "GOAL",
+        "_rel": relation,
+        "_detail": detail,
+        "_goal": label,
+        "_tentative": False,
+    }
+
+
+AUTOPLACE_GOAL_EDGES = [
+    _autoplace_goal_edge(
+        "cfmsAutoSew", "cfmsAutoPlace_1", "CAD 배치",
+        "봉제 후보를 의복 CAD의 전역 조립·초기 배치 가설로 확장한다", "통합",
+    ),
+    _autoplace_goal_edge(
+        "cfmsAutoPlace_1", "cfmsDrape", "CAD 물리 검증",
+        "CAD 조립·초기 배치 후보를 short-rollout 물리 오라클로 검증한다", "정확도",
+    ),
+    _autoplace_goal_edge(
+        "cfmsAutoSew", "cfmsAutoPlace_2", "패턴 배치",
+        "봉제 후보를 IJCST 패턴 트랙의 배치·조립 유효성 가설로 확장한다", "통합",
+    ),
+    _autoplace_goal_edge(
+        "cfmsAutoPlace_2", "cfmsDrape", "패턴 물리 검증",
+        "패턴 배치 후보를 short-rollout 물리 오라클로 검증한다", "정확도",
+    ),
+]
+
+
+autoplace_nodes_js = json.dumps(
+    [_autoplace_node(track) for track in AUTOPLACE_TRACKS],
+    ensure_ascii=False,
+    indent=2,
+)
+autoplace_curated_block = (
+    "// CFMS_AUTOPLACE_TRACKS_BEGIN\n"
+    f"const CFMS_AUTOPLACE_NODES = {autoplace_nodes_js};\n"
+    "CFMS_AUTOPLACE_NODES.forEach(node => {\n"
+    "  if (!RAW_NODES.some(existing => existing.id === node.id)) RAW_NODES.push(node);\n"
+    "});\n"
+    "// CFMS_AUTOPLACE_TRACKS_END"
+)
+s, nautoplace_block = re.subn(
+    r"(?:// CFMS_AUTOPLACE_TRACKS_BEGIN.*?// CFMS_AUTOPLACE_TRACKS_END|"
+    r"const CFMS_AUTOPLACE_NODE = \{.*?\};\s*"
+    r"if \(!RAW_NODES\.some\(n => n\.id === CFMS_AUTOPLACE_NODE\.id\)\) "
+    r"RAW_NODES\.push\(CFMS_AUTOPLACE_NODE\);)",
+    lambda _match: autoplace_curated_block,
+    s,
+    count=1,
+    flags=re.S,
+)
+assert nautoplace_block == 1, "cfmsAutoPlace curated node block not found"
+
+
+def _replace_curated_garment_edges(match):
+    edges = json.loads(match.group(1))
+    edges = [
+        edge for edge in edges
+        if str(edge.get("from")) not in AUTOPLACE_IDS
+        and str(edge.get("to")) not in AUTOPLACE_IDS
+    ]
+    edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
+    return "const CURATED_GARMENT_EDGES = " + json.dumps(edges, ensure_ascii=False) + ";"
+
+
+s, ncurated_garment_edges = re.subn(
+    r"const CURATED_GARMENT_EDGES = (\[.*?\]);",
+    _replace_curated_garment_edges,
+    s,
+    count=1,
+    flags=re.S,
+)
+assert ncurated_garment_edges == 1, "CURATED_GARMENT_EDGES block not found"
+
+
 def _preserve_raw_nodes(match):
     """Keep the public node snapshot and synchronize its quality fields.
 
@@ -1124,9 +1280,37 @@ def _preserve_raw_nodes(match):
     RAW_NODES so non-browser consumers do not observe stale classifications.
     """
     nodes = json.loads(match.group(1))
+    legacy_template = next(
+        (node for node in nodes if str(node.get("id")) == LEGACY_AUTOPLACE_ID),
+        None,
+    )
+    split_by_id = {
+        str(node.get("id")): node
+        for node in nodes
+        if str(node.get("id")) in AUTOPLACE_IDS - {LEGACY_AUTOPLACE_ID}
+    }
+    for track in AUTOPLACE_TRACKS:
+        split_by_id[track["id"]] = _autoplace_node(
+            track,
+            split_by_id.get(track["id"]) or legacy_template,
+        )
+
+    expanded_nodes = []
+    split_inserted = False
+    for node in nodes:
+        node_id = str(node.get("id"))
+        if node_id == LEGACY_AUTOPLACE_ID or node_id in split_by_id:
+            if not split_inserted:
+                expanded_nodes.extend(split_by_id[track["id"]] for track in AUTOPLACE_TRACKS)
+                split_inserted = True
+            continue
+        expanded_nodes.append(node)
+    if not split_inserted:
+        expanded_nodes.extend(split_by_id[track["id"]] for track in AUTOPLACE_TRACKS)
+
     preserved_nodes = []
     seen_ids = set()
-    for node in nodes:
+    for node in expanded_nodes:
         node_id = str(node.get("id"))
         if node_id in HIDDEN_NODE_IDS or node_id in seen_ids:
             continue
@@ -1177,6 +1361,12 @@ def _preserve_goal_edges(match):
         edge for edge in edges
         if edge.get("from") not in HIDDEN_NODE_IDS and edge.get("to") not in HIDDEN_NODE_IDS
     ]
+    edges = [
+        edge for edge in edges
+        if str(edge.get("from")) not in AUTOPLACE_IDS
+        and str(edge.get("to")) not in AUTOPLACE_IDS
+    ]
+    edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
     node_match = re.search(r"const RAW_NODES = (\[.*?\]);", s, flags=re.S)
     if node_match:
         node_ids = {str(node["id"]) for node in json.loads(node_match.group(1))}
@@ -1246,9 +1436,9 @@ quality_html = (
     '<div id="quality-board">'
     # QUALITY_ROWS 를 손댈 때 이 날짜도 같이 올린다.  하드코딩이라, 갱신하지 않으면
     # 재생성이 graph.html 의 최신 날짜를 조용히 되돌린다(2026-07-27 에 실제로 발생).
-    '<h3>최근 논문 quality (2026-08-31)</h3>'
+    '<h3>최근 논문 quality (2026-09-01)</h3>'
     '<div class="quality-meta">상=상위권 심사 대응 가능 · 중=핵심 gate 잔여 · 하=PoC/원고 미완료 · ToDo=새 설계선/검증 전 · 등급 없음=논문 판정 대상 아님<br>'
-    '등급 정본: Obsidian Projects frontmatter (2026-08-31) · 공개 화면에는 등급만 동기화</div>'
+    '등급 정본: Obsidian Projects frontmatter + 논문 트랙 분리 (2026-09-01) · 공개 화면에는 최소 메타데이터만 동기화</div>'
     '<table><thead><tr><th>프로젝트</th><th>등급</th><th>핵심 근거</th></tr></thead>'
     f'<tbody>{quality_html_rows}</tbody></table></div>'
 )
@@ -1335,7 +1525,7 @@ pos_js = "const POS = " + json.dumps(
     {k: {"x": v[0], "y": v[1]} for k, v in position_map.items()}, ensure_ascii=False) + ";"
 s, n1 = re.subn(r"const POS = \{.*?\};", lambda _m: pos_js, s, count=1,
                 flags=re.S)
-curated_position_ids = ("cfmsAutoSew", "cfmsAutoPlace")
+curated_position_ids = ("cfmsAutoSew", "cfmsAutoPlace_1", "cfmsAutoPlace_2")
 curated_pos_js = "const CURATED_POSITIONS = " + json.dumps(
     {
         node_id: {"x": POS[node_id][0], "y": POS[node_id][1]}
@@ -1353,6 +1543,36 @@ s, ncurated_pos = re.subn(
 hyper_js = "const hyperedges = " + json.dumps(hyperedges_for_graph, ensure_ascii=False) + ";"
 s, n2 = re.subn(r"const hyperedges = \[.*?\];", lambda _m: hyper_js, s, count=1,
                 flags=re.S)
+
+def _replace_curated_hyperedge_members(match):
+    members_by_label = json.loads(match.group(1))
+    members = [
+        node_id for node_id in members_by_label.get("의복 시뮬레이션", [])
+        if node_id not in AUTOPLACE_IDS
+    ]
+    for node_id in ("cfmsAutoSew", "cfmsAutoPlace_1", "cfmsAutoPlace_2"):
+        if node_id not in members:
+            members.append(node_id)
+    members_by_label["의복 시뮬레이션"] = members
+    return "const CURATED_HYPEREDGE_MEMBERS = " + json.dumps(
+        members_by_label,
+        ensure_ascii=False,
+    ) + ";"
+
+
+s, ncurated_hyperedges = re.subn(
+    r"const CURATED_HYPEREDGE_MEMBERS = (\{.*?\});",
+    _replace_curated_hyperedge_members,
+    s,
+    count=1,
+    flags=re.S,
+)
+s = re.sub(
+    r"// 2026-08-30: cfmsAutoSew2026·cfmsAutoPlace2026 프로젝트와 의복 CAD 데이터 흐름을 공개 그래프에 편입\.",
+    "// 2026-09-01: cfmsAutoPlace2026의 CAD·IJCST 패턴 논문 트랙을 별도 노드로 공개 그래프에 편입.",
+    s,
+    count=1,
+)
 s, n3 = re.subn(r"<title>.*?</title>",
                 "<title>SFTF/PFTF — 발견 1~6 + BASE/METHOD/PIPELINE</title>", s, count=1,
                 flags=re.S)
@@ -1723,8 +1943,8 @@ assert anchor in s, "afterDrawing anchor not found"
 repl = "        ctx.restore();\n    });\n" + DEPS_JS + "\n});"
 s, n4 = re.subn(re.escape(anchor), lambda _m: repl, s, count=1)
 
-assert n1 == ncurated_pos == n2 == n3 == n4 == nleg == nraw == nedge == nstats == 1, (
-    n1, ncurated_pos, n2, n3, n4, nleg, nraw, nedge, nstats
+assert n1 == ncurated_pos == n2 == ncurated_hyperedges == n3 == n4 == nleg == nraw == nedge == nstats == 1, (
+    n1, ncurated_pos, n2, ncurated_hyperedges, n3, n4, nleg, nraw, nedge, nstats
 )
 missing = [k for k in POS if f'"{k}"' not in s]
 for dst in DSTS:

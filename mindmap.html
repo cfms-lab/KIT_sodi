@@ -622,13 +622,14 @@ function applyDrapeEngineLinks20260827(data){
   return changed;
 }
 
-/* ====================== Obsidian 프로젝트 등급 동기화 (2026-08-31) ======================
+/* ====================== 프로젝트 등급·논문 트랙 동기화 (2026-09-01) ======================
    Dashboards/프로젝트현황.md가 읽는 Projects/*.md frontmatter의 최신 등급만 공개
    마인드맵에 옮긴다. grade_note·next_gate 같은 내부 판단은 복사하지 않는다.
    ``none``은 ToDo가 아니라 논문 등급 판정 대상이 아닌 프로젝트다. */
-const VAULT_GRADES_VERSION='2026-08-31a';
+const VAULT_GRADES_VERSION='2026-09-01a';
 const VAULT_PROJECT_GRADES={
-  'cfmsAutoPlace':{mindmapId:'cfmsAutoPlace',kind:'low'},
+  'cfmsAutoPlace_1':{mindmapId:'cfmsAutoPlace_1',kind:'low'},
+  'cfmsAutoPlace_2':{mindmapId:'cfmsAutoPlace_2',kind:'low'},
   'cfmsCIPC':{mindmapId:'n2dzarb3',kind:'medium'},
   'cfmsDrape':{mindmapId:'nptj5211',kind:'none'},
   'cfmsMiindo':{mindmapId:'cfmsdrape',kind:'none'},
@@ -658,29 +659,57 @@ const VAULT_PROJECT_GRADES={
   'SFTF_WarehouseAGV':{mindmapId:'no1b3vw4',kind:'low'},
   'SFTFSoft_DFSVR':{mindmapId:'n6odcyc1',kind:'medium'}
 };
-function applyVaultGrades20260831(data){
+function applyVaultGrades20260901(data){
   if(!data||!data.root||data.vaultGradesVersion===VAULT_GRADES_VERSION) return false;
-  let changed=false;
-  let autoPlace=findNode(data.root,'cfmsAutoPlace');
-  if(!autoPlace){
-    autoPlace={
-      id:'cfmsAutoPlace',title:'cfmsAutoPlace',kind:'low',status:'draft',
-      brief:'라벨 없는 의복 패턴의 신체 부위와 전역 조립 추정',
-      note:'AutoSew 봉제 후보를 위상 제약으로 검사하고 cfmsDrape 물리 검증으로 재정렬한다.',
+  let changed=true; // 버전 상승 자체도 클라우드 문서에 저장해야 재실행되지 않는다.
+  let legacyParent=null;
+  const removeLegacy=(parent)=>{
+    const children=parent.children||[];
+    const kept=[];
+    children.forEach(child=>{
+      if(child.id==='cfmsAutoPlace'){ legacyParent=parent; changed=true; return; }
+      removeLegacy(child); kept.push(child);
+    });
+    if(kept.length!==children.length) parent.children=kept;
+  };
+  removeLegacy(data.root);
+  data.links=(data.links||[]).filter(link=>{
+    const keep=link.from!=='cfmsAutoPlace'&&link.to!=='cfmsAutoPlace';
+    if(!keep) changed=true;
+    return keep;
+  });
+  const autoPlaceTracks=[
+    {
+      id:'cfmsAutoPlace_1',title:'cfmsAutoPlace_1',kind:'low',status:'draft',
+      brief:'의복 CAD 관점의 패널 신체 부위·전역 조립·초기 배치 추정',
+      note:'cfmsAutoPlace2026_dev의 CAD 논문 트랙.',
       url:'https://github.com/cfms-lab/cfmsAutoPlace2026_dev',
-      projectPath:'D:\\__CFMS_Projects\\cfmsAutoPlace2026_dev',children:[]
-    };
-    const parent=findNode(data.root,'n3k56wq4')||findNode(data.root,'nptj5211')||data.root;
-    (parent.children||(parent.children=[])).push(autoPlace); parent.collapsed=false; changed=true;
-  }
-  (data.links||(data.links=[]));
+      projectPath:'D:\\__CFMS_Projects\\cfmsAutoPlace2026_dev'
+    },
+    {
+      id:'cfmsAutoPlace_2',title:'cfmsAutoPlace_2',kind:'low',status:'draft',
+      brief:'IJCST 패턴 관점의 라벨 없는 패턴 배치·조립 유효성 검증',
+      note:'cfmsAutoPlace2026_dev의 IJCST 패턴 논문 트랙.',
+      url:'https://github.com/cfms-lab/cfmsAutoPlace2026_dev',
+      projectPath:'D:\\__CFMS_Projects\\cfmsAutoPlace2026_dev'
+    }
+  ];
+  const parent=legacyParent||findNode(data.root,'n3k56wq4')||findNode(data.root,'nptj5211')||data.root;
+  autoPlaceTracks.forEach(spec=>{
+    let node=findNode(data.root,spec.id);
+    if(!node){ node={...spec,children:[]}; (parent.children||(parent.children=[])).push(node); changed=true; }
+    else Object.assign(node,spec,{children:node.children||[]});
+  });
+  parent.collapsed=false;
   const ensureLink=(from,to,label)=>{
     if(findNode(data.root,from)&&findNode(data.root,to)&&!data.links.some(l=>l.from===from&&l.to===to)){
       data.links.push({from,to,label,type:'engine'}); changed=true;
     }
   };
-  ensureLink('n3k56wq4','cfmsAutoPlace','전역 배치');
-  ensureLink('cfmsAutoPlace','nptj5211','물리 검증');
+  ensureLink('n3k56wq4','cfmsAutoPlace_1','CAD 배치');
+  ensureLink('cfmsAutoPlace_1','nptj5211','CAD 물리 검증');
+  ensureLink('n3k56wq4','cfmsAutoPlace_2','패턴 배치');
+  ensureLink('cfmsAutoPlace_2','nptj5211','패턴 물리 검증');
   Object.values(VAULT_PROJECT_GRADES).forEach(({mindmapId,kind})=>{
     const node=findNode(data.root,mindmapId);
     if(node&&node.kind!==kind){ node.kind=kind; changed=true; }
@@ -805,7 +834,7 @@ function progIcon(status, cx, cy, color, checkColor, outline){
 let DATA=JSON.parse(JSON.stringify(DEFAULT_DATA));
 normalizeKinds(DATA);
 applySubmissionPlan20260806(DATA);
-applyVaultGrades20260831(DATA);
+applyVaultGrades20260901(DATA);
 let sel=null, view={tx:60,ty:30,s:1}, showRel=true, LAY=null;
 
 /* ====================== 실행취소 / 다시실행 (undo/redo) ====================== */
@@ -1160,7 +1189,7 @@ async function loadDoc(){
     const linkMigrated=applyLinkFill20260820(DATA);
     const statusMigrated=applyStatusCleanup20260822(DATA);
     const drapeMigrated=applyDrapeEngineLinks20260827(DATA);
-    const gradesMigrated=applyVaultGrades20260831(DATA);
+    const gradesMigrated=applyVaultGrades20260901(DATA);
     const kindsMigrated=normalizeKinds(DATA);
     showRel=DATA.showRel!==false; document.getElementById('relBtn').textContent='관계선 '+(showRel?'✓':'✕');
     sel=null; render(); renderEdit(); fitView(); setSaveState('');
@@ -1172,7 +1201,7 @@ async function loadDoc(){
     else if(!isLoggedIn() && /401|403|PGRST301|permission denied/i.test(e.message))
       b.textContent='공개 열람 권한이 없습니다. Supabase에서 enable_rls_mindmaps.sql 을 다시 실행해 anon SELECT 정책을 적용하세요.';
     else b.textContent='데이터를 불러오지 못했습니다: '+e.message.slice(0,140);
-    applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); applyDrapeEngineLinks20260827(DATA); applyVaultGrades20260831(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
+    applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); applyDrapeEngineLinks20260827(DATA); applyVaultGrades20260901(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
   }
 }
 async function saveDoc(silent){
@@ -1193,7 +1222,7 @@ function download(name,text,type){ const b=new Blob([text],{type:type||'applicat
 function exportJSON(){ download('mindmap_backup.json', JSON.stringify(DATA,null,2)); toast('백업 JSON을 내려받았습니다.'); }
 function importJSON(input){
   const f=input.files[0]; if(!f)return; const r=new FileReader();
-  r.onload=()=>{ try{ const d=JSON.parse(r.result); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); applyLinkFill20260820(d); applyStatusCleanup20260822(d); applyDrapeEngineLinks20260827(d); applyVaultGrades20260831(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); applyLinkFill20260820(d); applyStatusCleanup20260822(d); applyDrapeEngineLinks20260827(d); applyVaultGrades20260901(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
     if(!confirm('백업으로 현재 클라우드 관계도를 덮어쓸까요?'))return;
     pushHistory();
     DATA=d; showRel=DATA.showRel!==false; sel=null; render(); renderEdit(); saveDoc(false);

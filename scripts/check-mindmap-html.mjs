@@ -19,7 +19,8 @@ for (const [index, script] of scripts.entries()) {
 }
 
 const expectedVaultGrades = {
-  cfmsAutoPlace: ["cfmsAutoPlace", "low"],
+  cfmsAutoPlace_1: ["cfmsAutoPlace_1", "low"],
+  cfmsAutoPlace_2: ["cfmsAutoPlace_2", "low"],
   cfmsCIPC: ["n2dzarb3", "medium"],
   cfmsDrape: ["nptj5211", "none"],
   cfmsMiindo: ["cfmsdrape", "none"],
@@ -61,12 +62,18 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260831;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
-  .filter((mindmapId) => mindmapId !== "cfmsAutoPlace")
+  .filter((mindmapId) => !["cfmsAutoPlace_1", "cfmsAutoPlace_2"].includes(mindmapId))
   .map((mindmapId) => ({ id: mindmapId, title: mindmapId, kind: "todo", children: [] }));
+sampleNodes.push({
+  id: "n3k56wq4",
+  title: "cfmsAutoSew",
+  kind: "low",
+  children: [{ id: "cfmsAutoPlace", title: "cfmsAutoPlace", kind: "low", children: [] }],
+});
 const sample = { root: { id: "root", title: "root", kind: "group", children: sampleNodes }, links: [] };
 if (!context.__applyVaultGrades(sample)) throw new Error("vault grade migration did not run");
 const findSample = (id) => {
@@ -81,6 +88,18 @@ const findSample = (id) => {
 for (const [projectId, [mindmapId, kind]] of Object.entries(expectedVaultGrades)) {
   const node = findSample(mindmapId);
   if (!node || node.kind !== kind) throw new Error(`vault grade migration failed for ${projectId}`);
+}
+if (findSample("cfmsAutoPlace")) throw new Error("legacy cfmsAutoPlace node survived migration");
+const expectedAutoPlaceLinks = [
+  ["n3k56wq4", "cfmsAutoPlace_1", "CAD 배치"],
+  ["cfmsAutoPlace_1", "nptj5211", "CAD 물리 검증"],
+  ["n3k56wq4", "cfmsAutoPlace_2", "패턴 배치"],
+  ["cfmsAutoPlace_2", "nptj5211", "패턴 물리 검증"],
+];
+for (const [from, to, label] of expectedAutoPlaceLinks) {
+  if (!sample.links.some((link) => link.from === from && link.to === to && link.label === label)) {
+    throw new Error(`cfmsAutoPlace split link ${from}->${to} is missing`);
+  }
 }
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);

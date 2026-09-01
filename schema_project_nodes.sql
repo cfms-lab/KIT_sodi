@@ -4,7 +4,7 @@
 --
 -- 실행 순서 (Supabase SQL Editor):
 --   1) 이 파일 (테이블 + 권한)
---   2) seed_project_nodes.sql (초기 데이터 76건)
+--   2) seed_project_nodes.sql (초기 데이터 78건)
 --
 -- 열람은 anon 공개(SELECT), 편집은 로그인 사용자만 — mindmaps 테이블과 같은 규칙.
 

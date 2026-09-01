@@ -100,14 +100,18 @@ on conflict ("id") do update set
   "pos_y"       = excluded."pos_y",
   updated_at    = now();
 
--- 2026-08-31: Dashboards/프로젝트현황.md가 읽는 Projects/*.md 등급 스냅숏.
+-- 2026-09-01: cfmsAutoPlace2026_dev의 CAD·IJCST 패턴 논문 트랙을 별도 노드로 시드.
 -- 상세 grade_note/next_gate는 공개 시드로 복사하지 않고 등급만 맞춘다.
 insert into public.project_nodes
   ("id", "mindmap_id", "title", "grade", "status", "brief", "note", "url", "project_path")
 values
-  ('cfmsAutoPlace', 'cfmsAutoPlace', 'cfmsAutoPlace', '하', 'draft',
-   '라벨 없는 의복 패턴의 신체 부위와 전역 조립 추정',
-   'AutoSew 봉제 후보를 위상 제약으로 검사하고 cfmsDrape 물리 검증으로 재정렬한다.',
+  ('cfmsAutoPlace_1', 'cfmsAutoPlace_1', 'cfmsAutoPlace_1', '하', 'draft',
+   '의복 CAD 관점의 패널 신체 부위·전역 조립·초기 배치 추정',
+   'cfmsAutoPlace2026_dev의 CAD 논문 트랙.',
+   'https://github.com/cfms-lab/cfmsAutoPlace2026_dev', 'D:\__CFMS_Projects\cfmsAutoPlace2026_dev'),
+  ('cfmsAutoPlace_2', 'cfmsAutoPlace_2', 'cfmsAutoPlace_2', '하', 'draft',
+   'IJCST 패턴 관점의 라벨 없는 패턴 배치·조립 유효성 검증',
+   'cfmsAutoPlace2026_dev의 IJCST 패턴 논문 트랙.',
    'https://github.com/cfms-lab/cfmsAutoPlace2026_dev', 'D:\__CFMS_Projects\cfmsAutoPlace2026_dev')
 on conflict ("id") do update set
   "mindmap_id" = excluded."mindmap_id",
