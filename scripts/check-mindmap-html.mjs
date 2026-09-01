@@ -19,10 +19,11 @@ for (const [index, script] of scripts.entries()) {
 }
 
 const expectedVaultGrades = {
-  cfmsAutoPlace_1: ["cfmsAutoPlace_1", "low"],
-  cfmsAutoPlace_2: ["cfmsAutoPlace_2", "low"],
+  cfmsAutoPlace_IJCST: ["cfmsAutoPlace_IJCST", "medium"],
+  cfmsAutoPlace_JCDE: ["cfmsAutoPlace_JCDE", "medium"],
   cfmsCIPC: ["n2dzarb3", "medium"],
   cfmsDrape: ["nptj5211", "none"],
+  SFTF_DrapePrior: ["njkskwe4", "low"],
   cfmsMiindo: ["cfmsdrape", "none"],
   cfmsPINNCAD: ["npp8yov2", "low"],
   cfmsPINNDrape: ["nf18t2n5", "low"],
@@ -49,6 +50,7 @@ const expectedVaultGrades = {
   SFTF_ThermalChip: ["n8q2k963", "medium"],
   SFTF_WarehouseAGV: ["no1b3vw4", "low"],
   SFTFSoft_DFSVR: ["n6odcyc1", "medium"],
+  cfmsDrapeSCAN: ["ngi2vmc1", "todo"],
 };
 for (const [projectId, [mindmapId, kind]] of Object.entries(expectedVaultGrades)) {
   const literal = `'${projectId}':{mindmapId:'${mindmapId}',kind:'${kind}'}`;
@@ -66,7 +68,7 @@ runInNewContext(
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
-  .filter((mindmapId) => !["cfmsAutoPlace_1", "cfmsAutoPlace_2"].includes(mindmapId))
+  .filter((mindmapId) => !["cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE"].includes(mindmapId))
   .map((mindmapId) => ({ id: mindmapId, title: mindmapId, kind: "todo", children: [] }));
 sampleNodes.push({
   id: "n3k56wq4",
@@ -91,14 +93,28 @@ for (const [projectId, [mindmapId, kind]] of Object.entries(expectedVaultGrades)
 }
 if (findSample("cfmsAutoPlace")) throw new Error("legacy cfmsAutoPlace node survived migration");
 const expectedAutoPlaceLinks = [
-  ["n3k56wq4", "cfmsAutoPlace_1", "CAD 배치"],
-  ["cfmsAutoPlace_1", "nptj5211", "CAD 물리 검증"],
-  ["n3k56wq4", "cfmsAutoPlace_2", "패턴 배치"],
-  ["cfmsAutoPlace_2", "nptj5211", "패턴 물리 검증"],
+  ["n3k56wq4", "cfmsAutoPlace_JCDE", "CAD 배치"],
+  ["cfmsAutoPlace_JCDE", "nptj5211", "CAD 물리 검증"],
+  ["n3k56wq4", "cfmsAutoPlace_IJCST", "패턴 배치"],
+  ["cfmsAutoPlace_IJCST", "nptj5211", "패턴 물리 검증"],
 ];
 for (const [from, to, label] of expectedAutoPlaceLinks) {
   if (!sample.links.some((link) => link.from === from && link.to === to && link.label === label)) {
     throw new Error(`cfmsAutoPlace split link ${from}->${to} is missing`);
+  }
+}
+const expectedDrapeScanLinks = [
+  ["ngi2vmc1", "nptj5211", "실행 기반"],
+  ["ngi2vmc1", "cfmsdrape", "구현 호스트"],
+  ["ngi2vmc1", "npp8yov2", "body atlas"],
+  ["ngi2vmc1", "n2dzarb3", "검증 오라클"],
+  ["ngi2vmc1", "njkskwe4", "부분 재사용"],
+  ["ngi2vmc1", "nzyk4gd6", "조건부 QA"],
+  ["ngi2vmc1", "nokpy3z1", "후속 응용"],
+];
+for (const [from, to, label] of expectedDrapeScanLinks) {
+  if (!sample.links.some((link) => link.from === from && link.to === to && link.label === label)) {
+    throw new Error(`cfmsDrapeSCAN link ${from}->${to} is missing`);
   }
 }
 const sampleValidation = context.__validate(sample);

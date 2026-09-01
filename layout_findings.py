@@ -136,8 +136,10 @@ POS = {
     # Restored from the last pre-archive graph snapshot.
     "SFTF_UrbanTraffic": (103, 672),
     "cfmsAutoSew": (831, 419),
-    "cfmsAutoPlace_1": (807, 540),
-    "cfmsAutoPlace_2": (818, 675),
+    "cfmsAutoPlace_IJCST": (807, 540),
+    "cfmsAutoPlace_JCDE": (818, 675),
+    # 2026-09-01: ToDo DrapeSCAN onboarding from the Obsidian project note.
+    "cfmsDrapeSCAN": (852, 815),
 }
 
 HYPEREDGES = [
@@ -188,7 +190,7 @@ HYPEREDGES = [
                "PFTF_Compression", "PFTF_VisCull_kDop",
                "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape", "cfmsMiindo",
                "cfmsPINNCAD", "cfmsDrapeSCAN", "cfmsAutoSew",
-               "cfmsAutoPlace_1", "cfmsAutoPlace_2"],
+               "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE"],
      "color": "#db2777", "labelColor": "#be185d",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
@@ -264,8 +266,9 @@ QUALITY_ROWS = [
     ("SFTFSoft_DFSVR", "SFTFSoft_DFSVR", "중", "SFTFSoft와 DFSVR 결합 연구선"),
     ("Tomo_DFSVR", "Tomo_DFSVR", "중", "미분 가능한 지지 구조 계산 연구선"),
     ("cfmsAutoSew", "cfmsAutoSew", "하", "패턴 봉제 대응 자동화 연구선"),
-    ("cfmsAutoPlace_1", "cfmsAutoPlace_1", "하", "CAD 논문 트랙; 독립 holdout 미완"),
-    ("cfmsAutoPlace_2", "cfmsAutoPlace_2", "하", "IJCST 패턴 논문 트랙; 독립 holdout 미완"),
+    ("cfmsAutoPlace_IJCST", "cfmsAutoPlace_IJCST", "중", "IJCST 패턴 논문 트랙; 대칭·골선 사례연구 원고 및 전수 분석 완료, 검증 집합 확대 잔여"),
+    ("cfmsAutoPlace_JCDE", "cfmsAutoPlace_JCDE", "중", "JCDE CAD 논문 트랙; 시험 분할 100벌·본론 골격 완료, 영문 집필·투고 준비 잔여"),
+    ("cfmsDrapeSCAN", "cfmsDrapeSCAN", "ToDo", "Gate 0 GO; 실 스캔 데이터·마네킹 파일럿 전, cfmsDrape/cfmsMiindo 기반 실험 모듈"),
 ]
 QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
 
@@ -311,8 +314,9 @@ INTRODUCTIONS = {
     "SFTF_ActiveOverprint": "카메라로 기존 물체나 로봇이 고정한 의복의 출력 가능 표면과 다음 관측 위치를 찾고 그 위에 안전하게 작은 형상을 덧출력하려는 연구다.",
     "DFSVR_VisCull": "정확한 지지 구조 계산 전에 안전하게 불필요한 교차 후보를 줄여 DFSVR을 빠르게 하려는 연구선이다.",
     "SFTFSoft_GNN_DFSVR": "GNN이 좋은 출력 방향 후보를 빠르게 고르고 DFSVR이 정밀하게 다듬은 뒤 슬라이서로 확인하는 후속 연구다.",
-    "cfmsAutoPlace_1": "의복 CAD 관점에서 패널의 신체 부위와 전역 조립·배치 가설을 다루는 논문 트랙이다.",
-    "cfmsAutoPlace_2": "IJCST 패턴 관점에서 라벨 없는 의복 패턴의 배치와 검증을 다루는 논문 트랙이다.",
+    "cfmsAutoPlace_IJCST": "IJCST 패턴 관점에서 라벨 없는 의복 패턴의 배치와 검증을 다루는 논문 트랙이다.",
+    "cfmsAutoPlace_JCDE": "JCDE CAD 관점에서 패널의 신체 부위와 전역 조립·배치 가설을 다루는 논문 트랙이다.",
+    "cfmsDrapeSCAN": "고정형·핸드헬드 스캔 패치를 cfmsDrape 물리와 소프트 대응으로 정합해 인체 표면을 복원하려는 실험선이다.",
 }
 
 # 발견을 확정하는 hyperedge와 구분되는 그래프 해석용 역할 및 후보 표지.
@@ -895,6 +899,23 @@ URBAN_TRAFFIC_NODE = {
     "degree": 1,
 }
 
+DRAPESCAN_NODE = {
+    "id": "cfmsDrapeSCAN",
+    "label": "cfmsDrapeSCAN",
+    "color": {"background": "#ffffff", "border": "#000000",
+               "highlight": {"background": "#ffffff", "border": "#000000"}},
+    "size": 15.4,
+    "font": {"size": 13, "color": "#333333", "bold": False},
+    "title": "cfmsDrapeSCAN — ToDo: Gate 0 GO; Gate 1 마네킹 파일럿 전",
+    "community": 4,
+    "community_name": "ToDo",
+    "source_file": "cfmsDrapeSCAN.md",
+    "file_type": "concept",
+    "degree": 7,
+    "_intro": INTRODUCTIONS["cfmsDrapeSCAN"],
+    "_project_path": PROJECT_PATHS.get("cfmsDrapeSCAN", r"D:\__VSCode_Projects\cfmsDrapeSCAN_dev"),
+}
+
 # 2026-07-30: mindmap Paper quality 기준 상으로 동기화. 원고 2편+설명서가 있고
 # 게이트 T·T2·G2·S·X 가 닫혔다.  라벨에 [draft] 를 병기하는 이유는 등급이
 # 상이어도 아직 미투고이기 때문이다.
@@ -926,6 +947,7 @@ TODO_NODES = [
     DFSVR_VIS_CULL_NODE,
     SFTFSOFT_GNN_DFSVR_NODE,
     URBAN_TRAFFIC_NODE,
+    DRAPESCAN_NODE,
 ]
 
 TODO_EDGES = [
@@ -1125,21 +1147,26 @@ CURATED_EDGE_UPDATES = [
 # intentionally point to the same checkout, but their IDs and paper scopes are
 # distinct so graph/mindmap consumers do not collapse them back into one item.
 LEGACY_AUTOPLACE_ID = "cfmsAutoPlace"
+LEGACY_AUTOPLACE_SPLIT_IDS = {"cfmsAutoPlace_1", "cfmsAutoPlace_2"}
 AUTOPLACE_TRACKS = [
     {
-        "id": "cfmsAutoPlace_1",
-        "scope": "CAD 논문 트랙",
-        "summary": "의복 CAD 관점의 패널 신체 부위·전역 조립·초기 배치 추정",
-        "intro": INTRODUCTIONS["cfmsAutoPlace_1"],
+        "id": "cfmsAutoPlace_IJCST",
+        "scope": "IJCST 패턴 논문 트랙",
+        "summary": "라벨 없는 의복 패턴의 대칭·골선과 배치·조립 유효성 검증",
+        "intro": INTRODUCTIONS["cfmsAutoPlace_IJCST"],
     },
     {
-        "id": "cfmsAutoPlace_2",
-        "scope": "IJCST 패턴 논문 트랙",
-        "summary": "IJCST 패턴 관점의 라벨 없는 패턴 배치·조립 유효성 검증",
-        "intro": INTRODUCTIONS["cfmsAutoPlace_2"],
+        "id": "cfmsAutoPlace_JCDE",
+        "scope": "JCDE CAD 논문 트랙",
+        "summary": "산업 DXF 패널의 신체 부위·전역 조립·초기 배치 추정",
+        "intro": INTRODUCTIONS["cfmsAutoPlace_JCDE"],
     },
 ]
-AUTOPLACE_IDS = {LEGACY_AUTOPLACE_ID, *(track["id"] for track in AUTOPLACE_TRACKS)}
+AUTOPLACE_IDS = {
+    LEGACY_AUTOPLACE_ID,
+    *LEGACY_AUTOPLACE_SPLIT_IDS,
+    *(track["id"] for track in AUTOPLACE_TRACKS),
+}
 
 
 def _autoplace_node(track, template=None):
@@ -1206,20 +1233,79 @@ def _autoplace_goal_edge(source, target, label, detail, relation):
 
 AUTOPLACE_GOAL_EDGES = [
     _autoplace_goal_edge(
-        "cfmsAutoSew", "cfmsAutoPlace_1", "CAD 배치",
+        "cfmsAutoSew", "cfmsAutoPlace_JCDE", "CAD 배치",
         "봉제 후보를 의복 CAD의 전역 조립·초기 배치 가설로 확장한다", "통합",
     ),
     _autoplace_goal_edge(
-        "cfmsAutoPlace_1", "cfmsDrape", "CAD 물리 검증",
+        "cfmsAutoPlace_JCDE", "cfmsDrape", "CAD 물리 검증",
         "CAD 조립·초기 배치 후보를 short-rollout 물리 오라클로 검증한다", "정확도",
     ),
     _autoplace_goal_edge(
-        "cfmsAutoSew", "cfmsAutoPlace_2", "패턴 배치",
+        "cfmsAutoSew", "cfmsAutoPlace_IJCST", "패턴 배치",
         "봉제 후보를 IJCST 패턴 트랙의 배치·조립 유효성 가설로 확장한다", "통합",
     ),
     _autoplace_goal_edge(
-        "cfmsAutoPlace_2", "cfmsDrape", "패턴 물리 검증",
+        "cfmsAutoPlace_IJCST", "cfmsDrape", "패턴 물리 검증",
         "패턴 배치 후보를 short-rollout 물리 오라클로 검증한다", "정확도",
+    ),
+]
+
+# cfmsDrapeSCAN is a planned project, so these relations stay explicit and
+# conservative. They mirror the 2026-09-01 Obsidian integration table rather
+# than implying that the downstream experiments are already complete. The
+# public graph uses its four goal categories for edge styling.
+def _drapescan_goal_edge(source, target, label, detail, relation, *, dashes=False):
+    return {
+        "from": source,
+        "to": target,
+        "label": label,
+        "title": f"{source} → {target}\n볼트 관계: {label} ({relation})\n{detail}",
+        "dashes": dashes,
+        "width": 2,
+        "color": {"opacity": 0.65},
+        "confidence": "EXTRACTED",
+        "_rel": relation,
+        "_detail": detail,
+        "_goal": label,
+        "_tentative": False,
+    }
+
+
+DRAPESCAN_EDGES = [
+    _drapescan_goal_edge(
+        "cfmsDrapeSCAN", "cfmsDrape", "실행 기반",
+        "cfmsDrape의 shell 물리·정적 평형·body contact·soft tether를 핵심 실행 기반으로 사용",
+        "통합",
+    ),
+    _drapescan_goal_edge(
+        "cfmsDrapeSCAN", "cfmsMiindo", "구현 호스트",
+        "첫 실측 전까지 cfmsMiindo의 drape/ 위에 얇은 실험 모듈로 배양",
+        "통합",
+    ),
+    _drapescan_goal_edge(
+        "cfmsDrapeSCAN", "cfmsPINNCAD", "body atlas",
+        "저차원 body atlas·canonical 치수 schema와 단면·둘레·폭·깊이 평가를 보조 입력으로 사용",
+        "확장", dashes=True,
+    ),
+    _drapescan_goal_edge(
+        "cfmsDrapeSCAN", "cfmsCIPC", "검증 오라클",
+        "대표 난례의 penetration-free 독립 오라클과 clearance 검증에 사용",
+        "정확도", dashes=True,
+    ),
+    _drapescan_goal_edge(
+        "cfmsDrapeSCAN", "SFTF_DrapePrior", "부분 재사용",
+        "평형을 바꾸지 않는 M2 적응 감쇠와 측정 프로토콜만 부분 재사용",
+        "확장", dashes=True,
+    ),
+    _drapescan_goal_edge(
+        "cfmsDrapeSCAN", "PFTF_alpha", "조건부 QA",
+        "실제 유령 이중면이 검출될 때만 layer-first QA를 조건부 실행",
+        "정확도", dashes=True,
+    ),
+    _drapescan_goal_edge(
+        "cfmsDrapeSCAN", "PFTF_Compression", "후속 응용",
+        "등록된 3D 사지·인체 형상을 후속 응용·실험 소비자로 제공",
+        "확장", dashes=True,
     ),
 ]
 
@@ -1257,7 +1343,13 @@ def _replace_curated_garment_edges(match):
         if str(edge.get("from")) not in AUTOPLACE_IDS
         and str(edge.get("to")) not in AUTOPLACE_IDS
     ]
+    edges = [
+        edge for edge in edges
+        if str(edge.get("from")) != "cfmsDrapeSCAN"
+        and str(edge.get("to")) != "cfmsDrapeSCAN"
+    ]
     edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
+    edges.extend(copy.deepcopy(DRAPESCAN_EDGES))
     return "const CURATED_GARMENT_EDGES = " + json.dumps(edges, ensure_ascii=False) + ";"
 
 
@@ -1307,6 +1399,15 @@ def _preserve_raw_nodes(match):
         expanded_nodes.append(node)
     if not split_inserted:
         expanded_nodes.extend(split_by_id[track["id"]] for track in AUTOPLACE_TRACKS)
+
+    # Add newly onboarded project-note nodes without disturbing the preserved
+    # public snapshot. Existing IDs remain authoritative for their metadata.
+    existing_ids = {str(node.get("id")) for node in expanded_nodes}
+    for candidate in TODO_NODES:
+        candidate_id = str(candidate.get("id"))
+        if candidate_id not in existing_ids:
+            expanded_nodes.append(copy.deepcopy(candidate))
+            existing_ids.add(candidate_id)
 
     preserved_nodes = []
     seen_ids = set()
@@ -1366,7 +1467,13 @@ def _preserve_goal_edges(match):
         if str(edge.get("from")) not in AUTOPLACE_IDS
         and str(edge.get("to")) not in AUTOPLACE_IDS
     ]
+    edges = [
+        edge for edge in edges
+        if str(edge.get("from")) != "cfmsDrapeSCAN"
+        and str(edge.get("to")) != "cfmsDrapeSCAN"
+    ]
     edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
+    edges.extend(copy.deepcopy(DRAPESCAN_EDGES))
     node_match = re.search(r"const RAW_NODES = (\[.*?\]);", s, flags=re.S)
     if node_match:
         node_ids = {str(node["id"]) for node in json.loads(node_match.group(1))}
@@ -1525,7 +1632,7 @@ pos_js = "const POS = " + json.dumps(
     {k: {"x": v[0], "y": v[1]} for k, v in position_map.items()}, ensure_ascii=False) + ";"
 s, n1 = re.subn(r"const POS = \{.*?\};", lambda _m: pos_js, s, count=1,
                 flags=re.S)
-curated_position_ids = ("cfmsAutoSew", "cfmsAutoPlace_1", "cfmsAutoPlace_2")
+curated_position_ids = ("cfmsAutoSew", "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN")
 curated_pos_js = "const CURATED_POSITIONS = " + json.dumps(
     {
         node_id: {"x": POS[node_id][0], "y": POS[node_id][1]}
@@ -1550,7 +1657,7 @@ def _replace_curated_hyperedge_members(match):
         node_id for node_id in members_by_label.get("의복 시뮬레이션", [])
         if node_id not in AUTOPLACE_IDS
     ]
-    for node_id in ("cfmsAutoSew", "cfmsAutoPlace_1", "cfmsAutoPlace_2"):
+    for node_id in ("cfmsAutoSew", "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN"):
         if node_id not in members:
             members.append(node_id)
     members_by_label["의복 시뮬레이션"] = members

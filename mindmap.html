@@ -626,10 +626,10 @@ function applyDrapeEngineLinks20260827(data){
    Dashboards/프로젝트현황.md가 읽는 Projects/*.md frontmatter의 최신 등급만 공개
    마인드맵에 옮긴다. grade_note·next_gate 같은 내부 판단은 복사하지 않는다.
    ``none``은 ToDo가 아니라 논문 등급 판정 대상이 아닌 프로젝트다. */
-const VAULT_GRADES_VERSION='2026-09-01a';
+const VAULT_GRADES_VERSION='2026-09-01c';
 const VAULT_PROJECT_GRADES={
-  'cfmsAutoPlace_1':{mindmapId:'cfmsAutoPlace_1',kind:'low'},
-  'cfmsAutoPlace_2':{mindmapId:'cfmsAutoPlace_2',kind:'low'},
+  'cfmsAutoPlace_IJCST':{mindmapId:'cfmsAutoPlace_IJCST',kind:'medium'},
+  'cfmsAutoPlace_JCDE':{mindmapId:'cfmsAutoPlace_JCDE',kind:'medium'},
   'cfmsCIPC':{mindmapId:'n2dzarb3',kind:'medium'},
   'cfmsDrape':{mindmapId:'nptj5211',kind:'none'},
   'cfmsMiindo':{mindmapId:'cfmsdrape',kind:'none'},
@@ -657,7 +657,9 @@ const VAULT_PROJECT_GRADES={
   'SFTF_PDNElectric':{mindmapId:'nd8ctbq4',kind:'low'},
   'SFTF_ThermalChip':{mindmapId:'n8q2k963',kind:'medium'},
   'SFTF_WarehouseAGV':{mindmapId:'no1b3vw4',kind:'low'},
-  'SFTFSoft_DFSVR':{mindmapId:'n6odcyc1',kind:'medium'}
+  'SFTFSoft_DFSVR':{mindmapId:'n6odcyc1',kind:'medium'},
+  'SFTF_DrapePrior':{mindmapId:'njkskwe4',kind:'low'},
+  'cfmsDrapeSCAN':{mindmapId:'ngi2vmc1',kind:'todo'}
 };
 function applyVaultGrades20260901(data){
   if(!data||!data.root||data.vaultGradesVersion===VAULT_GRADES_VERSION) return false;
@@ -673,6 +675,16 @@ function applyVaultGrades20260901(data){
     if(kept.length!==children.length) parent.children=kept;
   };
   removeLegacy(data.root);
+  // Rename the previous numeric split IDs while preserving their existing
+  // links and positions in any already-persisted Supabase document.
+  const renameIds={cfmsAutoPlace_1:'cfmsAutoPlace_JCDE',cfmsAutoPlace_2:'cfmsAutoPlace_IJCST'};
+  walk(data.root,node=>{
+    if(renameIds[node.id]){ node.id=renameIds[node.id]; node.title=renameIds[node.id]; changed=true; }
+  });
+  (data.links||[]).forEach(link=>{
+    if(renameIds[link.from]){ link.from=renameIds[link.from]; changed=true; }
+    if(renameIds[link.to]){ link.to=renameIds[link.to]; changed=true; }
+  });
   data.links=(data.links||[]).filter(link=>{
     const keep=link.from!=='cfmsAutoPlace'&&link.to!=='cfmsAutoPlace';
     if(!keep) changed=true;
@@ -680,14 +692,14 @@ function applyVaultGrades20260901(data){
   });
   const autoPlaceTracks=[
     {
-      id:'cfmsAutoPlace_1',title:'cfmsAutoPlace_1',kind:'low',status:'draft',
+      id:'cfmsAutoPlace_IJCST',title:'cfmsAutoPlace_IJCST',kind:'medium',status:'draft',
       brief:'의복 CAD 관점의 패널 신체 부위·전역 조립·초기 배치 추정',
       note:'cfmsAutoPlace2026_dev의 CAD 논문 트랙.',
       url:'https://github.com/cfms-lab/cfmsAutoPlace2026_dev',
       projectPath:'D:\\__CFMS_Projects\\cfmsAutoPlace2026_dev'
     },
     {
-      id:'cfmsAutoPlace_2',title:'cfmsAutoPlace_2',kind:'low',status:'draft',
+      id:'cfmsAutoPlace_JCDE',title:'cfmsAutoPlace_JCDE',kind:'medium',status:'draft',
       brief:'IJCST 패턴 관점의 라벨 없는 패턴 배치·조립 유효성 검증',
       note:'cfmsAutoPlace2026_dev의 IJCST 패턴 논문 트랙.',
       url:'https://github.com/cfms-lab/cfmsAutoPlace2026_dev',
@@ -706,10 +718,34 @@ function applyVaultGrades20260901(data){
       data.links.push({from,to,label,type:'engine'}); changed=true;
     }
   };
-  ensureLink('n3k56wq4','cfmsAutoPlace_1','CAD 배치');
-  ensureLink('cfmsAutoPlace_1','nptj5211','CAD 물리 검증');
-  ensureLink('n3k56wq4','cfmsAutoPlace_2','패턴 배치');
-  ensureLink('cfmsAutoPlace_2','nptj5211','패턴 물리 검증');
+  ensureLink('n3k56wq4','cfmsAutoPlace_JCDE','CAD 배치');
+  ensureLink('cfmsAutoPlace_JCDE','nptj5211','CAD 물리 검증');
+  ensureLink('n3k56wq4','cfmsAutoPlace_IJCST','패턴 배치');
+  ensureLink('cfmsAutoPlace_IJCST','nptj5211','패턴 물리 검증');
+
+  const drapeScanSpec={
+    id:'ngi2vmc1',title:'cfmsDrapeSCAN',kind:'todo',status:'draft',
+    brief:'고정형·핸드헬드 스캔 패치를 물리 정합으로 결합하는 인체 계측 연구선',
+    note:'Gate 0 GO. 실 스캔 데이터·마네킹 파일럿 전이며 cfmsDrape/cfmsMiindo를 핵심 실행 기반으로 사용한다.',
+    url:'https://github.com/cfms-lab/cfmsDrapeSCAN_dev',
+    projectPath:'D:\\__VSCode_Projects\\cfmsDrapeSCAN_dev'
+  };
+  const drapeParent=findNode(data.root,'nptj5211')||findNode(data.root,'cfmsdrape')||data.root;
+  let drapeScan=findNode(data.root,drapeScanSpec.id);
+  if(!drapeScan){ drapeScan={...drapeScanSpec,children:[]}; (drapeParent.children||(drapeParent.children=[])).push(drapeScan); changed=true; }
+  else Object.assign(drapeScan,drapeScanSpec,{children:drapeScan.children||[]});
+  const ensureDrapeScanLink=(from,to,label)=>{
+    if(findNode(data.root,from)&&findNode(data.root,to)&&!data.links.some(l=>l.from===from&&l.to===to)){
+      data.links.push({from,to,label,type:'engine'}); changed=true;
+    }
+  };
+  ensureDrapeScanLink('ngi2vmc1','nptj5211','실행 기반');
+  ensureDrapeScanLink('ngi2vmc1','cfmsdrape','구현 호스트');
+  ensureDrapeScanLink('ngi2vmc1','npp8yov2','body atlas');
+  ensureDrapeScanLink('ngi2vmc1','n2dzarb3','검증 오라클');
+  ensureDrapeScanLink('ngi2vmc1','njkskwe4','부분 재사용');
+  ensureDrapeScanLink('ngi2vmc1','nzyk4gd6','조건부 QA');
+  ensureDrapeScanLink('ngi2vmc1','nokpy3z1','후속 응용');
   Object.values(VAULT_PROJECT_GRADES).forEach(({mindmapId,kind})=>{
     const node=findNode(data.root,mindmapId);
     if(node&&node.kind!==kind){ node.kind=kind; changed=true; }
