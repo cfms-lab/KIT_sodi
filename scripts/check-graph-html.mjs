@@ -101,6 +101,18 @@ const positions = Object.assign(
   readJsonConstant("CURATED_POSITIONS", "{"),
 );
 const expectedPositions = {"Tomo_SFTF":{"x":-254,"y":216},"Tomo_SFTFSoft":{"x":-52,"y":239},"SFTF_Clustering":{"x":55,"y":503},"PFTF":{"x":141,"y":423},"SFTF_Composite":{"x":339,"y":772},"SFTF_InjMold":{"x":-21,"y":770},"PFTF_Compression":{"x":504,"y":743},"Tomo_DFSVR":{"x":269,"y":68},"PFTF_VisCull_kDop":{"x":408,"y":548},"SFTF_SewerPOC":{"x":-160,"y":748},"SFTFSoft_GNN":{"x":114,"y":56},"SFTF_DrapePrior":{"x":325,"y":286},"PFTF_AsymTensor":{"x":195,"y":192},"PFTF_DrapePrior_VisCull_kDop":{"x":426,"y":379},"PFTF_ResearchOptimize":{"x":4,"y":408},"PFTF_alpha":{"x":96,"y":247},"SFTF_QEM":{"x":-58,"y":89},"SFTF_DynamicTargetSearch":{"x":-187,"y":12},"DFSVR_VisCull":{"x":447,"y":95},"SFTFSoft_GNN_DFSVR":{"x":260,"y":-105},"SFTF_ActiveOverprint":{"x":1,"y":-111},"ColdOndol":{"x":-166,"y":446},"ColdOndol_Positioning":{"x":-323,"y":497},"cfmsCIPC":{"x":530,"y":412},"TSE_SEM":{"x":200,"y":681},"SFTF_HeatMethod":{"x":208,"y":828},"cfmsPINNDrape":{"x":633,"y":273},"cfmsDrape":{"x":528,"y":589},"cfmsMiindo":{"x":670,"y":655},"cfmsPINNCAD":{"x":678,"y":486},"SFTFSoft_DFSVR":{"x":337,"y":182},"SFTF_UrbanTraffic":{"x":103,"y":672},"cfmsAutoSew":{"x":831,"y":419},"cfmsAutoPlace_IJCST":{"x":807,"y":540},"cfmsAutoPlace_JCDE":{"x":818,"y":675},"cfmsDrapeSCAN":{"x":852,"y":815}};
+Object.assign(expectedPositions, {
+  SFTF_InjMold: { x: -16, y: 805 },
+  PFTF_VisCull_kDop: { x: 372, y: 548 },
+  SFTF_SewerPOC: { x: -165, y: 739 },
+  PFTF_DrapePrior_VisCull_kDop: { x: 406, y: 359 },
+  ColdOndol: { x: -194, y: 410 },
+  cfmsCIPC: { x: 554, y: 428 },
+  TSE_SEM: { x: 182, y: 712 },
+  SFTF_HeatMethod: { x: 198, y: 814 },
+  SFTF_UrbanTraffic: { x: 8, y: 608 },
+  cfmsAutoPlace_JCDE: { x: 813, y: 693 },
+});
 const hyperedges = readJsonConstant("hyperedges", "[");
 const curatedHyperedgeMembers = readJsonConstant("CURATED_HYPEREDGE_MEMBERS", "{");
 for (const [label, nodeIds] of Object.entries(curatedHyperedgeMembers)) {
