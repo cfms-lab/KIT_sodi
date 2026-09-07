@@ -87,6 +87,11 @@ node scripts/audit-vault-projects.mjs D:\cfms-research-vault
 pwsh -File scripts/publish-research-views.ps1 -VaultPath D:\cfms-research-vault
 ```
 
+노드를 드래그해 바꾼 배치를 파일 기본값으로 승격하는 절차는
+[`docs/graph-positions-runbook.md`](docs/graph-positions-runbook.md)에 따로 적어 두었습니다.
+좌표 정본은 `graph.html`이 아니라 `layout_findings.py`의 `POS`이며, `graph.html`을 손으로
+고치면 다음 재생성 때 조용히 되돌아갑니다.
+
 검증한 `graph.html`·`mindmap.html` 변경만 `cfms-lab/KIT_sodi`의 `main`으로 올리려면
 마지막 명령에 `-Push`를 붙입니다. 스크립트는 원격이 앞서 있거나 관련 없는 작업 파일이
 있으면 push를 중단합니다.
