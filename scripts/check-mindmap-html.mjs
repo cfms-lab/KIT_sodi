@@ -24,6 +24,7 @@ const expectedVaultGrades = {
   cfmsCIPC: ["n2dzarb3", "medium"],
   cfmsDrape: ["nptj5211", "none"],
   SFTF_DrapePrior: ["njkskwe4", "low"],
+  SFTF_Holonomy: ["SFTF_Holonomy", "high"],
   cfmsMiindo: ["cfmsdrape", "none"],
   cfmsPINNCAD: ["npp8yov2", "low"],
   cfmsPINNDrape: ["nf18t2n5", "low"],
@@ -64,7 +65,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -94,9 +95,9 @@ for (const [projectId, [mindmapId, kind]] of Object.entries(expectedVaultGrades)
 if (findSample("cfmsAutoPlace")) throw new Error("legacy cfmsAutoPlace node survived migration");
 const expectedAutoPlaceLinks = [
   ["n3k56wq4", "cfmsAutoPlace_JCDE", "CAD 배치"],
-  ["cfmsAutoPlace_JCDE", "nptj5211", "CAD 물리 검증"],
+  ["nptj5211", "cfmsAutoPlace_JCDE", "CAD 물리 검증"],
   ["n3k56wq4", "cfmsAutoPlace_IJCST", "패턴 배치"],
-  ["cfmsAutoPlace_IJCST", "nptj5211", "패턴 물리 검증"],
+  ["nptj5211", "cfmsAutoPlace_IJCST", "패턴 물리 검증"],
 ];
 for (const [from, to, label] of expectedAutoPlaceLinks) {
   if (!sample.links.some((link) => link.from === from && link.to === to && link.label === label)) {
@@ -104,18 +105,73 @@ for (const [from, to, label] of expectedAutoPlaceLinks) {
   }
 }
 const expectedDrapeScanLinks = [
-  ["ngi2vmc1", "nptj5211", "실행 기반"],
-  ["ngi2vmc1", "cfmsdrape", "구현 호스트"],
-  ["ngi2vmc1", "npp8yov2", "body atlas"],
-  ["ngi2vmc1", "n2dzarb3", "검증 오라클"],
-  ["ngi2vmc1", "njkskwe4", "부분 재사용"],
-  ["ngi2vmc1", "nzyk4gd6", "조건부 QA"],
+  ["nptj5211", "ngi2vmc1", "실행 기반"],
+  ["cfmsdrape", "ngi2vmc1", "구현 호스트"],
+  ["npp8yov2", "ngi2vmc1", "body atlas"],
+  ["n2dzarb3", "ngi2vmc1", "검증 오라클"],
+  ["njkskwe4", "ngi2vmc1", "부분 재사용"],
+  ["nzyk4gd6", "ngi2vmc1", "조건부 QA"],
   ["ngi2vmc1", "nokpy3z1", "후속 응용"],
 ];
 for (const [from, to, label] of expectedDrapeScanLinks) {
   if (!sample.links.some((link) => link.from === from && link.to === to && link.label === label)) {
     throw new Error(`cfmsDrapeSCAN link ${from}->${to} is missing`);
   }
+}
+
+// 2026-09-07: SFTF_HeatMethod 에서 갈라져 나온 SFTF_Holonomy 가 앞 편 밑에 붙고,
+// 관계선은 통일된 방향(앞 편 -> 갈라져 나온 편)으로 하나만 남는지 본다.
+const splitSample = {
+  root: {
+    id: "root",
+    title: "root",
+    kind: "group",
+    children: [{ id: "nro5uca3", title: "SFTF_HeatMethod", kind: "medium", children: [] }],
+  },
+  links: [],
+};
+if (!context.__applyHolonomySplit(splitSample)) throw new Error("Holonomy split migration did not run");
+if (context.__applyHolonomySplit(splitSample)) throw new Error("Holonomy split migration is not idempotent");
+const holonomy = splitSample.root.children[0].children.find((node) => node.id === "SFTF_Holonomy");
+if (!holonomy || holonomy.kind !== "high" || holonomy.status !== "draft") {
+  throw new Error("SFTF_Holonomy node is missing or has the wrong grade");
+}
+const holonomyLinks = splitSample.links.filter(
+  (link) => link.from === "SFTF_Holonomy" || link.to === "SFTF_Holonomy",
+);
+if (
+  holonomyLinks.length !== 1
+  || holonomyLinks[0].from !== "nro5uca3"
+  || holonomyLinks[0].label !== "전단각 항등식"
+) {
+  throw new Error("SFTF_HeatMethod -> SFTF_Holonomy link is missing or points the old way");
+}
+
+// 이미 저장된 문서의 거꾸로 된 관계선도 같은 규칙으로 돌아가는지 본다.
+const legacyLinks = [
+  { from: "cfmsAutoPlace_JCDE", to: "nptj5211", label: "CAD 물리 검증" },
+  { from: "cfmsAutoPlace_IJCST", to: "nptj5211", label: "패턴 물리 검증" },
+  { from: "ngi2vmc1", to: "nptj5211", label: "실행 기반" },
+  { from: "ngi2vmc1", to: "cfmsdrape", label: "구현 호스트" },
+  { from: "ngi2vmc1", to: "npp8yov2", label: "body atlas" },
+  { from: "ngi2vmc1", to: "n2dzarb3", label: "검증 오라클" },
+  { from: "ngi2vmc1", to: "njkskwe4", label: "부분 재사용" },
+  { from: "ngi2vmc1", to: "nzyk4gd6", label: "조건부 QA" },
+  { from: "ngi2vmc1", to: "nokpy3z1", label: "후속 응용" },
+];
+const directionSample = { root: { id: "root", title: "root", kind: "group", children: [] }, links: legacyLinks.map((link) => ({ ...link })) };
+if (!context.__applyLinkDirection(directionSample)) throw new Error("link direction migration did not run");
+if (context.__applyLinkDirection(directionSample)) throw new Error("link direction migration is not idempotent");
+for (const legacy of legacyLinks.slice(0, 8)) {
+  if (directionSample.links.some((link) => link.from === legacy.from && link.to === legacy.to)) {
+    throw new Error(`link ${legacy.from}->${legacy.to} still points the old way`);
+  }
+  if (!directionSample.links.some((link) => link.from === legacy.to && link.to === legacy.from && link.label === legacy.label)) {
+    throw new Error(`flipped link ${legacy.to}->${legacy.from} is missing`);
+  }
+}
+if (!directionSample.links.some((link) => link.from === "ngi2vmc1" && link.to === "nokpy3z1")) {
+  throw new Error("후속 응용 link must keep its direction");
 }
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);

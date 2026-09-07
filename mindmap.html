@@ -659,6 +659,7 @@ const VAULT_PROJECT_GRADES={
   'SFTF_WarehouseAGV':{mindmapId:'no1b3vw4',kind:'low'},
   'SFTFSoft_DFSVR':{mindmapId:'n6odcyc1',kind:'medium'},
   'SFTF_DrapePrior':{mindmapId:'njkskwe4',kind:'low'},
+  'SFTF_Holonomy':{mindmapId:'SFTF_Holonomy',kind:'high'},
   'cfmsDrapeSCAN':{mindmapId:'ngi2vmc1',kind:'todo'}
 };
 function applyVaultGrades20260901(data){
@@ -719,9 +720,9 @@ function applyVaultGrades20260901(data){
     }
   };
   ensureLink('n3k56wq4','cfmsAutoPlace_JCDE','CAD 배치');
-  ensureLink('cfmsAutoPlace_JCDE','nptj5211','CAD 물리 검증');
+  ensureLink('nptj5211','cfmsAutoPlace_JCDE','CAD 물리 검증');
   ensureLink('n3k56wq4','cfmsAutoPlace_IJCST','패턴 배치');
-  ensureLink('cfmsAutoPlace_IJCST','nptj5211','패턴 물리 검증');
+  ensureLink('nptj5211','cfmsAutoPlace_IJCST','패턴 물리 검증');
 
   const drapeScanSpec={
     id:'ngi2vmc1',title:'cfmsDrapeSCAN',kind:'todo',status:'draft',
@@ -739,12 +740,12 @@ function applyVaultGrades20260901(data){
       data.links.push({from,to,label,type:'engine'}); changed=true;
     }
   };
-  ensureDrapeScanLink('ngi2vmc1','nptj5211','실행 기반');
-  ensureDrapeScanLink('ngi2vmc1','cfmsdrape','구현 호스트');
-  ensureDrapeScanLink('ngi2vmc1','npp8yov2','body atlas');
-  ensureDrapeScanLink('ngi2vmc1','n2dzarb3','검증 오라클');
-  ensureDrapeScanLink('ngi2vmc1','njkskwe4','부분 재사용');
-  ensureDrapeScanLink('ngi2vmc1','nzyk4gd6','조건부 QA');
+  ensureDrapeScanLink('nptj5211','ngi2vmc1','실행 기반');
+  ensureDrapeScanLink('cfmsdrape','ngi2vmc1','구현 호스트');
+  ensureDrapeScanLink('npp8yov2','ngi2vmc1','body atlas');
+  ensureDrapeScanLink('n2dzarb3','ngi2vmc1','검증 오라클');
+  ensureDrapeScanLink('njkskwe4','ngi2vmc1','부분 재사용');
+  ensureDrapeScanLink('nzyk4gd6','ngi2vmc1','조건부 QA');
   ensureDrapeScanLink('ngi2vmc1','nokpy3z1','후속 응용');
   Object.values(VAULT_PROJECT_GRADES).forEach(({mindmapId,kind})=>{
     const node=findNode(data.root,mindmapId);
@@ -754,6 +755,63 @@ function applyVaultGrades20260901(data){
   return changed;
 }
 
+/* ====== SFTF_Holonomy 논문 분리 (2026-09-07) ======
+   SFTF_HeatMethod 의 A④ 단계가 독립 논문으로 갈라졌다. 같은 저장소·같은 draft/ 를 쓰고
+   파일 이름 키워드(Holonomy)로만 갈리지만, 주장의 종류(민감도 대 항등식)와 자료(스캔 메쉬
+   대 치수 기입 실측)가 달라 노드를 따로 둔다. 인용은 Holonomy → HeatMethod 한 방향뿐이라
+   투고 순서가 고정된다 — 앞 편이 먼저 나가야 한다. 관계선은 아래 «관계선 방향 통일» 규칙
+   대로 그 반대, 즉 앞 편 → 갈라져 나온 편으로 그린다. */
+const HOLONOMY_SPLIT_VERSION='2026-09-07';
+function applyHolonomySplit20260907(data){
+  if(!data||!data.root||data.holonomySplitVersion===HOLONOMY_SPLIT_VERSION) return false;
+  const spec={
+    id:'SFTF_Holonomy',title:'SFTF_Holonomy',kind:'high',status:'draft',
+    brief:'전단각은 망이 둘러싼 총 Gauss 곡률이라는 항등식',
+    note:'SFTF_HeatMethod 의 A④ 단계가 갈라져 나온 독립 논문. 적합 파라미터 0개로 치수 기입된 반구 성형 실측 29점을 MAE 0.57° 로 맞힌다. 같은 저장소·같은 draft/ 를 쓰고 파일 이름 키워드(Holonomy)로만 갈린다.',
+    url:'https://github.com/cfms-lab/SFTF_HeatMethod_dev',
+    projectPath:'D:\\__SFTF_Projects(2026)\\SFTF_HeatMethod_dev'
+  };
+  const parent=findNode(data.root,'nro5uca3')||findNode(data.root,'composite')||data.root;
+  let node=findNode(data.root,spec.id);
+  if(!node){ node={...spec,children:[]}; (parent.children||(parent.children=[])).push(node); }
+  else Object.assign(node,spec,{children:node.children||[]});
+  parent.collapsed=false;
+  data.links=data.links||[];
+  if(findNode(data.root,'nro5uca3')&&!data.links.some(l=>l.from==='nro5uca3'&&l.to==='SFTF_Holonomy')){
+    data.links.push({from:'nro5uca3',to:'SFTF_Holonomy',label:'전단각 항등식',type:'engine'});
+  }
+  data.holonomySplitVersion=HOLONOMY_SPLIT_VERSION;
+  return true;
+}
+
+/* ====== 관계선 방향 통일 (2026-09-07) ======
+   «A → B» 의 뜻을 하나로 맞췄다 — 'A 를 개선·활용해서 B 를 만들었다'.
+   먼저 선 것(기반·앞 편)이 뒤에 선 것(파생·뒷 편)을 가리킨다. 아래 쌍은 예전에
+   «쓰는 쪽 → 쓰이는 쪽» 으로 거꾸로 그려져 있어서, 이미 저장된 문서에서 뒤집는다.
+   라벨은 방향과 무관한 관계 이름이라 그대로 둔다. */
+const LINK_DIRECTION_VERSION='2026-09-07';
+const LINK_DIRECTION_FIXES=[
+  ['cfmsAutoPlace_JCDE','nptj5211'],   // 물리 오라클(cfmsDrape)이 배치 트랙의 기반이다
+  ['cfmsAutoPlace_IJCST','nptj5211'],
+  ['ngi2vmc1','nptj5211'],             // cfmsDrapeSCAN 은 아래 여섯을 기반으로 삼는다
+  ['ngi2vmc1','cfmsdrape'],
+  ['ngi2vmc1','npp8yov2'],
+  ['ngi2vmc1','n2dzarb3'],
+  ['ngi2vmc1','njkskwe4'],
+  ['ngi2vmc1','nzyk4gd6']
+];
+function applyLinkDirection20260907(data){
+  if(!data||!data.root||data.linkDirectionVersion===LINK_DIRECTION_VERSION) return false;
+  data.links||(data.links=[]);
+  LINK_DIRECTION_FIXES.forEach(([from,to])=>{
+    const i=data.links.findIndex(l=>l.from===from&&l.to===to);
+    if(i<0) return;
+    if(data.links.some(l=>l.from===to&&l.to===from)){ data.links.splice(i,1); return; }
+    data.links[i].from=to; data.links[i].to=from;
+  });
+  data.linkDirectionVersion=LINK_DIRECTION_VERSION;
+  return true;   // 버전 상승 자체도 클라우드 문서에 저장해야 재실행되지 않는다.
+}
 //==PURE_END
 
 /* ====================== Supabase 설정/세션 (upjuk과 공유) ====================== */
@@ -871,6 +929,8 @@ let DATA=JSON.parse(JSON.stringify(DEFAULT_DATA));
 normalizeKinds(DATA);
 applySubmissionPlan20260806(DATA);
 applyVaultGrades20260901(DATA);
+applyLinkDirection20260907(DATA);
+applyHolonomySplit20260907(DATA);
 let sel=null, view={tx:60,ty:30,s:1}, showRel=true, LAY=null;
 
 /* ====================== 실행취소 / 다시실행 (undo/redo) ====================== */
@@ -1226,10 +1286,12 @@ async function loadDoc(){
     const statusMigrated=applyStatusCleanup20260822(DATA);
     const drapeMigrated=applyDrapeEngineLinks20260827(DATA);
     const gradesMigrated=applyVaultGrades20260901(DATA);
+    const directionMigrated=applyLinkDirection20260907(DATA);
+    const holonomyMigrated=applyHolonomySplit20260907(DATA);
     const kindsMigrated=normalizeKinds(DATA);
     showRel=DATA.showRel!==false; document.getElementById('relBtn').textContent='관계선 '+(showRel?'✓':'✕');
     sel=null; render(); renderEdit(); fitView(); setSaveState('');
-    if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||linkMigrated||statusMigrated||drapeMigrated||gradesMigrated||kindsMigrated) await saveDoc(true);
+    if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||linkMigrated||statusMigrated||drapeMigrated||gradesMigrated||directionMigrated||holonomyMigrated||kindsMigrated) await saveDoc(true);
   }catch(e){
     const b=document.getElementById('banner'); b.style.display='block';
     if(/relation|does not exist|42P01|PGRST205|404/i.test(e.message))
@@ -1237,7 +1299,7 @@ async function loadDoc(){
     else if(!isLoggedIn() && /401|403|PGRST301|permission denied/i.test(e.message))
       b.textContent='공개 열람 권한이 없습니다. Supabase에서 enable_rls_mindmaps.sql 을 다시 실행해 anon SELECT 정책을 적용하세요.';
     else b.textContent='데이터를 불러오지 못했습니다: '+e.message.slice(0,140);
-    applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); applyDrapeEngineLinks20260827(DATA); applyVaultGrades20260901(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
+    applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); applyDrapeEngineLinks20260827(DATA); applyVaultGrades20260901(DATA); applyLinkDirection20260907(DATA); applyHolonomySplit20260907(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
   }
 }
 async function saveDoc(silent){
@@ -1258,7 +1320,7 @@ function download(name,text,type){ const b=new Blob([text],{type:type||'applicat
 function exportJSON(){ download('mindmap_backup.json', JSON.stringify(DATA,null,2)); toast('백업 JSON을 내려받았습니다.'); }
 function importJSON(input){
   const f=input.files[0]; if(!f)return; const r=new FileReader();
-  r.onload=()=>{ try{ const d=JSON.parse(r.result); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); applyLinkFill20260820(d); applyStatusCleanup20260822(d); applyDrapeEngineLinks20260827(d); applyVaultGrades20260901(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); applyLinkFill20260820(d); applyStatusCleanup20260822(d); applyDrapeEngineLinks20260827(d); applyVaultGrades20260901(d); applyLinkDirection20260907(d); applyHolonomySplit20260907(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
     if(!confirm('백업으로 현재 클라우드 관계도를 덮어쓸까요?'))return;
     pushHistory();
     DATA=d; showRel=DATA.showRel!==false; sel=null; render(); renderEdit(); saveDoc(false);

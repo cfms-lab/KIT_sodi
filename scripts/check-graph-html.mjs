@@ -52,6 +52,7 @@ const nodes = readJsonConstant("RAW_NODES", "[");
 const curatedNodes = [
   readJsonConstant("CFMS_AUTOSEW_NODE", "{"),
   ...readJsonConstant("CFMS_AUTOPLACE_NODES", "["),
+  readJsonConstant("SFTF_HOLONOMY_NODE", "{"),
 ];
 for (const curatedNode of curatedNodes) {
   if (!nodes.some((node) => node.id === curatedNode.id)) nodes.push(curatedNode);
@@ -73,6 +74,7 @@ const expectedVaultGrades = {
   PFTF_DrapePrior_VisCull_kDop: "등급 없음",
   PFTF_ResearchOptimize: "등급 없음",
   SFTF_DrapePrior: "하",
+  SFTF_Holonomy: "상",
   SFTF_InjMold: "중",
   SFTF_SewerPOC: "하",
   SFTFSoft_DFSVR: "중",
@@ -87,13 +89,32 @@ for (const [nodeId, grade] of Object.entries(expectedVaultGrades)) {
 }
 
 const edges = readJsonConstant("RAW_EDGES", "[");
-const curatedEdges = readJsonConstant("CURATED_GARMENT_EDGES", "[");
+const curatedEdges = [
+  ...readJsonConstant("CURATED_GARMENT_EDGES", "["),
+  ...readJsonConstant("SFTF_HOLONOMY_EDGES", "["),
+];
 for (const curatedEdge of curatedEdges) {
   const index = edges.findIndex(
     (edge) => edge.from === curatedEdge.from && edge.to === curatedEdge.to,
   );
   if (index >= 0) edges[index] = curatedEdge;
   else edges.push(curatedEdge);
+}
+// 2026-09-07: 'A -> B' 는 'A 를 개선·활용해 B 를 만들었다' 하나로 통일됐다.
+const directionFixes = readJsonConstant("EDGE_DIRECTION_FIXES", "[");
+for (const [from, to] of directionFixes) {
+  const index = edges.findIndex((edge) => edge.from === from && edge.to === to);
+  if (index < 0) continue;
+  if (edges.some((edge) => edge.from === to && edge.to === from)) { edges.splice(index, 1); continue; }
+  edges[index] = { ...edges[index], from: to, to: from };
+}
+for (const [from, to] of directionFixes) {
+  if (edges.some((edge) => edge.from === from && edge.to === to)) {
+    throw new Error(`edge ${from}->${to} still points the old way`);
+  }
+  if (!edges.some((edge) => edge.from === to && edge.to === from)) {
+    throw new Error(`flipped edge ${to}->${from} is missing`);
+  }
 }
 
 const positions = Object.assign(
@@ -112,6 +133,7 @@ Object.assign(expectedPositions, {
   SFTF_HeatMethod: { x: 198, y: 814 },
   SFTF_UrbanTraffic: { x: 8, y: 608 },
   cfmsAutoPlace_JCDE: { x: 813, y: 693 },
+  SFTF_Holonomy: { x: 300, y: 925 },
 });
 const hyperedges = readJsonConstant("hyperedges", "[");
 const curatedHyperedgeMembers = readJsonConstant("CURATED_HYPEREDGE_MEMBERS", "{");
@@ -181,15 +203,15 @@ if (badGoalEdges.length) {
 }
 const expectedGarmentEdges = [
   ["cfmsAutoSew", "cfmsAutoPlace_JCDE", "CAD 배치", "통합", false],
-  ["cfmsAutoPlace_JCDE", "cfmsDrape", "CAD 물리 검증", "정확도", false],
+  ["cfmsDrape", "cfmsAutoPlace_JCDE", "CAD 물리 검증", "정확도", false],
   ["cfmsAutoSew", "cfmsAutoPlace_IJCST", "패턴 배치", "통합", false],
-  ["cfmsAutoPlace_IJCST", "cfmsDrape", "패턴 물리 검증", "정확도", false],
-  ["cfmsDrapeSCAN", "cfmsDrape", "실행 기반", "통합", false],
-  ["cfmsDrapeSCAN", "cfmsMiindo", "구현 호스트", "통합", false],
-  ["cfmsDrapeSCAN", "cfmsPINNCAD", "body atlas", "확장", false],
-  ["cfmsDrapeSCAN", "cfmsCIPC", "검증 오라클", "정확도", false],
-  ["cfmsDrapeSCAN", "SFTF_DrapePrior", "부분 재사용", "확장", false],
-  ["cfmsDrapeSCAN", "PFTF_alpha", "조건부 QA", "정확도", false],
+  ["cfmsDrape", "cfmsAutoPlace_IJCST", "패턴 물리 검증", "정확도", false],
+  ["cfmsDrape", "cfmsDrapeSCAN", "실행 기반", "통합", false],
+  ["cfmsMiindo", "cfmsDrapeSCAN", "구현 호스트", "통합", false],
+  ["cfmsPINNCAD", "cfmsDrapeSCAN", "body atlas", "확장", false],
+  ["cfmsCIPC", "cfmsDrapeSCAN", "검증 오라클", "정확도", false],
+  ["SFTF_DrapePrior", "cfmsDrapeSCAN", "부분 재사용", "확장", false],
+  ["PFTF_alpha", "cfmsDrapeSCAN", "조건부 QA", "정확도", false],
   ["cfmsDrapeSCAN", "PFTF_Compression", "후속 응용", "확장", false],
   ["cfmsAutoSew", "cfmsPINNCAD", "봉제 대응", "통합", false],
   ["cfmsAutoSew", "cfmsPINNDrape", "봉제 실험", "정확도", false],
@@ -206,6 +228,17 @@ for (const [from, to, label, relation, tentative] of expectedGarmentEdges) {
   ) {
     throw new Error(`garment edge ${from}->${to} is missing, duplicated, or incorrect`);
   }
+}
+const holonomyEdges = edges.filter(
+  (edge) => edge.from === "SFTF_Holonomy" || edge.to === "SFTF_Holonomy",
+);
+if (
+  holonomyEdges.length !== 1
+  || holonomyEdges[0].from !== "SFTF_HeatMethod"
+  || holonomyEdges[0].label !== "전단각 항등식"
+  || holonomyEdges[0]._rel !== "정확도"
+) {
+  throw new Error("SFTF_HeatMethod -> SFTF_Holonomy split edge is missing or incorrect");
 }
 if (
   !garmentSimulation
