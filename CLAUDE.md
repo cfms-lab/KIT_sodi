@@ -3,7 +3,9 @@
 ## 연구 그래프 노드 좌표
 
 사용자가 `const POS = {...};` 한 줄을 붙여넣고 "재배포"를 요청하는 일이 잦다.
-그때는 [docs/graph-positions-runbook.md](docs/graph-positions-runbook.md) 를 따른다.
+그때는 붙여넣은 좌표를 파일로 저장한 뒤
+`node scripts/apply-graph-positions.mjs <파일>` 하나면 정본 갱신·재생성·가드 동기화·검증이
+끝난다. 절차와 함정은 [docs/graph-positions-runbook.md](docs/graph-positions-runbook.md) 에 있다.
 
 - 좌표 정본은 `layout_findings.py` 의 `POS` dict 다. `graph.html` 은 생성물이므로
   직접 편집하지 않는다 — `python layout_findings.py` 가 `POS` 와 `CURATED_POSITIONS`

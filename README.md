@@ -87,8 +87,14 @@ node scripts/audit-vault-projects.mjs D:\cfms-research-vault
 pwsh -File scripts/publish-research-views.ps1 -VaultPath D:\cfms-research-vault
 ```
 
-노드를 드래그해 바꾼 배치를 파일 기본값으로 승격하는 절차는
-[`docs/graph-positions-runbook.md`](docs/graph-positions-runbook.md)에 따로 적어 두었습니다.
+노드를 드래그해 바꾼 배치는 **위치 복사** 버튼으로 복사한 뒤 한 줄로 승격합니다.
+
+```powershell
+Get-Clipboard | node scripts/apply-graph-positions.mjs
+```
+
+정본 갱신·재생성·좌표 가드 동기화·검증까지 이 스크립트가 하며, 전체 절차와 함정은
+[`docs/graph-positions-runbook.md`](docs/graph-positions-runbook.md)에 적어 두었습니다.
 좌표 정본은 `graph.html`이 아니라 `layout_findings.py`의 `POS`이며, `graph.html`을 손으로
 고치면 다음 재생성 때 조용히 되돌아갑니다.
 

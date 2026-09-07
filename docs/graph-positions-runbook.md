@@ -3,6 +3,22 @@
 브라우저에서 `graph.html` 노드를 드래그해 배치를 바꾼 뒤 **위치 복사** 버튼으로 얻은
 `const POS = {...};` 한 줄을 파일 기본값으로 승격하고 GitHub Pages에 올리는 절차다.
 
+## 한 줄로 하기
+
+```powershell
+Get-Clipboard | node scripts/apply-graph-positions.mjs
+pwsh -File scripts/publish-research-views.ps1
+git add graph.html layout_findings.py scripts/check-graph-html.mjs
+git commit -m "graph: redeploy user-adjusted node positions"
+git push origin main
+```
+
+클립보드 대신 파일로 넘겨도 된다: `node scripts/apply-graph-positions.mjs pasted.txt`.
+`--dry-run` 을 붙이면 어떤 노드가 어디로 움직이는지만 찍고 파일은 건드리지 않는다.
+
+스크립트는 붙여넣은 좌표에 노드가 빠져 있거나 모르는 노드가 섞여 있으면 아무것도
+쓰지 않고 멈춘다. 새 노드는 좌표만으로 끝나지 않기 때문이다(아래 "새 노드" 참고).
+
 ## 정본은 graph.html 이 아니라 layout_findings.py 다
 
 | 파일 | 역할 |
@@ -14,11 +30,10 @@
 `graph.html` 을 손으로 고치면 다음 재생성 때 조용히 사라진다. 2026-09-07 에 실제로
 SFTF_Holonomy 의 좌표·등급 행과 품질 보드 날짜가 이렇게 되돌아갔다.
 
-## 절차
+## 스크립트가 하는 일 (손으로 할 때의 절차)
 
 1. 붙여넣은 `POS` 의 값을 `layout_findings.py` 의 `POS` dict 에 반영한다.
    키 순서와 주석은 그대로 두고 좌표 값만 교체한다.
-   새 노드가 들어 있으면 dict 끝에 추가한다(아래 "새 노드" 참고).
 2. 재생성한다. `graph.html` 의 `POS` 와 `CURATED_POSITIONS` 가 함께 갱신된다.
 
    ```powershell
@@ -29,24 +44,15 @@ SFTF_Holonomy 의 좌표·등급 행과 품질 보드 날짜가 이렇게 되돌
 3. `scripts/check-graph-html.mjs` 의 `expectedPositions` 를 재생성된 `graph.html` 의
    `POS` + `CURATED_POSITIONS` **병합 결과**로 교체한다. 키 순서는 `POS` 순서를 따르고,
    `POS` 에 없는 큐레이션 키만 뒤에 붙는다.
-4. 검증한다. 볼트 감사 + `graph.html`·`mindmap.html` 구문 + 좌표 가드가 모두 돈다.
-
-   ```powershell
-   pwsh -File scripts/publish-research-views.ps1
-   ```
-
+4. `node scripts/check-graph-html.mjs` 와 `node scripts/check-mindmap-html.mjs` 로 검증한다.
    `positions` 가 노드 수와 같으면 통과다: `{"inlineScripts":4,"nodes":37,...,"positions":37,...}`
-5. 커밋하고 `main` 에 푸시한다. GitHub Pages 는 `main` 을 그대로 서비스한다.
 
-   ```powershell
-   git add graph.html layout_findings.py scripts/check-graph-html.mjs
-   git commit -m "graph: redeploy user-adjusted node positions"
-   git push origin main
-   ```
+그다음 `pwsh -File scripts/publish-research-views.ps1` 로 볼트 감사까지 포함한 전체 검증을
+돌리고, 커밋해서 `main` 에 푸시한다. GitHub Pages 는 `main` 을 그대로 서비스한다.
 
-   4 단계에 `-Push` 를 붙이는 길은 쓸 수 없다. 그 경로는 html 4 개 외의 파일이 바뀌어
-   있으면 push 를 중단하는데, 좌표 작업은 `layout_findings.py` 와 검증 스크립트를
-   반드시 함께 건드린다.
+검증 스크립트에 `-Push` 를 붙이는 길은 쓸 수 없다. 그 경로는 html 4 개 외의 파일이
+바뀌어 있으면 push 를 중단하는데, 좌표 작업은 `layout_findings.py` 와 검증 스크립트를
+반드시 함께 건드린다.
 
 ## 자주 걸리는 함정
 
