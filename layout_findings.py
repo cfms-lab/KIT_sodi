@@ -140,6 +140,8 @@ POS = {
     "cfmsAutoPlace_JCDE": (871, 615),
     # 2026-09-01: ToDo DrapeSCAN onboarding from the Obsidian project note.
     "cfmsDrapeSCAN": (702, 819),
+    # 2026-09-07: graph.html 의 큐레이션 노드(SFTF_HOLONOMY_NODE)와 짝을 이룬다.
+    "SFTF_Holonomy": (256, 902),
 }
 
 HYPEREDGES = [
@@ -259,6 +261,10 @@ QUALITY_ROWS = [
     ("cfmsCIPC", "cfmsCIPC", "중", "의복 충돌 강건성 벤치마크"),
     ("TSE_SEM", "TSE_SEM", "하", "섬유 영상 정량화 연구선"),
     ("SFTF_HeatMethod", "SFTF_HeatMethod", "중", "열전달 기반 복합재 설계 연구선"),
+    # 2026-09-07: SFTF_Holonomy 논문 트랙 편입.  graph.html 의 큐레이션 노드는
+    # RAW_NODES 밖에 있어도 등급 행은 여기서 나가야 재생성 뒤에 살아남는다.
+    ("SFTF_Holonomy", "SFTF_Holonomy", "상",
+     "전단각 항등식 논문 트랙; 적합 0개로 반구 실측 29점 MAE 0.57°, 원고 4종+표제지 완비. 앞 편 SFTF_HeatMethod 투고가 선행 게이트"),
     ("cfmsPINNDrape", "cfmsPINNDrape", "하", "PINN 기반 드레이프 실험"),
     ("cfmsDrape", "cfmsDrape", "등급 없음", "드레이프 엔진 기반 저장소; 독립 논문 등급 미적용"),
     ("cfmsMiindo", "cfmsMiindo", "등급 없음", "의복 CAD·드레이프 모노레포; 독립 논문 등급 미적용"),
@@ -1543,9 +1549,9 @@ quality_html = (
     '<div id="quality-board">'
     # QUALITY_ROWS 를 손댈 때 이 날짜도 같이 올린다.  하드코딩이라, 갱신하지 않으면
     # 재생성이 graph.html 의 최신 날짜를 조용히 되돌린다(2026-07-27 에 실제로 발생).
-    '<h3>최근 논문 quality (2026-09-01)</h3>'
+    '<h3>최근 논문 quality (2026-09-07)</h3>'
     '<div class="quality-meta">상=상위권 심사 대응 가능 · 중=핵심 gate 잔여 · 하=PoC/원고 미완료 · ToDo=새 설계선/검증 전 · 등급 없음=논문 판정 대상 아님<br>'
-    '등급 정본: Obsidian Projects frontmatter + 논문 트랙 분리 (2026-09-01) · 공개 화면에는 최소 메타데이터만 동기화</div>'
+    '등급 정본: Obsidian Projects frontmatter + 논문 트랙 분리 (2026-09-07) · 공개 화면에는 최소 메타데이터만 동기화</div>'
     '<table><thead><tr><th>프로젝트</th><th>등급</th><th>핵심 근거</th></tr></thead>'
     f'<tbody>{quality_html_rows}</tbody></table></div>'
 )
@@ -1632,7 +1638,12 @@ pos_js = "const POS = " + json.dumps(
     {k: {"x": v[0], "y": v[1]} for k, v in position_map.items()}, ensure_ascii=False) + ";"
 s, n1 = re.subn(r"const POS = \{.*?\};", lambda _m: pos_js, s, count=1,
                 flags=re.S)
-curated_position_ids = ("cfmsAutoSew", "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN")
+# RAW_NODES 에 없고 런타임에 덧붙는 큐레이션 노드는 CURATED_POSITIONS 로도 내보내야
+# 재생성 뒤에 좌표가 사라지지 않는다.
+curated_position_ids = (
+    "cfmsAutoSew", "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN",
+    "SFTF_Holonomy",
+)
 curated_pos_js = "const CURATED_POSITIONS = " + json.dumps(
     {
         node_id: {"x": POS[node_id][0], "y": POS[node_id][1]}
