@@ -121,20 +121,8 @@ const positions = Object.assign(
   readJsonConstant("POS", "{"),
   readJsonConstant("CURATED_POSITIONS", "{"),
 );
-const expectedPositions = {"Tomo_SFTF":{"x":-254,"y":216},"Tomo_SFTFSoft":{"x":-52,"y":239},"SFTF_Clustering":{"x":55,"y":503},"PFTF":{"x":141,"y":423},"SFTF_Composite":{"x":339,"y":772},"SFTF_InjMold":{"x":-21,"y":770},"PFTF_Compression":{"x":504,"y":743},"Tomo_DFSVR":{"x":269,"y":68},"PFTF_VisCull_kDop":{"x":408,"y":548},"SFTF_SewerPOC":{"x":-160,"y":748},"SFTFSoft_GNN":{"x":114,"y":56},"SFTF_DrapePrior":{"x":325,"y":286},"PFTF_AsymTensor":{"x":195,"y":192},"PFTF_DrapePrior_VisCull_kDop":{"x":426,"y":379},"PFTF_ResearchOptimize":{"x":4,"y":408},"PFTF_alpha":{"x":96,"y":247},"SFTF_QEM":{"x":-58,"y":89},"SFTF_DynamicTargetSearch":{"x":-187,"y":12},"DFSVR_VisCull":{"x":447,"y":95},"SFTFSoft_GNN_DFSVR":{"x":260,"y":-105},"SFTF_ActiveOverprint":{"x":1,"y":-111},"ColdOndol":{"x":-166,"y":446},"ColdOndol_Positioning":{"x":-323,"y":497},"cfmsCIPC":{"x":530,"y":412},"TSE_SEM":{"x":200,"y":681},"SFTF_HeatMethod":{"x":208,"y":828},"cfmsPINNDrape":{"x":633,"y":273},"cfmsDrape":{"x":528,"y":589},"cfmsMiindo":{"x":670,"y":655},"cfmsPINNCAD":{"x":678,"y":486},"SFTFSoft_DFSVR":{"x":337,"y":182},"SFTF_UrbanTraffic":{"x":103,"y":672},"cfmsAutoSew":{"x":831,"y":419},"cfmsAutoPlace_IJCST":{"x":807,"y":540},"cfmsAutoPlace_JCDE":{"x":818,"y":675},"cfmsDrapeSCAN":{"x":852,"y":815}};
-Object.assign(expectedPositions, {
-  SFTF_InjMold: { x: -16, y: 805 },
-  PFTF_VisCull_kDop: { x: 372, y: 548 },
-  SFTF_SewerPOC: { x: -165, y: 739 },
-  PFTF_DrapePrior_VisCull_kDop: { x: 406, y: 359 },
-  ColdOndol: { x: -194, y: 410 },
-  cfmsCIPC: { x: 554, y: 428 },
-  TSE_SEM: { x: 182, y: 712 },
-  SFTF_HeatMethod: { x: 198, y: 814 },
-  SFTF_UrbanTraffic: { x: 8, y: 608 },
-  cfmsAutoPlace_JCDE: { x: 813, y: 693 },
-  SFTF_Holonomy: { x: 300, y: 925 },
-});
+// 2026-09-07: graph.html 의 POS + CURATED_POSITIONS 병합 결과 전체를 그대로 적는다.
+const expectedPositions = {"Tomo_SFTF":{"x":-254,"y":216},"Tomo_SFTFSoft":{"x":-52,"y":239},"SFTF_Clustering":{"x":29,"y":498},"PFTF":{"x":141,"y":423},"SFTF_Composite":{"x":323,"y":728},"SFTF_InjMold":{"x":-16,"y":805},"PFTF_Compression":{"x":424,"y":793},"Tomo_DFSVR":{"x":287,"y":35},"PFTF_VisCull_kDop":{"x":363,"y":535},"SFTF_SewerPOC":{"x":-165,"y":739},"SFTFSoft_GNN":{"x":95,"y":50},"SFTF_DrapePrior":{"x":355,"y":349},"PFTF_AsymTensor":{"x":195,"y":192},"PFTF_DrapePrior_VisCull_kDop":{"x":516,"y":262},"PFTF_ResearchOptimize":{"x":4,"y":408},"PFTF_alpha":{"x":158,"y":1017},"SFTF_QEM":{"x":-44,"y":92},"SFTF_DynamicTargetSearch":{"x":-187,"y":12},"DFSVR_VisCull":{"x":456,"y":62},"SFTFSoft_GNN_DFSVR":{"x":270,"y":-109},"SFTF_ActiveOverprint":{"x":1,"y":-111},"ColdOndol":{"x":-205,"y":434},"ColdOndol_Positioning":{"x":-323,"y":497},"cfmsCIPC":{"x":516,"y":669},"TSE_SEM":{"x":182,"y":712},"SFTF_HeatMethod":{"x":225,"y":818},"cfmsPINNDrape":{"x":652,"y":239},"cfmsDrape":{"x":586,"y":513},"cfmsMiindo":{"x":797,"y":682},"cfmsPINNCAD":{"x":727,"y":395},"SFTFSoft_DFSVR":{"x":365,"y":164},"SFTF_UrbanTraffic":{"x":-32,"y":616},"cfmsAutoSew":{"x":848,"y":372},"cfmsAutoPlace_IJCST":{"x":797,"y":525},"cfmsAutoPlace_JCDE":{"x":871,"y":615},"cfmsDrapeSCAN":{"x":702,"y":819},"SFTF_Holonomy":{"x":256,"y":902}};
 const hyperedges = readJsonConstant("hyperedges", "[");
 const curatedHyperedgeMembers = readJsonConstant("CURATED_HYPEREDGE_MEMBERS", "{");
 for (const [label, nodeIds] of Object.entries(curatedHyperedgeMembers)) {
@@ -184,7 +172,7 @@ if (JSON.stringify(positions) !== JSON.stringify(expectedPositions)) {
     (nodeId) => JSON.stringify(positions[nodeId]) !== JSON.stringify(expectedPositions[nodeId]),
   );
   const extras = Object.keys(positions).filter((nodeId) => !(nodeId in expectedPositions));
-  throw new Error(`deployed POS differs from the exact 35-node map: changed=${changed.join(",")} extras=${extras.join(",")}`);
+  throw new Error(`deployed POS differs from the exact ${Object.keys(expectedPositions).length}-node map: changed=${changed.join(",")} extras=${extras.join(",")}`);
 }
 if (!urbanNode || finding3?.nodes?.join(",") !== "SFTF_UrbanTraffic") {
   throw new Error("SFTF_UrbanTraffic node or singleton 발견3 hyperedge is missing");
