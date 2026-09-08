@@ -1463,9 +1463,10 @@ network.on('afterDrawing', function (ctx) {
   wrap.appendChild(box);
 })();
 // EDGE_LABEL_LAYOUT_BEGIN
-// Keep every edge caption at the lengthwise midpoint of its edge.  Only the
-// perpendicular offset changes, so dragging a node can resolve collisions
-// without making the caption look attached to either endpoint.
+// Keep every edge caption at the lengthwise midpoint of its edge, turned to
+// run along that edge.  Only the perpendicular offset changes, so dragging a
+// node can resolve collisions without making the caption look attached to
+// either endpoint.
 function _edgeLabelOverlapArea(a, b) {
   const width = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
   const height = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
@@ -1523,8 +1524,19 @@ function _drawDynamicEdgeLabels(ctx) {
     const midY = (from.y + to.y) / 2;
     const normalX = -dy / length;
     const normalY = dx / length;
-    const halfWidth = ctx.measureText(edge.label).width / 2 + 5;
-    const halfHeight = 11;
+    // Turn the caption along its edge.  Folding the angle into [-90, +90]
+    // keeps the text left-to-right: without it, every edge that points
+    // leftwards would render its caption upside down.
+    let angle = Math.atan2(dy, dx);
+    if (angle > Math.PI / 2) angle -= Math.PI;
+    if (angle < -Math.PI / 2) angle += Math.PI;
+    // The collision box stays axis-aligned, so it has to cover the *rotated*
+    // text's extent — a tilted caption is wider and taller than the flat one.
+    const textWidth = ctx.measureText(edge.label).width + 10;
+    const textHeight = 22;
+    const ca = Math.abs(Math.cos(angle)), sa = Math.abs(Math.sin(angle));
+    const halfWidth = (ca * textWidth + sa * textHeight) / 2;
+    const halfHeight = (sa * textWidth + ca * textHeight) / 2;
     let best = null;
 
     offsets.forEach(offset => {
@@ -1551,12 +1563,16 @@ function _drawDynamicEdgeLabels(ctx) {
 
     if (!best) return;
     placedBoxes.push(best.box);
+    ctx.save();
+    ctx.translate(best.x, best.y);
+    ctx.rotate(angle);
     ctx.globalAlpha = 0.96;
     ctx.lineWidth = 4;
     ctx.strokeStyle = 'rgba(255,255,255,0.94)';
-    ctx.strokeText(edge.label, best.x, best.y);
+    ctx.strokeText(edge.label, 0, 0);
     ctx.fillStyle = '#3a3a3a';
-    ctx.fillText(edge.label, best.x, best.y);
+    ctx.fillText(edge.label, 0, 0);
+    ctx.restore();
   });
   ctx.restore();
 }
