@@ -275,6 +275,7 @@
     let hullInfos = [];
     let selectedIndex = -1;
     let currentHash = '';
+    let lastErrorHash = '';
     let toastTimer = 0;
     let pollBusy = false;
     const raycaster = new THREE.Raycaster();
@@ -332,17 +333,52 @@
       return Function(`"use strict"; return (${literal});`)();
     }
 
-    function parseGraphHtml(source) {
+    // Object.assign(POS, {...}) 뿐 아니라 Object.assign(POS, CURATED_POSITIONS) 형태도 받는다.
+    function assignedValue(source, start) {
+      const identifier = /^\s*([A-Za-z_$][\w$]*)\s*[,)]/.exec(source.slice(start, start + 200));
+      if (identifier) return variableValue(source, identifier[1]);
+      return Function(`"use strict"; return (${balancedLiteral(source, start)});`)();
+    }
+
+    function staticGraphData(source) {
       const positions = { ...variableValue(source, 'POS') };
       const assignRe = /Object\.assign\s*\(\s*POS\s*,/g;
-      let assign;
-      while ((assign = assignRe.exec(source)) !== null) {
-        Object.assign(positions, Function(`"use strict"; return (${balancedLiteral(source, assignRe.lastIndex)});`)());
+      while (assignRe.exec(source) !== null) Object.assign(positions, assignedValue(source, assignRe.lastIndex));
+      return { nodes: variableValue(source, 'RAW_NODES'), edges: variableValue(source, 'RAW_EDGES'), positions };
+    }
+
+    // graph.html 은 선언한 뒤에도 노드·edge·좌표를 손본다(큐레이션 노드 추가, 화살표 방향 정정 등).
+    // 선언만 읽으면 2D 화면보다 적은 그래프가 나오므로, DOM 을 건드리기 직전까지 실제로 실행해서 값을 받는다.
+    function evaluatedGraphData(source) {
+      const scriptRe = /<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/gi;
+      let match;
+      while ((match = scriptRe.exec(source)) !== null) {
+        const script = match[1];
+        if (!/\b(?:const|let|var)\s+RAW_NODES\s*=/.test(script)) continue;
+        const stop = script.search(/\bdocument\b|\bwindow\b|\blocalStorage\b|\bvis\s*\./);
+        let body = script;
+        if (stop >= 0) {
+          const lineStart = script.lastIndexOf('\n', stop);
+          if (lineStart < 0) throw new Error('데이터 구간을 잘라낼 수 없습니다.');
+          body = script.slice(0, lineStart);
+        }
+        return Function(`"use strict";${body}\nreturn { nodes: RAW_NODES, edges: RAW_EDGES, positions: POS };`)();
+      }
+      throw new Error('RAW_NODES를 선언한 스크립트를 찾지 못했습니다.');
+    }
+
+    function parseGraphHtml(source) {
+      let data;
+      try {
+        data = evaluatedGraphData(source);
+        if (!Array.isArray(data.nodes) || !data.nodes.length || !Array.isArray(data.edges) || !data.positions) {
+          throw new Error('실행 결과가 비어 있습니다.');
+        }
+      } catch {
+        data = staticGraphData(source);
       }
       return {
-        nodes: variableValue(source, 'RAW_NODES'),
-        edges: variableValue(source, 'RAW_EDGES'),
-        positions,
+        ...data,
         hyperedges: variableValue(source, 'hyperedges', false) || [],
         findingDeps: variableValue(source, 'FINDING_DEPS', false) || []
       };
@@ -712,14 +748,22 @@
     async function fetchGraph(force = false) {
       if (pollBusy) return;
       pollBusy = true;
+      let fetched = '';
       try {
         const response = await fetch(`./graph.html?webgl=${Date.now()}`, { cache: 'no-store' });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const text = await response.text();
+        fetched = hashText(text);
         if (force) currentHash = '';
         loadText(text, !force);
+        lastErrorHash = '';
       } catch (error) {
-        if (!model) {
+        if (fetched) {
+          // 파일은 받아왔는데 해석에 실패했다 — 서버 문제가 아니다.
+          statusEl.textContent = 'graph.html을 해석하지 못했습니다.';
+          if (force || fetched !== lastErrorHash) showToast(`graph.html 해석 실패: ${error.message}`, 9000);
+          lastErrorHash = fetched;
+        } else if (!model) {
           statusEl.textContent = 'graph.html을 자동으로 읽지 못했습니다.';
           showToast(`로컬 서버가 필요합니다: uv run python -m http.server 8000 → http://localhost:8000/graph3d.html (또는 graph.html 선택)`, 9000);
         } else if (force) showToast(`다시 읽기 실패: ${error.message}`);
