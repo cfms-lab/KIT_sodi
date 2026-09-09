@@ -749,16 +749,21 @@ const HORIZON = Object.fromEntries(RAW_NODES.map(n => [n.id, n._horizon]));
 // 2026-09-10: 예전 '커뮤니티' 정렬은 논문 품질 등급으로 묶어서 같은 블록 안에 서로 이어질
 // 이유가 없었다(47개 중 17개만 대각 블록 안). 주제로 묶어야 블록이 드러난다.
 // ColdOndol 은 폴더로는 __PFTF_Projects 아래지만 hyperedge 영역이 따로 있어 가족도 따로 둔다.
-const FAMILY_ORDER = ['Tomo', 'SFTF', 'PFTF', 'cfms', 'ColdOndol'];   // 연구 계보 순
+// Tomo_* 는 _family 가 'Tomo' 지만 같은 폴더(__SFTF_Projects)의 뿌리 셋이라 SFTF 로 합친다.
+// 따로 두면 Tomo → SFTF 엣지 7개가 전부 블록 밖으로 나가 SFTF 블록이 비어 보인다.
+const FAMILY_ALIAS = { Tomo: 'SFTF' };
+const FAMILY_ORDER = ['SFTF', 'PFTF', 'cfms', 'ColdOndol'];   // 연구 계보 순
 function familyOf(n) {
-  if (n._family) return n._family;
   const id = String(n.id);
-  if (/^cfms/.test(id)) return 'cfms';
-  if (/^ColdOndol/.test(id)) return 'ColdOndol';
-  if (/^SFTF(Soft)?_/.test(id)) return 'SFTF';
-  if (/^PFTF(_|$)/.test(id)) return 'PFTF';
-  if (/^Tomo_/.test(id)) return 'Tomo';
-  return id.split('_')[0];                 // 그 밖(TSE_SEM 등)은 접두어가 곧 가족
+  let family = n._family;
+  if (!family) {
+    if (/^cfms/.test(id)) family = 'cfms';
+    else if (/^ColdOndol/.test(id)) family = 'ColdOndol';
+    else if (/^(Tomo|SFTF|SFTFSoft)_/.test(id)) family = 'SFTF';
+    else if (/^PFTF(_|$)/.test(id)) family = 'PFTF';
+    else family = id.split('_')[0];        // 그 밖(TSE_SEM 등)은 접두어가 곧 가족
+  }
+  return FAMILY_ALIAS[family] || family;
 }
 const FAMILY = Object.fromEntries(RAW_NODES.map(n => [n.id, familyOf(n)]));
 const familyRank = f => { const i = FAMILY_ORDER.indexOf(f); return i < 0 ? FAMILY_ORDER.length : i; };
