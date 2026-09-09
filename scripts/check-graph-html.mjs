@@ -253,8 +253,16 @@ if (
 ) {
   throw new Error("dynamic midpoint edge-label layout or fresh position-store key is missing");
 }
-if (!/hidden: true,\s*label: '',/.test(html)) {
+if (!/hidden: false,\s*label: '',/.test(html)) {
   throw new Error("vis-network built-in edge labels are still enabled");
+}
+// 2026-09-10: '개발 목표' 엣지는 기본 켜짐. 체크박스·런타임 상태·DataSet 이 함께 켜져야 한다.
+if (!html.includes('id="edge-cb" checked>') || !html.includes("let showEdges = true;")) {
+  throw new Error("개발 목표 edges must default to visible (edge-cb checked, showEdges = true)");
+}
+// 2026-09-10: '원거리(하) 표시' 토글은 걷어냈다 (far 노드가 없다). 되살아나면 막는다.
+if (html.includes("horizon-cb") || html.includes("showFar")) {
+  throw new Error("the removed 원거리(하) toggle is back in graph.html");
 }
 
 console.log(JSON.stringify({

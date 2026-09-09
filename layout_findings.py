@@ -688,19 +688,20 @@ def _prefer_local_graph_side(text):
 
 s = _prefer_local_graph_side(s)
 
-# Dependency edges start hidden. The checkbox, runtime state, and DataSet must
-# agree on the first frame; otherwise vis-network briefly renders every edge.
+# '개발 목표' edges start visible (2026-09-10: the checkbox defaults on). The
+# checkbox, runtime state, and DataSet must agree on the first frame; otherwise
+# vis-network briefly renders the opposite state before the handler runs.
 s, nedge_checkbox = re.subn(
     r'(<input type="checkbox" id="edge-cb")(?: checked)?(>[^<]*</label>)',
-    r'\1\2', s, count=1,
+    r'\1 checked\2', s, count=1,
 )
 s, nedge_state = re.subn(
     r"let showEdges = (?:true|false);",
-    "let showEdges = false;", s, count=1,
+    "let showEdges = true;", s, count=1,
 )
 s, nedge_initial_hidden = re.subn(
-    r"(id: i, from: e\.from, to: e\.to,\n)(?:  hidden: true,\n)?",
-    r"\1  hidden: true,\n", s, count=1,
+    r"(id: i, from: e\.from, to: e\.to,\n)(?:  hidden: (?:true|false),\n)?",
+    r"\1  hidden: false,\n", s, count=1,
 )
 # vis-network's built-in edge labels can overlap endpoint captions.  Keep its
 # label payload empty; a custom afterDrawing pass below places each RAW_EDGES
@@ -708,7 +709,7 @@ s, nedge_initial_hidden = re.subn(
 s, nedge_builtin_label = re.subn(
     r"(const edgesDS = new vis\.DataSet\(RAW_EDGES\.map\(\(e, i\) => \(\{\n"
     r"  id: i, from: e\.from, to: e\.to,\n"
-    r"  hidden: true,\n)"
+    r"  hidden: false,\n)"
     r"  label: (?:e\.label \|\| ''|''),\n"
     r"(?:  font: \{.*?\},\n)?",
     r"\1  label: '',\n",
@@ -1643,8 +1644,11 @@ for hyperedge in HYPEREDGES:
     # graph.py renders one-node hulls as padded 3D shells.
     if members:
         hyperedges_for_graph.append({**hyperedge, "nodes": members})
+# 엣지는 기본 표시이므로 파일의 RAW_EDGES 수를 적는다. 노드와 마찬가지로 런타임에
+# 덧붙는 큐레이션분은 빠지며, 첫 화면의 updateStatsLine() 이 실제 가시 개수로 덮어쓴다.
+raw_edges_for_stats = json.loads(re.search(r"const RAW_EDGES = (\[.*?\]);", s, flags=re.S).group(1))
 stats_text = (
-    f"{len(raw_nodes_for_stats)} nodes &middot; 0 edges "
+    f"{len(raw_nodes_for_stats)} nodes &middot; {len(raw_edges_for_stats)} edges "
     f"&middot; {len(quality_legend) + (1 if preserve_extended_quality else 0)} communities"
 )
 s, nstats = re.subn(r"\d+ nodes &middot; \d+ edges &middot; \d+ communities",

@@ -100,7 +100,7 @@
     </div>
     <div id="legend"></div>
   </div>
-  <div id="stats">35 nodes &middot; 0 edges &middot; 6 communities
+  <div id="stats">35 nodes &middot; 42 edges &middot; 6 communities
     &nbsp;<button id="reset-pos-btn" style="font-size:14px;padding:2px 8px;cursor:pointer;border:1px solid #999;border-radius:4px;background:#f4f4f4">위치 초기화</button>
     <button id="copy-pos-btn" style="font-size:14px;padding:2px 8px;cursor:pointer;border:1px solid #999;border-radius:4px;background:#f4f4f4">위치 복사</button>
     &nbsp;<select id="layout-sel" style="font-size:14px;padding:2px 6px;border:1px solid #999;border-radius:4px;background:#f4f4f4">
@@ -108,9 +108,8 @@
       <option value="LR">배치: 계층 ←→</option>
       <option value="UD">배치: 계층 ↑↓</option>
     </select>
-    <label style="font-size:14px;margin-left:6px;cursor:pointer" title="노드 사이의 개발 목표 화살표. 끈 상태에서 노드를 클릭하면 그 노드의 화살표만 보입니다"><input type="checkbox" id="edge-cb">개발 목표</label>
+    <label style="font-size:14px;margin-left:6px;cursor:pointer" title="노드 사이의 개발 목표 화살표. 끈 상태에서 노드를 클릭하면 그 노드의 화살표만 보입니다"><input type="checkbox" id="edge-cb" checked>개발 목표</label>
     <label style="font-size:14px;margin-left:6px;cursor:pointer" title="발견·BASE·METHOD·PIPELINE 영역(hull)과 영역 간 의존 화살표"><input type="checkbox" id="hyper-cb" checked>hyperedge</label>
-    <label style="font-size:14px;margin-left:6px;cursor:pointer" title="paper quality 하 = 1년 내 투고 계획 없음"><input type="checkbox" id="horizon-cb">원거리(하) 표시</label>
     &nbsp;<select id="view-sel" style="font-size:14px;padding:2px 6px;border:1px solid #999;border-radius:4px;background:#f4f4f4">
       <option value="graph">뷰: 노드-링크</option>
       <option value="matrix">뷰: 인접행렬</option>
@@ -553,7 +552,7 @@ function dimmedEdgeColor(e) {
 // (2026-08-28: 활용 분야별로 갈라 놓았던 62개 엣지를 개발 목표 33개로 정리했다.)
 const edgesDS = new vis.DataSet(RAW_EDGES.map((e, i) => ({
   id: i, from: e.from, to: e.to,
-  hidden: true,
+  hidden: false,
   label: '',
   title: e.title,
   dashes: e.dashes,
@@ -665,8 +664,10 @@ document.getElementById('layout-sel').addEventListener('change', ev => {
   applyLayout(ev.target.value);
 });
 
-// === 가시성 토글 (에지 / hyperedge / 원거리) ==========================
+// === 가시성 토글 (에지 / hyperedge) ===================================
 // 2026-08-22: '포커스'·'허브 접기' 를 걷어내고 '에지'·'hyperedge' 로 바꿨다.
+// 2026-09-10: '개발 목표'(에지) 는 기본 켜짐. '원거리(하) 표시' 토글은 far 노드가
+// 하나도 남지 않아 걷어냈다.
 // 가시성은 항상 applyVisibility() 를 거친다. 노드에는 숨김만 얹고 hidden:false 로
 // 되돌리지 않는다 — 커뮤니티 필터가 내린 결정을 덮어쓰지 않기 위해서다.
 // 엣지는 커뮤니티 필터를 타지 않으므로 매번 전량 다시 계산한다.
@@ -681,17 +682,15 @@ RAW_EDGES.forEach(e => {
   NEIGH[e.from].add(e.to); NEIGH[e.to].add(e.from);
 });
 
-let showEdges = false;  // 노드 간 의존 엣지
+let showEdges = true;   // 노드 간 의존 엣지('개발 목표') — 기본 켜짐
 let showHyper = true;   // 영역(hull) + 영역 간 의존 화살표 — afterDrawing 이 읽는다
-let showFar = false;    // 원거리(하)
-const FAR = new Set(RAW_NODES.filter(n => n._horizon === 'far').map(n => n.id));
 
 // '에지' 를 끈 상태에서 노드를 클릭하면 그 노드에 붙은 엣지만 보여준다.
 // 빈 곳을 클릭하면 다시 전부 숨는다. ('에지' 가 켜져 있으면 아무 영향이 없다.)
 let edgeFocusId = null;   // 이름 주의: 아래 인접행렬의 focusNode() 와 겹치면 안 된다
 
 // 엣지만 다시 계산한다. 노드는 건드리지 않는다 — '에지'·'hyperedge' 토글이
-// 커뮤니티 필터나 원거리 필터의 결정을 흔들면 안 된다.
+// 커뮤니티 필터의 결정을 흔들면 안 된다.
 // 엣지는 양 끝 노드의 **실제** 가시성을 따르므로, 어느 필터로 숨었든 알아서 따라 숨는다.
 function applyEdgeVisibility() {
   const nodeHidden = id => { const n = nodesDS.get(id); return !n || n.hidden === true; };
@@ -717,11 +716,9 @@ network.on('click', params => {
   if (!showEdges) applyEdgeVisibility();   // '에지' 가 켜져 있으면 화면이 바뀔 게 없다
 });
 
-// 원거리(하) 노드 숨김까지 포함한 전체 가시성. 커뮤니티 필터·원거리 토글이 부른다.
+// 노드 가시성이 바뀐 뒤의 전체 갱신. 커뮤니티 필터가 부른다.
+// (예전에는 여기서 원거리(하) 노드도 숨겼다. 그 토글과 함께 걷어냈다.)
 function applyVisibility() {
-  if (!showFar) {
-    nodesDS.update(RAW_NODES.filter(n => FAR.has(n.id)).map(n => ({ id: n.id, hidden: true })));
-  }
   applyEdgeVisibility();
 }
 
@@ -733,13 +730,6 @@ document.getElementById('edge-cb').addEventListener('change', ev => {
 document.getElementById('hyper-cb').addEventListener('change', ev => {
   showHyper = ev.target.checked;
   applyEdgeVisibility();
-});
-
-document.getElementById('horizon-cb').addEventListener('change', ev => {
-  showFar = ev.target.checked;
-  if (showFar) nodesDS.update([...FAR].map(id => ({ id, hidden: false })));
-  applyVisibility();
-  network.fit({ animation: { duration: 400 } });
 });
 
 // === 인접행렬 뷰 =======================================================
@@ -872,6 +862,10 @@ function updateStatsLine() {
 }
 
 
+
+// 첫 화면부터 실제 가시 개수를 보인다. #stats 의 정적 텍스트는 생성기가 파일 기준으로
+// 적는 대체 문구일 뿐이다.
+updateStatsLine();
 
 // === 드래그 위치 영속화 ===============================================
 // 드래그가 끝나면 해당 노드들의 좌표를 localStorage에 저장한다.
