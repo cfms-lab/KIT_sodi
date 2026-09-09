@@ -260,6 +260,10 @@ if (!/hidden: false,\s*label: '',/.test(html)) {
 if (!html.includes('id="edge-cb" checked>') || !html.includes("let showEdges = true;")) {
   throw new Error("개발 목표 edges must default to visible (edge-cb checked, showEdges = true)");
 }
+// 2026-09-10: 인접행렬의 첫 정렬은 논문 등급이 아니라 주제 가족이다.
+if (!html.includes('<option value="family">정렬: 주제 가족</option>') || !html.includes("const FAMILY = ")) {
+  throw new Error("matrix view must sort by 주제 가족 (family), not by quality community");
+}
 // 2026-09-10: '원거리(하) 표시' 토글은 걷어냈다 (far 노드가 없다). 되살아나면 막는다.
 if (html.includes("horizon-cb") || html.includes("showFar")) {
   throw new Error("the removed 원거리(하) toggle is back in graph.html");

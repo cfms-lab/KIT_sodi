@@ -115,7 +115,7 @@
       <option value="matrix">뷰: 인접행렬</option>
     </select>
     <select id="matrix-sort" style="font-size:14px;padding:2px 6px;border:1px solid #999;border-radius:4px;background:#f4f4f4;display:none">
-      <option value="community">정렬: 커뮤니티</option>
+      <option value="family">정렬: 주제 가족</option>
       <option value="level">정렬: 의존 계층</option>
       <option value="degree">정렬: 차수</option>
       <option value="name">정렬: 이름</option>
@@ -735,13 +735,34 @@ document.getElementById('hyper-cb').addEventListener('change', ev => {
 // === 인접행렬 뷰 =======================================================
 // 37x37 격자. 노드-링크 도면과 달리 교차선이 원리적으로 존재하지 않는다.
 // 행 = 출발(from), 열 = 도착(to). 행·열 정렬을 바꾸면 블록 구조가 드러난다.
-// 커뮤니티순으로 정렬했을 때 대각 블록이 진하면 모듈성이 높다는 뜻이다.
+// 주제 가족순으로 정렬했을 때 대각 블록이 진하면 목표가 가족 안에서 닫혀 있다는 뜻이고,
+// 블록 밖에 남는 칸이 가족 사이의 다리다.
 
 const EDGE_AT = {};                       // "from\u0000to" -> 엣지
 RAW_EDGES.forEach(e => { EDGE_AT[e.from + '\u0000' + e.to] = e; });
 const NODE_BY_ID = Object.fromEntries(RAW_NODES.map(n => [n.id, n]));
 
 const HORIZON = Object.fromEntries(RAW_NODES.map(n => [n.id, n._horizon]));
+
+// 주제 가족 — '정렬: 주제 가족' 이 쓴다. 노드의 _family 를 우선하고, 없으면 id 접두어로
+// 정한다 (SFTFSoft_* → SFTF, cfms* → cfms, ColdOndol* → ColdOndol: 기존 _family 관례).
+// 2026-09-10: 예전 '커뮤니티' 정렬은 논문 품질 등급으로 묶어서 같은 블록 안에 서로 이어질
+// 이유가 없었다(47개 중 17개만 대각 블록 안). 주제로 묶어야 블록이 드러난다.
+// ColdOndol 은 폴더로는 __PFTF_Projects 아래지만 hyperedge 영역이 따로 있어 가족도 따로 둔다.
+const FAMILY_ORDER = ['Tomo', 'SFTF', 'PFTF', 'cfms', 'ColdOndol'];   // 연구 계보 순
+function familyOf(n) {
+  if (n._family) return n._family;
+  const id = String(n.id);
+  if (/^cfms/.test(id)) return 'cfms';
+  if (/^ColdOndol/.test(id)) return 'ColdOndol';
+  if (/^SFTF(Soft)?_/.test(id)) return 'SFTF';
+  if (/^PFTF(_|$)/.test(id)) return 'PFTF';
+  if (/^Tomo_/.test(id)) return 'Tomo';
+  return id.split('_')[0];                 // 그 밖(TSE_SEM 등)은 접두어가 곧 가족
+}
+const FAMILY = Object.fromEntries(RAW_NODES.map(n => [n.id, familyOf(n)]));
+const familyRank = f => { const i = FAMILY_ORDER.indexOf(f); return i < 0 ? FAMILY_ORDER.length : i; };
+
 // 개발 목표의 범주 — 인접행렬 셀 글리프와 범례가 쓴다.
 const REL_GLYPH = {
   '확장': '▲', '가속': '»', '정확도': '◆', '통합': '●',
@@ -754,15 +775,17 @@ function matrixOrder(mode) {
   if (mode === 'name') return arr.sort(byName);
   if (mode === 'degree') return arr.sort((a, b) => DEGREE[b.id] - DEGREE[a.id] || byName(a, b));
   if (mode === 'level') return arr.sort((a, b) => LEVEL[a.id] - LEVEL[b.id] || byName(a, b));
-  return arr.sort((a, b) =>                    // community
-    (a.community - b.community) || (LEVEL[a.id] - LEVEL[b.id]) || byName(a, b));
+  return arr.sort((a, b) =>                    // family: 가족 → 의존 계층 → 이름
+    (familyRank(FAMILY[a.id]) - familyRank(FAMILY[b.id]))
+    || FAMILY[a.id].localeCompare(FAMILY[b.id])
+    || (LEVEL[a.id] - LEVEL[b.id]) || byName(a, b));
 }
 
 function groupKey(n, mode) {
-  if (mode === 'community') return n.community_name;
   if (mode === 'level') return 'L' + LEVEL[n.id];
   if (mode === 'degree') return DEGREE[n.id] >= 5 ? '\ud5c8\ube0c' : (DEGREE[n.id] === 1 ? '\uc78e' : '\uc911\uac04');
-  return n.id[0].toUpperCase();
+  if (mode === 'name') return n.id[0].toUpperCase();
+  return FAMILY[n.id];                          // family
 }
 
 function buildMatrix() {
