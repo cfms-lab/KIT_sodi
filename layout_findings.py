@@ -38,6 +38,21 @@ HIDDEN_NODE_IDS = {"PFTF_subMarine", "PFTF_Terrain"}
 VAULT_ROOT = Path(os.environ.get("CFMS_RESEARCH_VAULT", r"D:\cfms-research-vault"))
 PROJECTS_DIR = VAULT_ROOT / "Projects"
 
+def _strip_yaml_comment(value):
+    """볼트 frontmatter 의 path: 값에서 따옴표와 뒤따르는 YAML 주석을 걷어낸다.
+
+    2026-09-10: 주석을 남겨 두면 경로에 문장이 통째로 섞여 들어가 그래프의
+    「VSCode 로 열기」 버튼이 열 수 없는 경로를 받는다.  SFTF_DrapePrior 에서
+    실제로 그렇게 됐다 — `...\\SFTF_DrapePrior_dev'   # 2026-08-19 이동. ...` 이
+    _project_path 에 그대로 박혀 있었다.  경로에 공백+`#` 가 들어가는 일은 없다.
+    """
+    value = value.strip()
+    quoted = re.match(r"^(['\"])(.*?)\1", value)
+    if quoted:
+        return quoted.group(2).strip()
+    return re.split(r"[ \t]#", value, maxsplit=1)[0].strip()
+
+
 def _load_project_paths():
     paths = {}
     if not PROJECTS_DIR.is_dir():
@@ -49,9 +64,9 @@ def _load_project_paths():
             continue
         if not re.search(r"(?m)^type:\s*project\s*$", text):
             continue
-        match = re.search(r"(?m)^path:\s*['\"]?(.+?)['\"]?\s*$", text)
+        match = re.search(r"(?m)^path:[ \t]*(.+?)[ \t\r]*$", text)
         if match:
-            paths[note.stem] = match.group(1).strip()
+            paths[note.stem] = _strip_yaml_comment(match.group(1))
     return paths
 
 PROJECT_PATHS = _load_project_paths()
