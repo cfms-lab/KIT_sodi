@@ -125,7 +125,7 @@ const positions = Object.assign(
   readJsonConstant("CURATED_POSITIONS", "{"),
 );
 // 2026-09-10: graph.html 의 POS + CURATED_POSITIONS 병합 결과 전체를 그대로 적는다.
-const expectedPositions = {"Tomo_SFTF":{"x":9,"y":-28},"Tomo_SFTFSoft":{"x":22,"y":152},"SFTF_Clustering":{"x":-224,"y":326},"PFTF":{"x":465,"y":242},"SFTF_Composite":{"x":611,"y":32},"SFTF_InjMold":{"x":-82,"y":908},"PFTF_Compression":{"x":540,"y":379},"Tomo_DFSVR":{"x":174,"y":483},"PFTF_VisCull_kDop":{"x":311,"y":554},"SFTF_SewerPOC":{"x":-320,"y":852},"SFTFSoft_GNN":{"x":17,"y":326},"SFTF_DrapePrior":{"x":430,"y":692},"PFTF_AsymTensor":{"x":-175,"y":523},"PFTF_DrapePrior_VisCull_kDop":{"x":519,"y":484},"PFTF_ResearchOptimize":{"x":420,"y":39},"PFTF_alpha":{"x":765,"y":126},"SFTF_QEM":{"x":-189,"y":131},"SFTF_DynamicTargetSearch":{"x":-229,"y":-34},"DFSVR_VisCull":{"x":163,"y":784},"SFTFSoft_GNN_DFSVR":{"x":30,"y":661},"SFTF_ActiveOverprint":{"x":28,"y":-179},"ColdOndol":{"x":-368,"y":491},"ColdOndol_Positioning":{"x":-487,"y":626},"cfmsCIPC":{"x":800,"y":524},"TSE_SEM":{"x":396,"y":-121},"SFTF_HeatMethod":{"x":711,"y":-126},"cfmsPINNDrape":{"x":983,"y":540},"cfmsDrape":{"x":651,"y":822},"cfmsMiindo":{"x":590,"y":626},"cfmsPINNCAD":{"x":915,"y":362},"SFTFSoft_DFSVR":{"x":185,"y":181},"SFTF_UrbanTraffic":{"x":-130,"y":736},"cfmsAutoSew":{"x":1184,"y":618},"cfmsAutoPlace_IJCST":{"x":984,"y":672},"cfmsAutoPlace_JCDE":{"x":905,"y":859},"cfmsDrapeSCAN":{"x":743,"y":347},"SFTF_Holonomy":{"x":1051,"y":51},"HIPDetect":{"x":932,"y":189}};
+const expectedPositions = {"Tomo_SFTF":{"x":9,"y":-28},"Tomo_SFTFSoft":{"x":63,"y":173},"SFTF_Clustering":{"x":-224,"y":326},"PFTF":{"x":465,"y":242},"SFTF_Composite":{"x":611,"y":32},"SFTF_InjMold":{"x":-82,"y":908},"PFTF_Compression":{"x":540,"y":379},"Tomo_DFSVR":{"x":153,"y":529},"PFTF_VisCull_kDop":{"x":311,"y":554},"SFTF_SewerPOC":{"x":-320,"y":852},"SFTFSoft_GNN":{"x":-25,"y":380},"SFTF_DrapePrior":{"x":394,"y":746},"PFTF_AsymTensor":{"x":-175,"y":523},"PFTF_DrapePrior_VisCull_kDop":{"x":481,"y":546},"PFTF_ResearchOptimize":{"x":420,"y":39},"PFTF_alpha":{"x":765,"y":126},"SFTF_QEM":{"x":-189,"y":131},"SFTF_DynamicTargetSearch":{"x":-229,"y":-34},"DFSVR_VisCull":{"x":163,"y":784},"SFTFSoft_GNN_DFSVR":{"x":30,"y":661},"SFTF_ActiveOverprint":{"x":28,"y":-179},"ColdOndol":{"x":-368,"y":491},"ColdOndol_Positioning":{"x":-487,"y":626},"cfmsCIPC":{"x":800,"y":524},"TSE_SEM":{"x":396,"y":-121},"SFTF_HeatMethod":{"x":711,"y":-126},"cfmsPINNDrape":{"x":983,"y":540},"cfmsDrape":{"x":651,"y":822},"cfmsMiindo":{"x":590,"y":626},"cfmsPINNCAD":{"x":915,"y":362},"SFTFSoft_DFSVR":{"x":232,"y":362},"SFTF_UrbanTraffic":{"x":-130,"y":736},"cfmsAutoSew":{"x":1184,"y":618},"cfmsAutoPlace_IJCST":{"x":984,"y":672},"cfmsAutoPlace_JCDE":{"x":905,"y":859},"cfmsDrapeSCAN":{"x":743,"y":347},"SFTF_Holonomy":{"x":1051,"y":51},"HIPDetect":{"x":932,"y":189}};
 const hyperedges = readJsonConstant("hyperedges", "[");
 const curatedHyperedgeMembers = readJsonConstant("CURATED_HYPEREDGE_MEMBERS", "{");
 for (const [label, nodeIds] of Object.entries(curatedHyperedgeMembers)) {
@@ -242,6 +242,30 @@ if (
   || hipDetectEdges[0]._rel !== "정확도"
 ) {
   throw new Error("cfmsPINNCAD -> HIPDetect split edge is missing or incorrect");
+}
+// 2026-09-10: SFTF_DynamicTargetSearch 의 계보. 부모는 Tomo_SFTF 하나(볼트
+// Papers/SFTF_동적표적탐색_연구아이디어_2026-07-29.md §3·§6), 자식은 SFTF_ActiveOverprint 다.
+// 2026-08-28 개발 목표 전환 때 떨어졌던 부모 화살표가 다시 사라지면 막는다.
+const dynamicTargetSearchEdges = edges.filter(
+  (edge) => edge.from === "SFTF_DynamicTargetSearch" || edge.to === "SFTF_DynamicTargetSearch",
+);
+const dynamicTargetSearchParent = dynamicTargetSearchEdges.find(
+  (edge) => edge.to === "SFTF_DynamicTargetSearch",
+);
+const dynamicTargetSearchChild = dynamicTargetSearchEdges.find(
+  (edge) => edge.from === "SFTF_DynamicTargetSearch",
+);
+if (
+  dynamicTargetSearchEdges.length !== 2
+  || dynamicTargetSearchParent?.from !== "Tomo_SFTF"
+  || dynamicTargetSearchParent.label !== "표적 탐색"
+  || dynamicTargetSearchParent._rel !== "확장"
+  || dynamicTargetSearchChild?.to !== "SFTF_ActiveOverprint"
+  || dynamicTargetSearchChild.label !== "표면 덧출력"
+) {
+  throw new Error(
+    "Tomo_SFTF -> SFTF_DynamicTargetSearch -> SFTF_ActiveOverprint lineage edges are missing or incorrect",
+  );
 }
 if (
   !garmentSimulation

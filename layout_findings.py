@@ -118,19 +118,19 @@ NODE_SOURCE_FILES = {
 POS = {
     # 2026-08-31: 사용자가 graph.html에서 조정한 34-node 배치를 정본으로 승격.
     "Tomo_SFTF": (9, -28),
-    "Tomo_SFTFSoft": (22, 152),
+    "Tomo_SFTFSoft": (63, 173),
     "SFTF_Clustering": (-224, 326),
     "PFTF": (465, 242),
     "SFTF_Composite": (611, 32),
     "SFTF_InjMold": (-82, 908),
     "PFTF_Compression": (540, 379),
-    "Tomo_DFSVR": (174, 483),
+    "Tomo_DFSVR": (153, 529),
     "PFTF_VisCull_kDop": (311, 554),
     "SFTF_SewerPOC": (-320, 852),
-    "SFTFSoft_GNN": (17, 326),
-    "SFTF_DrapePrior": (430, 692),
+    "SFTFSoft_GNN": (-25, 380),
+    "SFTF_DrapePrior": (394, 746),
     "PFTF_AsymTensor": (-175, 523),
-    "PFTF_DrapePrior_VisCull_kDop": (519, 484),
+    "PFTF_DrapePrior_VisCull_kDop": (481, 546),
     "PFTF_ResearchOptimize": (420, 39),
     "PFTF_alpha": (765, 126),
     "SFTF_QEM": (-189, 131),
@@ -147,7 +147,7 @@ POS = {
     "cfmsDrape": (651, 822),
     "cfmsMiindo": (590, 626),
     "cfmsPINNCAD": (915, 362),
-    "SFTFSoft_DFSVR": (185, 181),
+    "SFTFSoft_DFSVR": (232, 362),
     # Restored from the last pre-archive graph snapshot.
     "SFTF_UrbanTraffic": (-130, 736),
     "cfmsAutoSew": (1184, 618),
@@ -1353,6 +1353,27 @@ DRAPESCAN_EDGES = [
     ),
 ]
 
+# SFTF_DynamicTargetSearch 는 Tomo_SFTF 에서 갈라져 나왔다. 볼트 아이디어 노트
+# (Papers/SFTF_동적표적탐색_연구아이디어_2026-07-29.md §3·§6)가 Tomo_SFTF 의 후보 생성,
+# source→receiver support path, 방향 다양성 선택을 메시 표면에서 시간가변 공간 그래프로
+# 옮기는 것을 핵심으로 적고 있고, Projects/SFTF_DynamicTargetSearch.md 도 Tomo_SFTF 를
+# 첫 근거로 둔다. 2026-08-28 개발 목표 전환(d7ba711)이 이 노드로 들어오는 계보 화살표
+# 셋을 모두 떨어뜨려 부모가 없어 보였으므로, 주 부모 하나만 목표 엣지로 되살린다.
+# Tomo_SFTFSoft(soft evidence)·SFTF_Clustering(basin 압축)은 부품만 보태는 보조 부모라
+# 공개 그래프에는 두지 않는다. 대상이 아직 ToDo(물리 레인 보류)라서 나가는 엣지와
+# 같이 점선·잠정으로 그린다.
+DYNAMIC_TARGET_SEARCH_GOAL_EDGES = [
+    {
+        **_autoplace_goal_edge(
+            "Tomo_SFTF", "SFTF_DynamicTargetSearch", "표적 탐색",
+            "메시 표면의 후보 생성·평가와 support path를 시간가변 공간 그래프의 이동 표적 탐색으로 옮긴다",
+            "확장",
+        ),
+        "dashes": True,
+        "_tentative": True,
+    },
+]
+
 
 autoplace_nodes_js = json.dumps(
     [_autoplace_node(track) for track in AUTOPLACE_TRACKS],
@@ -1516,6 +1537,16 @@ def _preserve_goal_edges(match):
         if str(edge.get("from")) != "cfmsDrapeSCAN"
         and str(edge.get("to")) != "cfmsDrapeSCAN"
     ]
+    # 계보 엣지는 이 파일이 정본이다. 스냅샷에 남은 옛 사본을 걷어내고 다시 넣어야
+    # 아래 pair dedup 이 파일 쪽 라벨·설명을 이긴다.
+    lineage_pairs = {
+        (str(edge["from"]), str(edge["to"])) for edge in DYNAMIC_TARGET_SEARCH_GOAL_EDGES
+    }
+    edges = [
+        edge for edge in edges
+        if (str(edge.get("from")), str(edge.get("to"))) not in lineage_pairs
+    ]
+    edges.extend(copy.deepcopy(DYNAMIC_TARGET_SEARCH_GOAL_EDGES))
     edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
     edges.extend(copy.deepcopy(DRAPESCAN_EDGES))
     node_match = re.search(r"const RAW_NODES = (\[.*?\]);", s, flags=re.S)
