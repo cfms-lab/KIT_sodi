@@ -142,6 +142,8 @@ POS = {
     "cfmsDrapeSCAN": (628, 906),
     # 2026-09-07: graph.html 의 큐레이션 노드(SFTF_HOLONOMY_NODE)와 짝을 이룬다.
     "SFTF_Holonomy": (-17, 989),
+    # 2026-09-10: graph.html 의 큐레이션 노드(HIPDETECT_NODE)와 짝을 이룬다.
+    "HIPDetect": (975, 230),
 }
 
 HYPEREDGES = [
@@ -192,7 +194,7 @@ HYPEREDGES = [
                "PFTF_Compression", "PFTF_VisCull_kDop",
                "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape", "cfmsMiindo",
                "cfmsPINNCAD", "cfmsDrapeSCAN", "cfmsAutoSew",
-               "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE"],
+               "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "HIPDetect"],
      "color": "#db2777", "labelColor": "#be185d",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
@@ -269,6 +271,10 @@ QUALITY_ROWS = [
     ("cfmsDrape", "cfmsDrape", "등급 없음", "드레이프 엔진 기반 저장소; 독립 논문 등급 미적용"),
     ("cfmsMiindo", "cfmsMiindo", "등급 없음", "의복 CAD·드레이프 모노레포; 독립 논문 등급 미적용"),
     ("cfmsPINNCAD", "cfmsPINNCAD", "하", "PINN 기반 의복 CAD 연구선"),
+    # 2026-09-10: cfmsPINNCAD 의 계측기 쪽 결과가 독립 논문 HIPDetect 로 갈라졌다.
+    # graph.html 의 큐레이션 노드는 RAW_NODES 밖에 있어도 등급 행은 여기서 나가야 한다.
+    ("HIPDetect", "HIPDetect", "중",
+     "엉덩이높이 기준점 논문 트랙; 평탄 구간 중앙 추정량이 LOSO 잔차 RMS 1.285 → 0.358 cm (9명 중 8명, 부호검정 p 0.0195), IJCST 원고 3종·그림 5개·커버레터 완비, 미투고. held-out 0건·N=10 한 조사가 남은 심사 위험"),
     ("SFTFSoft_DFSVR", "SFTFSoft_DFSVR", "중", "SFTFSoft와 DFSVR 결합 연구선"),
     ("Tomo_DFSVR", "Tomo_DFSVR", "중", "미분 가능한 지지 구조 계산 연구선"),
     ("cfmsAutoSew", "cfmsAutoSew", "하", "패턴 봉제 대응 자동화 연구선"),
@@ -1566,9 +1572,9 @@ quality_html = (
     '<div id="quality-board">'
     # QUALITY_ROWS 를 손댈 때 이 날짜도 같이 올린다.  하드코딩이라, 갱신하지 않으면
     # 재생성이 graph.html 의 최신 날짜를 조용히 되돌린다(2026-07-27 에 실제로 발생).
-    '<h3>최근 논문 quality (2026-09-07)</h3>'
+    '<h3>최근 논문 quality (2026-09-10)</h3>'
     '<div class="quality-meta">상=상위권 심사 대응 가능 · 중=핵심 gate 잔여 · 하=PoC/원고 미완료 · ToDo=새 설계선/검증 전 · 등급 없음=논문 판정 대상 아님<br>'
-    '등급 정본: Obsidian Projects frontmatter + 논문 트랙 분리 (2026-09-07) · 공개 화면에는 최소 메타데이터만 동기화</div>'
+    '등급 정본: Obsidian Projects frontmatter + 논문 트랙 분리 (2026-09-10) · 공개 화면에는 최소 메타데이터만 동기화</div>'
     '<table><thead><tr><th>프로젝트</th><th>등급</th><th>핵심 근거</th></tr></thead>'
     f'<tbody>{quality_html_rows}</tbody></table></div>'
 )
@@ -1662,7 +1668,7 @@ s, n1 = re.subn(r"const POS = \{.*?\};", lambda _m: pos_js, s, count=1,
 # 재생성 뒤에 좌표가 사라지지 않는다.
 curated_position_ids = (
     "cfmsAutoSew", "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN",
-    "SFTF_Holonomy",
+    "SFTF_Holonomy", "HIPDetect",
 )
 curated_pos_js = "const CURATED_POSITIONS = " + json.dumps(
     {
@@ -1688,7 +1694,8 @@ def _replace_curated_hyperedge_members(match):
         node_id for node_id in members_by_label.get("의복 시뮬레이션", [])
         if node_id not in AUTOPLACE_IDS
     ]
-    for node_id in ("cfmsAutoSew", "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN"):
+    for node_id in ("cfmsAutoSew", "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE",
+                    "cfmsDrapeSCAN", "HIPDetect"):
         if node_id not in members:
             members.append(node_id)
     members_by_label["의복 시뮬레이션"] = members

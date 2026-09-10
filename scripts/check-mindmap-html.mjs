@@ -25,6 +25,7 @@ const expectedVaultGrades = {
   cfmsDrape: ["nptj5211", "none"],
   SFTF_DrapePrior: ["njkskwe4", "low"],
   SFTF_Holonomy: ["SFTF_Holonomy", "high"],
+  HIPDetect: ["HIPDetect", "medium"],
   cfmsMiindo: ["cfmsdrape", "none"],
   cfmsPINNCAD: ["npp8yov2", "low"],
   cfmsPINNDrape: ["nf18t2n5", "low"],
@@ -65,7 +66,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -145,6 +146,33 @@ if (
   || holonomyLinks[0].label !== "전단각 항등식"
 ) {
   throw new Error("SFTF_HeatMethod -> SFTF_Holonomy link is missing or points the old way");
+}
+
+// 2026-09-10: cfmsPINNCAD 에서 갈라져 나온 HIPDetect 도 같은 규칙으로 앞 편 밑에 붙는다.
+const hipDetectSample = {
+  root: {
+    id: "root",
+    title: "root",
+    kind: "group",
+    children: [{ id: "npp8yov2", title: "cfmsPINNCAD", kind: "low", children: [] }],
+  },
+  links: [],
+};
+if (!context.__applyHipDetectSplit(hipDetectSample)) throw new Error("HIPDetect split migration did not run");
+if (context.__applyHipDetectSplit(hipDetectSample)) throw new Error("HIPDetect split migration is not idempotent");
+const hipDetect = hipDetectSample.root.children[0].children.find((node) => node.id === "HIPDetect");
+if (!hipDetect || hipDetect.kind !== "medium" || hipDetect.status !== "draft") {
+  throw new Error("HIPDetect node is missing or has the wrong grade");
+}
+const hipDetectLinks = hipDetectSample.links.filter(
+  (link) => link.from === "HIPDetect" || link.to === "HIPDetect",
+);
+if (
+  hipDetectLinks.length !== 1
+  || hipDetectLinks[0].from !== "npp8yov2"
+  || hipDetectLinks[0].label !== "엉덩이높이 기준점"
+) {
+  throw new Error("cfmsPINNCAD -> HIPDetect link is missing or points the old way");
 }
 
 // 이미 저장된 문서의 거꾸로 된 관계선도 같은 규칙으로 돌아가는지 본다.

@@ -660,6 +660,7 @@ const VAULT_PROJECT_GRADES={
   'SFTFSoft_DFSVR':{mindmapId:'n6odcyc1',kind:'medium'},
   'SFTF_DrapePrior':{mindmapId:'njkskwe4',kind:'low'},
   'SFTF_Holonomy':{mindmapId:'SFTF_Holonomy',kind:'high'},
+  'HIPDetect':{mindmapId:'HIPDetect',kind:'medium'},
   'cfmsDrapeSCAN':{mindmapId:'ngi2vmc1',kind:'todo'}
 };
 function applyVaultGrades20260901(data){
@@ -812,6 +813,35 @@ function applyLinkDirection20260907(data){
   data.linkDirectionVersion=LINK_DIRECTION_VERSION;
   return true;   // 버전 상승 자체도 클라우드 문서에 저장해야 재실행되지 않는다.
 }
+
+/* ====== HIPDetect 논문 분리 (2026-09-10) ======
+   cfmsPINNCAD 를 진행하는 동안 계측기 쪽에서 나온 결과가 독립 논문으로 갈라졌다. 같은
+   저장소·같은 draft/ 를 쓰고 파일 이름 키워드(HIPDetect)로만 갈리지만, 저장소 목표
+   (2D 패턴·3D 의복 동시 편집)와 다루는 것(엉덩이높이 기준점)이 달라 노드를 따로 둔다 —
+   SFTF_HeatMethod / SFTF_Holonomy 와 같은 형태다. 관계선은 위 «관계선 방향 통일» 규칙대로
+   먼저 선 것(cfmsPINNCAD) → 갈라져 나온 것(HIPDetect) 으로 그린다. */
+const HIPDETECT_SPLIT_VERSION='2026-09-10';
+function applyHipDetectSplit20260910(data){
+  if(!data||!data.root||data.hipDetectSplitVersion===HIPDETECT_SPLIT_VERSION) return false;
+  const spec={
+    id:'HIPDetect',title:'HIPDetect',kind:'medium',status:'draft',
+    brief:'엉덩이높이 기준점 — 극값은 못 찾고 평탄 구간 중앙은 찾는다',
+    note:'cfmsPINNCAD 에서 갈라져 나온 독립 논문. 평탄 구간 중앙 추정량이 LOSO 잔차 RMS 1.285 → 0.358 cm 로 9명 중 8명에서 표준 landmark 에 더 가깝고(부호검정 p 0.0195), 대조군이 더 평평해 ill-conditioning 이 발표된 한 규칙의 흠이 아니라 극값 기반 추출이라는 방식의 성질임을 보인다. IJCST 원고 3종·그림 5개·커버레터 완비, 미투고. held-out 0건·메시 11개(피험자 10명, 한 조사)가 남은 심사 위험.',
+    url:'https://github.com/cfms-lab/cfmsPINNCAD_dev',
+    projectPath:'D:\\__VSCode_Projects\\cfmsPINNCAD_dev'
+  };
+  const parent=findNode(data.root,'npp8yov2')||findNode(data.root,'nptj5211')||data.root;
+  let node=findNode(data.root,spec.id);
+  if(!node){ node={...spec,children:[]}; (parent.children||(parent.children=[])).push(node); }
+  else Object.assign(node,spec,{children:node.children||[]});
+  parent.collapsed=false;
+  data.links=data.links||[];
+  if(findNode(data.root,'npp8yov2')&&!data.links.some(l=>l.from==='npp8yov2'&&l.to==='HIPDetect')){
+    data.links.push({from:'npp8yov2',to:'HIPDetect',label:'엉덩이높이 기준점',type:'engine'});
+  }
+  data.hipDetectSplitVersion=HIPDETECT_SPLIT_VERSION;
+  return true;
+}
 //==PURE_END
 
 /* ====================== Supabase 설정/세션 (upjuk과 공유) ====================== */
@@ -931,6 +961,7 @@ applySubmissionPlan20260806(DATA);
 applyVaultGrades20260901(DATA);
 applyLinkDirection20260907(DATA);
 applyHolonomySplit20260907(DATA);
+applyHipDetectSplit20260910(DATA);
 let sel=null, view={tx:60,ty:30,s:1}, showRel=true, LAY=null;
 
 /* ====================== 실행취소 / 다시실행 (undo/redo) ====================== */
@@ -1288,10 +1319,11 @@ async function loadDoc(){
     const gradesMigrated=applyVaultGrades20260901(DATA);
     const directionMigrated=applyLinkDirection20260907(DATA);
     const holonomyMigrated=applyHolonomySplit20260907(DATA);
+    const hipDetectMigrated=applyHipDetectSplit20260910(DATA);
     const kindsMigrated=normalizeKinds(DATA);
     showRel=DATA.showRel!==false; document.getElementById('relBtn').textContent='관계선 '+(showRel?'✓':'✕');
     sel=null; render(); renderEdit(); fitView(); setSaveState('');
-    if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||linkMigrated||statusMigrated||drapeMigrated||gradesMigrated||directionMigrated||holonomyMigrated||kindsMigrated) await saveDoc(true);
+    if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||linkMigrated||statusMigrated||drapeMigrated||gradesMigrated||directionMigrated||holonomyMigrated||hipDetectMigrated||kindsMigrated) await saveDoc(true);
   }catch(e){
     const b=document.getElementById('banner'); b.style.display='block';
     if(/relation|does not exist|42P01|PGRST205|404/i.test(e.message))
@@ -1299,7 +1331,7 @@ async function loadDoc(){
     else if(!isLoggedIn() && /401|403|PGRST301|permission denied/i.test(e.message))
       b.textContent='공개 열람 권한이 없습니다. Supabase에서 enable_rls_mindmaps.sql 을 다시 실행해 anon SELECT 정책을 적용하세요.';
     else b.textContent='데이터를 불러오지 못했습니다: '+e.message.slice(0,140);
-    applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); applyDrapeEngineLinks20260827(DATA); applyVaultGrades20260901(DATA); applyLinkDirection20260907(DATA); applyHolonomySplit20260907(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
+    applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); applyDrapeEngineLinks20260827(DATA); applyVaultGrades20260901(DATA); applyLinkDirection20260907(DATA); applyHolonomySplit20260907(DATA); applyHipDetectSplit20260910(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
   }
 }
 async function saveDoc(silent){
@@ -1320,7 +1352,7 @@ function download(name,text,type){ const b=new Blob([text],{type:type||'applicat
 function exportJSON(){ download('mindmap_backup.json', JSON.stringify(DATA,null,2)); toast('백업 JSON을 내려받았습니다.'); }
 function importJSON(input){
   const f=input.files[0]; if(!f)return; const r=new FileReader();
-  r.onload=()=>{ try{ const d=JSON.parse(r.result); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); applyLinkFill20260820(d); applyStatusCleanup20260822(d); applyDrapeEngineLinks20260827(d); applyVaultGrades20260901(d); applyLinkDirection20260907(d); applyHolonomySplit20260907(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); applyLinkFill20260820(d); applyStatusCleanup20260822(d); applyDrapeEngineLinks20260827(d); applyVaultGrades20260901(d); applyLinkDirection20260907(d); applyHolonomySplit20260907(d); applyHipDetectSplit20260910(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
     if(!confirm('백업으로 현재 클라우드 관계도를 덮어쓸까요?'))return;
     pushHistory();
     DATA=d; showRel=DATA.showRel!==false; sel=null; render(); renderEdit(); saveDoc(false);

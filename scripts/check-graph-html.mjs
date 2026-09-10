@@ -53,6 +53,7 @@ const curatedNodes = [
   readJsonConstant("CFMS_AUTOSEW_NODE", "{"),
   ...readJsonConstant("CFMS_AUTOPLACE_NODES", "["),
   readJsonConstant("SFTF_HOLONOMY_NODE", "{"),
+  readJsonConstant("HIPDETECT_NODE", "{"),
 ];
 for (const curatedNode of curatedNodes) {
   if (!nodes.some((node) => node.id === curatedNode.id)) nodes.push(curatedNode);
@@ -68,6 +69,7 @@ const expectedVaultGrades = {
   cfmsMiindo: "등급 없음",
   cfmsPINNCAD: "하",
   cfmsPINNDrape: "하",
+  HIPDetect: "중",
   PFTF_alpha: "중",
   PFTF_AsymTensor: "중",
   PFTF_Compression: "중",
@@ -92,6 +94,7 @@ const edges = readJsonConstant("RAW_EDGES", "[");
 const curatedEdges = [
   ...readJsonConstant("CURATED_GARMENT_EDGES", "["),
   ...readJsonConstant("SFTF_HOLONOMY_EDGES", "["),
+  ...readJsonConstant("HIPDETECT_EDGES", "["),
 ];
 for (const curatedEdge of curatedEdges) {
   const index = edges.findIndex(
@@ -121,8 +124,8 @@ const positions = Object.assign(
   readJsonConstant("POS", "{"),
   readJsonConstant("CURATED_POSITIONS", "{"),
 );
-// 2026-09-07: graph.html 의 POS + CURATED_POSITIONS 병합 결과 전체를 그대로 적는다.
-const expectedPositions = {"Tomo_SFTF":{"x":-323,"y":234},"Tomo_SFTFSoft":{"x":-52,"y":239},"SFTF_Clustering":{"x":-5,"y":498},"PFTF":{"x":141,"y":423},"SFTF_Composite":{"x":249,"y":775},"SFTF_InjMold":{"x":-92,"y":861},"PFTF_Compression":{"x":395,"y":772},"Tomo_DFSVR":{"x":272,"y":54},"PFTF_VisCull_kDop":{"x":363,"y":565},"SFTF_SewerPOC":{"x":-281,"y":810},"SFTFSoft_GNN":{"x":121,"y":-5},"SFTF_DrapePrior":{"x":347,"y":333},"PFTF_AsymTensor":{"x":190,"y":198},"PFTF_DrapePrior_VisCull_kDop":{"x":663,"y":134},"PFTF_ResearchOptimize":{"x":4,"y":408},"PFTF_alpha":{"x":179,"y":1080},"SFTF_QEM":{"x":-96,"y":99},"SFTF_DynamicTargetSearch":{"x":-229,"y":-34},"DFSVR_VisCull":{"x":572,"y":-48},"SFTFSoft_GNN_DFSVR":{"x":386,"y":-133},"SFTF_ActiveOverprint":{"x":28,"y":-179},"ColdOndol":{"x":-235,"y":478},"ColdOndol_Positioning":{"x":-417,"y":589},"cfmsCIPC":{"x":556,"y":601},"TSE_SEM":{"x":19,"y":824},"SFTF_HeatMethod":{"x":268,"y":951},"cfmsPINNDrape":{"x":728,"y":241},"cfmsDrape":{"x":568,"y":431},"cfmsMiindo":{"x":1015,"y":754},"cfmsPINNCAD":{"x":775,"y":403},"SFTFSoft_DFSVR":{"x":381,"y":206},"SFTF_UrbanTraffic":{"x":-74,"y":637},"cfmsAutoSew":{"x":1020,"y":382},"cfmsAutoPlace_IJCST":{"x":838,"y":503},"cfmsAutoPlace_JCDE":{"x":765,"y":795},"cfmsDrapeSCAN":{"x":628,"y":906},"SFTF_Holonomy":{"x":-17,"y":989}};
+// 2026-09-10: graph.html 의 POS + CURATED_POSITIONS 병합 결과 전체를 그대로 적는다.
+const expectedPositions = {"Tomo_SFTF":{"x":-323,"y":234},"Tomo_SFTFSoft":{"x":-52,"y":239},"SFTF_Clustering":{"x":-5,"y":498},"PFTF":{"x":141,"y":423},"SFTF_Composite":{"x":249,"y":775},"SFTF_InjMold":{"x":-92,"y":861},"PFTF_Compression":{"x":395,"y":772},"Tomo_DFSVR":{"x":272,"y":54},"PFTF_VisCull_kDop":{"x":363,"y":565},"SFTF_SewerPOC":{"x":-281,"y":810},"SFTFSoft_GNN":{"x":121,"y":-5},"SFTF_DrapePrior":{"x":347,"y":333},"PFTF_AsymTensor":{"x":190,"y":198},"PFTF_DrapePrior_VisCull_kDop":{"x":663,"y":134},"PFTF_ResearchOptimize":{"x":4,"y":408},"PFTF_alpha":{"x":179,"y":1080},"SFTF_QEM":{"x":-96,"y":99},"SFTF_DynamicTargetSearch":{"x":-229,"y":-34},"DFSVR_VisCull":{"x":572,"y":-48},"SFTFSoft_GNN_DFSVR":{"x":386,"y":-133},"SFTF_ActiveOverprint":{"x":28,"y":-179},"ColdOndol":{"x":-235,"y":478},"ColdOndol_Positioning":{"x":-417,"y":589},"cfmsCIPC":{"x":556,"y":601},"TSE_SEM":{"x":19,"y":824},"SFTF_HeatMethod":{"x":268,"y":951},"cfmsPINNDrape":{"x":728,"y":241},"cfmsDrape":{"x":568,"y":431},"cfmsMiindo":{"x":1015,"y":754},"cfmsPINNCAD":{"x":775,"y":403},"SFTFSoft_DFSVR":{"x":381,"y":206},"SFTF_UrbanTraffic":{"x":-74,"y":637},"cfmsAutoSew":{"x":1020,"y":382},"cfmsAutoPlace_IJCST":{"x":838,"y":503},"cfmsAutoPlace_JCDE":{"x":765,"y":795},"cfmsDrapeSCAN":{"x":628,"y":906},"SFTF_Holonomy":{"x":-17,"y":989},"HIPDetect":{"x":975,"y":230}};
 const hyperedges = readJsonConstant("hyperedges", "[");
 const curatedHyperedgeMembers = readJsonConstant("CURATED_HYPEREDGE_MEMBERS", "{");
 for (const [label, nodeIds] of Object.entries(curatedHyperedgeMembers)) {
@@ -152,7 +155,7 @@ const expectedGarmentNodes = [
   "PFTF", "SFTF_Composite", "SFTF_DrapePrior", "PFTF_Compression",
   "PFTF_VisCull_kDop", "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape",
   "cfmsMiindo", "cfmsPINNCAD", "cfmsAutoSew", "cfmsAutoPlace_IJCST",
-  "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN",
+  "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN", "HIPDetect",
 ];
 const buildingEnergy = hyperedges.find(
   (hyperedge) => hyperedge.label === "온돌 냉방 / 건물 에너지",
@@ -227,6 +230,18 @@ if (
   || holonomyEdges[0]._rel !== "정확도"
 ) {
   throw new Error("SFTF_HeatMethod -> SFTF_Holonomy split edge is missing or incorrect");
+}
+// 2026-09-10: cfmsPINNCAD 에서 갈라져 나온 HIPDetect 도 같은 분리 규칙을 따른다.
+const hipDetectEdges = edges.filter(
+  (edge) => edge.from === "HIPDetect" || edge.to === "HIPDetect",
+);
+if (
+  hipDetectEdges.length !== 1
+  || hipDetectEdges[0].from !== "cfmsPINNCAD"
+  || hipDetectEdges[0].label !== "엉덩이높이 기준점"
+  || hipDetectEdges[0]._rel !== "정확도"
+) {
+  throw new Error("cfmsPINNCAD -> HIPDetect split edge is missing or incorrect");
 }
 if (
   !garmentSimulation
