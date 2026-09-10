@@ -184,6 +184,12 @@
     import { ConvexGeometry } from 'three/addons/geometries/ConvexGeometry.js';
 
     const LAYOUT_SCALE = 60;
+    // z 축은 볼트(Dashboards/프로젝트현황.md)의 논문 완성도다 — 1=완성도 높음이
+    // 꼭대기, 10=낮음이 바닥이고 한 점이 1.0 이다. 값은 graph.html 의
+    // PAPER_COMPLETENESS 로 실려 온다.
+    const COMPLETENESS_BEST = 1;
+    const COMPLETENESS_WORST = 10;
+    const COMPLETENESS_TOP_Z = 9;
     const HULL_INRADIUS = 0.8864518862828913;
     const HULL_PALETTE = [
       '#1c63e3', '#e39c1c', '#e31cc6', '#1ce338',
@@ -380,8 +386,31 @@
       return {
         ...data,
         hyperedges: variableValue(source, 'hyperedges', false) || [],
-        findingDeps: variableValue(source, 'FINDING_DEPS', false) || []
+        findingDeps: variableValue(source, 'FINDING_DEPS', false) || [],
+        completeness: variableValue(source, 'PAPER_COMPLETENESS', false) || {}
       };
+    }
+
+    // 볼트 노트 이름과 그래프 노드 이름은 대소문자가 어긋나기도 한다
+    // (노드 HIPDetect ↔ 노트 HipDetect.md). 소문자로 맞춰 찾는다.
+    function completenessTable(source) {
+      return new Map(Object.entries(source || {}).map(([key, value]) => [key.toLowerCase(), value]));
+    }
+
+    // 노드 id 를 먼저 본다 — 트랙이 갈린 논문(cfmsAutoPlace_IJCST)은 노트 하나에
+    // 완성도가 둘이라 id 로만 갈린다. 나머지는 source_file 로 찾힌다.
+    function completenessOf(node, table) {
+      const stem = String(node.source_file || '').replace(/\.md$/i, '');
+      const raw = table.get(String(node.id).toLowerCase())
+        ?? (stem ? table.get(stem.toLowerCase()) : undefined);
+      const value = Number(raw);
+      return Number.isFinite(value) && value >= COMPLETENESS_BEST ? value : null;
+    }
+
+    // 완성도가 없는 노드(인프라·통합 저장소 등)는 대시보드와 같은 규칙으로 10 으로 본다.
+    function completenessHeight(value) {
+      const score = Math.min(COMPLETENESS_WORST, Math.max(COMPLETENESS_BEST, value ?? COMPLETENESS_WORST));
+      return (COMPLETENESS_WORST - score) / (COMPLETENESS_WORST - COMPLETENESS_BEST) * COMPLETENESS_TOP_Z;
     }
 
     function colorValue(value, fallback = '#bfc5cf') {
@@ -416,9 +445,12 @@
       const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
       const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
       const degrees = neighbors.map(set => set.size);
-      const points = xy.map((p, i) => new THREE.Vector3((p[0] - cx) / LAYOUT_SCALE, -(p[1] - cy) / LAYOUT_SCALE, degrees[i]));
+      const scores = completenessTable(data.completeness);
+      const completeness = data.nodes.map(node => completenessOf(node, scores));
+      const points = xy.map((p, i) => new THREE.Vector3(
+        (p[0] - cx) / LAYOUT_SCALE, -(p[1] - cy) / LAYOUT_SCALE, completenessHeight(completeness[i])));
       const radii = data.nodes.map(node => Math.max(8, Number(node.size || 13)) / LAYOUT_SCALE);
-      return { ...data, ids, indexById, neighbors, degrees, points, radii };
+      return { ...data, ids, indexById, neighbors, degrees, completeness, points, radii };
     }
 
     function disposeGroup(group) {
@@ -642,7 +674,9 @@
       const heading = document.createElement('h2');
       heading.textContent = String(node.id);
       const body = document.createElement('p');
-      body.textContent = `Degree ${model.degrees[index]} · 나감 ${outgoing} · 들어옴 ${incoming} · 양방향 ${bidirectional}${title && title !== node.id ? ` · ${title}` : ''}`;
+      const completeness = model.completeness[index];
+      const completenessText = completeness === null ? '미기재 · 10 취급' : `${completeness}`;
+      body.textContent = `논문 완성도 ${completenessText} · Degree ${model.degrees[index]} · 나감 ${outgoing} · 들어옴 ${incoming} · 양방향 ${bidirectional}${title && title !== node.id ? ` · ${title}` : ''}`;
       detailsEl.append(heading, body);
     }
 
@@ -722,7 +756,7 @@
       nodeGroup.visible = true;
       if (initial) fitCamera();
       updateDetails(-1, new Map());
-      statusEl.textContent = `${model.nodes.length} nodes · ${model.edges.length} directed edges · ${model.hyperedges.length} hyperedges · z = Degree`;
+      statusEl.textContent = `${model.nodes.length} nodes · ${model.edges.length} directed edges · ${model.hyperedges.length} hyperedges · z = 논문 완성도 (1 위 ↔ 10 바닥)`;
     }
 
     function hashText(text) {

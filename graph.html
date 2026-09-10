@@ -375,6 +375,7 @@ EDGE_DIRECTION_FIXES.forEach(([from, to]) => {
 // EDGE_DIRECTION_END
 
 const CURATED_POSITIONS = {"cfmsAutoSew": {"x": 1184, "y": 618}, "cfmsAutoPlace_IJCST": {"x": 984, "y": 672}, "cfmsAutoPlace_JCDE": {"x": 905, "y": 859}, "cfmsDrapeSCAN": {"x": 743, "y": 347}, "SFTF_Holonomy": {"x": 1051, "y": 51}, "HIPDetect": {"x": 932, "y": 189}};
+const PAPER_COMPLETENESS = {"ColdOndol": 3, "ColdOndol_Materials": 4, "ColdOndol_Positioning": 3, "HipDetect": 1, "PFTF": 5, "PFTF_AsymTensor": 8, "PFTF_Compression": 6, "PFTF_FXShock": 8, "PFTF_Mold": 8, "PFTF_VisCull_kDop": 4, "PFTF_alpha": 3, "SFTFSoft_DFSVR": 5, "SFTFSoft_GNN": 4, "SFTF_Clustering": 4, "SFTF_Composite": 3, "SFTF_DrapePrior": 1, "SFTF_HeatMethod": 1, "SFTF_Holonomy": 2, "SFTF_QEM": 4, "SFTF_SewerPOC": 5, "SFTF_ThermalChip": 5, "SFTF_UrbanTraffic": 6, "TSE_SEM": 2, "Tomo_DFSVR": 4, "Tomo_SFTF": 1, "Tomo_SFTFSoft": 2, "Tomo_Shell2026_TomoSh4": 1, "Tomo_Shell2026_TomoSh5": 1, "cfmsAutoPlace_IJCST": 3, "cfmsAutoPlace_JCDE": 3, "cfmsAutoSew": 4, "cfmsCIPC": 1, "cfmsDispersity": 1, "cfmsDrapeSCAN": 10, "cfmsPINNCAD": 10, "cfmsPINNDrape": 5};
 Object.assign(POS, CURATED_POSITIONS);
 
 // 새 관계를 반영해 모든 노드의 차수 메타데이터도 같은 실행에서 맞춘다.

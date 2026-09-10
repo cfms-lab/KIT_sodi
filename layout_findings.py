@@ -71,6 +71,54 @@ def _load_project_paths():
 
 PROJECT_PATHS = _load_project_paths()
 
+
+def _strip_inline_comment(value):
+    """`3   # 논문 완성도 …` 처럼 값 뒤에 붙는 YAML 주석을 걷어낸다.
+
+    `_strip_yaml_comment` 는 경로용이라 줄 전체가 주석일 때(`# 논문 완성도 …`)
+    그 문장을 값으로 돌려준다.  완성도는 숫자뿐이므로 여기서는 `#` 부터 잘라
+    빈 문자열을 돌려주고, 그 빈 값이 「다음 줄부터 트랙별 중첩 맵」 신호가 된다.
+    """
+    return re.sub(r"(?:^|[ \t])#.*$", "", value).strip()
+
+
+def _load_paper_completeness():
+    """볼트 frontmatter 의 `paper_completeness` 를 노드 id 기준 지도로 모은다.
+
+    1=완성도 높음 … 10=낮음 이며, 3D 뷰(graph3d.html)의 z 축이 이 값을 쓴다.
+    한 노트에 논문이 둘인 트랙 노트(cfmsAutoPlace·Tomo_Shell2026)는 중첩 맵이라
+    `노트_트랙` 키로 펴서 담는다 — 그래프의 노드 id 가 그 꼴이다
+    (cfmsAutoPlace_IJCST).  판정 규칙의 정본은 볼트의 프로젝트현황 대시보드다.
+    """
+    scores = {}
+    if not PROJECTS_DIR.is_dir():
+        return scores
+    for note in PROJECTS_DIR.glob("*.md"):
+        try:
+            lines = note.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            continue
+        for index, line in enumerate(lines):
+            head = re.match(r"^paper_completeness:[ \t]*(.*)$", line)
+            if not head:
+                continue
+            inline = _strip_inline_comment(head.group(1))
+            if inline:
+                if re.fullmatch(r"\d+", inline):
+                    scores[note.stem] = int(inline)
+                break
+            for nested in lines[index + 1:]:
+                track = re.match(r"^[ \t]+([A-Za-z0-9_]+):[ \t]*(.*)$", nested)
+                if not track:
+                    break
+                value = _strip_inline_comment(track.group(2))
+                if re.fullmatch(r"\d+", value):
+                    scores[f"{note.stem}_{track.group(1)}"] = int(value)
+            break
+    return scores
+
+PAPER_COMPLETENESS = _load_paper_completeness()
+
 # Exact, project-specific caption suffixes requested for the graph view.
 # Keep these separate from Papers/투고현황.md: that source is reserved for
 # journal-qualified submission badges such as "[RPJ,draft]".
@@ -1730,6 +1778,30 @@ s, ncurated_pos = re.subn(
     count=1,
     flags=re.S,
 )
+assert ncurated_pos == 1, "CURATED_POSITIONS block not found"
+
+# graph3d.html 의 z 축은 볼트의 논문 완성도(1=높음 … 10=낮음)를 쓴다.  graph.html 은
+# 값을 나르기만 하고 2D 화면에서는 쓰지 않는다 — 3D 뷰가 정본 파일을 실시간으로
+# 읽으므로, 여기 실어야 볼트가 바뀔 때 높이도 따라온다.
+completeness_js = "const PAPER_COMPLETENESS = " + json.dumps(
+    dict(sorted(PAPER_COMPLETENESS.items())), ensure_ascii=False) + ";"
+s, ncompleteness = re.subn(
+    r"const PAPER_COMPLETENESS = \{.*?\};",
+    lambda _m: completeness_js,
+    s,
+    count=1,
+    flags=re.S,
+)
+if not ncompleteness:
+    s, ncompleteness = re.subn(
+        r"(const CURATED_POSITIONS = \{.*?\};)",
+        lambda match: match.group(1) + "\n" + completeness_js,
+        s,
+        count=1,
+        flags=re.S,
+    )
+assert ncompleteness == 1, "PAPER_COMPLETENESS block not written"
+
 hyper_js = "const hyperedges = " + json.dumps(hyperedges_for_graph, ensure_ascii=False) + ";"
 s, n2 = re.subn(r"const hyperedges = \[.*?\];", lambda _m: hyper_js, s, count=1,
                 flags=re.S)
