@@ -158,7 +158,7 @@ POS = {
     # 2026-09-07: graph.html 의 큐레이션 노드(SFTF_HOLONOMY_NODE)와 짝을 이룬다.
     "SFTF_Holonomy": (130, 965),
     # 2026-09-10: graph.html 의 큐레이션 노드(HIPDETECT_NODE)와 짝을 이룬다.
-    "HIPDetect": (975, 230),
+    "HIPDetect": (923, 168),
 }
 
 HYPEREDGES = [
