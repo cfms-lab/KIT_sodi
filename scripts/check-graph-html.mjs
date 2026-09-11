@@ -81,6 +81,9 @@ const expectedVaultGrades = {
   SFTF_SewerPOC: "하",
   SFTFSoft_DFSVR: "중",
   cfmsDrapeSCAN: "ToDo",
+  TSE_SEM_Bezier: "하",
+  TSE_SEM_Tensor: "하",
+  TSE_SEM_AutoTune: "하",
 };
 for (const [nodeId, grade] of Object.entries(expectedVaultGrades)) {
   const node = nodes.find((candidate) => candidate.id === nodeId);
@@ -125,7 +128,7 @@ const positions = Object.assign(
   readJsonConstant("CURATED_POSITIONS", "{"),
 );
 // 2026-09-10: graph.html 의 POS + CURATED_POSITIONS 병합 결과 전체를 그대로 적는다.
-const expectedPositions = {"Tomo_SFTF":{"x":9,"y":-28},"Tomo_SFTFSoft":{"x":63,"y":173},"SFTF_Clustering":{"x":-224,"y":326},"PFTF":{"x":465,"y":242},"SFTF_Composite":{"x":611,"y":32},"SFTF_InjMold":{"x":-82,"y":908},"PFTF_Compression":{"x":502,"y":379},"Tomo_DFSVR":{"x":142,"y":545},"PFTF_VisCull_kDop":{"x":311,"y":554},"SFTF_SewerPOC":{"x":-320,"y":852},"SFTFSoft_GNN":{"x":-25,"y":380},"SFTF_DrapePrior":{"x":376,"y":775},"PFTF_AsymTensor":{"x":-204,"y":536},"PFTF_DrapePrior_VisCull_kDop":{"x":481,"y":546},"PFTF_ResearchOptimize":{"x":420,"y":39},"PFTF_GFiberCT":{"x":779,"y":104},"SFTF_QEM":{"x":-189,"y":131},"SFTF_DynamicTargetSearch":{"x":-229,"y":-34},"DFSVR_VisCull":{"x":163,"y":784},"SFTFSoft_GNN_DFSVR":{"x":6,"y":681},"SFTF_ActiveOverprint":{"x":28,"y":-179},"ColdOndol":{"x":-368,"y":491},"ColdOndol_Positioning":{"x":-487,"y":626},"cfmsCIPC":{"x":800,"y":524},"TSE_SEM":{"x":396,"y":-121},"SFTF_HeatMethod":{"x":711,"y":-126},"cfmsPINNDrape":{"x":983,"y":540},"cfmsDrape":{"x":651,"y":822},"cfmsMiindo":{"x":590,"y":626},"cfmsPINNCAD":{"x":986,"y":351},"SFTFSoft_DFSVR":{"x":245,"y":338},"SFTF_UrbanTraffic":{"x":-130,"y":736},"cfmsAutoSew":{"x":1184,"y":618},"cfmsAutoPlace_IJCST":{"x":984,"y":672},"cfmsAutoPlace_JCDE":{"x":905,"y":859},"cfmsDrapeSCAN":{"x":752,"y":304},"SFTF_Holonomy":{"x":1051,"y":51},"HIPDetect":{"x":945,"y":151}};
+const expectedPositions = {"Tomo_SFTF":{"x":9,"y":-28},"Tomo_SFTFSoft":{"x":63,"y":173},"SFTF_Clustering":{"x":-224,"y":326},"PFTF":{"x":465,"y":242},"SFTF_Composite":{"x":611,"y":32},"SFTF_InjMold":{"x":-82,"y":908},"PFTF_Compression":{"x":502,"y":379},"Tomo_DFSVR":{"x":142,"y":545},"PFTF_VisCull_kDop":{"x":311,"y":554},"SFTF_SewerPOC":{"x":-320,"y":852},"SFTFSoft_GNN":{"x":-25,"y":380},"SFTF_DrapePrior":{"x":376,"y":775},"PFTF_AsymTensor":{"x":-204,"y":536},"PFTF_DrapePrior_VisCull_kDop":{"x":481,"y":546},"PFTF_ResearchOptimize":{"x":420,"y":39},"PFTF_GFiberCT":{"x":779,"y":104},"SFTF_QEM":{"x":-189,"y":131},"SFTF_DynamicTargetSearch":{"x":-229,"y":-34},"DFSVR_VisCull":{"x":163,"y":784},"SFTFSoft_GNN_DFSVR":{"x":6,"y":681},"SFTF_ActiveOverprint":{"x":28,"y":-179},"ColdOndol":{"x":-368,"y":491},"ColdOndol_Positioning":{"x":-487,"y":626},"cfmsCIPC":{"x":800,"y":524},"TSE_SEM_Bezier":{"x":396,"y":-121},"TSE_SEM_Tensor":{"x":300,"y":-250},"TSE_SEM_AutoTune":{"x":204,"y":-379},"SFTF_HeatMethod":{"x":711,"y":-126},"cfmsPINNDrape":{"x":983,"y":540},"cfmsDrape":{"x":651,"y":822},"cfmsMiindo":{"x":590,"y":626},"cfmsPINNCAD":{"x":986,"y":351},"SFTFSoft_DFSVR":{"x":245,"y":338},"SFTF_UrbanTraffic":{"x":-130,"y":736},"cfmsAutoSew":{"x":1184,"y":618},"cfmsAutoPlace_IJCST":{"x":984,"y":672},"cfmsAutoPlace_JCDE":{"x":905,"y":859},"cfmsDrapeSCAN":{"x":752,"y":304},"SFTF_Holonomy":{"x":1051,"y":51},"HIPDetect":{"x":945,"y":151}};
 const hyperedges = readJsonConstant("hyperedges", "[");
 const curatedHyperedgeMembers = readJsonConstant("CURATED_HYPEREDGE_MEMBERS", "{");
 for (const [label, nodeIds] of Object.entries(curatedHyperedgeMembers)) {
@@ -266,6 +269,42 @@ if (
   throw new Error(
     "Tomo_SFTF -> SFTF_DynamicTargetSearch -> SFTF_ActiveOverprint lineage edges are missing or incorrect",
   );
+}
+// 2026-09-11: TSE_SEM 한 저장소의 논문 3편이 mindmap.html 의 SEM1·SEM2·SEM3 와 같은 이름의
+// 세 노드로 갈라졌다. 옛 노드는 사라지고, 화살표는 SFTF_Composite → ① → ② → ③ 한 줄뿐이다.
+if (ids.has("TSE_SEM")) {
+  throw new Error("legacy TSE_SEM node still exists after the three-paper split");
+}
+const expectedSemLabels = {
+  TSE_SEM_Bezier: "SEM1(Bezier)",
+  TSE_SEM_Tensor: "SEM2(Tensor)",
+  TSE_SEM_AutoTune: "SEM3(AutoTune)",
+};
+for (const [nodeId, label] of Object.entries(expectedSemLabels)) {
+  const node = nodes.find((candidate) => candidate.id === nodeId);
+  if (!node || node.label !== label || node.source_file !== "TSE_SEM.md") {
+    throw new Error(`SEM track node ${nodeId} is missing, mislabeled, or detached from TSE_SEM.md`);
+  }
+}
+const expectedSemChain = [
+  ["SFTF_Composite", "TSE_SEM_Bezier", "섬유 계측", "확장"],
+  ["TSE_SEM_Bezier", "TSE_SEM_Tensor", "배향 텐서장", "확장"],
+  ["TSE_SEM_Tensor", "TSE_SEM_AutoTune", "자동 파라미터 선택", "정확도"],
+];
+const semEdges = edges.filter(
+  (edge) => edge.from in expectedSemLabels || edge.to in expectedSemLabels,
+);
+if (semEdges.length !== expectedSemChain.length) {
+  throw new Error(
+    "SEM track edges must be exactly the SFTF_Composite -> Bezier -> Tensor -> AutoTune chain: "
+    + semEdges.map((edge) => `${edge.from}->${edge.to}`).join(", "),
+  );
+}
+for (const [from, to, label, relation] of expectedSemChain) {
+  const matches = semEdges.filter((edge) => edge.from === from && edge.to === to);
+  if (matches.length !== 1 || matches[0].label !== label || matches[0]._rel !== relation) {
+    throw new Error(`SEM chain edge ${from}->${to} is missing, duplicated, or incorrect`);
+  }
 }
 if (
   !garmentSimulation

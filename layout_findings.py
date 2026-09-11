@@ -189,7 +189,11 @@ POS = {
     "ColdOndol": (-368, 491),
     "ColdOndol_Positioning": (-487, 626),
     "cfmsCIPC": (800, 524),
-    "TSE_SEM": (396, -121),
+    # 2026-09-11: TSE_SEM 을 논문 3편 트랙으로 나눴다.  ① 은 옛 TSE_SEM 자리를 잇고
+    # ②·③ 은 SFTF_Composite → ① 방향을 따라 위쪽으로 한 칸씩 이어진다.
+    "TSE_SEM_Bezier": (396, -121),
+    "TSE_SEM_Tensor": (300, -250),
+    "TSE_SEM_AutoTune": (204, -379),
     "SFTF_HeatMethod": (711, -126),
     "cfmsPINNDrape": (983, 540),
     "cfmsDrape": (651, 822),
@@ -324,7 +328,15 @@ QUALITY_ROWS = [
     ("ColdOndol", "ColdOndol", "하", "온돌 냉방 중 숨은 에어컨 검출 한계"),
     ("ColdOndol_Positioning", "ColdOndol_Positioning", "하", "부하·이슬점 기반 냉방 배분 최적화"),
     ("cfmsCIPC", "cfmsCIPC", "중", "의복 충돌 강건성 벤치마크"),
-    ("TSE_SEM", "TSE_SEM", "하", "섬유 영상 정량화 연구선"),
+    # 2026-09-11: TSE_SEM 한 저장소의 논문 3편 트랙을 mindmap.html 의 SEM1·SEM2·SEM3 노드와
+    # 같은 이름으로 나눈다.  등급은 볼트 노트(TSE_SEM.md, grade 하)와 마인드맵 kind(low)를
+    # 따르고, 근거는 노트의 「논문 트랙」·「투고 일정」 절을 요약한 것이다.
+    ("TSE_SEM_Bezier", "SEM1(Bezier)", "하",
+     "① 방향 리프팅+3차 Bézier 관 재구성; 실제 SEM IoU 0.814·팬텀 12종 배향 오차 2.3–11.6°, 원고 완성, 한국섬유공학회지 즉시 투고 대기(저자·COI·수치 대조 잔여)"),
+    ("TSE_SEM_Tensor", "SEM2(Tensor)", "하",
+     "② 이진화 없는 배향 텐서장, 하부층 포함; 저배율 SEM 9장 observed fraction 0.86–0.93, 원고 완성, ① 접수 후 companion 인용으로 투고"),
+    ("TSE_SEM_AutoTune", "SEM3(AutoTune)", "하",
+     "③ 증거 제약 기반 자동 파라미터 선택; 자체 SCI(E) 사전심사 major revision(held-out 누출·예산 불일치·최종 조합 미검증·XCT 서술)으로 보류, 투고 3순위"),
     ("SFTF_HeatMethod", "SFTF_HeatMethod", "중", "열전달 기반 복합재 설계 연구선"),
     # 2026-09-07: SFTF_Holonomy 논문 트랙 편입.  graph.html 의 큐레이션 노드는
     # RAW_NODES 밖에 있어도 등급 행은 여기서 나가야 재생성 뒤에 살아남는다.
@@ -392,6 +404,9 @@ INTRODUCTIONS = {
     "cfmsAutoPlace_IJCST": "IJCST 패턴 관점에서 라벨 없는 의복 패턴의 배치와 검증을 다루는 논문 트랙이다.",
     "cfmsAutoPlace_JCDE": "JCDE CAD 관점에서 패널의 신체 부위와 전역 조립·배치 가설을 다루는 논문 트랙이다.",
     "cfmsDrapeSCAN": "고정형·핸드헬드 스캔 패치를 cfmsDrape 물리와 소프트 대응으로 정합해 인체 표면을 복원하려는 실험선이다.",
+    "TSE_SEM_Bezier": "전자현미경 사진 한 장에서 섬유 한 올 한 올을 매끈한 곡선으로 따라가며 굵기와 방향을 재어내는 방법이다.",
+    "TSE_SEM_Tensor": "섬유를 하나씩 오려내지 않고 사진 전체에서 섬유가 어느 쪽으로 누워 있는지와 겹친 아래층까지 한꺼번에 재는 방법이다.",
+    "TSE_SEM_AutoTune": "정답을 모르는 실제 사진에서도 측정기의 손잡이를 스스로 안전하게 맞추는 방법을 다루는 연구다.",
 }
 
 # 발견을 확정하는 hyperedge와 구분되는 그래프 해석용 역할 및 후보 표지.
@@ -818,11 +833,17 @@ existing_quality_js = (
 )
 preserve_extended_quality = "const REMAINING_BOTTLENECKS" in existing_quality_js
 
-def _update_json_object_constant(js, name, updates):
-    """Update one JSON-valued JavaScript object without rewriting its logic."""
+def _update_json_object_constant(js, name, updates, remove=()):
+    """Update one JSON-valued JavaScript object without rewriting its logic.
+
+    ``remove`` 는 더 이상 없는 노드의 키다 — 갈라진 노드의 옛 id 가 배지·병목 표에
+    남아 있어도 화면에는 안 보이지만, 정본에서 걷어내야 재생성이 되돌리지 않는다.
+    """
     pattern = rf"const {re.escape(name)} = (\{{.*?\}});"
     def repl(match):
         value = json.loads(match.group(1))
+        for key in remove:
+            value.pop(key, None)
         value.update(updates)
         return f"const {name} = " + json.dumps(value, ensure_ascii=False) + ";"
     updated, count = re.subn(pattern, repl, js, count=1, flags=re.S)
@@ -833,13 +854,25 @@ if preserve_extended_quality:
     s = _update_json_object_constant(
         s,
         "STATUS_BADGES",
-        {"PFTF_GFiberCT": "한국섬유공학회지,draft"},
+        {
+            "PFTF_GFiberCT": "한국섬유공학회지,draft",
+            # 2026-09-11: TSE_SEM 의 배지 「섬유공학회지,draft」를 세 트랙이 나눠 갖는다.
+            # ③ 은 자체 SCI(E) 사전심사 판정으로 보류 중이라 투고 상태가 아니다.
+            "TSE_SEM_Bezier": "한국섬유공학회지,draft",
+            "TSE_SEM_Tensor": "한국섬유공학회지,draft",
+            "TSE_SEM_AutoTune": "보류(사전심사 major revision · 투고 3순위)",
+        },
+        remove=("TSE_SEM",),
     )
     existing_quality_js = _update_json_object_constant(
         existing_quality_js,
         "REMAINING_BOTTLENECKS",
         {
             "PFTF_GFiberCT": "A안 보강 중 — 초록의 시편 표기, 일반 복원 대조군(Poisson/Ball Pivoting), 복원 메시 기반 간격 지도; 시편 1개·ρ=4 는 한 패널의 값; PFTF/local-SPD 우월성 주장 금지",
+            # 2026-09-11: 볼트 TSE_SEM.md 「투고 일정」의 트랙별 남은 일.
+            "TSE_SEM_Bezier": "저자·소속·사사·COI 확정, validation_summary.csv 와 본문 수치 대조, 투고요령 참고문헌 형식 점검",
+            "TSE_SEM_Tensor": "① 접수번호로 companion 인용 확정, ①과의 방법·그림·검증 주장 중복 정리",
+            "TSE_SEM_AutoTune": "grid 예산 버그 수정 → 최종 조합 고정 → 미사용 test 재검증 → guarantee 를 empirical guardrail 로 하향",
             "PFTF_DrapePrior_VisCull_kDop": "독립 논문 등급 미적용 — 통합 evidence 저장소",
             "PFTF_ResearchOptimize": "독립 논문 등급 미적용 — 연구 보조 도구",
             "DFSVR_VisCull": "값·gradient parity·거짓음성 0 및 실제 end-to-end utility 검증",
@@ -1422,6 +1455,125 @@ DYNAMIC_TARGET_SEARCH_GOAL_EDGES = [
     },
 ]
 
+# ------------------------------------------------ TSE_SEM 논문 트랙 분리 (2026-09-11)
+# TSE_SEM2026_dev 한 저장소에 논문 3편이 있고(볼트 Projects/TSE_SEM.md 의 draft_keyword),
+# mindmap.html 의 클라우드 문서는 이미 SEM1(Bezier) → SEM2(Tensor) → SEM3(AutoTune) 세
+# 노드로 나뉘어 있다.  graph.html 도 같은 이름으로 나눈다.  노드 id 는 볼트 노트의
+# «노트_트랙» 규약(cfmsAutoPlace_IJCST 와 같은 꼴이고 paper_completeness 중첩 맵의 키)을
+# 따르고, 캡션은 마인드맵 제목을 그대로 쓴다.  화살표는 «먼저 선 것 → 갈라져 나온 것»
+# 규칙과 투고 순서(Bezier → Tensor → AutoTune)를 따라 SFTF_Composite → ① → ② → ③ 한 줄이다.
+LEGACY_SEM_ID = "TSE_SEM"
+SEM_TRACKS = [
+    {
+        "id": "TSE_SEM_Bezier",
+        "label": "SEM1(Bezier)",
+        "level": 3,
+        "scope": "① Bézier 관 재구성 트랙",
+        "summary": "방향 리프팅과 3차 Bézier 곡선으로 SEM 나노섬유 웹의 개별 섬유 중심선·반지름을 3차원 복원",
+    },
+    {
+        "id": "TSE_SEM_Tensor",
+        "label": "SEM2(Tensor)",
+        "level": 4,
+        "scope": "② 배향 텐서장 트랙",
+        "summary": "이진화 없는 섬유 배향 텐서장으로 전체 배향·교차점·하부층까지 정량화",
+    },
+    {
+        "id": "TSE_SEM_AutoTune",
+        "label": "SEM3(AutoTune)",
+        "level": 5,
+        "scope": "③ AutoTune 트랙(보류)",
+        "summary": "정답 없는 SEM 영상에서 증거 제약만으로 텐서 파이프라인의 파라미터를 자동 선택",
+    },
+]
+SEM_TRACK_IDS = [track["id"] for track in SEM_TRACKS]
+SEM_IDS = {LEGACY_SEM_ID, *SEM_TRACK_IDS}
+
+SEM_GOAL_EDGES = [
+    # 옛 SFTF_Composite → TSE_SEM 화살표의 라벨·설명은 첫 트랙이 물려받는다.
+    _autoplace_goal_edge(
+        "SFTF_Composite", "TSE_SEM_Bezier", "섬유 계측",
+        "SEM 사진에서 섬유 굵기·방향을 자동으로 재어 입력을 만든다", "확장",
+    ),
+    _autoplace_goal_edge(
+        "TSE_SEM_Bezier", "TSE_SEM_Tensor", "배향 텐서장",
+        "개별 섬유의 중심선·반지름 복원에서 이진화 없는 전체 배향장·교차점·하부층 정량화로 넓힌다",
+        "확장",
+    ),
+    _autoplace_goal_edge(
+        "TSE_SEM_Tensor", "TSE_SEM_AutoTune", "자동 파라미터 선택",
+        "정답이 없는 실제 SEM 에서 관측 가능한 자기일관성 지표와 baseline 상대 안전 제약만으로 텐서 파이프라인의 파라미터를 고른다",
+        "정확도",
+    ),
+]
+
+
+def _sem_node(track, template=None):
+    node = copy.deepcopy(template) if template else {}
+    grade, note = quality_lookup[track["id"]]
+    color = GRADE_COLORS[grade]
+    incoming = sum(1 for edge in SEM_GOAL_EDGES if edge["to"] == track["id"])
+    outgoing = sum(1 for edge in SEM_GOAL_EDGES if edge["from"] == track["id"])
+    node.update({
+        "id": track["id"],
+        "label": track["label"],
+        "color": {
+            "background": color,
+            "border": color,
+            "highlight": {"background": color, "border": color},
+        },
+        "size": 15.6,
+        "font": {"size": 12, "color": "#333333"},
+        "title": (
+            f'{track["label"]} — {grade}\n'
+            f'차수 {incoming + outgoing} (in {incoming} / out {outgoing}) · L{track["level"]} · near\n'
+            f'{track["scope"]}: {track["summary"]}'
+        ),
+        "community": QUALITY_COMMUNITY_IDS[grade],
+        "community_name": grade,
+        "source_file": f"{LEGACY_SEM_ID}.md",
+        "file_type": "concept",
+        "degree": incoming + outgoing,
+        "_intro": INTRODUCTIONS[track["id"]],
+        # 세 트랙이 한 저장소를 쓴다 — 볼트 노트의 path 가 정본이다.
+        "_project_path": PROJECT_PATHS.get(LEGACY_SEM_ID, r"D:\__AI_automatized\TSE_SEM2026_dev"),
+        "_grade": grade,
+        "_stage": "draft",
+        "_horizon": "near",
+        "_level": track["level"],
+        # 인접행렬의 주제 가족.  접두어 규칙(id.split('_')[0])도 TSE 를 주지만 명시해 둔다.
+        "_family": "TSE",
+        "_in": incoming,
+        "_out": outgoing,
+        "_quality": grade,
+        "_quality_note": note,
+        "_bottleneck": None,
+        "_graph_role": "",
+        "_finding_candidate": "",
+    })
+    return node
+
+
+def _replace_sem_tracks(nodes):
+    """RAW_NODES 의 TSE_SEM 한 노드를 그 자리에서 세 트랙 노드로 바꾼다(재실행해도 같다)."""
+    template = next((node for node in nodes if str(node.get("id")) == LEGACY_SEM_ID), None)
+    existing = {
+        str(node.get("id")): node for node in nodes if str(node.get("id")) in SEM_TRACK_IDS
+    }
+    built = [_sem_node(track, existing.get(track["id"]) or template) for track in SEM_TRACKS]
+    replaced = []
+    inserted = False
+    for node in nodes:
+        if str(node.get("id")) in SEM_IDS:
+            if not inserted:
+                replaced.extend(built)
+                inserted = True
+            continue
+        replaced.append(node)
+    if not inserted:
+        replaced.extend(built)
+    return replaced
+
 
 autoplace_nodes_js = json.dumps(
     [_autoplace_node(track) for track in AUTOPLACE_TRACKS],
@@ -1512,6 +1664,7 @@ def _preserve_raw_nodes(match):
         expanded_nodes.append(node)
     if not split_inserted:
         expanded_nodes.extend(split_by_id[track["id"]] for track in AUTOPLACE_TRACKS)
+    expanded_nodes = _replace_sem_tracks(expanded_nodes)
 
     # Add newly onboarded project-note nodes without disturbing the preserved
     # public snapshot. Existing IDs remain authoritative for their metadata.
@@ -1594,9 +1747,16 @@ def _preserve_goal_edges(match):
         edge for edge in edges
         if (str(edge.get("from")), str(edge.get("to"))) not in lineage_pairs
     ]
+    # TSE_SEM 논문 트랙 사슬도 이 파일이 정본이다 — 옛 TSE_SEM 화살표와 트랙 화살표를
+    # 걷어내고 SEM_GOAL_EDGES 를 다시 넣는다.
+    edges = [
+        edge for edge in edges
+        if str(edge.get("from")) not in SEM_IDS and str(edge.get("to")) not in SEM_IDS
+    ]
     edges.extend(copy.deepcopy(DYNAMIC_TARGET_SEARCH_GOAL_EDGES))
     edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
     edges.extend(copy.deepcopy(DRAPESCAN_EDGES))
+    edges.extend(copy.deepcopy(SEM_GOAL_EDGES))
     node_match = re.search(r"const RAW_NODES = (\[.*?\]);", s, flags=re.S)
     if node_match:
         node_ids = {str(node["id"]) for node in json.loads(node_match.group(1))}
@@ -1657,7 +1817,9 @@ if edges_only:
     print(f"wrote {', '.join(str(dst) for dst in DSTS)} | edges only")
     raise SystemExit(0)
 quality_html_rows = "".join(
-    f'<tr><td>{html_escape(label)}</td>'
+    # data-project-id: 캡션(label)이 id 와 다른 트랙 노드(SEM1(Bezier) 등)도
+    # syncQualityBoard() 가 QUALITY_BY_ID 로 찾을 수 있게 id 를 따로 싣는다.
+    f'<tr data-project-id="{html_escape(_id)}"><td>{html_escape(label)}</td>'
     f'<td><span class="quality-grade" style="background:{GRADE_COLORS[grade]};color:{"#333333" if grade == "ToDo" else "#ffffff"}">{grade}</span></td>'
     f'<td>{html_escape(note)}</td></tr>'
     for _id, label, grade, note in QUALITY_ROWS
@@ -1666,9 +1828,9 @@ quality_html = (
     '<div id="quality-board">'
     # QUALITY_ROWS 를 손댈 때 이 날짜도 같이 올린다.  하드코딩이라, 갱신하지 않으면
     # 재생성이 graph.html 의 최신 날짜를 조용히 되돌린다(2026-07-27 에 실제로 발생).
-    '<h3>최근 논문 quality (2026-09-10)</h3>'
+    '<h3>최근 논문 quality (2026-09-11)</h3>'
     '<div class="quality-meta">상=상위권 심사 대응 가능 · 중=핵심 gate 잔여 · 하=PoC/원고 미완료 · ToDo=새 설계선/검증 전 · 등급 없음=논문 판정 대상 아님<br>'
-    '등급 정본: Obsidian Projects frontmatter + 논문 트랙 분리 (2026-09-10) · 공개 화면에는 최소 메타데이터만 동기화</div>'
+    '등급 정본: Obsidian Projects frontmatter + 논문 트랙 분리 (2026-09-11) · 공개 화면에는 최소 메타데이터만 동기화</div>'
     '<table><thead><tr><th>프로젝트</th><th>등급</th><th>핵심 근거</th></tr></thead>'
     f'<tbody>{quality_html_rows}</tbody></table></div>'
 )
@@ -1783,8 +1945,15 @@ assert ncurated_pos == 1, "CURATED_POSITIONS block not found"
 # graph3d.html 의 z 축은 볼트의 논문 완성도(1=높음 … 10=낮음)를 쓴다.  graph.html 은
 # 값을 나르기만 하고 2D 화면에서는 쓰지 않는다 — 3D 뷰가 정본 파일을 실시간으로
 # 읽으므로, 여기 실어야 볼트가 바뀔 때 높이도 따라온다.
+completeness_by_id = dict(PAPER_COMPLETENESS)
+# TSE_SEM 트랙 노드는 볼트 노트가 아직 노트 하나에 값 하나(TSE_SEM: n)라서 그 값을 세 트랙이
+# 물려받는다.  노트의 paper_completeness 를 cfmsAutoPlace 처럼 트랙별 중첩 맵(Bezier/Tensor/
+# AutoTune)으로 바꾸면 _load_paper_completeness 가 TSE_SEM_Bezier 꼴 키를 만들어 이쪽이 이긴다.
+if LEGACY_SEM_ID in completeness_by_id:
+    for track_id in SEM_TRACK_IDS:
+        completeness_by_id.setdefault(track_id, completeness_by_id[LEGACY_SEM_ID])
 completeness_js = "const PAPER_COMPLETENESS = " + json.dumps(
-    dict(sorted(PAPER_COMPLETENESS.items())), ensure_ascii=False) + ";"
+    dict(sorted(completeness_by_id.items())), ensure_ascii=False) + ";"
 s, ncompleteness = re.subn(
     r"const PAPER_COMPLETENESS = \{.*?\};",
     lambda _m: completeness_js,
