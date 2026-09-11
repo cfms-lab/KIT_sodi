@@ -29,7 +29,7 @@ const expectedVaultGrades = {
   cfmsMiindo: ["cfmsdrape", "none"],
   cfmsPINNCAD: ["npp8yov2", "low"],
   cfmsPINNDrape: ["nf18t2n5", "low"],
-  PFTF_alpha: ["nzyk4gd6", "medium"],
+  PFTF_GFiberCT: ["nzyk4gd6", "medium"],
   PFTF_Assembly: ["n1krev41", "low"],
   PFTF_AssetShock: ["gx_pftf_assetshock", "low"],
   PFTF_AsymTensor: ["nongkxm5", "medium"],
@@ -66,7 +66,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -201,6 +201,84 @@ for (const legacy of legacyLinks.slice(0, 8)) {
 if (!directionSample.links.some((link) => link.from === "ngi2vmc1" && link.to === "nokpy3z1")) {
   throw new Error("후속 응용 link must keep its direction");
 }
+// 2026-09-11: 이희란 교수님 꾸러미 노드 넷이 「이희란 교수님방」으로 모이고(군 E 사슬 A → {B, AutoSew}),
+// 공저가 아닌 cfmsPINNDrape 는 cfmsAutoSew 자리를 이어받아 cfmsSew 에 남으며,
+// 끊긴 계보(Tomo_SFTF → SFTF_Cluster, cfmsAutoSew → cfmsPINNDrape)만 관계선으로 남는지 본다.
+const mk = (id, children = []) => ({ id, title: id, kind: "medium", children });
+const leeRoomSample = {
+  root: mk("root", [
+    mk("sftf", [mk("ny0tqz74"), mk("tomo_sftf")]),
+    mk("cfmsdrape", [
+      mk("na25mau3", [mk("nq1owe91", [mk("nf18t2n5", [mk("cfmsAutoPlace_JCDE"), mk("cfmsAutoPlace_IJCST")])])]),
+      mk("nptj5211"),
+    ]),
+    mk("nkrb7xj2", [mk("nowmyrt1"), mk("HIPDetect", [mk("nokpy3z1", [mk("ngi2vmc1")])])]),
+    mk("nffg4ou5"),
+  ]),
+  links: [{ from: "nptj5211", to: "cfmsAutoPlace_IJCST", label: "패턴 물리 검증", type: "engine" }],
+};
+if (!context.__applyLeeRoomGather(leeRoomSample)) throw new Error("이희란 room migration did not run");
+if (context.__applyLeeRoomGather(leeRoomSample)) throw new Error("이희란 room migration is not idempotent");
+const findIn = (rootNode, id) => {
+  let hit = null;
+  const visit = (n) => { if (n.id === id) hit = n; (n.children || []).forEach(visit); };
+  visit(rootNode);
+  return hit;
+};
+const childIds = (n) => (n.children || []).map((c) => c.id).join(",");
+const expectedShape = [
+  ["nkrb7xj2", "nowmyrt1,HIPDetect,cfmsAutoPlace_IJCST,tomo_sftf"],
+  ["cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE,nq1owe91"],
+  ["HIPDetect", "nokpy3z1"],
+  ["na25mau3", "nf18t2n5"],
+  ["nf18t2n5", ""],
+  ["nq1owe91", ""],
+  ["sftf", "ny0tqz74"],
+];
+for (const [id, expected] of expectedShape) {
+  const n = findIn(leeRoomSample.root, id);
+  const actual = n ? childIds(n) : "(missing)";
+  if (actual !== expected) throw new Error(`이희란 room: ${id} children are [${actual}], expected [${expected}]`);
+}
+for (const [from, to, label] of [["sftf", "tomo_sftf", "메시 분할"], ["nq1owe91", "nf18t2n5", "초기배치 이완"]]) {
+  if (!leeRoomSample.links.some((l) => l.from === from && l.to === to && l.label === label && l.type === "engine")) {
+    throw new Error(`이희란 room: link ${from}->${to} is missing`);
+  }
+}
+if (leeRoomSample.links.length !== 3) throw new Error("이희란 room migration touched unrelated links");
+const leeRoomValidation = context.__validate(leeRoomSample);
+if (!leeRoomValidation.ok) throw new Error(`이희란 room sample is invalid: ${leeRoomValidation.errors[0]}`);
+
+// 가지가 안 끊긴 문서(방이 없는 기본 관계도)에서는 계보 선을 덧그리지 않는다.
+const noRoomSample = { root: mk("root", [mk("sftf", [mk("tomo_sftf")])]), links: [] };
+context.__applyLeeRoomGather(noRoomSample);
+if (noRoomSample.links.length) throw new Error("이희란 room migration drew a link over an intact branch");
+
+// 2026-09-11: PFTF_alpha 노드(nzyk4gd6)의 제목·저장소 주소·폴더가 PFTF_GFiberCT 로 바뀌고,
+// 노드 id 는 그대로이며, 사용자가 손으로 붙인 다른 제목은 건드리지 않는지 본다.
+const renameSample = {
+  root: mk("root", [mk("nffg4ou5", [Object.assign(mk("nzyk4gd6"), {
+    title: "PFTF_alpha ",
+    url: "https://github.com/cfms-lab/PFTF_alpha_dev",
+    projectPath: "D:\\__PFTF_Projects(2026)\\PFTF_alpha_dev",
+  })])]),
+  links: [],
+};
+if (!context.__applyGFiberCTRename(renameSample)) throw new Error("PFTF_GFiberCT rename migration did not run");
+if (context.__applyGFiberCTRename(renameSample)) throw new Error("PFTF_GFiberCT rename migration is not idempotent");
+const renamed = findIn(renameSample.root, "nzyk4gd6");
+if (!renamed) throw new Error("PFTF_GFiberCT rename changed the node id");
+if (renamed.title !== "PFTF_GFiberCT") throw new Error(`PFTF_GFiberCT rename left title [${renamed.title}]`);
+if (renamed.url !== "https://github.com/cfms-lab/PFTF_GFiberCT_dev") throw new Error(`PFTF_GFiberCT rename left url [${renamed.url}]`);
+if (renamed.projectPath !== "D:\\__PFTF_Projects(2026)\\PFTF_GFiberCT_dev") throw new Error(`PFTF_GFiberCT rename left projectPath [${renamed.projectPath}]`);
+const customTitleSample = { root: mk("root", [Object.assign(mk("nzyk4gd6"), { title: "GFiberCT (손으로 붙인 제목)" })]), links: [] };
+context.__applyGFiberCTRename(customTitleSample);
+if (findIn(customTitleSample.root, "nzyk4gd6").title !== "GFiberCT (손으로 붙인 제목)") {
+  throw new Error("PFTF_GFiberCT rename overwrote a user-chosen title");
+}
+const renameValidation = context.__validate(renameSample);
+if (!renameValidation.ok) throw new Error(`PFTF_GFiberCT rename sample is invalid: ${renameValidation.errors[0]}`);
+
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);
 console.log(`mindmap.html OK (${scripts.length} inline scripts, ${Object.keys(expectedVaultGrades).length} vault grades)`);

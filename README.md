@@ -35,6 +35,7 @@
 4. `schema_project_nodes.sql`: graph/mindmap/upjuk 공유 프로젝트 노드 테이블 + 권한 (단독 실행 가능)
 5. `seed_project_nodes.sql`: 공유 노드 초기 데이터 (graph.html 등급·배지 + mindmap 클라우드 병합, 재실행 안전)
 6. `add_papers_project_link.sql`: `papers.PROJECT_ID` 열 추가 + 기존 논문 4건 노드 연결 (재실행 안전)
+7. `rename_pftf_alpha_to_gfiberct.sql`: 공유 노드 `PFTF_alpha` 행을 `PFTF_GFiberCT` 로 개명 (2026-09-11, 재실행 안전)
 
 기본 내장 연결 정보는 각 HTML의 `BAKED_URL`, `BAKED_KEY`에 있습니다. 공개 저장소에 들어간 키는 Supabase `anon` 키이며, 실제 보안은 RLS와 storage 정책이 담당합니다.
 

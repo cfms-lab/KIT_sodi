@@ -659,8 +659,8 @@
       "level": 2
     },
     {
-      "id": "PFTF_alpha",
-      "label": "PFTF_alpha",
+      "id": "PFTF_GFiberCT",
+      "label": "PFTF_GFiberCT",
       "grade": "ToDo",
       "stage": "active",
       "horizon": "near",
@@ -673,8 +673,8 @@
       "intro": "점의 밀도와 방향에 맞춰 물체의 오목한 경계를 더 안정적으로 복원하려는 새 연구선이다.",
       "memo": "local anisotropic alpha field",
       "grade_conflict": null,
-      "source_file": "PFTF_alpha.md",
-      "project_path": "D:\\__PFTF_Projects(2026)\\PFTF_alpha_dev",
+      "source_file": "PFTF_GFiberCT.md",
+      "project_path": "D:\\__PFTF_Projects(2026)\\PFTF_GFiberCT_dev",
       "color": "#6b7280",
       "level": 2
     },
@@ -1074,7 +1074,7 @@
     },
     {
       "from": "PFTF",
-      "to": "PFTF_alpha",
+      "to": "PFTF_GFiberCT",
       "rel": "instantiates",
       "detail": "instantiates",
       "confidence": "INFERRED",
@@ -1097,7 +1097,7 @@
       "mapping_tentative": false
     },
     {
-      "from": "PFTF_alpha",
+      "from": "PFTF_GFiberCT",
       "to": "SFTF_QEM",
       "rel": "complements",
       "detail": "adjacent",

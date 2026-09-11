@@ -143,7 +143,7 @@ NODE_TITLES = {
                             "Physical AI 의복 시뮬레이션 직접 통합선; "
                             "RGB-D replay·controlled textile print 전",
     "SFTF_UrbanTraffic": "SFTF_UrbanTraffic — 도시 교통 가역차로 방향장 응용",
-    "PFTF_alpha": "PFTF_alpha — 중: positive two-layer draft; "
+    "PFTF_GFiberCT": "PFTF_GFiberCT — 중: positive two-layer draft; "
                   "Phase 50/51C frozen evidence, B5/M1 상대 207/207 paired wins·"
                   "topology error 0. PFTF/local-SPD 우월성은 주장하지 않으며 "
                   "게재지·관련연구·submission package가 남음",
@@ -180,7 +180,7 @@ POS = {
     "PFTF_AsymTensor": (-204, 536),
     "PFTF_DrapePrior_VisCull_kDop": (481, 546),
     "PFTF_ResearchOptimize": (420, 39),
-    "PFTF_alpha": (779, 104),
+    "PFTF_GFiberCT": (779, 104),
     "SFTF_QEM": (-189, 131),
     "SFTF_DynamicTargetSearch": (-229, -34),
     "DFSVR_VisCull": (163, 784),
@@ -311,7 +311,7 @@ QUALITY_ROWS = [
     ("PFTF_AssetShock", "PFTF_AssetShock", "하", "38 benchmark/provider rehearsal; draft 원고와 실제 provider outcome 없음"),
     ("PFTF_DrapePrior_VisCull_kDop", "PFTF_DrapePrior_VisCull_kDop", "등급 없음", "통합 evidence 저장소; 독립 논문 등급 미적용"),
     ("PFTF_ResearchOptimize", "PFTF_ResearchOptimize", "등급 없음", "연구 보조 도구; 독립 논문 등급 미적용"),
-    ("PFTF_alpha", "PFTF_alpha", "중", "Phase 50 합성 144건·Phase 51C S3DIS 63건 frozen held-out, B5/M1 상대 207/207 paired wins·topology error 0; PFTF/local-SPD 우월성 제외"),
+    ("PFTF_GFiberCT", "PFTF_GFiberCT", "중", "합성 144건·NCF 유리섬유 복합재 X선 CT 17쌍(원저자 분할) 사전등록 검증, B5/M1 대비 사례별 144/144·17/17 승, 위상 오차 0; 한국섬유공학회지 국문 투고본 초고; PFTF/local-SPD 우월성 제외"),
     ("SFTF_QEM", "SFTF_QEM", "상", "여각 규약 오류 정정·Cura 교차검증(천장 ρ=+0.754)·코퍼스 50메쉬·원고 2편+설명서; 성능 우월 주장 없는 평가방법론 트랙, 미투고"),
     ("SFTF_DynamicTargetSearch", "SFTF_DynamicTargetSearch", "ToDo",
      "Net1 G0 topology·provenance, 11 nodes·12 candidate pipes, 총 15 tests; LeakDB scenario localization·baseline 전"),
@@ -383,7 +383,7 @@ INTRODUCTIONS = {
     "PFTF_AsymTensor": "방향에 따라 다르게 반응하는 재료나 문제를 표현하기 위한 비대칭 텐서 이론이다.",
     "PFTF_DrapePrior_VisCull_kDop": "옷감의 좋은 시작 상태와 안전한 충돌 필터를 결합해 천 계산을 빠르게 하려는 새 연구선이다.",
     "PFTF_ResearchOptimize": "프로젝트 사이의 연결과 작업량을 비교해 효율적인 논문 투고 순서를 찾는 방법이다.",
-    "PFTF_alpha": "서로 떨어진 두 표면을 먼저 구분해 각 층을 따로 복원함으로써 alpha 방법의 잘못된 연결과 위상 오류를 줄이는 연구다.",
+    "PFTF_GFiberCT": "서로 떨어진 두 표면을 먼저 구분해 각 층을 따로 복원함으로써 alpha 방법의 잘못된 연결과 위상 오류를 줄이는 연구다.",
     "SFTF_QEM": "메쉬를 줄여 방향 탐색을 빠르게 하려다 그 가설이 기각되었고, 대신 지지비용 계산의 검증 방법 자체를 다루게 된 연구다. 각도 규약 오류를 스스로 찾아 정정한 기록과, 서로 다른 두 슬라이서조차 완전히 일치하지 않는다는 측정이 주 내용이다.",
     "SFTF_DynamicTargetSearch": "여러 이동 센서의 불완전한 보고를 합쳐 구조가 바뀌는 공간에서 목표물과 다음 탐색 경로를 찾으려는 연구다.",
     "SFTF_ActiveOverprint": "카메라로 기존 물체나 로봇이 고정한 의복의 출력 가능 표면과 다음 관측 위치를 찾고 그 위에 안전하게 작은 형상을 덧출력하려는 연구다.",
@@ -410,7 +410,7 @@ GRAPH_ROLES = {
 }
 
 FINDING_CANDIDATES = {
-    "PFTF_alpha": "발견1?",
+    "PFTF_GFiberCT": "발견1?",
     "DFSVR_VisCull": "발견4·5·6?",
 }
 
@@ -833,13 +833,13 @@ if preserve_extended_quality:
     s = _update_json_object_constant(
         s,
         "STATUS_BADGES",
-        {"PFTF_alpha": "미정,draft"},
+        {"PFTF_GFiberCT": "한국섬유공학회지,draft"},
     )
     existing_quality_js = _update_json_object_constant(
         existing_quality_js,
         "REMAINING_BOTTLENECKS",
         {
-            "PFTF_alpha": "게재지·관련연구·서지·저자·declarations·data availability 확정; close-layer·outlier·N<160·automatic pair discovery와 PFTF/local-SPD 우월성 주장 금지",
+            "PFTF_GFiberCT": "A안 보강 중 — 초록의 시편 표기, 일반 복원 대조군(Poisson/Ball Pivoting), 복원 메시 기반 간격 지도; 시편 1개·ρ=4 는 한 패널의 값; PFTF/local-SPD 우월성 주장 금지",
             "PFTF_DrapePrior_VisCull_kDop": "독립 논문 등급 미적용 — 통합 evidence 저장소",
             "PFTF_ResearchOptimize": "독립 논문 등급 미적용 — 연구 보조 도구",
             "DFSVR_VisCull": "값·gradient parity·거짓음성 0 및 실제 end-to-end utility 검증",
@@ -850,7 +850,7 @@ if preserve_extended_quality:
         s,
         "INDUSTRIAL_EFFECTS",
         {
-            "PFTF_alpha": "실내 스캔의 바닥·천장처럼 떨어진 두 표면을 먼저 분리 복원해 잘못된 연결과 topology 오류를 줄일 수 있다. 자동 객체 탐지와 close-layer는 미지원이다.",
+            "PFTF_GFiberCT": "X선 CT로 촬영한 적층 섬유구조(복합재 적층체·스페이서 패브릭)에서 층 간격과 두께를 층간 오연결 없이 계산할 수 있고, 표본이 부족하면 필요한 관측 밀도를 스스로 알려 준다. 맞닿은 계면과 자동 객체 탐지는 미지원이다.",
             "DFSVR_VisCull": "정확한 first-hit 결과를 유지하면서 불필요한 교차 후보를 안전하게 줄이면 미분가능 지지 구조 계산의 확장성을 높일 수 있다.",
             "SFTFSoft_GNN_DFSVR": "GNN의 빠른 후보 제안과 DFSVR의 정밀 보정을 결합해 출력 방향 탐색 시간과 검증 비용을 함께 줄이는 것을 목표로 한다.",
         },
@@ -902,16 +902,16 @@ RESEARCH_OPTIMIZE_NODE = {
 }
 
 ALPHA_NODE = {
-    "id": "PFTF_alpha",
-    "label": "PFTF_alpha",
+    "id": "PFTF_GFiberCT",
+    "label": "PFTF_GFiberCT",
     "color": {"background": "#f28e2b", "border": "#f28e2b",
                "highlight": {"background": "#f28e2b", "border": "#f28e2b"}},
     "size": 16.4,
     "font": {"size": 12, "color": "#333333", "bold": False},
-    "title": NODE_TITLES["PFTF_alpha"],
+    "title": NODE_TITLES["PFTF_GFiberCT"],
     "community": 2,
     "community_name": "중",
-    "source_file": "PFTF_alpha.md",
+    "source_file": "PFTF_GFiberCT.md",
     "file_type": "concept",
     "degree": 2,
 }
@@ -1063,14 +1063,14 @@ TODO_EDGES = [
     {"from": "PFTF", "to": "PFTF_ResearchOptimize",
      "label": "optimizes", "title": "optimizes [INFERRED]", "dashes": True,
      "width": 2, "color": {"opacity": 0.7}, "confidence": "INFERRED"},
-    {"from": "PFTF", "to": "PFTF_alpha",
+    {"from": "PFTF", "to": "PFTF_GFiberCT",
      "label": "instantiates", "title": "instantiates [INFERRED]", "dashes": True,
      "width": 2, "color": {"opacity": 0.7}, "confidence": "INFERRED"},
-    # SFTF_QEM: Tomo_SFTF 가 베이스, PFTF_alpha 와는 문제·기준이 다른 인접/대비 관계다.
+    # SFTF_QEM: Tomo_SFTF 가 베이스, PFTF_GFiberCT 와는 문제·기준이 다른 인접/대비 관계다.
     {"from": "Tomo_SFTF", "to": "SFTF_QEM",
      "label": "accelerates", "title": "accelerates [INFERRED]", "dashes": True,
      "width": 2, "color": {"opacity": 0.7}, "confidence": "INFERRED"},
-    {"from": "PFTF_alpha", "to": "SFTF_QEM",
+    {"from": "PFTF_GFiberCT", "to": "SFTF_QEM",
      "label": "adjacent",
      "title": "adjacent — 다른 문제(alpha 값 선택 vs 목적함수 보존) [INFERRED]",
      "dashes": True,
@@ -1206,7 +1206,7 @@ CURATED_EDGE_UPDATES = [
     _curated_edge("Tomo_SFTF", "SFTF_QEM", "ranking surrogate",
                   "hard-SFTF 배향 순위를 저비용 QEM 대리모델로 감사",
                   relation="accelerates", dashes=False, width=3),
-    _curated_edge("PFTF_alpha", "SFTF_QEM", "problem boundary",
+    _curated_edge("PFTF_GFiberCT", "SFTF_QEM", "problem boundary",
                   "two-layer 분리와 목적함수 보존 문제의 경계를 명시",
                   relation="complements"),
     _curated_edge("Tomo_SFTF", "SFTF_DynamicTargetSearch", "candidate evidence",
@@ -1390,7 +1390,7 @@ DRAPESCAN_EDGES = [
         "확장", dashes=True,
     ),
     _drapescan_goal_edge(
-        "cfmsDrapeSCAN", "PFTF_alpha", "조건부 QA",
+        "cfmsDrapeSCAN", "PFTF_GFiberCT", "조건부 QA",
         "실제 유령 이중면이 검출될 때만 layer-first QA를 조건부 실행",
         "정확도", dashes=True,
     ),
@@ -1978,10 +1978,10 @@ s = s.replace(
     '"highlight": {"background": "#ffffff", "border": "#000000"}}',
 )
 s = s.replace(
-    '"id": "PFTF_alpha", "label": "PFTF_alpha", '
+    '"id": "PFTF_GFiberCT", "label": "PFTF_GFiberCT", '
     '"color": {"background": "#c8c8c8", "border": "#000000", '
     '"highlight": {"background": "#c8c8c8", "border": "#000000"}}',
-    '"id": "PFTF_alpha", "label": "PFTF_alpha", '
+    '"id": "PFTF_GFiberCT", "label": "PFTF_GFiberCT", '
     '"color": {"background": "#ffffff", "border": "#000000", '
     '"highlight": {"background": "#ffffff", "border": "#000000"}}',
 )

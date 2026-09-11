@@ -163,7 +163,7 @@
 
 <script>
 /* ====================== 버전 (배포 확인용) ====================== */
-const APP_VERSION='v2026-08-31-grades';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
+const APP_VERSION='v2026-09-11-gfiberct';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
 
 /* ====================== 기본 데이터 (첫 실행 시드) ====================== */
 const DEFAULT_DATA = /*DATA_START*/{"version":1,"title":"CFMS 프로젝트 관계도 2026","showRel":true,"root":{"id":"root","title":"CFMS 연구실 2026","kind":"root","note":"두 워크스페이스의 세부 프로젝트 관계도","children":[{"id":"sftf","title":"__SFTF_Projects(2026)","kind":"group","note":"3D 프린팅 Support Flow Tensor Field 연구군 (D:\\__SFTF_Projects(2026))","children":[{"id":"tomo_sftf","title":"Tomo_SFTF_dev","kind":"core","status":"active","note":"SFTF 본체: 빌드방향 후보 생성(coarse-to-refine) + TOMO_CPU/GPU 엔진(DLL). 표준 템플릿의 기원."},{"id":"clustering","title":"SFTF_Clustering_dev","kind":"app","status":"active","note":"면별 SFTF 특징 → 출판지향 메쉬 분할(clustering). 한국섬유공학회지 투고."},{"id":"derivative","title":"SFTF_Derivative_dev","kind":"app","status":"active","note":"미분가능 SFTF 손실항 + GNN + 경사기반 빌드방향 최적화. TOMO 교차검증."},{"id":"composite","title":"SFTF_Composite_dev","kind":"app","status":"stub","note":"복합재 적용 (신규 스캐폴드)."},{"id":"injmold","title":"SFTF_InjMold_dev","kind":"app","status":"stub","note":"사출성형 적용 (신규 스캐폴드)."}]},{"id":"vscode","title":"__VSCode_Projects","kind":"group","note":"의복 CAD·영상계측·랩 웹앱·인프라 (D:\\__VSCode_Projects)","children":[{"id":"cadsuite","title":"의복 CAD 스위트","kind":"subgroup","note":"Clo3D 오픈소스 대안","children":[{"id":"cfmscad","title":"cfmsCAD2026_dev","kind":"app","status":"active","note":"3D 의복 CAD 에디터 (UI/패턴)."},{"id":"cfmsdrape","title":"cfmsDrape2026_dev","kind":"app","status":"active","note":"암시적 옷감 드레이프 솔버(DLL). SCAD/GarmentCode 입력, 인체 충돌·자기충돌."},{"id":"cfmssew","title":"cfmsSew2026_dev","kind":"app","status":"active","note":"2D 패턴 봉제대응 자동인식(휴리스틱→GNN). CAD/Drape에 병합 예정."},{"id":"cfmsshared","title":"cfmsShared2026_dev","kind":"infra","status":"infra","note":"CAD↔Drape 인터페이스 단일진실(contract/messages) 공유 git 채널."}]},{"id":"measure","title":"영상 계측","kind":"subgroup","children":[{"id":"dispersity","title":"cfmsDispersity2026_Dev","kind":"app","status":"active","note":"광학현미경 입자 분산도 정량화(정적 kNN 에너지). C++Builder(Baraff 클로스심) 포팅."},{"id":"sem","title":"TSE_SEM2026_dev","kind":"app","status":"active","note":"SEM 섬유 영상 정량화(반지름·배향·기공) + metaball 3D 재구성."}]},{"id":"webapps","title":"랩 웹앱 (cfms-lab/KIT_sodi · Supabase)","kind":"subgroup","children":[{"id":"upjuk","title":"논문관리 (upjuk)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/upjuk.html","note":"업적 리스트 CRUD + PDF. draft는 RLS로 비로그인 숨김."},{"id":"timetable","title":"수업시간표 (TimeTable)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/timetable.html","note":"학기별 시간표 드래그 편성."},{"id":"jobgis","title":"취업현황 (JobGIS)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/jobgis.html","note":"졸업생 취업처 지도."},{"id":"mindmap","title":"이 관계도 (Mindmap)","kind":"web","status":"active","note":"프로젝트 관계도 (이 페이지, 로그인 전용)."}]},{"id":"infra","title":"인프라/템플릿","kind":"subgroup","children":[{"id":"template","title":"__vscode_AI_template","kind":"infra","status":"infra","note":"표준 프로젝트 템플릿(코드+논문, uv/xelatex/훅). 모든 *_dev의 기반. Tomo_SFTF에서 기원."},{"id":"hooks","title":"__클로드코드_훅설정","kind":"infra","status":"infra","note":"Claude Code 전역 훅 설정."}]}]}]},"links":[{"from":"tomo_sftf","to":"clustering","label":"코어 분리"},{"from":"tomo_sftf","to":"derivative","label":"코어 재사용"},{"from":"tomo_sftf","to":"composite","label":"파생"},{"from":"tomo_sftf","to":"injmold","label":"파생"},{"from":"clustering","to":"derivative","label":"코드 재사용"},{"from":"tomo_sftf","to":"template","label":"템플릿 기원"},{"from":"cfmsshared","to":"cfmscad","label":"contract"},{"from":"cfmsshared","to":"cfmsdrape","label":"contract"},{"from":"cfmssew","to":"cfmscad","label":"병합 예정"},{"from":"cfmssew","to":"cfmsdrape","label":"병합 예정"},{"from":"derivative","to":"cfmsdrape","label":"드레이프 응용 연계"},{"from":"dispersity","to":"cfmsdrape","label":"클로스심 계보"}]}/*DATA_END*/;
@@ -402,7 +402,7 @@ function applyGraphNodes20260811(data){
 
 /* ====== 중복 노드 정리 (2026-08-11) ======
    같은 이름이 두 번 들어간 것을 한 번만 남긴다.
-   - PFTF_alpha: '#2 SFTF_QEM' 밑(nzyk4gd6, 중·draft) 유지, '#5 framework' 밑 취소본(nli69r22) 삭제
+   - PFTF_GFiberCT: '#2 SFTF_QEM' 밑(nzyk4gd6, 중·draft) 유지, '#5 framework' 밑 취소본(nli69r22) 삭제
    - SFTF_DynamicTargetSearch: A(nkbfa3m1, #3 Composite 밑) 유지, B(nvthuh54)의 하위(ActiveOverprint 갈래)를 A로 옮긴 뒤 B 삭제 */
 const DEDUP_VERSION='2026-08-11';
 function applyDedup20260811(data){
@@ -411,7 +411,7 @@ function applyDedup20260811(data){
   const root=data.root;
   const removeNode=(id)=>{ const par=findParent(root,id); if(!par) return; const i=(par.children||[]).findIndex(c=>c.id===id); if(i>=0) par.children.splice(i,1); };
   let changed=false;
-  if(findNode(root,'nli69r22')){ removeNode('nli69r22'); changed=true; }         // PFTF_alpha 취소본 삭제
+  if(findNode(root,'nli69r22')){ removeNode('nli69r22'); changed=true; }         // PFTF_GFiberCT 취소본 삭제
   const A=findNode(root,'nkbfa3m1'), B=findNode(root,'nvthuh54');
   if(A&&B){                                                                       // DTS: B의 하위를 A로 병합 후 B 삭제
     (B.children||[]).forEach(c=>{ (A.children||(A.children=[])).push(c); });
@@ -459,7 +459,7 @@ function applyGraphMeta20260811(data){
     'nf7nopp2':{b:'그래프 학습으로 출력 방향 품질 예측',p:'D:\\__SFTF_Projects(2026)\\SFTFSoft_GNN_dev'},
     'njkskwe4':{b:'옷감 접촉 예측해 천 시뮬레이션 가속',p:'D:\\__SFTF_Projects(2026)\\SFTF_DrapePrior_dev'},
     'nongkxm5':{b:'방향 이방성 표현하는 비대칭 텐서 이론',p:'D:\\__PFTF_Projects(2026)\\PFTF_AsymTensor_dev'},
-    'nzyk4gd6':{b:'떨어진 두 표면 분리로 위상 오류 감소',p:'D:\\__PFTF_Projects(2026)\\PFTF_alpha_dev'},
+    'nzyk4gd6':{b:'떨어진 두 표면 분리로 위상 오류 감소',p:'D:\\__PFTF_Projects(2026)\\PFTF_GFiberCT_dev'},
     'nafefnc3':{b:'지지비용 계산의 검증 방법 자체 연구',p:'D:\\__SFTF_Projects(2026)\\SFTF_QEM_dev'},
     'nkbfa3m1':{b:'이동 센서 종합해 목표·탐색 경로 추정',p:'D:\\__SFTF_Projects(2026)\\SFTF_DynamicTargetSearch_dev'},
     'nu3n7ge9':{b:'교차 후보 줄여 DFSVR 계산 가속',p:''},
@@ -635,7 +635,7 @@ const VAULT_PROJECT_GRADES={
   'cfmsMiindo':{mindmapId:'cfmsdrape',kind:'none'},
   'cfmsPINNCAD':{mindmapId:'npp8yov2',kind:'low'},
   'cfmsPINNDrape':{mindmapId:'nf18t2n5',kind:'low'},
-  'PFTF_alpha':{mindmapId:'nzyk4gd6',kind:'medium'},
+  'PFTF_GFiberCT':{mindmapId:'nzyk4gd6',kind:'medium'},
   'PFTF_Assembly':{mindmapId:'n1krev41',kind:'low'},
   'PFTF_AssetShock':{mindmapId:'gx_pftf_assetshock',kind:'low'},
   'PFTF_AsymTensor':{mindmapId:'nongkxm5',kind:'medium'},
@@ -842,6 +842,84 @@ function applyHipDetectSplit20260910(data){
   data.hipDetectSplitVersion=HIPDETECT_SPLIT_VERSION;
   return true;
 }
+
+/* ====== 이희란 교수님방 모으기 (2026-09-11) ======
+   공저자 팀에 보내는 꾸러미(볼트 Dashboards/cfms_cowork_이희란교수님.md)의 여덟 노드 중 넷이
+   다른 가지에 흩어져 있었다 — SFTF_Cluster 는 Tomo_SFTF 밑, cfmsAutoSew 와 cfmsAutoPlace 두
+   트랙은 미인도 프로젝트의 cfmsSew 사슬. 「은종현 교수님방」처럼 한 가지에 모은다.
+   방 안의 자리는 형제프로젝트_계획 군 E 의 사슬 «A → {B, AutoSew}» 를 따른다 —
+   cfmsAutoPlace_IJCST(A)가 앞 편이고 cfmsAutoPlace_JCDE(B)·cfmsAutoSew 가 그 밑에 선다(OP-3 인계).
+   방 차원의 순서는 꾸러미 표의 줄 순서다(Tomo_Shell2026 → HIPDetect → AutoPlace → SFTF_Cluster).
+   끌려가면 안 되는 것: cfmsPINNDrape 는 공저가 아니므로 cfmsAutoSew 자리를 이어받아 cfmsSew 에 남는다.
+   가지가 끊기는 계보는 관계선으로 남긴다 — Tomo_SFTF → SFTF_Cluster(메시 분할, accept 후 투고),
+   cfmsAutoSew → cfmsPINNDrape(OP-9 초기배치 이완). 방향은 위 «관계선 방향 통일» 규칙대로
+   앞 편 → 뒷 편이다. cfmsPINNDrape → cfmsAutoPlace 였던 옛 가지는 사슬 순서와 반대라 선을 남기지 않는다. */
+const LEE_ROOM_GATHER_VERSION='2026-09-11';
+function applyLeeRoomGather20260911(data){
+  if(!data||!data.root||data.leeRoomGatherVersion===LEE_ROOM_GATHER_VERSION) return false;
+  const root=data.root;
+  const room=findNode(root,'nkrb7xj2');                                   // 이희란 교수님방
+  const autoSew=findNode(root,'nq1owe91')||findNode(root,'n3k56wq4');     // cfmsAutoSew (볼트 노트는 옛 id 를 가리킨다)
+  const pinnDrape=findNode(root,'nf18t2n5');                              // cfmsPINNDrape — 공저 아님, 방으로 안 간다
+  // parent 의 index 자리(없으면 맨 뒤)로 옮긴다. 노드가 없거나 자기 하위로 넣는 꼴이면 건드리지 않는다.
+  const moveUnder=(id,parent,index)=>{
+    const node=findNode(root,id);
+    if(!node||!parent||node.id===parent.id||findNode(node,parent.id)) return null;
+    const par=findParent(root,id);
+    if(par){ const i=par.children.findIndex(c=>c.id===id); if(i>=0) par.children.splice(i,1); }
+    const kids=parent.children||(parent.children=[]);
+    kids.splice(index==null||index<0||index>kids.length?kids.length:index,0,node);
+    parent.collapsed=false;
+    return node;
+  };
+  if(room){
+    // 1) cfmsPINNDrape 가 cfmsAutoSew 밑에 있으면 그 자리로 한 칸 올린다 — AutoSew 가 떠나도 cfmsSew 에 남는다.
+    if(autoSew&&pinnDrape&&findParent(root,pinnDrape.id)===autoSew){
+      const sewGroup=findParent(root,autoSew.id);
+      if(sewGroup) moveUnder(pinnDrape.id,sewGroup,sewGroup.children.findIndex(c=>c.id===autoSew.id));
+    }
+    // 2) cfmsAutoPlace_IJCST(앞 편)를 방에 붙이고, 그 밑에 JCDE 와 AutoSew(같은 세대)를 세운다.
+    const ijcst=moveUnder('cfmsAutoPlace_IJCST',room);
+    const trackParent=ijcst||room;
+    moveUnder('cfmsAutoPlace_JCDE',trackParent);
+    if(autoSew) moveUnder(autoSew.id,trackParent);
+    // 3) SFTF_Cluster 는 방 맨 뒤 — 꾸러미 표에서도 뒤쪽 줄이다.
+    moveUnder('tomo_sftf',room);
+    room.collapsed=false;
+  }
+  data.links=data.links||[];
+  const severed=(parentId,childId)=>{                  // 부모-자식 가지가 없을 때만 참 — 가지가 있으면 선이 겹친다
+    const c=findNode(root,childId); return !!c&&findParent(root,childId)!==findNode(root,parentId);
+  };
+  const ensureLink=(from,to,label)=>{                  // 양쪽이 있고 어느 방향으로도 선이 없을 때만 긋는다
+    if(!findNode(root,from)||!findNode(root,to)) return;
+    if(data.links.some(l=>(l.from===from&&l.to===to)||(l.from===to&&l.to===from))) return;
+    data.links.push({from,to,label,type:'engine'});
+  };
+  if(severed('sftf','tomo_sftf')) ensureLink('sftf','tomo_sftf','메시 분할');
+  if(autoSew&&severed(autoSew.id,'nf18t2n5')) ensureLink(autoSew.id,'nf18t2n5','초기배치 이완');
+  data.leeRoomGatherVersion=LEE_ROOM_GATHER_VERSION;
+  return true;   // 버전 상승 자체도 클라우드 문서에 저장해야 재실행되지 않는다.
+}
+
+/* ====== PFTF_alpha → PFTF_GFiberCT 개명 (2026-09-11) ======
+   볼트 Projects/PFTF_alpha.md 가 PFTF_GFiberCT.md 로 바뀌었다 — 검증 자료가 S3DIS 실내 점군에서
+   NCF 섬유복합재 X선 CT 로 옮겨 간 뒤의 이름이다. 클라우드 문서의 노드(nzyk4gd6)는 아직 옛 제목이라
+   제목·저장소 주소·프로젝트 폴더를 새 이름으로 바꾼다. 노드 id 는 그대로 두어 볼트 frontmatter
+   (mindmap_id)·project_nodes.mindmap_id 대응이 끊기지 않게 한다.
+   사용자가 이미 다른 제목을 붙였으면 제목은 건드리지 않는다(주소·폴더의 옛 이름만 바꾼다). */
+const GFIBERCT_RENAME_VERSION='2026-09-11';
+function applyGFiberCTRename20260911(data){
+  if(!data||!data.root||data.gfiberCtRenameVersion===GFIBERCT_RENAME_VERSION) return false;
+  const n=findNode(data.root,'nzyk4gd6');
+  if(n){
+    if((n.title||'').trim().toLowerCase()==='pftf_alpha') n.title='PFTF_GFiberCT';
+    if(/PFTF_alpha/i.test(n.url||'')) n.url=n.url.replace(/PFTF_alpha/gi,'PFTF_GFiberCT');
+    if(/PFTF_alpha/i.test(n.projectPath||'')) n.projectPath=n.projectPath.replace(/PFTF_alpha/gi,'PFTF_GFiberCT');
+  }
+  data.gfiberCtRenameVersion=GFIBERCT_RENAME_VERSION;
+  return true;   // 버전 상승 자체도 클라우드 문서에 저장해야 재실행되지 않는다.
+}
 //==PURE_END
 
 /* ====================== Supabase 설정/세션 (upjuk과 공유) ====================== */
@@ -962,6 +1040,8 @@ applyVaultGrades20260901(DATA);
 applyLinkDirection20260907(DATA);
 applyHolonomySplit20260907(DATA);
 applyHipDetectSplit20260910(DATA);
+applyLeeRoomGather20260911(DATA);
+applyGFiberCTRename20260911(DATA);
 let sel=null, view={tx:60,ty:30,s:1}, showRel=true, LAY=null;
 
 /* ====================== 실행취소 / 다시실행 (undo/redo) ====================== */
@@ -1320,10 +1400,12 @@ async function loadDoc(){
     const directionMigrated=applyLinkDirection20260907(DATA);
     const holonomyMigrated=applyHolonomySplit20260907(DATA);
     const hipDetectMigrated=applyHipDetectSplit20260910(DATA);
+    const leeRoomMigrated=applyLeeRoomGather20260911(DATA);
+    const gfiberCtMigrated=applyGFiberCTRename20260911(DATA);
     const kindsMigrated=normalizeKinds(DATA);
     showRel=DATA.showRel!==false; document.getElementById('relBtn').textContent='관계선 '+(showRel?'✓':'✕');
     sel=null; render(); renderEdit(); fitView(); setSaveState('');
-    if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||linkMigrated||statusMigrated||drapeMigrated||gradesMigrated||directionMigrated||holonomyMigrated||hipDetectMigrated||kindsMigrated) await saveDoc(true);
+    if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||linkMigrated||statusMigrated||drapeMigrated||gradesMigrated||directionMigrated||holonomyMigrated||hipDetectMigrated||leeRoomMigrated||gfiberCtMigrated||kindsMigrated) await saveDoc(true);
   }catch(e){
     const b=document.getElementById('banner'); b.style.display='block';
     if(/relation|does not exist|42P01|PGRST205|404/i.test(e.message))
@@ -1331,7 +1413,7 @@ async function loadDoc(){
     else if(!isLoggedIn() && /401|403|PGRST301|permission denied/i.test(e.message))
       b.textContent='공개 열람 권한이 없습니다. Supabase에서 enable_rls_mindmaps.sql 을 다시 실행해 anon SELECT 정책을 적용하세요.';
     else b.textContent='데이터를 불러오지 못했습니다: '+e.message.slice(0,140);
-    applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); applyDrapeEngineLinks20260827(DATA); applyVaultGrades20260901(DATA); applyLinkDirection20260907(DATA); applyHolonomySplit20260907(DATA); applyHipDetectSplit20260910(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
+    applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); applyDrapeEngineLinks20260827(DATA); applyVaultGrades20260901(DATA); applyLinkDirection20260907(DATA); applyHolonomySplit20260907(DATA); applyHipDetectSplit20260910(DATA); applyLeeRoomGather20260911(DATA); applyGFiberCTRename20260911(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
   }
 }
 async function saveDoc(silent){
@@ -1352,7 +1434,7 @@ function download(name,text,type){ const b=new Blob([text],{type:type||'applicat
 function exportJSON(){ download('mindmap_backup.json', JSON.stringify(DATA,null,2)); toast('백업 JSON을 내려받았습니다.'); }
 function importJSON(input){
   const f=input.files[0]; if(!f)return; const r=new FileReader();
-  r.onload=()=>{ try{ const d=JSON.parse(r.result); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); applyLinkFill20260820(d); applyStatusCleanup20260822(d); applyDrapeEngineLinks20260827(d); applyVaultGrades20260901(d); applyLinkDirection20260907(d); applyHolonomySplit20260907(d); applyHipDetectSplit20260910(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); applyLinkFill20260820(d); applyStatusCleanup20260822(d); applyDrapeEngineLinks20260827(d); applyVaultGrades20260901(d); applyLinkDirection20260907(d); applyHolonomySplit20260907(d); applyHipDetectSplit20260910(d); applyLeeRoomGather20260911(d); applyGFiberCTRename20260911(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
     if(!confirm('백업으로 현재 클라우드 관계도를 덮어쓸까요?'))return;
     pushHistory();
     DATA=d; showRel=DATA.showRel!==false; sel=null; render(); renderEdit(); saveDoc(false);
