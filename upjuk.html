@@ -7,11 +7,20 @@
 <style>
   :root{--green:#2e7d32;--green-d:#1b5e20;--bg:#f4f6f4;--line:#cfd8cf;
     /* ── 등급 색 (2026-09-12) ────────────────────────────────────────────────
-       graph.html 의 QUALITY_COLORS · mindmap.html 의 KIND.fill 과 **같은 값**이다.
-       세 페이지에서 같은 프로젝트가 같은 색으로 보이게 하려는 것.
-       **아직 안 나간 원고에만** 쓴다 — 출판된 것은 흰색(기본)이다. */
-    --q-high:#e02020; --q-medium:#f28e2b; --q-low:#2a78d6;
-    --q-todo:#ffffff; --q-closed:#6b7280; --q-group:#c8c8c8; --q-none:#94a3b8;
+       graph.html 의 QUALITY_COLORS · mindmap.html 의 KIND.fill 을 **흰 바탕에 50% 섞은**
+       값이다. 같은 색을 쓰되, 그래프의 작은 사각형과 달리 여기는 줄 전체를 덮어서
+       원색 그대로는 너무 셌다. 색상(hue)은 같으므로 세 페이지가 여전히 같은 언어를 쓴다.
+       **아직 안 나간 원고에만** 쓴다 — 출판된 것은 흰색(기본)이다.
+
+         등급        원색       여기(50%)
+         상          #e02020    #f09090
+         중          #f28e2b    #f9c795
+         하          #2a78d6    #95bceb
+         Closed      #6b7280    #b5b9c0
+         그룹        #c8c8c8    #e4e4e4
+         등급 없음   #94a3b8    #cad1dc                                        */
+    --q-high:#f09090; --q-medium:#f9c795; --q-low:#95bceb;
+    --q-todo:#ffffff; --q-closed:#b5b9c0; --q-group:#e4e4e4; --q-none:#cad1dc;
     /* 진행 중이지만 연결된 프로젝트가 없어 등급을 모르는 것 */
     --q-unknown:#f3f4f5;}
   *{box-sizing:border-box}
@@ -52,24 +61,18 @@
   .paper.q-group{background:var(--q-group)}
   .paper.q-none{background:var(--q-none)}
   .paper.q-unknown{background:var(--q-unknown)}
-  /* 짙은 등급색(상·하·Closed·등급없음) 위에서는 글자를 흰색으로 뒤집는다.
-     graph.html·mindmap.html 이 같은 색에서 text:'#ffffff' 를 쓰는 것과 같은 규칙이다.
-     중(주황)은 밝아서 검은 글자가 더 읽힌다. */
-  .paper.ink-light{color:#fff}
-  .paper.ink-light .title{color:#fff}
-  .paper.ink-light .funding{color:#eaffea}
-  .paper.ink-light .doi{color:#fff;border-color:#fff}
-  .paper.ink-light .pdf{color:#fff;background:transparent;border-color:#fff}
-  .paper.ink-light .num{color:#e8e8e8}
-  .paper.ink-light .rowtools button{background:transparent;color:#fff;border-color:#fff}
+  /* 50% 로 옅어진 뒤로는 여섯 색 모두 **검은 글자**가 잘 읽혀서, 전에 있던 흰 글자 반전
+     (.ink-light)을 걷어냈다. 본문 대비는 전부 6.9:1 이상이다.
+     다만 제목 파랑(#0d47a1)만 상(3.7:1)·하(4.4:1)에서 WCAG AA(4.5:1)에 조금 못 미쳐,
+     색칠된 줄에서만 한 톤 낮춘다(#0b3a85 → 4.7:1·5.5:1). 흰 줄은 그대로다. */
+  .paper[class*="q-"] .title{color:#0b3a85}
+  .paper.q-todo .title,.paper.q-unknown .title{color:#0d47a1}   /* 거의 흰 바탕은 원래 색 */
   .paper .num{font-weight:700;color:#888;min-width:34px;text-align:right}
   .paper .body{flex:1;line-height:1.5}
   .authors{font-weight:700}.title{color:#0d47a1;cursor:pointer}.title:hover{text-decoration:underline}
   .journal{font-style:italic;font-weight:600}.vol{text-decoration:underline}
   .badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;color:#fff;margin-right:6px}
   .b1{background:#2e7d32}.b2{background:#00838f}.b3{background:#0277bd}.b4{background:#f9a825}.b5{background:#8d6e63}
-  /* 등급색 행 위에서는 배지 테두리를 흰색으로 둘러 배경과 떼어 놓는다. */
-  .paper.ink-light .badge{box-shadow:0 0 0 1px rgba(255,255,255,.8)}
   .funding{color:#2e7d32;font-weight:700;font-size:12px}
   .doi{color:#1565c0;font-weight:700;font-size:11px;text-decoration:none;border:1px solid #1565c0;border-radius:4px;padding:0 5px;margin-left:6px}
   .pdf{color:#c62828;background:#fff;font-weight:700;font-size:11px;text-decoration:none;border:1px solid #c62828;border-radius:4px;padding:1px 6px;margin-left:6px;cursor:pointer}
@@ -416,8 +419,6 @@ function renderTodoNode(n,i){
 }
 /* 등급 → 행 배경 클래스. graph.html 의 QUALITY_COLORS 와 같은 이름표를 쓴다. */
 const GRADE_CLASS={'상':'high','중':'medium','하':'low','ToDo':'todo','Closed':'closed','그룹':'group','등급 없음':'none'};
-/* 글자를 흰색으로 뒤집어야 하는 짙은 등급색. 중(주황)·ToDo(흰색)·그룹(연회색)은 검은 글자. */
-const GRADE_DARK=new Set(['high','low','closed','none']);
 
 /* 행 배경을 정한다.
    · 출판된 것은 흰색(기본) — 목록의 대부분이라 전과 같아 보인다
@@ -428,7 +429,7 @@ function rowClass(p){
   const n=nodeById(p.PROJECT_ID);
   const g=n&&GRADE_CLASS[n.grade];
   if(!g) return ' q-unknown';
-  return ' q-'+g+(GRADE_DARK.has(g)?' ink-light':'');
+  return ' q-'+g;
 }
 function renderPaper(p,i){const st=p.PrintStatus;let x=[];
   if(p.FUNDING)x.push(`<span class="funding">[${esc(p.FUNDING)}]</span>`);
