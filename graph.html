@@ -404,7 +404,7 @@ LEGEND.forEach(item => {
 // 정본: Projects/{노드ID}.md frontmatter(submission) — graphify-out/status_badges.py 로 재적용 가능.
 const STATUS_BADGES = {"ColdOndol": "미정", "PFTF": "보류(⛔)", "PFTF_VisCull_kDop": "IJCST,draft", "PFTF_GFiberCT": "한국섬유공학회지,draft", "SFTFSoft_GNN": "IJAMT, draft", "SFTF_Clustering": "RPJ,draft", "SFTF_DrapePrior": "TSE 투고 완료 (2026-08-14, manuscriptlink #51937 번호 할당 중)", "SFTF_HeatMethod": "Composites Part A 초고 완성 (2026-08-15, 미투고)", "SFTF_Holonomy": "Composites Part A 초고 완성 (2026-09-07, 미투고)", "SFTF_SewerPOC": "미정", "SFTF_UrbanTraffic": "미정", "Tomo_DFSVR": "보강 후 투고 · T2 v2 완주(2026-08-22)·분석 완료(2026-08-23), 확증은 두 번 다 NO-GO", "Tomo_SFTF": "TDP,submit,08-13", "Tomo_SFTFSoft": "RPJ,draft", "cfmsAutoSew": "해외 SCIE,draft", "cfmsCIPC": "TSE 투고 완료 (2026-08-21, 원고번호 26M-08-029)", "cfmsPINNDrape": "**한국섬유공학회지(TSE) 국문 투고본으로 전환**(2026-08-21, 사용자 지정 — TDP 해외 투고는 접었다). 정본 `draft/src/PINNDrape_2_검토용한글.md`, 영문 Maintext 는 `draft/src/_archive/` 로 보관. 빌드 14면(한도 20). 저자 설인환 단독·NRF-2022R1A2C1010072. 구 기록: **TDP 포맷으로 집필 착수**(2026-08-17). G1~G6 종주 완료, 긍정 효과 확보 — 목표 착의 품질 도달 시간 cold 대비 +92~98 %·엔진 대조군 대비 +78~92 %, 예측 비용 3.7~14 ms. 검토본은 TDP 구조 + 한글. 원격 PC 원고는 병합하지 않는다", "TSE_SEM_Bezier": "한국섬유공학회지,draft", "TSE_SEM_Tensor": "한국섬유공학회지,draft", "TSE_SEM_AutoTune": "보류(사전심사 major revision · 투고 3순위)"};
 const STATUS_COLORS = { draft: "#64748b", submit: "#d4a017", revision: "#e06e10", accepted: "#12a150", printed: "#7a3fd1" };
-// Supabase(project_nodes) 오버라이드 뒤 같은 규칙으로 다시 장식할 수 있도록,
+// Supabase(research_outputs) 오버라이드 뒤 같은 규칙으로 다시 장식할 수 있도록,
 // 장식(배지·등급·테두리)이 손대기 전의 원본을 보존해 둔다. decorateNodes() 참고.
 RAW_NODES.forEach(n => {
   n._base = { title: n.title, label: n.label, shape: n.shape, borderWidth: n.borderWidth,
@@ -534,7 +534,7 @@ RAW_NODES.forEach(n => {
 });
 }
 // 장식 전체를 한 번에: 원본 복원 → 배지 → 우선 고려 → 등급 → 대괄호 테두리.
-// 처음 로드 때 한 번 돌고, Supabase(project_nodes) 오버라이드가 오면 다시 돈다.
+// 처음 로드 때 한 번 돌고, Supabase(research_outputs) 오버라이드가 오면 다시 돈다.
 function decorateNodes() {
   resetNodesFromBase();
   applyBadgeDecoration();
@@ -1659,12 +1659,22 @@ network.on('afterDrawing', function(ctx) {
 // EDGE_LABEL_LAYOUT_END
 </script>
 <script>
-/* ====== Supabase 공유 노드(project_nodes) 오버라이드 ======================
-   upjuk.html·mindmap.html 과 같은 테이블을 읽어, 파일에 내장된 등급(QUALITY)·
-   투고 배지(STATUS_BADGES)·병목·소개·프로젝트 경로·투고 진도(MINDMAP_STATUS)를
-   최신 값으로 덮어쓴다. mindmap 에서 노트를 고치면 새로고침만으로 반영된다.
+/* ====== Supabase 공유 노드(research_outputs, kind='node') 오버라이드 ==========
+   2026-09-12: `project_nodes` → `research_outputs` 로 옮겼다. upjuk.html 은 같은 표의
+   kind='output' 을 본다 — 한 표의 두 필터다. 정본은 옵시디언 볼트이고 이 표는 발행
+   캐시다(볼트 Rules/업적통합_설계안.md).
+   파일에 내장된 등급(QUALITY)·투고 배지(STATUS_BADGES)·병목·소개·프로젝트 경로·
+   투고 진도(MINDMAP_STATUS)를 최신 값으로 덮어쓴다.
    실패(오프라인·테이블 미설치)하면 내장 데이터 그대로 동작한다.
    범례의 커뮤니티별 개수는 파일 생성 시점 값을 유지한다(장식·색·보드는 갱신됨). */
+
+/* 볼트의 통합 단계 어휘 → 이 파일의 4단계 진도 아이콘.
+   revision 은 심사 중이므로 submitted 로, blocked·undecided·cancelled·idea 는
+   아이콘 없이 둔다(그래프는 진행선만 배지로 그린다). */
+const STAGE_TO_PROG = {
+  published: 'published', inprint: 'inprint', accepted: 'accepted',
+  revision: 'submitted', submitted: 'submitted',
+};
 (async function () {
   const normUrl = u => (u || "").trim().replace(/\/+$/, "").replace(/\/rest\/v1$/i, "").replace(/\/auth\/v1$/i, "").replace(/\/+$/, "");
   const BAKED_URL = "https://ijutjirouxgqcldjyhma.supabase.co";
@@ -1672,7 +1682,7 @@ network.on('afterDrawing', function(ctx) {
   const url = normUrl(localStorage.getItem("cfms_url") || BAKED_URL);
   const key = (localStorage.getItem("cfms_key") || BAKED_KEY).trim();
   try {
-    const res = await fetch(url + '/rest/v1/project_nodes?select=*', {
+    const res = await fetch(url + '/rest/v1/research_outputs?kind=eq.node&select=*', {
       headers: { apikey: key, Authorization: 'Bearer ' + key }
     });
     if (!res.ok) return;
@@ -1683,9 +1693,11 @@ network.on('afterDrawing', function(ctx) {
       const n = NODE_BY_ID[r.id];
       if (!n) return;
       touched = true;
-      // Grade is locked to the current Obsidian snapshot. Other shared fields
-      // still update normally while an older project_nodes row is being migrated.
-      const sharedGrade = VAULT_GRADE_OVERRIDES[r.id] || r.grade;
+      /* 2026-09-12: 등급 잠금을 풀었다. 전에는 표가 웹 정본이라 볼트 스냅샷
+         (VAULT_GRADE_OVERRIDES)을 우선했는데, 이제 표 자체가 볼트에서 발행된
+         값이라 그 잠금이 오히려 낡은 값을 덮어씌운다. 표를 먼저 믿고,
+         표에 없을 때만 내장 스냅샷으로 떨어진다. */
+      const sharedGrade = r.grade || VAULT_GRADE_OVERRIDES[r.id];
       if (sharedGrade && sharedGrade !== '그룹' && QUALITY_COLORS[sharedGrade]) {
         const q = QUALITY_BY_ID[r.id] || (QUALITY_BY_ID[r.id] = { id: r.id, label: n._base.label, grade: sharedGrade, note: '' });
         q.grade = sharedGrade;
@@ -1695,7 +1707,9 @@ network.on('afterDrawing', function(ctx) {
       if (r.bottleneck) REMAINING_BOTTLENECKS[r.id] = r.bottleneck;
       if (r.brief) n._intro = r.brief;
       if (r.project_path) n._project_path = r.project_path;
-      if (r.status && PROG[r.status]) MINDMAP_STATUS[r.id] = r.status;
+      const prog = STAGE_TO_PROG[r.stage];
+      if (prog) MINDMAP_STATUS[r.id] = prog;
+      else if (r.stage) delete MINDMAP_STATUS[r.id];   // draft·보류 등은 배지를 뗀다
     });
     if (!touched) return;
     decorateNodes();

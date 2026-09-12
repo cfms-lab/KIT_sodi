@@ -198,7 +198,7 @@ const BAKED_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 let CFG={url:normUrl(localStorage.getItem("cfms_url")||BAKED_URL),key:(localStorage.getItem("cfms_key")||BAKED_KEY).trim()};
 let SESSION=JSON.parse(localStorage.getItem("cfms_session")||"null"); // {access_token,email}
 let PAPERS=[];
-let NODES=[]; // graph/mindmap과 공유하는 프로젝트 노드 (Supabase project_nodes)
+let NODES=[]; // graph/mindmap과 공유하는 프로젝트 노드 (research_outputs, kind='node')
 
 function authHeaders(useUser){
   const h={"apikey":CFG.key,"Content-Type":"application/json"};
