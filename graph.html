@@ -1440,18 +1440,24 @@ function _glyph(ctx, type, x, y) {
    `if (!showHyper) return;` 가 있어서 같이 넣으면 'hyperedge' 를 끌 때 배지까지
    사라진다. 나중에 등록해야 hull 위에 그려지는 것도 이 자리라야 한다. */
 const MINDMAP_STATUS = {"SFTF_DrapePrior": "submitted", "Tomo_SFTF": "submitted", "cfmsCIPC": "submitted"};
+/* 2026-09-12: 색을 둘로 갈랐다. 넷 다 초록이던 때는 초록이 너무 많아 「저널에 가 있는 것」과
+   「끝난 것」이 한 색으로 뭉쳤다. 이제 published 만 초록이고 나머지 셋은 노랑이다 —
+   셋끼리는 파이가 찬 정도로 가른다. mindmap.html · 볼트 「투고」 열도 같은 규칙이다. */
+const PROG_GREEN = '#16a34a';    // 출판(끝난 것)
+const PROG_YELLOW = '#eab308';   // 저널 손에 가 있는 단계(투고·게재확정·인쇄중)
 const PROG = {
-  submitted: { frac: 0.5,   label: '투고(submitted)' },
-  accepted:  { frac: 0.75,  label: '게재확정(accepted)' },
-  inprint:   { frac: 0.875, label: '인쇄중(in print)' },
-  published: { done: true,  label: '출판(published)' },
+  submitted: { frac: 0.5,   color: PROG_YELLOW, label: '투고(submitted)' },
+  accepted:  { frac: 0.75,  color: PROG_YELLOW, label: '게재확정(accepted)' },
+  inprint:   { frac: 0.875, color: PROG_YELLOW, label: '인쇄중(in print)' },
+  published: { done: true,  color: PROG_GREEN,  label: '출판(published)' },
 };
-const PROG_GREEN = '#16a34a';
 const PROG_R = 10;          // 배지 반지름(그래프 좌표). 노드 반지름은 20~36 이다.
 
 /* mindmap.html progIcon() 의 비율을 그대로 옮긴 것. r=6 기준으로
-   초록 링 폭 1.6(0.267r) · 흰 테두리 중심 7.4(1.233r)·폭 1.2(0.2r) · 완료형 6.6(1.1r). */
+   링 폭 1.6(0.267r) · 흰 테두리 중심 7.4(1.233r)·폭 1.2(0.2r) · 완료형 6.6(1.1r).
+   색은 단계가 정한다(p.color) — 옛 배지 데이터에 color 가 없으면 초록으로 떨어진다. */
 function drawProgBadge(ctx, cx, cy, R, p) {
+  const col = p.color || PROG_GREEN;
   ctx.save();
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
@@ -1466,7 +1472,7 @@ function drawProgBadge(ctx, cx, cy, R, p) {
     outline(1.1 * R);
     ctx.beginPath();
     ctx.arc(cx, cy, R, 0, 2 * Math.PI);
-    ctx.fillStyle = PROG_GREEN;
+    ctx.fillStyle = col;
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx - 0.48 * R, cy + 0.03 * R);
@@ -1481,11 +1487,11 @@ function drawProgBadge(ctx, cx, cy, R, p) {
     ctx.moveTo(cx, cy);
     ctx.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * p.frac);
     ctx.closePath();
-    ctx.fillStyle = PROG_GREEN;
+    ctx.fillStyle = col;
     ctx.fill();
     ctx.beginPath();
     ctx.arc(cx, cy, R, 0, 2 * Math.PI);
-    ctx.strokeStyle = PROG_GREEN;
+    ctx.strokeStyle = col;
     ctx.lineWidth = 0.267 * R;
     ctx.stroke();
   }

@@ -998,18 +998,25 @@ const STATUS={published:'published',inprint:'in print',accepted:'accepted',submi
 /* ====================== 진도 아이콘 (XMind 풍 파이) ======================
    노드가 많아 어느 것이 투고/출판인지 안 보이는 문제. 논문 진행선만 아이콘으로
    드러낸다. draft 는 점선 테두리, cancelled 는 취소선으로 이미 구분되므로 뺐다.
-   frac = 채워지는 비율, done = 꽉 찬 원 + 체크. */
+   frac = 채워지는 비율, done = 꽉 찬 원 + 체크.
+
+   2026-09-12: 색을 둘로 갈랐다. 넷 다 초록이던 때는 지도 위에 초록이 너무 많아
+   「저널에 가 있는 것」과 「끝난 것」이 한 색으로 뭉쳤다. 이제 published 만 초록이고
+   나머지 셋은 노랑이다 — 셋끼리는 파이가 찬 정도로 가른다(반 → 3/4 → 7/8).
+   볼트 `Dashboards/프로젝트현황.md` 의 「투고」 열도 같은 규칙으로 맞췄다. */
+const PROG_GREEN='#16a34a';            // 출판(끝난 것). 밝은 배경일 때 값이다.
+const PROG_YELLOW='#eab308';           // 저널 손에 가 있는 단계(투고·게재확정·인쇄중)
 const PROGRESS={
-  submitted:{frac:0.5,   label:'투고(submitted)'},
-  accepted: {frac:0.75,  label:'게재확정(accepted)'},
-  inprint:  {frac:0.875, label:'인쇄중(in print)'},
-  published:{done:true,  label:'출판(published)'}
+  submitted:{frac:0.5,   color:PROG_YELLOW, label:'투고(submitted)'},
+  accepted: {frac:0.75,  color:PROG_YELLOW, label:'게재확정(accepted)'},
+  inprint:  {frac:0.875, color:PROG_YELLOW, label:'인쇄중(in print)'},
+  published:{done:true,  color:PROG_GREEN,  label:'출판(published)'}
 };
 // 옛 표기. 읽을 때만 받아준다(데이터는 그대로 둔다). 예: Tomo_SFTF 의 'submit'.
 const LEGACY_STATUS={submit:'submitted'};
 const progStatus=st=>LEGACY_STATUS[st]||st;
+const progColor=st=>(PROGRESS[progStatus(st)]||{}).color||PROG_GREEN;
 const PROG_W=16;                       // 아이콘이 차지하는 가로폭(제목을 그만큼 민다)
-const PROG_GREEN='#16a34a';            // 밝은 배경일 때. 채색 박스에서는 글자색(흰색)을 쓴다.
 function progIcon(status, cx, cy, color, checkColor, outline){
   const p=PROGRESS[progStatus(status)]; if(!p) return '';
   const r=6;
@@ -1124,9 +1131,10 @@ function render(){
     const titleX=prog?12+PROG_W:12;
     h+=`<g class="${cls}" data-id="${n.id}" transform="translate(${p.x},${p.y})">`;
     h+=`<rect class="box" width="${p.w}" height="${lay.nodeH}" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="2" ${dash} data-act="sel" data-id="${n.id}"/>`;
-    // 아이콘 색은 박스 색과 무관하게 범례와 같은 초록으로 고정한다.
+    // 아이콘 색은 박스 색과 무관하게 범례와 같은 단계색(출판=초록, 나머지=노랑)으로 고정한다.
     // 흰색으로 하면 채색 박스(상/중/하/Closed)에서 배경에 묻혀 잘 안 보인다.
-    if(prog)h+=progIcon(n.status, 18, titleY-4.5, PROG_GREEN, '#ffffff', '#ffffff');
+    // 노랑은 '중'(주황 #f28e2b) 박스와 명도가 가까우므로 흰 링(outline)이 특히 중요하다.
+    if(prog)h+=progIcon(n.status, 18, titleY-4.5, progColor(n.status), '#ffffff', '#ffffff');
     h+=`<text x="${titleX}" y="${titleY}" font-size="12.5" font-weight="700" fill="${textColor}" ${cancelled?'text-decoration="line-through"':''}>${esc(truncW(n.title, p.w-24-(n.url?16:0)-(prog?PROG_W:0), 12.5))}</text>`;
     if(sub)h+=`<text x="12" y="${lay.nodeH-11}" font-size="10" fill="${cancelled?INK2:textColor}">${esc(sub)}</text>`;
     if(n.url)h+=`<text x="${p.w-7}" y="15" text-anchor="end" font-size="10">🔗</text>`;
@@ -1146,7 +1154,7 @@ function renderLegend(){
     +`<span class="lg"><i style="border-color:#9d9c98;background:#e3e2de"></i><s>cancelled(취소)</s></span>`
     +Object.keys(PROGRESS).map(k=>
       `<span class="lg"><svg viewBox="0 0 13 13">`
-      +progIcon(k, 6.5, 6.5, PROG_GREEN, '#ffffff')+`</svg>${PROGRESS[k].label}</span>`).join('');
+      +progIcon(k, 6.5, 6.5, progColor(k), '#ffffff')+`</svg>${PROGRESS[k].label}</span>`).join('');
 }
 
 /* ====== VSCODE·링크 버튼: 모든 노드에 동일하게 만들고, 값이 유효할 때만 눌리게 한다 ====== */
