@@ -40,7 +40,10 @@
   .neighbor-link { display: block; padding: 2px 6px; margin: 2px 0; border-radius: 3px; cursor: pointer; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid #cccccc; }
   .neighbor-link:hover { background: #dddddd; }
   #neighbors-list { max-height: 160px; overflow-y: auto; margin-top: 4px; }
-  #legend-wrap { flex: 1; overflow-y: auto; padding: 12px; }
+  /* 2026-09-13: flex:1 이던 것을 내용 높이로 바꿨다. 그때는 범례가 남은 세로를 다 차지해서
+     아래의 #stats(노드 저장·위치 초기화·배치 …)가 사이드바 맨 밑으로 밀려 있었다. 이제
+     「투고 진도」 바로 다음 칸에 붙는다. 범례가 길어지면 예전처럼 줄어들며 스크롤한다. */
+  #legend-wrap { flex: 0 1 auto; overflow-y: auto; padding: 12px; }
   #legend-wrap h3 { font-size: 16px; color: #777777; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
   .legend-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; border-radius: 4px; font-size: 15px; }
   .legend-item:hover { background: #dddddd; padding-left: 4px; }
@@ -82,7 +85,6 @@
   </div>
 
 <div id="legend-wrap">
-    <div class="quality-meta">노드 캡션은 프로젝트 영문명입니다. 검정 테두리는 논문 submit 우선 고려 대상, 굵은 테두리는 투고 상태가 등록된 노드, 반투명 채색은 상태가 draft인 미완성 프로젝트입니다 — 저널·상태·경위는 노드에 마우스를 올리거나 클릭해 Node Info 에서 봅니다.</div>
     <h3>Paper quality</h3>
     <div id="legend-controls">
       <label><input type="checkbox" id="select-all-cb" checked onchange="toggleAllCommunities(!this.checked)">Select All</label>
