@@ -61,6 +61,13 @@ SFTF_Holonomy 의 좌표·등급 행과 품질 보드 날짜가 이렇게 되돌
   `cfmsAutoSew`, `cfmsAutoPlace_IJCST`, `cfmsAutoPlace_JCDE`, `cfmsDrapeSCAN`,
   `SFTF_Holonomy` 다섯 개는 옛 자리에 그대로 남는다. 정본(`layout_findings.py`)에서
   고치면 두 상수가 같은 값으로 함께 나가므로 이 함정이 없다.
+- **`graph.html` 의 앵커 문자열을 고치면 재생성이 멈춘다.** `layout_findings.py` 는
+  스크립트 경계 주석이나 함수 선언 같은 고정 문자열을 앵커로 잡아 그 앞뒤에 블록을
+  끼워 넣는다(`grep -n "anchor" layout_findings.py`). `graph.html` 에서 그 문장을
+  손보면 다음 재생성이 `AssertionError: ... anchor not found` 로 죽으므로
+  `layout_findings.py` 의 앵커도 같은 커밋에서 함께 고친다. 2026-09-12 에 Supabase
+  주석을 `project_nodes` → `research_outputs, kind='node'` 로 바꾸면서 실제로 이렇게
+  멈췄고, 다음 좌표 작업 때야 드러났다.
 - **브라우저 저장본이 파일 기본값을 이긴다.** 한 번이라도 노드를 드래그한 브라우저는
   `localStorage` 의 `graphify_graph_positions_v5` 를 우선한다. 새 배치를 보려면 화면의
   **위치 초기화** 를 누른다. 모든 방문자에게 강제하려면 `layout_findings.py` 의
