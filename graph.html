@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SFTF/PFTF — 발견 1~6 + BASE/METHOD/PIPELINE</title>
+<title>SFTF/PFTF 연구 그래프 — BASE + 공저자</title>
 <script src="https://unpkg.com/vis-network@9.1.6/standalone/umd/vis-network.min.js"
         integrity="sha384-Ux6phic9PEHJ38YtrijhkzyJ8yQlH8i/+buBR8s3mAZOJrP1gwyvAcIYl3GWtpX1"
         crossorigin="anonymous"></script>
@@ -370,7 +370,7 @@ EDGE_DIRECTION_FIXES.forEach(([from, to]) => {
 // EDGE_DIRECTION_END
 
 const CURATED_POSITIONS = {"cfmsAutoSew": {"x": 128, "y": 1429}, "cfmsAutoPlace_IJCST": {"x": -28, "y": 1128}, "cfmsAutoPlace_JCDE": {"x": -190, "y": 1136}, "cfmsDrapeSCAN": {"x": 427, "y": 932}, "SFTF_Holonomy": {"x": 457, "y": 1372}, "HIPDetect": {"x": 509, "y": 992}};
-const PAPER_COMPLETENESS = {"ColdOndol": 3, "ColdOndol_Materials": 4, "ColdOndol_Positioning": 3, "HipDetect": 1, "PFTF": 5, "PFTF_AsymTensor": 2, "PFTF_Compression": 6, "PFTF_FXShock": 8, "PFTF_GFiberCT": 2, "PFTF_Mold": 8, "PFTF_VisCull_kDop": 4, "SFTFSoft_DFSVR": 5, "SFTFSoft_GNN": 4, "SFTF_Clustering": 4, "SFTF_Composite": 3, "SFTF_DrapePrior": 1, "SFTF_HeatMethod": 1, "SFTF_Holonomy": 2, "SFTF_QEM": 4, "SFTF_SewerPOC": 5, "SFTF_ThermalChip": 5, "SFTF_UrbanTraffic": 6, "TSE_SEM": 2, "TSE_SEM_AutoTune": 2, "TSE_SEM_Bezier": 2, "TSE_SEM_Tensor": 2, "Tomo_DFSVR": 4, "Tomo_SFTF": 1, "Tomo_SFTFSoft": 2, "Tomo_Shell2026_TomoSh4": 2, "Tomo_Shell2026_TomoSh5": 2, "cfmsAutoPlace_IJCST": 3, "cfmsAutoPlace_JCDE": 3, "cfmsAutoSew": 4, "cfmsCIPC": 1, "cfmsDispersity": 1, "cfmsDrapeSCAN": 10, "cfmsPINNCAD": 10, "cfmsPINNDrape": 5};
+const PAPER_COMPLETENESS = {"ColdOndol": 3, "ColdOndol_Materials": 4, "ColdOndol_Positioning": 3, "HipDetect": 1, "PFTF": 5, "PFTF_AsymTensor": 3, "PFTF_Compression": 6, "PFTF_FXShock": 8, "PFTF_GFiberCT": 2, "PFTF_Mold": 8, "PFTF_VisCull_kDop": 4, "SFTFSoft_DFSVR": 5, "SFTFSoft_GNN": 4, "SFTF_Clustering": 4, "SFTF_Composite": 3, "SFTF_DrapePrior": 1, "SFTF_HeatMethod": 1, "SFTF_Holonomy": 2, "SFTF_QEM": 4, "SFTF_SewerPOC": 5, "SFTF_ThermalChip": 5, "SFTF_UrbanTraffic": 6, "TSE_SEM": 2, "TSE_SEM_AutoTune": 2, "TSE_SEM_Bezier": 2, "TSE_SEM_Tensor": 2, "Tomo_DFSVR": 4, "Tomo_SFTF": 1, "Tomo_SFTFSoft": 2, "Tomo_Shell2026_TomoSh4": 2, "Tomo_Shell2026_TomoSh5": 2, "cfmsAutoPlace_IJCST": 3, "cfmsAutoPlace_JCDE": 3, "cfmsAutoSew": 4, "cfmsCIPC": 1, "cfmsDispersity": 1, "cfmsDrapeSCAN": 10, "cfmsPINNCAD": 10, "cfmsPINNDrape": 5};
 const VAULT_STAGES = {"ColdOndol": "undecided", "ColdOndol_Positioning": "draft", "DFSVR_VisCull": "draft", "HIPDetect": "draft", "PFTF": "blocked", "PFTF_AsymTensor": "draft", "PFTF_Compression": "draft", "PFTF_DrapePrior_VisCull_kDop": "draft", "PFTF_GFiberCT": "draft", "PFTF_ResearchOptimize": "draft", "PFTF_VisCull_kDop": "draft", "SFTFSoft_DFSVR": "blocked", "SFTFSoft_GNN": "draft", "SFTFSoft_GNN_DFSVR": "draft", "SFTF_ActiveOverprint": "draft", "SFTF_Clustering": "draft", "SFTF_Composite": "draft", "SFTF_DrapePrior": "revision", "SFTF_DynamicTargetSearch": "draft", "SFTF_HeatMethod": "draft", "SFTF_Holonomy": "draft", "SFTF_InjMold": "draft", "SFTF_QEM": "draft", "SFTF_SewerPOC": "undecided", "SFTF_UrbanTraffic": "undecided", "TSE_SEM_AutoTune": "draft", "TSE_SEM_Bezier": "draft", "TSE_SEM_Tensor": "draft", "Tomo_DFSVR": "draft", "Tomo_SFTF": "submitted", "Tomo_SFTFSoft": "draft", "cfmsAutoPlace_IJCST": "draft", "cfmsAutoPlace_JCDE": "draft", "cfmsAutoSew": "draft", "cfmsCIPC": "submitted", "cfmsDrape": "draft", "cfmsDrapeSCAN": "draft", "cfmsPINNCAD": "undecided", "cfmsPINNDrape": "undecided"};
 Object.assign(POS, CURATED_POSITIONS);
 
@@ -1157,8 +1157,8 @@ LEGEND.forEach(c => {
 </script>
 <script>
 // Render hyperedges as shaded regions
-const hyperedges = [{"label": "발견1", "nodes": ["SFTF_InjMold", "SFTF_SewerPOC"]}, {"label": "발견2", "nodes": ["SFTF_Composite", "PFTF_Compression"]}, {"label": "발견3", "nodes": ["SFTF_UrbanTraffic"]}, {"label": "발견3'", "nodes": ["ColdOndol"]}, {"label": "발견4·5·6", "nodes": ["PFTF_VisCull_kDop"]}, {"label": "BASE", "kind": "base", "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering", "PFTF"], "color": "#0f766e", "labelColor": "#115e59", "fillAlpha": 0.1, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.18}, {"label": "METHOD / 이론·추론 확장", "kind": "role", "nodes": ["SFTFSoft_GNN", "PFTF_AsymTensor"], "color": "#7c3aed", "labelColor": "#6d28d9", "fillAlpha": 0.035, "strokeAlpha": 0.75, "labelAlpha": 0.95, "lineWidth": 2, "dash": [4, 6], "scale": 1.12}, {"label": "PIPELINE / 다단계 통합", "kind": "role", "nodes": ["SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop", "SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint", "DFSVR_VisCull", "SFTFSoft_GNN_DFSVR", "ColdOndol"], "color": "#0891b2", "labelColor": "#0e7490", "fillAlpha": 0.025, "strokeAlpha": 0.7, "labelAlpha": 0.95, "lineWidth": 2, "dash": [16, 8], "scale": 1.08}, {"label": "의복 시뮬레이션", "kind": "domain", "nodes": ["PFTF", "SFTF_Composite", "SFTF_DrapePrior", "PFTF_Compression", "PFTF_VisCull_kDop", "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape", "cfmsMiindo", "cfmsPINNCAD", "cfmsDrapeSCAN", "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE"], "color": "#db2777", "labelColor": "#be185d", "fillAlpha": 0.035, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}, {"label": "온돌 냉방 / 건물 에너지", "kind": "domain", "nodes": ["ColdOndol", "ColdOndol_Positioning"], "color": "#2563eb", "labelColor": "#1d4ed8", "fillAlpha": 0.035, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}];
-const CURATED_HYPEREDGE_MEMBERS = {"의복 시뮬레이션": ["cfmsAutoSew", "cfmsDrapeSCAN", "HIPDetect", "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE"]};
+const hyperedges = [{"label": "BASE", "kind": "base", "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering", "PFTF"], "color": "#0f766e", "labelColor": "#115e59", "fillAlpha": 0.1, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.18}, {"label": "이희란 교수님", "kind": "coauthor", "nodes": ["SFTF_Clustering", "PFTF_Compression", "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN"], "color": "#7c3aed", "labelColor": "#6d28d9", "fillAlpha": 0.035, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}, {"label": "은종현 교수님", "kind": "coauthor", "nodes": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM_Bezier", "TSE_SEM_Tensor", "TSE_SEM_AutoTune", "SFTF_HeatMethod"], "color": "#db2777", "labelColor": "#be185d", "fillAlpha": 0.035, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}, {"label": "김우석 교수님", "kind": "coauthor", "nodes": ["SFTF_SewerPOC", "ColdOndol", "SFTF_UrbanTraffic"], "color": "#65a30d", "labelColor": "#4d7c0f", "fillAlpha": 0.035, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}];
+const CURATED_HYPEREDGE_MEMBERS = {"이희란 교수님": ["cfmsAutoSew", "HIPDetect"], "은종현 교수님": ["SFTF_Holonomy"]};
 Object.entries(CURATED_HYPEREDGE_MEMBERS).forEach(([label, nodeIds]) => {
   const hyperedge = hyperedges.find(item => item.label === label);
   if (!hyperedge) return;
@@ -1317,14 +1317,11 @@ network.on('afterDrawing', function(ctx) {
         ctx.restore();
     });
 // FINDING_DEPS_BEGIN — 발견 간 의존성 (분류표 노트의 DAG, layout_findings.py 정본)
-const FINDING_DEPS = [
-  {from:0, to:1, style:"solid"},
-  {from:0, to:2, style:"solid"},
-  {from:0, to:4, style:"solid"},
-  {from:2, to:1, style:"dotted",   label:"\u2124\u2082 보조정리", labelT:0.78},
-  {from:2, to:4, style:"double",   label:"\u2124\u2082 쌍대(\u00b1d)"},
-  {from:2, to:3, style:"contrast", label:"소거 \u2194 생존 대비"},
-];
+// 2026-09-14: 비웠다. 이 화살표들은 발견1~6 영역 **사이**의 의존성이었는데 그 영역을
+// 걷어냈다(인덱스로 가리키던 대상이 없다). 공저자 묶음 사이에는 그런 의존이 없다.
+// 노드 사이의 개발 목표 엣지와 캡션은 이것과 무관하며 그대로다.
+// 아래 그리기 코드는 남겨 둔다 — 나중에 영역 간 관계를 다시 그릴 일이 생기면 여기에 적는다.
+const FINDING_DEPS = [];
 function _regionCentroid(h) {
   const ps = h.nodes.map(nid => network.getPositions([nid])[nid]).filter(p => p);
   return {x: ps.reduce((s,p)=>s+p.x,0)/ps.length,

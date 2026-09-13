@@ -150,20 +150,18 @@ const danglingHyperedges = hyperedges.flatMap((hyperedge) =>
     .map((nodeId) => `${hyperedge.label}:${nodeId}`),
 );
 const urbanNode = nodes.find((node) => node.id === "SFTF_UrbanTraffic");
-const finding3 = hyperedges.find((hyperedge) => hyperedge.label === "발견3");
-const garmentSimulation = hyperedges.find(
-  (hyperedge) => hyperedge.label === "의복 시뮬레이션",
-);
-const expectedGarmentNodes = [
-  "PFTF", "SFTF_Composite", "SFTF_DrapePrior", "PFTF_Compression",
-  "PFTF_VisCull_kDop", "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape",
-  "cfmsMiindo", "cfmsPINNCAD", "cfmsAutoSew", "cfmsAutoPlace_IJCST",
-  "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN", "HIPDetect",
-];
-const buildingEnergy = hyperedges.find(
-  (hyperedge) => hyperedge.label === "온돌 냉방 / 건물 에너지",
-);
-const expectedBuildingEnergyNodes = ["ColdOndol", "ColdOndol_Positioning"];
+// 2026-09-14: 훌 구성이 바뀌었다. 발견1~6·METHOD·PIPELINE·도메인 오버레이를 걷어내고
+// BASE 와 공저자 셋만 남겼다(SFTF → PFTF 일반화를 전제한 틀이라 지금 구조와 맞지 않는다).
+// 구성원 정본은 볼트의 coauthors/coauthor 이고, layout_findings.py 의 HYPEREDGES 가 그
+// 스냅샷이다. 여기서는 그 스냅샷이 배포본에 그대로 나갔는지만 본다.
+const expectedHulls = {
+  "BASE": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering", "PFTF"],
+  "이희란 교수님": ["SFTF_Clustering", "PFTF_Compression", "cfmsAutoSew",
+    "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN", "HIPDetect"],
+  "은종현 교수님": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM_Bezier",
+    "TSE_SEM_Tensor", "TSE_SEM_AutoTune", "SFTF_HeatMethod", "SFTF_Holonomy"],
+  "김우석 교수님": ["SFTF_SewerPOC", "ColdOndol", "SFTF_UrbanTraffic"],
+};
 
 if (duplicateIds || danglingEdges.length || missingPositions.length || danglingHyperedges.length) {
   throw new Error(
@@ -180,8 +178,24 @@ if (JSON.stringify(positions) !== JSON.stringify(expectedPositions)) {
   const extras = Object.keys(positions).filter((nodeId) => !(nodeId in expectedPositions));
   throw new Error(`deployed POS differs from the exact ${Object.keys(expectedPositions).length}-node map: changed=${changed.join(",")} extras=${extras.join(",")}`);
 }
-if (!urbanNode || finding3?.nodes?.join(",") !== "SFTF_UrbanTraffic") {
-  throw new Error("SFTF_UrbanTraffic node or singleton 발견3 hyperedge is missing");
+if (!urbanNode) throw new Error("SFTF_UrbanTraffic node is missing");
+if (hyperedges.length !== Object.keys(expectedHulls).length) {
+  throw new Error(
+    `hyperedges should be exactly [${Object.keys(expectedHulls).join(", ")}] `
+    + `but the page has [${hyperedges.map((h) => h.label).join(", ")}]`,
+  );
+}
+for (const [label, members] of Object.entries(expectedHulls)) {
+  const hull = hyperedges.find((item) => item.label === label);
+  if (!hull) throw new Error(`hyperedge ${label} is missing`);
+  // 순서는 보지 않는다 — 큐레이션으로 뒤늦게 붙는 구성원(CURATED_HYPEREDGE_MEMBERS)은
+  // 목록 끝에 덧붙으므로, 정본의 적힌 순서와 다를 수 있다. 집합이 같으면 된다.
+  if ([...hull.nodes].sort().join(",") !== [...members].sort().join(",")) {
+    throw new Error(`hyperedge ${label} membership drifted: ${hull.nodes.join(",")}`);
+  }
+  if (new Set(hull.nodes).size !== hull.nodes.length) {
+    throw new Error(`hyperedge ${label} has duplicate members`);
+  }
 }
 // 2026-08-28: 엣지는 활용 분야가 아니라 '개발 목표'만 담는다.
 // 응용 전용 노드(SFTF_UrbanTraffic 등)는 연결 0개가 정상이므로 차수를 검사하지 않는다.
@@ -305,20 +319,6 @@ for (const [from, to, label, relation] of expectedSemChain) {
   if (matches.length !== 1 || matches[0].label !== label || matches[0]._rel !== relation) {
     throw new Error(`SEM chain edge ${from}->${to} is missing, duplicated, or incorrect`);
   }
-}
-if (
-  !garmentSimulation
-  || expectedGarmentNodes.some((nodeId) => !garmentSimulation.nodes.includes(nodeId))
-  || new Set(garmentSimulation.nodes).size !== garmentSimulation.nodes.length
-) {
-  throw new Error("의복 시뮬레이션 hyperedge membership is incomplete or duplicated");
-}
-if (
-  !buildingEnergy
-  || buildingEnergy.kind !== "domain"
-  || buildingEnergy.nodes.join(",") !== expectedBuildingEnergyNodes.join(",")
-) {
-  throw new Error("온돌 냉방 / 건물 에너지 domain membership is missing or incorrect");
 }
 if (!html.includes("if (positions.length < 1) return;") || !html.includes("if (ps.length < 1) return;")) {
   throw new Error("singleton hyperedge rendering guards are missing");

@@ -243,64 +243,44 @@ POS = {
     "HIPDetect": (509, 992),
 }
 
+# 2026-09-14: 발견1~6 · METHOD · PIPELINE · 도메인 오버레이를 걷어냈다.
+# 그 틀은 SFTF → PFTF 일반화가 잘 풀렸을 때를 가정하고 그린 것인데, PFTF 논문 진도가
+# 그렇게 가지 않았다. 화면에 남겨 두면 없는 구조를 있다고 말하게 되므로 사용자 판단으로
+# 내렸다. BASE 만 남기고, 실제로 굴러가는 축인 **공저자**로 다시 묶는다.
+#
+# 구성원 정본은 볼트 Projects/*.md 의 coauthors / coauthor 다(부모 노트를 쓰는 트랙 노드는
+# 그 값을 물려받는다). 여기 적힌 목록은 그 스냅샷이고, 볼트에서 공저자가 바뀌면 이 목록도
+# 같이 고친다 — 등급·단계와 달리 hyperedge 는 아직 발행 경로가 없다.
 HYPEREDGES = [
-    {"label": "발견1",
-     "nodes": ["SFTF_InjMold", "SFTF_SewerPOC", "SFTF_PDNElectric",
-               "SFTF_ThermalChip", "SFTF_BatteryThermal", "PFTF_CNC"]},
-    {"label": "발견2",
-     "nodes": ["SFTF_Composite", "PFTF_Compression", "PFTF_Mold",
-               "PFTF_Radiotherapy"]},
-    {"label": "발견3",
-     "nodes": ["SFTF_UrbanTraffic"]},
-    {"label": "발견3'",
-     "nodes": ["SFTF_DataCenterTraffic", "PFTF_subMarine", "PFTF_Assembly",
-               "PFTF_RainNowcast", "PFTF_Terrain", "PFTF_Solar",
-               "PFTF_FXShock", "ColdOndol"]},
-    {"label": "발견4·5·6",
-     "nodes": ["PFTF_VisCull_kDop", "PFTF_Inspection"]},
-    # The four method-level foundations are intentionally separate from the
-    # 발견1~6 application regions.  A teal dashed hull exposes the strategic
-    # base role without reusing the finding-region color.
+    # 네 방법론 기반. 예전 그대로 둔다.
     {"label": "BASE",
      "kind": "base",
      "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering", "PFTF"],
      "color": "#0f766e", "labelColor": "#115e59",
      "fillAlpha": 0.10, "strokeAlpha": 0.85, "labelAlpha": 0.95,
      "lineWidth": 3, "dash": [12, 6], "scale": 1.18},
-    # 발견 hyperedge와 별개인 역할 overlay. 발견을 확정하지 않고 방법론과
-    # 다단계 통합 구조를 보여 준다.
-    {"label": "METHOD / 이론·추론 확장",
-     "kind": "role",
-     "nodes": ["Tomo_DiffSupport", "SFTFSoft_GNN", "PFTF_AsymTensor"],
+    {"label": "이희란 교수님",
+     "kind": "coauthor",
+     "nodes": ["SFTF_Clustering", "PFTF_Compression", "cfmsAutoSew",
+               "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN",
+               "HIPDetect"],
      "color": "#7c3aed", "labelColor": "#6d28d9",
-     "fillAlpha": 0.035, "strokeAlpha": 0.75, "labelAlpha": 0.95,
-     "lineWidth": 2, "dash": [4, 6], "scale": 1.12},
-    {"label": "PIPELINE / 다단계 통합",
-     "kind": "role",
-     "nodes": ["SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop",
-               "SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint", "DFSVR_VisCull",
-               "SFTFSoft_GNN_DFSVR", "ColdOndol"],
-     "color": "#0891b2", "labelColor": "#0e7490",
-     "fillAlpha": 0.025, "strokeAlpha": 0.70, "labelAlpha": 0.95,
-     "lineWidth": 2, "dash": [16, 8], "scale": 1.08},
-    # Garment-simulation domain overlay. Keep this in the generator so a later
-    # refresh cannot erase the manually curated public grouping.
-    {"label": "의복 시뮬레이션",
-     "kind": "domain",
-     "nodes": ["PFTF", "SFTF_Composite", "SFTF_DrapePrior",
-               "PFTF_Compression", "PFTF_VisCull_kDop",
-               "cfmsCIPC", "cfmsPINNDrape", "cfmsDrape", "cfmsMiindo",
-               "cfmsPINNCAD", "cfmsDrapeSCAN", "cfmsAutoSew",
-               "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "HIPDetect"],
+     "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
+     "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
+    {"label": "은종현 교수님",
+     "kind": "coauthor",
+     "nodes": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM_Bezier",
+               "TSE_SEM_Tensor", "TSE_SEM_AutoTune", "SFTF_HeatMethod",
+               "SFTF_Holonomy"],
      "color": "#db2777", "labelColor": "#be185d",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
-    # Building-energy domain overlay for the two distinct paper tracks that
-    # share ColdOndol_dev: hidden-cooling detection and capacity allocation.
-    {"label": "온돌 냉방 / 건물 에너지",
-     "kind": "domain",
-     "nodes": ["ColdOndol", "ColdOndol_Positioning"],
-     "color": "#2563eb", "labelColor": "#1d4ed8",
+    # ColdOndol_Positioning 은 같은 저장소를 쓰지만 볼트 노트에 coauthor 가 없어 빠져 있다.
+    # 볼트에 적히면 여기에도 넣는다.
+    {"label": "김우석 교수님",
+     "kind": "coauthor",
+     "nodes": ["SFTF_SewerPOC", "ColdOndol", "SFTF_UrbanTraffic"],
+     "color": "#65a30d", "labelColor": "#4d7c0f",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
 ]
@@ -469,14 +449,11 @@ GRADE_COLORS = {
 
 # 영역 간 의존성 (인덱스 = HYPEREDGES 순서: 0=발견1 1=발견2 2=발견3 3=발견3' 4=발견4·5·6)
 DEPS_JS = """// FINDING_DEPS_BEGIN — 발견 간 의존성 (분류표 노트의 DAG, layout_findings.py 정본)
-const FINDING_DEPS = [
-  {from:0, to:1, style:"solid"},
-  {from:0, to:2, style:"solid"},
-  {from:0, to:4, style:"solid"},
-  {from:2, to:1, style:"dotted",   label:"\\u2124\\u2082 보조정리", labelT:0.78},
-  {from:2, to:4, style:"double",   label:"\\u2124\\u2082 쌍대(\\u00b1d)"},
-  {from:2, to:3, style:"contrast", label:"소거 \\u2194 생존 대비"},
-];
+// 2026-09-14: 비웠다. 이 화살표들은 발견1~6 영역 **사이**의 의존성이었는데 그 영역을
+// 걷어냈다(인덱스로 가리키던 대상이 없다). 공저자 묶음 사이에는 그런 의존이 없다.
+// 노드 사이의 개발 목표 엣지와 캡션은 이것과 무관하며 그대로다.
+// 아래 그리기 코드는 남겨 둔다 — 나중에 영역 간 관계를 다시 그릴 일이 생기면 여기에 적는다.
+const FINDING_DEPS = [];
 function _regionCentroid(h) {
   const ps = h.nodes.map(nid => network.getPositions([nid])[nid]).filter(p => p);
   return {x: ps.reduce((s,p)=>s+p.x,0)/ps.length,
@@ -2012,23 +1989,24 @@ hyper_js = "const hyperedges = " + json.dumps(hyperedges_for_graph, ensure_ascii
 s, n2 = re.subn(r"const hyperedges = \[.*?\];", lambda _m: hyper_js, s, count=1,
                 flags=re.S)
 
-def _replace_curated_hyperedge_members(match):
-    members_by_label = json.loads(match.group(1))
-    members = [
-        node_id for node_id in members_by_label.get("의복 시뮬레이션", [])
-        if node_id not in AUTOPLACE_IDS
-    ]
-    for node_id in ("cfmsAutoSew", "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE",
-                    "cfmsDrapeSCAN", "HIPDetect"):
-        if node_id not in members:
-            members.append(node_id)
-    members_by_label["의복 시뮬레이션"] = members
-    return "const CURATED_HYPEREDGE_MEMBERS = " + json.dumps(
-        members_by_label,
-        ensure_ascii=False,
-    ) + ";"
-
-
+def _replace_curated_hyperedge_members(_match):
+    # 이 상수는 **아직 파일에 없는 노드**를 훌에 덧붙이는 장치다. hyperedges_for_graph 는
+    # 그 시점의 RAW_NODES 에 있는 id 만 남기는데, 큐레이션으로 뒤늦게 붙는 노드
+    # (cfmsAutoSew·HIPDetect 등)가 그보다 나중에 들어오기 때문이다. 그래서 걸러진 구성원을
+    # 그대로 실어 두고, 페이지가 로드할 때 다시 붙인다.
+    #
+    # 2026-09-14: 「의복 시뮬레이션」 한 훌만 손으로 적던 것을 **HYPEREDGES 전체에서 자동으로
+    # 계산**하게 바꿨다. 공저자 훌에도 같은 사정이 있는데(이희란 교수님의 cfmsAutoSew·
+    # HIPDetect) 손으로 적은 목록에는 그 자리가 없었다.
+    late = {}
+    for hyperedge in HYPEREDGES:
+        missing = [
+            str(node_id) for node_id in hyperedge.get("nodes", [])
+            if str(node_id) not in node_ids_for_hyperedges
+        ]
+        if missing:
+            late[hyperedge["label"]] = missing
+    return "const CURATED_HYPEREDGE_MEMBERS = " + json.dumps(late, ensure_ascii=False) + ";"
 s, ncurated_hyperedges = re.subn(
     r"const CURATED_HYPEREDGE_MEMBERS = (\{.*?\});",
     _replace_curated_hyperedge_members,
@@ -2043,7 +2021,7 @@ s = re.sub(
     count=1,
 )
 s, n3 = re.subn(r"<title>.*?</title>",
-                "<title>SFTF/PFTF — 발견 1~6 + BASE/METHOD/PIPELINE</title>", s, count=1,
+                "<title>SFTF/PFTF 연구 그래프 — BASE + 공저자</title>", s, count=1,
                 flags=re.S)
 
 # Broad role overlays go behind the finding regions, while BASE stays at the
@@ -2594,5 +2572,5 @@ missing = [k for k in POS if f'"{k}"' not in s]
 for dst in DSTS:
     io.open(dst, "w", encoding="utf-8", newline="").write(s)
 print(f"wrote {', '.join(str(dst) for dst in DSTS)} | POS {len(POS)} nodes, "
-      f"hulls {len(HYPEREDGES)}, deps 6 | missing ids: {missing}")
+      f"hulls {len(HYPEREDGES)}, deps {DEPS_JS.count('{from:')} | missing ids: {missing}")
 print(f"canonical output stays in KIT_sodi: {HERE / 'graph.html'}")
