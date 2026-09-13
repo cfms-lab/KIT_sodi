@@ -149,9 +149,16 @@ node scripts/publish-portfolio.mjs --push
 node scripts/publish-portfolio.mjs --sql
 ```
 
-`tmp/portfolio-rows.sql` (약 50KB) 이 나오고, 이것을 Supabase SQL Editor 에 통째로 붙여넣어
+`tmp/portfolio-rows.sql` (약 80KB) 이 나오고, 이것을 Supabase SQL Editor 에 통째로 붙여넣어
 Run 하면 `--push` 와 같은 결과가 됩니다 — 임시 표에 받아 한 번에 upsert 하고, 볼트에서 사라진
 행을 지웁니다. 여러 번 돌려도 안전합니다.
+
+이 파일은 **표 두 개를 함께 갱신합니다**(2026-09-14). 정본은 볼트 하나인데 화면이 읽는 캐시가
+둘이라 — `portfolio.html`은 `portfolio_rows`, `graph.html`은 `research_outputs` — 따로 돌리면
+한쪽만 옛 값으로 남습니다(실제로 cfmsCIPC 등급이 그랬습니다). 그래서 같은 파일에 `research_outputs`의
+노드 필드(등급·단계·배지·소개·병목·경로) 갱신을 덧붙였습니다. 짝짓기는 볼트 발행 스크립트와 같은
+`mindmap_id`이고 **UPDATE만 합니다** — 행을 만들지도 지우지도 않습니다. 좌표(`pos_x`·`pos_y`)는
+건드리지 않습니다. 화면의 좌표 정본은 `graph_positions`이고 노트의 `node_pos`는 그보다 낡았습니다.
 
 인자 없이 돌리면 미리보기(행 수·투고 단계 분포)만 찍고 아무것도 보내지 않습니다. `--dump` 는
 보낼 JSON 을 `tmp/portfolio-rows-preview.json` 에 떠 놓습니다. 볼트 경로를 생략하면

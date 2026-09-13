@@ -235,7 +235,40 @@ export function buildRows(vaultRoot) {
     stages: out.파이단계,
     rank: out.순위,
   };
-  return { rows, meta };
+
+  /* graph.html 이 읽는 research_outputs(kind='node')의 노드 필드도 같이 모은다 (2026-09-14).
+     정본은 볼트 하나인데 화면이 읽는 캐시가 둘이라, 따로 갱신하면 한쪽만 옛 값으로 남는다
+     (cfmsCIPC 등급이 실제로 그랬다). 짝짓기는 볼트 발행 스크립트와 같은 방식인 mindmap_id 다.
+     **행을 만들지도 지우지도 않는다** — UPDATE 만 낸다. 그 규율은 볼트 쪽과 같다.
+     pos_x·pos_y 는 일부러 뺐다. 화면의 좌표 정본은 graph_positions 이고, 노트의 node_pos 는
+     그보다 낡았다 — 여기서 밀면 옛 배치를 되살린다. */
+  const GRADE_OUT2 = { none: "등급 없음" };
+  const nodeFields = [];
+  for (const page of pages) {
+    if (page.type !== "project") continue;
+    const mindmapId = String(page.mindmap_id ?? "").trim();
+    if (!mindmapId) continue;
+    const text = (key) => {
+      const value = String(page[key] ?? "").trim();
+      return value === "" ? null : value;
+    };
+    const repository = String(page.repository ?? "").trim();
+    nodeFields.push({
+      mindmap_id: mindmapId,
+      data: {
+        grade: GRADE_OUT2[text("grade")] ?? text("grade"),
+        stage: text("stage"),
+        badge: text("badge"),
+        grade_note: text("grade_note"),
+        bottleneck: text("bottleneck"),
+        brief: text("brief"),
+        note: text("mindmap_note"),
+        url: /^https?:\/\//i.test(repository) ? repository : null,
+        project_path: text("path"),
+      },
+    });
+  }
+  return { rows, meta, nodeFields };
 }
 
 // ── Supabase ───────────────────────────────────────────────────────────────
@@ -289,13 +322,20 @@ async function api(pathname, accessToken, options = {}) {
 // Supabase SQL Editor 에 그대로 붙여넣을 스크립트. 값은 달러 인용($json$)으로 감싸므로
 // 따옴표·역슬래시·줄바꿈을 따로 이스케이프하지 않는다. 임시 표에 모두 받은 뒤 한 번에
 // upsert 하고, 볼트에 없는 행을 지운다 — --push 와 결과가 같고 여러 번 돌려도 안전하다.
-function toSql(payload) {
+function toSql(payload, nodeFields) {
   const values = payload.map((row) => {
     const json = JSON.stringify(row.data);
     if (json.includes("$json$")) {
       throw new Error(`${row.id} 의 값에 $json$ 가 들어 있어 달러 인용을 쓸 수 없습니다`);
     }
     return `  ('${row.id.replace(/'/g, "''")}', '${row.kind}', ${row.sort_index}, $json$${json}$json$)`;
+  });
+  const nodeValues = nodeFields.map((node) => {
+    const json = JSON.stringify(node.data);
+    if (json.includes("$json$")) {
+      throw new Error(`${node.mindmap_id} 의 값에 $json$ 가 들어 있습니다`);
+    }
+    return `  ('${node.mindmap_id.replace(/'/g, "''")}', $json$${json}$json$)`;
   });
   return [
     "-- portfolio_rows 발행 — scripts/publish-portfolio.mjs --sql 이 만든 파일이다.",
@@ -320,9 +360,41 @@ function toSql(payload) {
     "-- 볼트에서 사라진 프로젝트는 표에서도 지운다.",
     "delete from public.portfolio_rows p where not exists (select 1 from _incoming i where i.id = p.id);",
     "",
+    "---------------------------------------------------------------------------",
+    "-- ② research_outputs — graph.html 이 읽는 노드 필드",
+    "--",
+    "-- 정본은 볼트 하나인데 화면이 읽는 캐시가 둘이라, 따로 갱신하면 한쪽만 옛 값으로 남는다",
+    "-- (2026-09-14 cfmsCIPC 등급이 실제로 그랬다). 그래서 같은 파일에 담는다.",
+    "-- 짝짓기는 볼트 발행 스크립트와 같은 mindmap_id 이고, **UPDATE 만 한다** — 행을 만들지도",
+    "-- 지우지도 않는다. 좌표(pos_x·pos_y)는 건드리지 않는다: 화면의 좌표 정본은",
+    "-- graph_positions 이고 노트의 node_pos 는 그보다 낡았다.",
+    "---------------------------------------------------------------------------",
+    "",
+    "create temp table _nodes (mindmap_id text, data jsonb) on commit drop;",
+    "",
+    "insert into _nodes (mindmap_id, data) values",
+    nodeValues.join(",\n") + ";",
+    "",
+    "update public.research_outputs r set",
+    "  grade        = n.data->>'grade',",
+    "  stage        = n.data->>'stage',",
+    "  badge        = n.data->>'badge',",
+    "  grade_note   = n.data->>'grade_note',",
+    "  bottleneck   = n.data->>'bottleneck',",
+    "  brief        = n.data->>'brief',",
+    "  note         = n.data->>'note',",
+    "  url          = n.data->>'url',",
+    "  project_path = n.data->>'project_path',",
+    "  updated_at   = now()",
+    "from _nodes n",
+    "where r.kind = 'node' and r.mindmap_id = n.mindmap_id;",
+    "",
     "commit;",
     "",
     "select kind, count(*) from public.portfolio_rows group by kind order by kind;",
+    "select id, stage, grade from public.research_outputs",
+    " where kind = 'node' and stage in ('submitted','revision','accepted','inprint','published')",
+    " order by id;",
     "",
   ].join("\n");
 }
@@ -340,7 +412,7 @@ async function main() {
     throw new Error(`볼트 폴더가 없습니다: ${vaultRoot}`);
   }
 
-  const { rows, meta } = buildRows(vaultRoot);
+  const { rows, meta, nodeFields } = buildRows(vaultRoot);
   const payload = [
     { id: "__meta__", kind: "meta", sort_index: -1, data: meta },
     ...rows.map((row, index) => ({ id: row.id, kind: "row", sort_index: index, data: row })),
@@ -361,7 +433,7 @@ async function main() {
   if (sql) {
     const out = path.join(repoRoot, "tmp", "portfolio-rows.sql");
     mkdirSync(path.dirname(out), { recursive: true });
-    writeFileSync(out, toSql(payload), "utf8");
+    writeFileSync(out, toSql(payload, nodeFields), "utf8");
     const kb = Math.round(statSync(out).size / 1024);
     console.log(`${path.relative(repoRoot, out)} (${kb}KB) 를 만들었습니다.`);
     console.log("Supabase SQL Editor 에 통째로 붙여넣고 Run 하세요. 로그인 정보는 필요 없습니다.");
