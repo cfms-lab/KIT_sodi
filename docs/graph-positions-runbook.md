@@ -1,9 +1,37 @@
 # graph.html 노드 좌표 재배포 런북
 
-브라우저에서 `graph.html` 노드를 드래그해 배치를 바꾼 뒤 **위치 복사** 버튼으로 얻은
-`const POS = {...};` 한 줄을 파일 기본값으로 승격하고 GitHub Pages에 올리는 절차다.
+## 평소에는 이 문서가 필요 없다 (2026-09-13)
 
-## 한 줄로 하기
+노드를 끌어 놓고 **노드 저장** 을 누르면 끝이다. 좌표가 Supabase `graph_positions` 로
+올라가고, 다음 방문자부터 모두 그 배치를 본다. 저장소를 건드리지 않으므로 커밋도 배포도
+없다. 저장은 로그인한 사용자만 할 수 있고(다른 랩 웹앱과 같은 계정), 열람은 누구나 한다.
+
+우선순위는 **내 미저장 드래그(localStorage) > 표의 공유 좌표 > 파일의 `POS`** 다.
+저장하는 순간 로컬 스크래치는 버려진다 — 「내 화면만 다른」 상태를 남기지 않기 위해서다.
+**위치 초기화** 는 이제 공유 배치로 돌아간다(표가 비어 있으면 파일의 `POS` 로).
+
+표가 없거나 오프라인이면 페이지는 조용히 파일의 `POS` 로 그린다. 그래서 파일 값도 죽은
+값이 아니라 **씨앗**이다.
+
+### 그래도 파일을 만져야 하는 두 경우
+
+- **3D 뷰어가 옛 배치를 보인다.** `graph3d.html` 은 표가 아니라 `graph.html` 파일을 직접
+  읽는다. 웹 저장은 그 파일을 바꾸지 않으므로, 3D 를 맞추려면 아래 `pull` 을 돌려 커밋한다.
+- **오프라인 사본·백업의 기본 배치를 지금 배치로 굳히고 싶다.**
+
+```powershell
+node scripts/pull-graph-positions.mjs            # 표 → layout_findings.py → graph.html → 가드
+node scripts/pull-graph-positions.mjs --dry-run  # 무엇이 움직이는지만
+```
+
+`pull` 은 아래 「한 줄로 하기」와 같은 일을 하되, 붙여넣기 대신 표에서 좌표를 가져온다.
+처음 한 번은 `schema_graph_positions.sql` 을 Supabase SQL Editor 에서 돌려 표를 만들고,
+`node scripts/pull-graph-positions.mjs --seed` 로 만든 SQL 을 붙여넣어 지금 배치를 채운다.
+
+## 붙여넣은 POS 한 줄로 하기 (예전 경로)
+
+아래는 **위치 복사** 버튼으로 얻은 `const POS = {...};` 한 줄을 파일 기본값으로 승격하는
+절차다. 웹 저장이 생긴 뒤로는 잘 쓰지 않지만, 표 없이 파일만 고칠 때는 여전히 이 길이다.
 
 ```powershell
 Get-Clipboard | node scripts/apply-graph-positions.mjs

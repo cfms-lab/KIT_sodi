@@ -101,7 +101,7 @@
     <div id="legend"></div>
   </div>
   <div id="stats">37 nodes &middot; 45 edges &middot; 6 communities
-    &nbsp;<button id="reset-pos-btn" style="font-size:14px;padding:2px 8px;cursor:pointer;border:1px solid #999;border-radius:4px;background:#f4f4f4">위치 초기화</button>
+    &nbsp;<button id="save-pos-btn" title="현재 배치를 모두에게 보이도록 Supabase 에 저장합니다 (로그인 필요)" style="font-size:14px;padding:2px 8px;cursor:pointer;border:1px solid #2f6feb;border-radius:4px;background:#eaf1ff;color:#1d4ed8;font-weight:600">노드 저장</button><span id="save-pos-note" style="font-size:11px;color:#666;margin-left:6px"></span>&nbsp;<button id="reset-pos-btn" style="font-size:14px;padding:2px 8px;cursor:pointer;border:1px solid #999;border-radius:4px;background:#f4f4f4">위치 초기화</button>
     <button id="copy-pos-btn" style="font-size:14px;padding:2px 8px;cursor:pointer;border:1px solid #999;border-radius:4px;background:#f4f4f4">위치 복사</button>
     &nbsp;<select id="layout-sel" style="font-size:14px;padding:2px 6px;border:1px solid #999;border-radius:4px;background:#f4f4f4">
       <option value="free">배치: 수동(POS)</option>
@@ -1728,6 +1728,157 @@ const STAGE_TO_PROG = {
     network.redraw();
   } catch (e) { /* 오프라인/미설치 — 내장 데이터로 동작 */ }
 })();
+// GRAPH_POSITION_SYNC_BEGIN — 노드 좌표를 Supabase graph_positions 와 주고받는다.
+// (정본은 layout_findings.py 다. graph.html 을 직접 고치면 다음 재생성 때 사라진다)
+//
+// 왜 research_outputs 가 아니라 별도 표인가 — 그쪽에도 pos_x/pos_y 가 있지만 **볼트가
+// 정본**이라 볼트를 발행할 때마다 노트의 node_pos 로 덮어써진다. 웹에서 끌어 놓은 배치는
+// 볼트가 모르는 값이므로 충돌하지 않는 자리(graph_positions)에 둔다.
+//
+// 우선순위: 이 브라우저의 미저장 드래그(localStorage) > 표의 공유 좌표 > 파일의 POS.
+// 「노드 저장」을 누르면 현재 배치가 표로 올라가고, 그 순간 로컬 스크래치는 버린다 —
+// 그래야 「내 화면만 다른」 상태가 남지 않는다.
+(function () {
+  const SUPA_URL = "https://ijutjirouxgqcldjyhma.supabase.co";
+  const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdXRqaXJvdXhncWNsZGp5aG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDk4MDAsImV4cCI6MjA5Nzk4NTgwMH0.gIAwf6a2oY-DkTXaf5eM2L4ROMCKim5WsevGfjol7tE";
+  const norm = u => (u || "").trim().replace(/\/+$/, "");
+  let url = SUPA_URL, key = SUPA_KEY, session = null;
+  try { url = norm(localStorage.getItem("cfms_url") || SUPA_URL); } catch (e) {}
+  try { key = (localStorage.getItem("cfms_key") || SUPA_KEY).trim(); } catch (e) {}
+  try { session = JSON.parse(localStorage.getItem("cfms_session") || "null"); } catch (e) {}
+  const REST = url + '/rest/v1/graph_positions';
+  const SHARED = {};
+  const loggedIn = () => !!(session && session.access_token);
+
+  const btn = document.getElementById('save-pos-btn');
+  const note = document.getElementById('save-pos-note');
+  function say(text, ok) {
+    if (!note) return;
+    note.textContent = text || '';
+    note.style.color = ok === false ? '#9a3412' : '#4b5563';
+  }
+
+  // force=false 면 아직 저장하지 않은 내 드래그는 건드리지 않는다.
+  function applyShared(force) {
+    let moved = 0;
+    RAW_NODES.forEach(n => {
+      const p = SHARED[n.id];
+      if (!p) return;
+      if (!force && savedPos[n.id]) return;
+      network.moveNode(n.id, p.x, p.y);
+      moved += 1;
+    });
+    return moved;
+  }
+
+  async function load() {
+    try {
+      const res = await fetch(REST + '?select=id,x,y', { headers: { apikey: key, Authorization: 'Bearer ' + key } });
+      if (!res.ok) return;                    // 표가 없거나 권한이 없다 — 파일의 POS 로 그린다
+      const rows = await res.json();
+      if (!Array.isArray(rows) || !rows.length) return;
+      rows.forEach(r => { if (NODE_BY_ID[r.id]) SHARED[r.id] = { x: r.x, y: r.y }; });
+      if (applyShared(false)) network.redraw();
+      const mine = Object.keys(savedPos).length;
+      say('공유 배치 ' + rows.length + '개' + (mine ? (' · 내 미저장 ' + mine + '개') : ''));
+    } catch (e) { /* 오프라인 — 조용히 파일 값으로 */ }
+  }
+
+  async function save() {
+    if (!loggedIn()) { askLogin(); return; }
+    const ids = RAW_NODES.map(n => n.id);
+    const all = network.getPositions(ids);
+    const rows = ids.filter(id => all[id]).map(id => ({
+      id: id, x: Math.round(all[id].x), y: Math.round(all[id].y), updated_at: new Date().toISOString(),
+    }));
+    btn.disabled = true;
+    say('저장 중…');
+    try {
+      const res = await fetch(REST, {
+        method: 'POST',
+        headers: {
+          apikey: key, Authorization: 'Bearer ' + session.access_token,
+          'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal',
+        },
+        body: JSON.stringify(rows),
+      });
+      if (res.status === 401) {
+        session = null;
+        try { localStorage.removeItem('cfms_session'); } catch (e) {}
+        say('세션이 만료됐습니다. 다시 로그인해 주세요.', false);
+        askLogin();
+        return;
+      }
+      if (!res.ok) {
+        const body = await res.text();
+        say(/graph_positions|PGRST205|42P01/i.test(body)
+          ? 'graph_positions 표가 없습니다 — schema_graph_positions.sql 을 먼저 돌려 주세요.'
+          : ('저장 실패 (' + res.status + ')'), false);
+        return;
+      }
+      rows.forEach(r => { SHARED[r.id] = { x: r.x, y: r.y }; });
+      savedPos = {};
+      try { localStorage.removeItem(POS_STORE_KEY); } catch (e) {}
+      say('저장했습니다 — ' + rows.length + '개');
+    } catch (e) {
+      say('저장 실패: ' + e.message, false);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // 이 페이지에는 로그인 UI 가 없다(열람 전용이므로). 저장할 때만 작은 상자를 띄우고,
+  // 세션은 다른 랩 웹앱과 같은 localStorage 키(cfms_session)를 함께 쓴다.
+  function askLogin() {
+    if (document.getElementById('pos-login')) return;
+    const box = document.createElement('div');
+    box.id = 'pos-login';
+    box.style.cssText = 'position:fixed;z-index:120;top:52px;right:16px;width:250px;padding:13px 14px;'
+      + 'background:#fff;border:1px solid #cbd5e1;border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.16);'
+      + "font:13px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
+    box.innerHTML = '<div style="font-weight:700;margin-bottom:7px">노드 저장 — 로그인</div>'
+      + '<div style="font-size:11.5px;color:#64748b;margin-bottom:9px">upjuk·마인드맵과 같은 계정입니다.</div>'
+      + '<input id="pos-email" type="email" placeholder="이메일" style="width:100%;margin-bottom:6px;padding:6px 8px;border:1px solid #cbd5e1;border-radius:6px">'
+      + '<input id="pos-pw" type="password" placeholder="비밀번호" style="width:100%;margin-bottom:8px;padding:6px 8px;border:1px solid #cbd5e1;border-radius:6px">'
+      + '<div id="pos-login-err" style="color:#b91c1c;font-size:11.5px;min-height:15px;margin-bottom:6px"></div>'
+      + '<button id="pos-login-go" style="padding:5px 11px;border:none;border-radius:6px;background:#2f6feb;color:#fff;font-weight:600;cursor:pointer">로그인</button>'
+      + '<button id="pos-login-cancel" style="margin-left:6px;padding:5px 11px;border:1px solid #cbd5e1;border-radius:6px;background:#fff;cursor:pointer">취소</button>';
+    document.body.appendChild(box);
+    const err = box.querySelector('#pos-login-err');
+    box.querySelector('#pos-login-cancel').addEventListener('click', () => box.remove());
+    box.querySelector('#pos-login-go').addEventListener('click', async () => {
+      const email = box.querySelector('#pos-email').value.trim();
+      const pw = box.querySelector('#pos-pw').value;
+      if (!email || !pw) { err.textContent = '이메일과 비밀번호를 입력하세요.'; return; }
+      try {
+        const res = await fetch(url + '/auth/v1/token?grant_type=password', {
+          method: 'POST',
+          headers: { apikey: key, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, password: pw }),
+        });
+        if (!res.ok) { err.textContent = '로그인 실패 — 이메일/비밀번호를 확인하세요.'; return; }
+        const data = await res.json();
+        session = { access_token: data.access_token, refresh_token: data.refresh_token, email: email };
+        try { localStorage.setItem('cfms_session', JSON.stringify(session)); } catch (e) {}
+        box.remove();
+        save();
+      } catch (e) { err.textContent = '로그인 실패: ' + e.message; }
+    });
+    box.querySelector('#pos-pw').addEventListener('keydown', e => {
+      if (e.key === 'Enter') box.querySelector('#pos-login-go').click();
+    });
+  }
+
+  if (btn) btn.addEventListener('click', save);
+  // 「위치 초기화」는 파일의 POS 로 되돌린다. 공유 배치가 있으면 그쪽이 「모두가 보는 배치」
+  // 이므로 초기화의 종착지도 그쪽이어야 한다. 원래 핸들러가 끝난 뒤 덮어쓴다.
+  const resetBtn = document.getElementById('reset-pos-btn');
+  if (resetBtn) resetBtn.addEventListener('click', () => {
+    setTimeout(() => { if (applyShared(true)) network.redraw(); }, 0);
+  });
+  load();
+})();
+// GRAPH_POSITION_SYNC_END
 // HYPEREDGE_INITIAL_REDRAW_BEGIN
 // The network can finish its first frame before the overlay listeners above
 // are registered. Draw once more so hulls and rotated labels appear on load.

@@ -40,6 +40,7 @@
 7. `rename_pftf_alpha_to_gfiberct.sql`: 공유 노드 `PFTF_alpha` 행을 `PFTF_GFiberCT` 로 개명 (2026-09-11, 재실행 안전)
 8. `schema_research_outputs.sql`: `papers` + `project_nodes` 를 합친 단일 표 (2026-09-12)
 9. `schema_portfolio_rows.sql`: `portfolio.html` 이 읽는 표. **anon 권한 없음 — 로그인 사용자만** (2026-09-13)
+10. `schema_graph_positions.sql`: `graph.html` 의 노드 좌표. 열람 공개 · 저장은 로그인 사용자만 (2026-09-13)
 
 기본 내장 연결 정보는 각 HTML의 `BAKED_URL`, `BAKED_KEY`에 있습니다. 공개 저장소에 들어간 키는 Supabase `anon` 키이며, 실제 보안은 RLS와 storage 정책이 담당합니다.
 
@@ -92,13 +93,28 @@ node scripts/audit-vault-projects.mjs D:\cfms-research-vault
 pwsh -File scripts/publish-research-views.ps1 -VaultPath D:\cfms-research-vault
 ```
 
-노드를 드래그해 바꾼 배치는 **위치 복사** 버튼으로 복사한 뒤 한 줄로 승격합니다.
+### 노드 배치 (2026-09-13부터 웹에서 저장)
+
+노드를 끌어 놓고 `graph.html`의 **노드 저장** 을 누르면 좌표가 Supabase `graph_positions`로
+올라가고 모든 방문자가 그 배치를 봅니다. 저장소를 건드리지 않으므로 커밋도 배포도 없습니다.
+저장은 로그인한 사용자만, 열람은 누구나 가능합니다. 처음 한 번 SQL Editor에서
+[`schema_graph_positions.sql`](schema_graph_positions.sql)을 돌려 표를 만들어야 합니다.
+
+파일의 `POS`는 씨앗으로 남습니다 — 표가 비었거나 오프라인일 때, 그리고 `graph3d.html`이
+`graph.html`을 직접 읽을 때 쓰입니다. 3D 뷰가 옛 배치로 보이거나 파일 기본값을 지금 배치로
+굳히고 싶으면 표에서 되받습니다.
+
+```powershell
+node scripts/pull-graph-positions.mjs
+```
+
+예전처럼 **위치 복사** 로 얻은 `const POS = {...};` 한 줄을 승격하는 길도 그대로 있습니다.
 
 ```powershell
 Get-Clipboard | node scripts/apply-graph-positions.mjs
 ```
 
-정본 갱신·재생성·좌표 가드 동기화·검증까지 이 스크립트가 하며, 전체 절차와 함정은
+두 스크립트 모두 정본 갱신·재생성·좌표 가드 동기화·검증까지 하며, 전체 절차와 함정은
 [`docs/graph-positions-runbook.md`](docs/graph-positions-runbook.md)에 적어 두었습니다.
 좌표 정본은 `graph.html`이 아니라 `layout_findings.py`의 `POS`이며, `graph.html`을 손으로
 고치면 다음 재생성 때 조용히 되돌아갑니다.
