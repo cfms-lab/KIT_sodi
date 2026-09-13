@@ -376,6 +376,7 @@ EDGE_DIRECTION_FIXES.forEach(([from, to]) => {
 
 const CURATED_POSITIONS = {"cfmsAutoSew": {"x": 1289, "y": 549}, "cfmsAutoPlace_IJCST": {"x": 988, "y": 705}, "cfmsAutoPlace_JCDE": {"x": 996, "y": 867}, "cfmsDrapeSCAN": {"x": 792, "y": 250}, "SFTF_Holonomy": {"x": 1167, "y": 137}, "HIPDetect": {"x": 852, "y": 168}};
 const PAPER_COMPLETENESS = {"ColdOndol": 3, "ColdOndol_Materials": 4, "ColdOndol_Positioning": 3, "HipDetect": 1, "PFTF": 5, "PFTF_AsymTensor": 2, "PFTF_Compression": 6, "PFTF_FXShock": 8, "PFTF_GFiberCT": 2, "PFTF_Mold": 8, "PFTF_VisCull_kDop": 4, "SFTFSoft_DFSVR": 5, "SFTFSoft_GNN": 4, "SFTF_Clustering": 4, "SFTF_Composite": 3, "SFTF_DrapePrior": 1, "SFTF_HeatMethod": 1, "SFTF_Holonomy": 2, "SFTF_QEM": 4, "SFTF_SewerPOC": 5, "SFTF_ThermalChip": 5, "SFTF_UrbanTraffic": 6, "TSE_SEM": 2, "TSE_SEM_AutoTune": 2, "TSE_SEM_Bezier": 2, "TSE_SEM_Tensor": 2, "Tomo_DFSVR": 4, "Tomo_SFTF": 1, "Tomo_SFTFSoft": 2, "Tomo_Shell2026_TomoSh4": 2, "Tomo_Shell2026_TomoSh5": 2, "cfmsAutoPlace_IJCST": 3, "cfmsAutoPlace_JCDE": 3, "cfmsAutoSew": 4, "cfmsCIPC": 1, "cfmsDispersity": 1, "cfmsDrapeSCAN": 10, "cfmsPINNCAD": 10, "cfmsPINNDrape": 5};
+const VAULT_STAGES = {"ColdOndol": "undecided", "ColdOndol_Positioning": "draft", "DFSVR_VisCull": "draft", "HIPDetect": "draft", "PFTF": "blocked", "PFTF_AsymTensor": "draft", "PFTF_Compression": "draft", "PFTF_DrapePrior_VisCull_kDop": "draft", "PFTF_GFiberCT": "draft", "PFTF_ResearchOptimize": "draft", "PFTF_VisCull_kDop": "draft", "SFTFSoft_DFSVR": "blocked", "SFTFSoft_GNN": "draft", "SFTFSoft_GNN_DFSVR": "draft", "SFTF_ActiveOverprint": "draft", "SFTF_Clustering": "draft", "SFTF_Composite": "draft", "SFTF_DrapePrior": "revision", "SFTF_DynamicTargetSearch": "draft", "SFTF_HeatMethod": "draft", "SFTF_Holonomy": "draft", "SFTF_InjMold": "draft", "SFTF_QEM": "draft", "SFTF_SewerPOC": "undecided", "SFTF_UrbanTraffic": "undecided", "TSE_SEM_AutoTune": "draft", "TSE_SEM_Bezier": "draft", "TSE_SEM_Tensor": "draft", "Tomo_DFSVR": "draft", "Tomo_SFTF": "submitted", "Tomo_SFTFSoft": "draft", "cfmsAutoPlace_IJCST": "draft", "cfmsAutoPlace_JCDE": "draft", "cfmsAutoSew": "draft", "cfmsCIPC": "submitted", "cfmsDrape": "draft", "cfmsDrapeSCAN": "draft", "cfmsPINNCAD": "undecided", "cfmsPINNDrape": "undecided"};
 Object.assign(POS, CURATED_POSITIONS);
 
 // 새 관계를 반영해 모든 노드의 차수 메타데이터도 같은 실행에서 맞춘다.
@@ -1452,6 +1453,27 @@ const PROG = {
   published: { done: true,  color: PROG_GREEN,  label: '출판(published)' },
 };
 
+/* 노드 파이의 단계표 (2026-09-13).
+   위 PROG 넷만으로는 노드 대부분이 그려지지 않는다 — 이 볼트의 프로젝트는 대개 draft 라서
+   옛 배지 규칙에서는 아이콘이 아예 없었다(그래서 Tomo_SFTF 만 파이로 바뀌어 보였다).
+   그래서 **볼트의 통합 단계 어휘 아홉 가지를 그대로** 들여온다. 볼트 대시보드의 파이단계와
+   같은 기하이고, 색은 여기서 정하지 않는다 — 노드의 등급 색을 쓴다. */
+const STAGE_PIE = {
+  published: { frac: 1,     done: true, label: '출판(published)' },
+  inprint:   { frac: 0.875,             label: '인쇄중(in print)' },
+  accepted:  { frac: 0.75,              label: '게재확정(accepted)' },
+  revision:  { frac: 0.625,             label: '심사 수정(revision)' },
+  submitted: { frac: 0.5,               label: '투고(submitted)' },
+  draft:     { frac: 0.25,              label: '초고(draft)' },
+  undecided: { frac: 0,                 label: '미정(undecided)' },
+  blocked:   { frac: 0,     x: true,    label: '보류(blocked)' },
+  cancelled: { frac: 0,     xx: true,   label: '취소(cancelled)' },
+  idea:      { frac: 0,                 label: '아이디어(idea)' },
+};
+/* 노드별 단계. 파일에 구운 볼트 값(VAULT_STAGES)으로 시작하고, Supabase 표가 살아 있으면
+   아래 오버라이드가 최신 값으로 덮는다. 표에도 볼트에도 없는 노드는 꽉 찬 원으로 남는다. */
+const NODE_STAGE = Object.assign({}, typeof VAULT_STAGES === 'object' ? VAULT_STAGES : {});
+
 /* mindmap.html progIcon() 의 비율을 그대로 옮긴 것. r=6 기준으로
    링 폭 1.6(0.267r) · 흰 테두리 중심 7.4(1.233r)·폭 1.2(0.2r) · 완료형 6.6(1.1r).
    색은 단계가 정한다(p.color) — 옛 배지 데이터에 color 가 없으면 초록으로 떨어진다. */
@@ -1528,6 +1550,20 @@ function drawNodePie(ctx, cx, cy, R, p, color) {
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 0.22 * R;
     ctx.stroke();
+  } else if (p.x || p.xx) {
+    // 보류는 빗금 한 획(멈췄을 뿐), 취소는 X(접었음). 볼트 대시보드와 같은 구분이다.
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 0.16 * R;
+    ctx.beginPath();
+    ctx.moveTo(cx - 0.5 * R, cy + 0.5 * R);
+    ctx.lineTo(cx + 0.5 * R, cy - 0.5 * R);
+    ctx.stroke();
+    if (p.xx) {
+      ctx.beginPath();
+      ctx.moveTo(cx - 0.5 * R, cy - 0.5 * R);
+      ctx.lineTo(cx + 0.5 * R, cy + 0.5 * R);
+      ctx.stroke();
+    }
   } else {
     ctx.beginPath();                          // 12시에서 시계방향으로 채운다
     ctx.moveTo(cx, cy);
@@ -1547,7 +1583,8 @@ function drawNodePie(ctx, cx, cy, R, p, color) {
 
 network.on('afterDrawing', function (ctx) {
   nodesDS.get({ filter: (n) => !n.hidden }).forEach((n) => {
-    const p = PROG[MINDMAP_STATUS[n.id]];
+    // 볼트/표의 단계가 먼저다. 옛 4단계 배지 데이터(MINDMAP_STATUS)는 그것이 없을 때만.
+    const p = STAGE_PIE[NODE_STAGE[n.id]] || PROG[MINDMAP_STATUS[n.id]];
     if (!p) return;
     if (n.shape === 'circle') return;          // 종료 노드(×)는 라벨이 원 안에 있어 덮으면 안 된다
     const pos = network.getPositions([n.id])[n.id];
@@ -1573,7 +1610,11 @@ network.on('afterDrawing', function (ctx) {
   hint.textContent = '노드의 채운 정도 = 진도 · 색 = 논문 등급';
   box.appendChild(hint);
   const S = 16, dpr = window.devicePixelRatio || 1;
-  Object.keys(PROG).forEach((k) => {
+  // 이 그래프에 실제로 있는 단계만 보인다 — 어휘 열 가지를 다 늘어놓으면 범례가 본문보다 길다.
+  const used = new Set(Object.values(NODE_STAGE));
+  const keys = Object.keys(STAGE_PIE).filter((k) => used.has(k));
+  (keys.length ? keys : Object.keys(PROG)).forEach((k) => {
+    const stage = STAGE_PIE[k] || PROG[k];
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;align-items:center;gap:6px;margin:3px 0;font-size:13px;color:#555';
     const cv = document.createElement('canvas');
@@ -1581,10 +1622,11 @@ network.on('afterDrawing', function (ctx) {
     cv.style.width = S + 'px'; cv.style.height = S + 'px'; cv.style.flex = 'none';
     const c = cv.getContext('2d');
     c.scale(dpr, dpr);
-    drawProgBadge(c, S / 2, S / 2, S / 2 / 1.25,             // 흰 테두리까지 들어가게
-      Object.assign({}, PROG[k], { color: '#94a3b8' }));     // 색은 등급이 정하므로 범례는 회색
+    // 노드와 같은 그림(drawNodePie)을 쓴다 — 보류·취소의 빗금까지 같은 모양으로 보이게.
+    // 색은 등급이 정하므로 범례는 회색이다.
+    drawNodePie(c, S / 2, S / 2, S / 2 * 0.86, stage, '#94a3b8');
     row.appendChild(cv);
-    row.appendChild(document.createTextNode(PROG[k].label));
+    row.appendChild(document.createTextNode(stage.label));
     box.appendChild(row);
   });
   wrap.appendChild(box);
@@ -1762,7 +1804,10 @@ const STAGE_TO_PROG = {
       if (r.project_path) n._project_path = r.project_path;
       const prog = STAGE_TO_PROG[r.stage];
       if (prog) MINDMAP_STATUS[r.id] = prog;
-      else if (r.stage) delete MINDMAP_STATUS[r.id];   // draft·보류 등은 배지를 뗀다
+      else if (r.stage) delete MINDMAP_STATUS[r.id];   // draft·보류 등은 옛 4단계 배지가 없다
+      // 노드 파이는 통합 단계 어휘를 그대로 쓴다(draft·undecided·blocked·cancelled 포함).
+      if (r.stage) NODE_STAGE[r.id] = r.stage;
+      else delete NODE_STAGE[r.id];
     });
     if (!touched) return;
     decorateNodes();

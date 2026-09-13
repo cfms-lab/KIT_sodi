@@ -119,6 +119,36 @@ def _load_paper_completeness():
 
 PAPER_COMPLETENESS = _load_paper_completeness()
 
+
+def _load_note_stages():
+    """볼트 frontmatter 의 `stage:` 를 노트 이름 기준으로 모은다.
+
+    통합 단계 어휘(published inprint accepted revision submitted draft undecided
+    blocked cancelled idea)이며 정본은 볼트 `scripts/lib/stage.mjs` 다.  graph.html 은
+    이 값으로 노드를 파이로 그린다 — **채운 정도가 투고 진도이고 색은 논문 등급**이다.
+    표(research_outputs)가 살아 있으면 그쪽 값이 이기고, 여기 값은 오프라인 씨앗이다.
+    """
+    stages = {}
+    if not PROJECTS_DIR.is_dir():
+        return stages
+    for note in PROJECTS_DIR.glob("*.md"):
+        try:
+            lines = note.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            continue
+        for line in lines:
+            head = re.match(r"^stage:[ \t]*(.*)$", line)
+            if not head:
+                continue
+            value = _strip_inline_comment(head.group(1)).strip().strip("\"'")
+            if value:
+                stages[note.stem] = value
+            break
+    return stages
+
+
+NOTE_STAGES = _load_note_stages()
+
 # Exact, project-specific caption suffixes requested for the graph view.
 # Keep these separate from Papers/투고현황.md: that source is reserved for
 # journal-qualified submission badges such as "[RPJ,draft]".
@@ -1970,6 +2000,34 @@ if not ncompleteness:
         flags=re.S,
     )
 assert ncompleteness == 1, "PAPER_COMPLETENESS block not written"
+
+# 노드별 투고 단계.  한 노트가 논문 둘을 담는 트랙 노드(cfmsAutoPlace_IJCST·TSE_TomoSh4 …)는
+# 부모 노트의 단계를 물려받는다 — 볼트 대시보드의 분리트랙이 그렇게 적혀 있다.
+stage_by_id = {}
+# 노드 id 와 노트 이름의 대소문자가 어긋난 짝이 있다(HIPDetect 노드 ↔ HipDetect.md).
+_stage_ci = {stem.lower(): stage for stem, stage in NOTE_STAGES.items()}
+for _node_id in POS:
+    if _node_id in NOTE_STAGES:
+        stage_by_id[_node_id] = NOTE_STAGES[_node_id]
+        continue
+    if _node_id.lower() in _stage_ci:
+        stage_by_id[_node_id] = _stage_ci[_node_id.lower()]
+        continue
+    _parents = [stem for stem in NOTE_STAGES if _node_id.lower().startswith(stem.lower() + "_")]
+    if _parents:
+        stage_by_id[_node_id] = NOTE_STAGES[max(_parents, key=len)]
+stages_js = "const VAULT_STAGES = " + json.dumps(
+    dict(sorted(stage_by_id.items())), ensure_ascii=False) + ";"
+s, nstages = re.subn(r"const VAULT_STAGES = \{.*?\};", lambda _m: stages_js, s, count=1, flags=re.S)
+if not nstages:
+    s, nstages = re.subn(
+        r"(const PAPER_COMPLETENESS = \{.*?\};)",
+        lambda match: match.group(1) + "\n" + stages_js,
+        s,
+        count=1,
+        flags=re.S,
+    )
+assert nstages == 1, "VAULT_STAGES block not written"
 
 hyper_js = "const hyperedges = " + json.dumps(hyperedges_for_graph, ensure_ascii=False) + ";"
 s, n2 = re.subn(r"const hyperedges = \[.*?\];", lambda _m: hyper_js, s, count=1,
