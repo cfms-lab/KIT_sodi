@@ -259,12 +259,21 @@ function 비교(a, b) {
   return 역순 ? -c : c;
 }
 
+/* 투고 아이콘의 색은 단계가 아니라 **논문 등급**이다 (2026-09-13). graph.html 이 노드 원과
+   진도 배지를 하나로 합치면서 「채운 정도 = 투고 진도, 색 = 논문 등급」이 되었고, 볼트
+   대시보드와 이 표도 같은 눈으로 읽히게 맞췄다. 값은 graph.html 의 QUALITY_COLORS 와 같다 —
+   여기서는 SVG 속성에 들어가므로 CSS 변수가 아니라 실제 색이어야 한다.
+   ToDo 는 원래 흰색인데 흰 바탕에서 안 보여 회색으로 둔다. */
+const QUALITY_PIE = {"상":"#e02020","중":"#f28e2b","하":"#2a78d6","ToDo":"#9ca3af",
+  "Closed":"#6b7280","그룹":"#c8c8c8","등급 없음":"#94a3b8"};
+const 파이색 = g => QUALITY_PIE[g] || "#94a3b8";
+
 /* ── 투고 파이 아이콘 — 볼트 노트의 투고셀() 과 같은 기하다(r=6, 12시에서 시계방향).
-   단계·색·설명은 META.stages 로 볼트에서 따라온다. */
-function 파이(stage) {
+   단계(채운 정도)와 설명은 META.stages 로 볼트에서 따라오고, 색은 호출부가 준다. */
+function 파이(stage, color) {
   const s = META.stages && META.stages[stage];
   if (!s) return "";
-  const r = 6, cx = 8, cy = 8, c = s.color;
+  const r = 6, cx = 8, cy = 8, c = color || s.color;
   let 안 = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c}" stroke-width="1.6"/>`;
   if (s.done) {
     안 = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>`
@@ -299,7 +308,7 @@ function 행그리기(row) {
     + `<td class="num">${esc(row.completeness)}</td>`
     + `<td><span class="chip"><span class="dot" style="background:${QUALITY_COLORS[row.grade] || "var(--q-none)"}"></span>${esc(row.grade)}</span></td>`
     + `<td class="c-co">${esc(row.coauthor)}</td>`
-    + `<td><span class="journal" title="${esc(stage ? stage.label : "")}">${파이(row.stage)}<span>${esc(row.journal)}</span></span></td>`
+    + `<td><span class="journal" title="${esc((stage ? stage.label : "") + (row.grade ? ` · 등급 ${row.grade}` : ""))}">${파이(row.stage, 파이색(row.grade))}<span>${esc(row.journal)}</span></span></td>`
     + `<td><div class="clamp" title="${esc(row.gate)}">${esc(row.gate)}</div></td>`
     + `<td class="c-intro"><div class="clamp" title="${esc(row.intro)}">${esc(row.intro)}</div></td>`;
   // 긴 서술 두 열은 3줄에서 자른다. 줄을 누르면 그 행만 펼친다.
@@ -359,7 +368,9 @@ function 범례() {
   const box = document.getElementById("legend");
   const 단계들 = Object.entries(META.stages || {})
     .sort((a, b) => ((META.rank && META.rank[a[0]]) ?? 99) - ((META.rank && META.rank[b[0]]) ?? 99));
-  box.innerHTML = 단계들.map(([id, s]) => `<span>${파이(id)}${esc(s.label)}</span>`).join("")
+  // 범례 아이콘은 회색이다 — 색은 단계가 아니라 등급이 정하므로, 여기서 색을 쓰면 거짓말이 된다.
+  box.innerHTML = 단계들.map(([id, s]) => `<span>${파이(id, "#94a3b8")}${esc(s.label)}</span>`).join("")
+    + `<span style="margin-left:14px">채운 정도 = 투고 진도 · 색 = 논문 등급</span>`
     + `<span style="margin-left:auto">— 는 미기입 (정렬에서 늘 맨 아래)</span>`;
 }
 

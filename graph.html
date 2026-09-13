@@ -1451,7 +1451,6 @@ const PROG = {
   inprint:   { frac: 0.875, color: PROG_YELLOW, label: '인쇄중(in print)' },
   published: { done: true,  color: PROG_GREEN,  label: '출판(published)' },
 };
-const PROG_R = 10;          // 배지 반지름(그래프 좌표). 노드 반지름은 20~36 이다.
 
 /* mindmap.html progIcon() 의 비율을 그대로 옮긴 것. r=6 기준으로
    링 폭 1.6(0.267r) · 흰 테두리 중심 7.4(1.233r)·폭 1.2(0.2r) · 완료형 6.6(1.1r).
@@ -1498,15 +1497,62 @@ function drawProgBadge(ctx, cx, cy, R, p) {
   ctx.restore();
 }
 
+/* 노드 자체가 진도 파이다 (2026-09-13).
+   전에는 등급 색 원을 그리고 그 오른쪽 위 어깨에 진도 배지를 따로 얹었다. 둘을 합쳤다 —
+   **모양(채운 정도)은 투고 진도, 색은 논문 등급**이고, 크기는 예전 원 그대로(degree).
+   진도가 없는 노드는 지금까지처럼 꽉 찬 원으로 남는다. 그래야 대부분의 노드에서
+   「꽉 찬 원 = 아직 안 나간 원고」라는 읽기가 유지된다. */
+function nodeFillColor(n) {
+  const c = n.color && (n.color.background || n.color);
+  return typeof c === 'string' ? c : '#999999';
+}
+
+function drawNodePie(ctx, cx, cy, R, p, color) {
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  // vis 가 그려 둔 꽉 찬 원을 덮는다. 남은 흰 부분이 「아직」을 뜻한다.
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, 0, 2 * Math.PI);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  if (p.done) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, 2 * Math.PI);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.beginPath();                          // 완료 체크
+    ctx.moveTo(cx - 0.48 * R, cy + 0.03 * R);
+    ctx.lineTo(cx - 0.13 * R, cy + 0.40 * R);
+    ctx.lineTo(cx + 0.52 * R, cy - 0.33 * R);
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 0.22 * R;
+    ctx.stroke();
+  } else {
+    ctx.beginPath();                          // 12시에서 시계방향으로 채운다
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * p.frac);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+  // 테두리는 언제나 등급 색이다 — 파이가 비어 있어도 노드의 등급이 읽힌다.
+  ctx.beginPath();
+  ctx.arc(cx, cy, R * 0.93, 0, 2 * Math.PI);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 0.14 * R;
+  ctx.stroke();
+  ctx.restore();
+}
+
 network.on('afterDrawing', function (ctx) {
   nodesDS.get({ filter: (n) => !n.hidden }).forEach((n) => {
     const p = PROG[MINDMAP_STATUS[n.id]];
     if (!p) return;
+    if (n.shape === 'circle') return;          // 종료 노드(×)는 라벨이 원 안에 있어 덮으면 안 된다
     const pos = network.getPositions([n.id])[n.id];
     if (!pos) return;
-    const k = Math.SQRT1_2;                   // 45도 — 노드 오른쪽 위 어깨
-    const r = n.size || 12;
-    drawProgBadge(ctx, pos.x + r * k, pos.y - r * k, PROG_R, p);
+    drawNodePie(ctx, pos.x, pos.y, n.size || 12, p, nodeFillColor(n));
   });
 });
 
@@ -1520,6 +1566,12 @@ network.on('afterDrawing', function (ctx) {
   const h = document.createElement('h3');
   h.textContent = '투고 진도';
   box.appendChild(h);
+  // 2026-09-13: 파이가 노드 자리로 옮겨 가면서 색의 뜻이 바뀌었다. 채운 정도만 진도이고
+  // 색은 논문 등급이므로, 범례 아이콘은 색을 빼고(회색) 모양만 보인다.
+  const hint = document.createElement('div');
+  hint.style.cssText = 'font-size:12px;color:#888;margin:-2px 0 5px;line-height:1.4';
+  hint.textContent = '노드의 채운 정도 = 진도 · 색 = 논문 등급';
+  box.appendChild(hint);
   const S = 16, dpr = window.devicePixelRatio || 1;
   Object.keys(PROG).forEach((k) => {
     const row = document.createElement('div');
@@ -1529,7 +1581,8 @@ network.on('afterDrawing', function (ctx) {
     cv.style.width = S + 'px'; cv.style.height = S + 'px'; cv.style.flex = 'none';
     const c = cv.getContext('2d');
     c.scale(dpr, dpr);
-    drawProgBadge(c, S / 2, S / 2, S / 2 / 1.25, PROG[k]);   // 흰 테두리까지 들어가게
+    drawProgBadge(c, S / 2, S / 2, S / 2 / 1.25,             // 흰 테두리까지 들어가게
+      Object.assign({}, PROG[k], { color: '#94a3b8' }));     // 색은 등급이 정하므로 범례는 회색
     row.appendChild(cv);
     row.appendChild(document.createTextNode(PROG[k].label));
     box.appendChild(row);
