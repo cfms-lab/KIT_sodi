@@ -199,11 +199,15 @@ export function buildRows(vaultRoot) {
     const notePath = row.링크?.path ?? `Projects/${row.이름}.md`;
     const owner = byPath.get(notePath);
     const repo = String(owner?.repository ?? "");
+    // 프로젝트 폴더. graph.html 의 VSCODE 버튼과 같은 값(볼트 노트의 path:)이고,
+    // 페이지가 vscode://file/... 로 열 때만 쓴다. 남의 브라우저에서는 그냥 안 열릴 뿐이다.
+    const projectPath = String(owner?.path ?? "").trim();
     return {
       id: row.이름,
       name: row.링크?.display ?? row.이름,
       note: notePath,
       repo: /^https?:\/\//i.test(repo) ? repo : null,
+      projectPath: projectPath || null,
       order: row.순서,
       completeness: row.완성도,
       published: !!row.출판,

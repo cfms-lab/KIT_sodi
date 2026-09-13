@@ -83,6 +83,11 @@
   .name{font-weight:600}
   .repo{margin-left:5px;font-size:11px;color:#2563eb;text-decoration:none}
   .repo:hover{text-decoration:underline}
+  /* VS Code 로 열기 — graph.html 의 VSCODE 버튼과 같은 일을 하는 작은 칩이다. */
+  .vscode-btn{margin-left:4px;padding:0 4px;border:1px solid var(--line);border-radius:3px;
+    background:#fff;color:#475569;font-size:10px;font-weight:700;line-height:15px;
+    cursor:pointer;vertical-align:1px}
+  .vscode-btn:hover{background:#eff6ff;border-color:#93c5fd;color:#2563eb}
   .chip{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
   .dot{width:10px;height:10px;border-radius:2px;border:1px solid rgba(15,23,42,.35);flex:0 0 auto}
   .journal{display:inline-flex;align-items:center;gap:5px}
@@ -285,8 +290,11 @@ function 행그리기(row) {
   const stage = META.stages && META.stages[row.stage];
   const 저장소 = row.repo
     ? `<a class="repo" href="${esc(row.repo)}" target="_blank" rel="noopener" title="저장소 열기">↗</a>` : "";
+  const 브이에스 = row.projectPath
+    ? `<button type="button" class="vscode-btn" data-path="${esc(row.projectPath)}"`
+      + ` title="VS Code 새 창으로 열기 — ${esc(row.projectPath)}">VS</button>` : "";
   tr.innerHTML =
-      `<td><span class="name">${esc(row.name)}</span>${저장소}</td>`
+      `<td><span class="name">${esc(row.name)}</span>${저장소}${브이에스}</td>`
     + `<td class="num">${esc(row.order)}</td>`
     + `<td class="num">${esc(row.completeness)}</td>`
     + `<td><span class="chip"><span class="dot" style="background:${QUALITY_COLORS[row.grade] || "var(--q-none)"}"></span>${esc(row.grade)}</span></td>`
@@ -295,7 +303,12 @@ function 행그리기(row) {
     + `<td><div class="clamp" title="${esc(row.gate)}">${esc(row.gate)}</div></td>`
     + `<td class="c-intro"><div class="clamp" title="${esc(row.intro)}">${esc(row.intro)}</div></td>`;
   // 긴 서술 두 열은 3줄에서 자른다. 줄을 누르면 그 행만 펼친다.
-  tr.addEventListener("click", () => tr.classList.toggle("open"));
+  // ↗·VS 는 여기서 걸러 낸다 — 이 핸들러가 tbody 의 위임 핸들러보다 먼저 버블을 받으므로
+  // 저쪽에서 stopPropagation 을 해도 이미 늦다(그래서 링크를 눌러도 행이 펼쳐졌다).
+  tr.addEventListener("click", (event) => {
+    if (event.target.closest("a.repo, .vscode-btn")) return;
+    tr.classList.toggle("open");
+  });
   return tr;
 }
 
@@ -424,6 +437,22 @@ function logout(){
   forgetSession();
   toast('로그아웃되었습니다.');
 }
+
+/* VS Code 열기 — graph.html 과 같은 규칙이다. OS 에 등록된 vscode:// 처리기로 폴더를 새 창에
+   연다. 경로는 볼트 노트의 path: 이고, 여기서 셸 명령을 만들지 않는다. 그 처리기가 없는
+   컴퓨터(남의 브라우저)에서는 아무 일도 일어나지 않는다.
+   ↗·VS 클릭이 행 펼치기까지 건드리지 않도록 여기서 전파를 끊는다. */
+document.getElementById('body').addEventListener('click', e => {
+  if (e.target.closest('a.repo')) { e.stopPropagation(); return; }
+  const btn = e.target.closest('.vscode-btn');
+  if (!btn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const projectPath = btn.dataset.path;
+  if (!projectPath) return;
+  const normalized = projectPath.replace(/\\/g, '/').replace(/\/+$/, '');
+  window.open('vscode://file/' + encodeURI(normalized) + '/?windowId=_blank', '_blank', 'noopener');
+});
 
 document.getElementById('loginBtn').addEventListener('click', login);
 document.getElementById('liPw').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
