@@ -46,6 +46,15 @@
   .jgm svg{display:block}
   .jgm .cnt{position:absolute;top:-5px;right:-6px;background:#222;color:#fff;font-size:10px;font-weight:700;border-radius:9px;padding:0 4px;border:1px solid #fff}
   .maplibregl-popup-content{font-size:12px;line-height:1.5}
+  /* 연봉 색 범례 — 색이 무엇을 뜻하는지 지도 위에서 바로 읽히게 (2026-09-13) */
+  #map{position:relative}
+  #salaryLegend{position:absolute;left:10px;bottom:26px;z-index:2;background:rgba(255,255,255,.92);
+    border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-size:11px;color:#374151;
+    box-shadow:0 2px 8px rgba(15,23,42,.12)}
+  #salaryLegend b{display:block;font-size:11px;font-weight:600;margin-bottom:4px;color:#1f2937}
+  #salaryLegend .ramp{width:132px;height:9px;border-radius:5px;border:1px solid rgba(15,23,42,.15);
+    background:linear-gradient(90deg,rgb(68,1,84) 0%,rgb(72,40,120) 11%,rgb(62,74,137) 22%,rgb(49,104,142) 33%,rgb(38,130,142) 44%,rgb(31,158,137) 56%,rgb(53,183,121) 67%,rgb(110,206,88) 78%,rgb(181,222,43) 89%,rgb(253,231,37) 100%)}
+  #salaryLegend .ax{display:flex;justify-content:space-between;margin-top:2px;color:#6b7280;font-size:10px}
   .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:50}
   .modal{background:#fff;border-radius:10px;padding:18px;width:520px;max-width:94vw;max-height:90vh;overflow:auto}
   .modal h2{margin:0 0 12px;font-size:16px;color:var(--c2)}
@@ -79,7 +88,10 @@
       <div id="statTables"></div>
     </div>
   </aside>
-  <div id="map"></div>
+  <div id="map">
+    <div id="salaryLegend"><b>연봉(만원)</b><div class="ramp"></div>
+      <div class="ax"><span>0</span><span>2000</span><span>4000+</span></div></div>
+  </div>
 </div>
 
 <!-- 편집 모달 -->
@@ -127,8 +139,14 @@
 function normUrl(u){return (u||"").trim().replace(/\/+$/,"").replace(/\/rest\/v1$/i,"").replace(/\/auth\/v1$/i,"").replace(/\/+$/,"");}
 const BAKED_URL="https://ijutjirouxgqcldjyhma.supabase.co";
 const BAKED_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdXRqaXJvdXhncWNsZGp5aG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDk4MDAsImV4cCI6MjA5Nzk4NTgwMH0.gIAwf6a2oY-DkTXaf5eM2L4ROMCKim5WsevGfjol7tE";
-let CFG={url:normUrl(localStorage.getItem("cfms_url")||BAKED_URL),key:(localStorage.getItem("cfms_key")||BAKED_KEY).trim()};
-let SESSION=JSON.parse(localStorage.getItem("cfms_session")||"null");
+/* 쿠키·사이트 데이터가 막힌 브라우저에서는 localStorage 접근이 예외를 던진다. 그 예외가
+   최상단에서 터지면 지도도 목록도 못 뜨므로 전부 감싼다 (2026-09-13). */
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
+let CFG={url:normUrl(lsGet("cfms_url")||BAKED_URL),key:(lsGet("cfms_key")||BAKED_KEY).trim()};
+let SESSION=null;
+try{SESSION=JSON.parse(lsGet("cfms_session")||"null");}catch(e){}
 function isIn(){return !!(SESSION&&SESSION.access_token);}
 function authHeaders(u){const h={apikey:CFG.key,"Content-Type":"application/json"};h.Authorization="Bearer "+((u&&isIn())?SESSION.access_token:CFG.key);return h;}
 async function refreshToken(){
@@ -139,7 +157,7 @@ async function refreshToken(){
     if(!rr.ok) return false;
     const d=await rr.json();
     SESSION={access_token:d.access_token,refresh_token:d.refresh_token||SESSION.refresh_token,email:SESSION.email};
-    localStorage.setItem("cfms_session",JSON.stringify(SESSION));
+    lsSet("cfms_session",JSON.stringify(SESSION));
     return true;
   }catch(e){ return false; }
 }
@@ -172,13 +190,23 @@ async function loadAll(){
 }
 const num=v=>{const n=parseFloat(v);return isNaN(n)?null:n;};
 
-/* ===== 연봉→무지개색 (원본 FloatToRainbow 이식) ===== */
-const COL=[[0,0,232],[0,93,232],[0,185,232],[0,255,232],[0,255,139],[0,255,46],[46,255,0],[139,255,0],[139,255,0],[255,185,0],[255,93,0],[255,0,0]];
+/* ===== 연봉 → 색 (viridis) =====
+   2026-09-13: 파랑→빨강 무지개(원본 FloatToRainbow 이식)를 걷어냈다. 무지개는 화려한 만큼
+   값의 순서를 눈으로 읽을 수 없고(초록 구간이 넓고 청록에서 튄다), 원색이 많아 지도 바탕과
+   싸운다. viridis 는 밝기가 단조 증가라 낮은 연봉 → 높은 연봉이 어두움 → 밝음으로 그대로
+   읽히고 색각 이상에서도 순서가 유지된다. Polyscope 의 기본 colormap 이기도 하다.
+   값 범위(0~4100)는 예전과 같게 두었다 — 필터에 따라 범위가 움직이면 같은 회사가 화면마다
+   다른 색이 되어 비교가 무너진다. */
+const VIRIDIS=[[68,1,84],[72,40,120],[62,74,137],[49,104,142],[38,130,142],[31,158,137],[53,183,121],[110,206,88],[181,222,43],[253,231,37]];
 function hx(n){return ("0"+Math.round(n).toString(16)).slice(-2);}
-function rainbow(v){const min=0,max=4100; v=Math.max(min,Math.min(max,v||0));
-  let t=(v-min)/(max-min); if(t<0.001)return "#0000FF"; if(t>0.999)return "#FF0000";
-  let s=t*11,i=Math.floor(s),f=s-i; if(i>=11){i=10;f=1;}
-  return "#"+hx(COL[i][0]*(1-f)+COL[i+1][0]*f)+hx(COL[i][1]*(1-f)+COL[i+1][1]*f)+hx(COL[i][2]*(1-f)+COL[i+1][2]*f);}
+function rgbAt(t){
+  t=Math.max(0,Math.min(1,t));
+  const s=t*(VIRIDIS.length-1), i=Math.min(VIRIDIS.length-2,Math.floor(s)), f=s-i;
+  const a=VIRIDIS[i], b=VIRIDIS[i+1];
+  return [a[0]+(b[0]-a[0])*f, a[1]+(b[1]-a[1])*f, a[2]+(b[2]-a[2])*f];
+}
+const SALARY_MAX=4100;
+function salaryColor(v){const c=rgbAt((Math.max(0,Math.min(SALARY_MAX,v||0)))/SALARY_MAX);return "#"+hx(c[0])+hx(c[1])+hx(c[2]);}
 
 /* ===== UI 초기화 ===== */
 /* ===== 분류(통계=필터) 정의 ===== */
@@ -234,7 +262,7 @@ function renderStats(){
     let sum=0;
     for(const b of c.buckets){
       const on=CHECKED[c.key].has(b); sum+=cnt[b];
-      const ic=c.icon?`<svg viewBox="0 0 24 24" width="15" height="15" style="flex:0 0 15px"><path d="${ICON[symbolByType[b]||'_']||ICON._}" fill="#555"/></svg>`:"";
+      const ic=c.icon?`<svg viewBox="0 -960 960 960" width="15" height="15" style="flex:0 0 15px"><path d="${ICON[symbolByType[b]||'_']||ICON._}" fill="#555"/></svg>`:"";
       h+=`<tr class="${on?"":"off"}"><td class="c"><input type="checkbox" ${on?"checked":""} onclick="tBucket('${c.key}','${(""+b).replace(/'/g,"\\'")}')"></td>`+
          `<td class="l">${ic}${esc(b)}</td><td class="n">${cnt[b]}</td></tr>`;
     }
@@ -251,7 +279,11 @@ function renderStats(){
 function initMap(){
   map=new maplibregl.Map({container:"map",
     style:{version:8,sources:{osm:{type:"raster",tiles:["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],tileSize:256,attribution:"© OpenStreetMap contributors"}},
-      layers:[{id:"osm",type:"raster",source:"osm"}]},
+      layers:[{id:"osm",type:"raster",source:"osm",
+        /* 2026-09-13: OSM 기본 타일은 도로·녹지·건물이 모두 원색이라 그 위에 얹은 마커와
+           채도가 맞붙는다. 타일을 바꾸지 않고(출처·약관 그대로) 채도만 내려 바탕으로
+           물러나게 한다. 마커 색이 유일한 강한 색이 되도록. */
+        paint:{"raster-saturation":-0.9,"raster-contrast":-0.12,"raster-brightness-min":0.06,"raster-brightness-max":0.97}}]},
     center:[127.885,36.238],zoom:6});
   map.addControl(new maplibregl.NavigationControl());
   map.on("load",()=>{
@@ -262,22 +294,27 @@ function initMap(){
   });
 }
 
-/* ===== 업종별 아이콘(실루엣) — 색은 연봉(rainbow) ===== */
+/* ===== 업종별 아이콘 — 모양은 업종, 색은 연봉(viridis) =====
+   2026-09-13: 손으로 모은 실루엣을 Material Symbols(Apache-2.0) 로 갈아 끼웠다. 예전 것은
+   섬유·의류가 옷걸이였고, 화학(fire-station)과 연구소(lab)가 **같은 path** 라 둘이 구별되지
+   않았다. 이제 섬유·의류는 티셔츠, 화학은 플라스크, 연구소는 현미경이다.
+   좌표계는 Material Symbols 그대로 0 -960 960 960 이므로 viewBox 를 그렇게 맞춰야 한다.
+   키(book·car·chip…)는 Supabase jobgis_office_types.sOfficeSymbol 이 정하므로 바꾸지 않았다. */
 const ICON={
-  car:"M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z",
-  chip:"M15 9H9v6h6V9zm-2 4h-2v-2h2v2zm8-2V9h-2V7c0-1.1-.9-2-2-2h-2V3h-2v2h-2V3H9v2H7c-1.1 0-2 .9-2 2v2H3v2h2v2H3v2h2v2c0 1.1.9 2 2 2h2v2h2v-2h2v2h2v-2h2c1.1 0 2-.9 2-2v-2h2v-2h-2v-2h2zm-4 6H7V7h10v10z",
-  lab:"M19.8 18.4L14 10.67V6.5l1.35-1.69c.26-.33.03-.81-.39-.81H9.04c-.42 0-.65.48-.39.81L10 6.5v4.17L4.2 18.4c-.49.66-.02 1.6.8 1.6h14c.82 0 1.29-.94.8-1.6z",
-  book:"M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H6V4h5v8l2.5-1.5L16 12V4h2v16z",
-  "clothing-store":"M21.6 18.2L13 11.75v-.91c1.65-.49 2.8-2.17 2.43-4.05-.26-1.31-1.3-2.4-2.61-2.7C10.54 3.57 8.5 5.3 8.5 7.5h2c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5c0 .84-.69 1.52-1.53 1.5-.54-.01-.97.45-.97.99v1.76L2.4 18.2c-.77.58-.36 1.8.6 1.8h18c.96 0 1.37-1.22.6-1.8z",
-  dollar:"M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z",
-  energy:"M11 21h-1l1-7H6.74c-.51 0-.41-.32-.21-.62.21-.3.05-.07.08-.12C8.1 10.55 9.9 7.42 13.16 2.99h1l-1 7h3.45c.49 0 .56.33.47.51l-.07.15C11.79 18.94 11 21 11 21z",
-  factory:"M22 22H2V11l5 3v-3l5 3V11l5 3 5-3v8zm0-13l-2.5 1.5L17 8V4h-3v2.5L11.5 5 9 6.5V4H4v3.5L2 9V4h20v5z",
-  "fire-station":"M19.8 18.4L14 10.67V6.5l1.35-1.69c.26-.33.03-.81-.39-.81H9.04c-.42 0-.65.48-.39.81L10 6.5v4.17L4.2 18.4c-.49.66-.02 1.6.8 1.6h14c.82 0 1.29-.94.8-1.6z",
-  garden:"M6.05 8.05c-2.73 2.73-2.73 7.15-.02 9.88 1.47-3.4 4.09-6.24 7.36-7.93-2.77 2.34-4.71 5.61-5.39 9.32 2.6 1.23 5.8.78 7.95-1.37C19.43 14.47 20 4 20 4S9.53 4.57 6.05 8.05z",
-  hammer:"M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z",
-  school:"M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z",
-  "town-hall":"M11.5 1L2 6v2h19V6l-9.5-5zM4 10v7H2v2h19v-2h-2v-7h-2v7h-3v-7h-2v7H9v-7H7v7H6v-7H4z",
-  _:"M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6 0h-4V4h4v2z"
+  book:"M480-160q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740v484q51-32 107-48t113-16q36 0 70.5 6t69.5 18v-480q15 5 29.5 10.5T898-752q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59Zm80-200v-380l200-200v400L560-360Z",
+  car:"M240-200v40q0 17-11.5 28.5T200-120h-40q-17 0-28.5-11.5T120-160v-320l84-240q6-18 21.5-29t34.5-11h440q19 0 34.5 11t21.5 29l84 240v320q0 17-11.5 28.5T800-120h-40q-17 0-28.5-11.5T720-160v-40H240Zm-8-360h496l-42-120H274l-42 120Zm68 240q25 0 42.5-17.5T360-380q0-25-17.5-42.5T300-440q-25 0-42.5 17.5T240-380q0 25 17.5 42.5T300-320Zm360 0q25 0 42.5-17.5T720-380q0-25-17.5-42.5T660-440q-25 0-42.5 17.5T600-380q0 25 17.5 42.5T660-320Z",
+  chip:"M360-360v-240h240v240H360Zm0 240v-80h-80q-33 0-56.5-23.5T200-280v-80h-80v-80h80v-80h-80v-80h80v-80q0-33 23.5-56.5T280-760h80v-80h80v80h80v-80h80v80h80q33 0 56.5 23.5T760-680v80h80v80h-80v80h80v80h-80v80q0 33-23.5 56.5T680-200h-80v80h-80v-80h-80v80h-80Zm320-160v-400H280v400h400Z",
+  "clothing-store":"m240-522-40 22q-14 8-30 4t-24-18L66-654q-8-14-4-30t18-24l230-132h70q9 0 14.5 5.5T400-820v20q0 33 23.5 56.5T480-720q33 0 56.5-23.5T560-800v-20q0-9 5.5-14.5T580-840h70l230 132q14 8 18 24t-4 30l-80 140q-8 14-23.5 17.5T760-501l-40-20v361q0 17-11.5 28.5T680-120H280q-17 0-28.5-11.5T240-160v-362Z",
+  dollar:"M120-160q-33 0-56.5-23.5T40-240v-440h80v440h680v80H120Zm160-160q-33 0-56.5-23.5T200-400v-320q0-33 23.5-56.5T280-800h560q33 0 56.5 23.5T920-720v320q0 33-23.5 56.5T840-320H280Zm80-80q0-33-23.5-56.5T280-480v80h80Zm400 0h80v-80q-33 0-56.5 23.5T760-400Zm-200-40q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35ZM280-640q33 0 56.5-23.5T360-720h-80v80Zm560 0v-80h-80q0 33 23.5 56.5T840-640Z",
+  energy:"m320-80 40-280H160l360-520h80l-40 320h240L400-80h-80Z",
+  factory:"M80-80v-481l280-119v80l200-80v120h320v480H80Zm360-160h80v-160h-80v160Zm-160 0h80v-160h-80v160Zm320 0h80v-160h-80v160Zm272-380H687l34-260h119l32 260Z",
+  "fire-station":"M200-120q-51 0-72.5-45.5T138-250l222-270v-240h-40q-17 0-28.5-11.5T280-800q0-17 11.5-28.5T320-840h320q17 0 28.5 11.5T680-800q0 17-11.5 28.5T640-760h-40v240l222 270q32 39 10.5 84.5T760-120H200Z",
+  lab:"M200-120v-80h200v-80q-83 0-141.5-58.5T200-480q0-57 29-105t80-73q-4 22 1.5 43t17.5 40q-23 16-35.5 41T280-480q0 50 35 85t85 35h320v80H520v80h240v80H200Zm360-356-12-38-38 14-20-53q20-16 31-38.5t11-48.5q0-47-33-79.5T418-752l-18-50 38-14-14-36 76-28 12 38 38-14 110 300-38 14 14 38-76 28Zm-140-92q-30 0-51-21t-21-51q0-30 21-51t51-21q30 0 51 21t21 51q0 30-21 51t-51 21Z",
+  garden:"M450-80q-33 0-66.5-7.5T315-109q12-121 70-226t149-185q-110 56-190.5 148T231-162q-4-3-7.5-6.5L216-176q-47-47-71.5-105T120-402q0-68 27-130t75-110q81-81 210-105.5t362-4.5q18 239-6 364.5T684-182q-49 49-109.5 75.5T450-80Z",
+  hammer:"M360-520v-120H160q0-83 58.5-141.5T360-840h240v120l120-120h80v320h-80L600-640v120H360Zm40 400q-17 0-28.5-11.5T360-160v-280h240v280q0 17-11.5 28.5T560-120H400Z",
+  school:"M840-280v-276L480-360 40-600l440-240 440 240v320h-80ZM480-120 200-272v-200l280 152 280-152v200L480-120Z",
+  "town-hall":"M200-280v-280h80v280h-80Zm240 0v-280h80v280h-80ZM80-120v-80h800v80H80Zm600-160v-280h80v280h-80ZM80-640v-80l400-200 400 200v80H80Z",
+  _:"M160-120q-33 0-56.5-23.5T80-200v-440q0-33 23.5-56.5T160-720h160v-80q0-33 23.5-56.5T400-880h160q33 0 56.5 23.5T640-800v80h160q33 0 56.5 23.5T880-640v440q0 33-23.5 56.5T800-120H160Zm240-600h160v-80H400v80Z",
 };
 let symbolByType={}, markers=[];
 function symbolOf(type){return symbolByType[type]||"_";}
@@ -292,9 +329,9 @@ function rebuildMarkers(list){
     (groups[k]=groups[k]||{lng,lat,items:[]}).items.push(j);}
   for(const k in groups){const g=groups[k];
     const sym=symbolOf(modeType(g.items));
-    const color=rainbow(avgOf(g.items.map(j=>num(j.sOfficeSalary))));
+    const color=salaryColor(avgOf(g.items.map(j=>num(j.sOfficeSalary))));
     const el=document.createElement("div"); el.className="jgm";
-    el.innerHTML=`<div class="jgm-in"><svg viewBox="0 0 24 24" width="30" height="30"><path d="${ICON[sym]||ICON._}" fill="${color}" stroke="#222" stroke-width="0.7"/></svg>`+
+    el.innerHTML=`<div class="jgm-in"><svg viewBox="0 -960 960 960" width="30" height="30"><path d="${ICON[sym]||ICON._}" fill="none" stroke="#ffffff" stroke-width="96" stroke-linejoin="round"/><path d="${ICON[sym]||ICON._}" fill="${color}" stroke="rgba(15,23,42,.5)" stroke-width="22" paint-order="stroke"/></svg>`+
       (g.items.length>1?`<span class="cnt">${g.items.length}</span>`:"")+`</div>`;
     el.title=(g.items[0].sOfficeName||"")+" ["+(modeType(g.items)||"")+"]";
     el.addEventListener("click",()=>popupGroup(g));
@@ -361,11 +398,11 @@ async function login(){
   const email=document.getElementById("liEmail").value.trim(),pw=document.getElementById("liPw").value;
   if(!email||!pw){toast("이메일/비밀번호 입력");return;}
   try{const r=await api('/auth/v1/token?grant_type=password',{method:"POST",headers:{apikey:CFG.key,"Content-Type":"application/json"},body:JSON.stringify({email,password:pw})});
-    SESSION={access_token:r.access_token,refresh_token:r.refresh_token,email};localStorage.setItem("cfms_session",JSON.stringify(SESSION));
+    SESSION={access_token:r.access_token,refresh_token:r.refresh_token,email};lsSet("cfms_session",JSON.stringify(SESSION));
     toast("로그인되었습니다. 학생 이름이 표시됩니다.");renderAuth();loadAll();
   }catch(e){toast("로그인 실패: 이메일/비밀번호 확인");}
 }
-function logout(){SESSION=null;localStorage.removeItem("cfms_session");renderAuth();loadAll();toast("로그아웃");}
+function logout(){SESSION=null;lsDel("cfms_session");renderAuth();loadAll();toast("로그아웃");}
 function renderAuth(){
   const bar=document.getElementById("authbar");
   document.getElementById("btnAdd").disabled=!isIn();
@@ -375,7 +412,7 @@ function renderAuth(){
 function openConfig(){document.getElementById("cfgUrl").value=CFG.url;document.getElementById("cfgKey").value=CFG.key;document.getElementById("cfgBg").style.display="flex";}
 function saveConfig(){const url=normUrl(document.getElementById("cfgUrl").value),key=document.getElementById("cfgKey").value.trim();
   if(!url||!key){document.getElementById("cfgErr").textContent="입력하세요";return;}
-  CFG={url,key};localStorage.setItem("cfms_url",url);localStorage.setItem("cfms_key",key);document.getElementById("cfgBg").style.display="none";boot();}
+  CFG={url,key};lsSet("cfms_url",url);lsSet("cfms_key",key);document.getElementById("cfgBg").style.display="none";boot();}
 function showBanner(m){const b=document.getElementById("banner");b.textContent=m;b.style.display="block";}
 let tT;function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(tT);tT=setTimeout(()=>t.classList.remove("show"),2400);}
 
