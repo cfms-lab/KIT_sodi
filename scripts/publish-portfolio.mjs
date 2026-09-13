@@ -2,8 +2,13 @@
 // publish-portfolio.mjs — 볼트의 「포트폴리오 한눈에」 표를 Supabase `portfolio_rows` 로 발행한다.
 //
 //   node scripts/publish-portfolio.mjs            미리보기 (아무것도 안 보낸다)
-//   node scripts/publish-portfolio.mjs --push     발행
+//   node scripts/publish-portfolio.mjs --push     발행 (REST + 로그인)
+//   node scripts/publish-portfolio.mjs --sql      Supabase SQL Editor 에 붙여넣을 SQL 을 만든다
 //   node scripts/publish-portfolio.mjs --dump     보낼 JSON 을 파일로 떠 놓는다
+//
+// --sql 은 로그인이 안 될 때의 우회로다. SQL Editor 는 대시보드 세션 자체가 권한이라
+// 이 스크립트가 비밀번호를 알 필요가 없다. 결과는 --push 와 같다(같은 행을 넣고, 볼트에서
+// 사라진 행을 지운다).
 //
 // 정본은 옵시디언 볼트다. 두 곳에서 읽는다 —
 //   · Projects/*.md 의 frontmatter          (등급·투고·게이트·소개·공저자·완성도)
@@ -277,9 +282,51 @@ async function api(pathname, accessToken, options = {}) {
   return text ? JSON.parse(text) : null;
 }
 
+// Supabase SQL Editor 에 그대로 붙여넣을 스크립트. 값은 달러 인용($json$)으로 감싸므로
+// 따옴표·역슬래시·줄바꿈을 따로 이스케이프하지 않는다. 임시 표에 모두 받은 뒤 한 번에
+// upsert 하고, 볼트에 없는 행을 지운다 — --push 와 결과가 같고 여러 번 돌려도 안전하다.
+function toSql(payload) {
+  const values = payload.map((row) => {
+    const json = JSON.stringify(row.data);
+    if (json.includes("$json$")) {
+      throw new Error(`${row.id} 의 값에 $json$ 가 들어 있어 달러 인용을 쓸 수 없습니다`);
+    }
+    return `  ('${row.id.replace(/'/g, "''")}', '${row.kind}', ${row.sort_index}, $json$${json}$json$)`;
+  });
+  return [
+    "-- portfolio_rows 발행 — scripts/publish-portfolio.mjs --sql 이 만든 파일이다.",
+    "-- 볼트가 정본이고 이 파일은 사본이므로, 손으로 고치지 말고 다시 만들어 쓴다.",
+    `-- 만든 날: ${new Date().toISOString().slice(0, 10)} · 행 ${payload.length - 1}개 + 메타 1개`,
+    "--",
+    "-- Supabase SQL Editor 에 통째로 붙여넣고 Run. 먼저 schema_portfolio_rows.sql 이 돌아 있어야 한다.",
+    "",
+    "begin;",
+    "",
+    "create temp table _incoming (id text, kind text, sort_index int, data jsonb) on commit drop;",
+    "",
+    "insert into _incoming (id, kind, sort_index, data) values",
+    values.join(",\n") + ";",
+    "",
+    "insert into public.portfolio_rows (id, kind, sort_index, data, updated_at)",
+    "select id, kind, sort_index, data, now() from _incoming",
+    "on conflict (id) do update set",
+    "  kind = excluded.kind, sort_index = excluded.sort_index,",
+    "  data = excluded.data, updated_at = now();",
+    "",
+    "-- 볼트에서 사라진 프로젝트는 표에서도 지운다.",
+    "delete from public.portfolio_rows p where not exists (select 1 from _incoming i where i.id = p.id);",
+    "",
+    "commit;",
+    "",
+    "select kind, count(*) from public.portfolio_rows group by kind order by kind;",
+    "",
+  ].join("\n");
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const push = args.includes("--push");
+  const sql = args.includes("--sql");
   const dump = args.includes("--dump");
   const positional = args.filter((arg) => !arg.startsWith("--"));
   const vaultRoot = path.resolve(
@@ -307,8 +354,19 @@ async function main() {
     console.log(`보낼 값을 ${path.relative(repoRoot, out)} 에 떠 놓았습니다.`);
     return;
   }
+  if (sql) {
+    const out = path.join(repoRoot, "tmp", "portfolio-rows.sql");
+    mkdirSync(path.dirname(out), { recursive: true });
+    writeFileSync(out, toSql(payload), "utf8");
+    const kb = Math.round(statSync(out).size / 1024);
+    console.log(`${path.relative(repoRoot, out)} (${kb}KB) 를 만들었습니다.`);
+    console.log("Supabase SQL Editor 에 통째로 붙여넣고 Run 하세요. 로그인 정보는 필요 없습니다.");
+    return;
+  }
   if (!push) {
-    console.log("--push 가 없어 아무것도 보내지 않았습니다. (--dump 로 보낼 JSON 을 볼 수 있습니다)");
+    console.log("--push 가 없어 아무것도 보내지 않았습니다.");
+    console.log("  --sql   Supabase SQL Editor 에 붙여넣을 SQL 을 만든다 (로그인 불필요)");
+    console.log("  --dump  보낼 JSON 을 파일로 떠 놓는다");
     return;
   }
 

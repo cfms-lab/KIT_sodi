@@ -126,6 +126,17 @@ $env:SUPABASE_EMAIL="..."; $env:SUPABASE_PASSWORD="..."
 node scripts/publish-portfolio.mjs --push
 ```
 
+로그인이 안 되거나 REST 로 보내기가 마땅치 않으면 **SQL Editor 로 넣는 길**이 있습니다.
+대시보드 세션 자체가 권한이라 스크립트가 비밀번호를 알 필요가 없습니다.
+
+```powershell
+node scripts/publish-portfolio.mjs --sql
+```
+
+`tmp/portfolio-rows.sql` (약 50KB) 이 나오고, 이것을 Supabase SQL Editor 에 통째로 붙여넣어
+Run 하면 `--push` 와 같은 결과가 됩니다 — 임시 표에 받아 한 번에 upsert 하고, 볼트에서 사라진
+행을 지웁니다. 여러 번 돌려도 안전합니다.
+
 인자 없이 돌리면 미리보기(행 수·투고 단계 분포)만 찍고 아무것도 보내지 않습니다. `--dump` 는
 보낼 JSON 을 `tmp/portfolio-rows-preview.json` 에 떠 놓습니다. 볼트 경로를 생략하면
 `$env:CFMS_RESEARCH_VAULT`, 그것도 없으면 `D:\cfms-research-vault` 를 씁니다. 로그인 정보는
