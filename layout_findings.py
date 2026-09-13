@@ -194,7 +194,7 @@ POS = {
     "TSE_SEM_Bezier": (396, -127),
     "TSE_SEM_Tensor": (56, -162),
     "TSE_SEM_AutoTune": (-324, -152),
-    "SFTF_HeatMethod": (868, 7),
+    "SFTF_HeatMethod": (889, -56),
     "cfmsPINNDrape": (988, 563),
     "cfmsDrape": (642, 939),
     "cfmsMiindo": (639, 620),
