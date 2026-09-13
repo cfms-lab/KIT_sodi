@@ -275,11 +275,12 @@ HYPEREDGES = [
      "color": "#db2777", "labelColor": "#be185d",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
-    # ColdOndol_Positioning 은 같은 저장소를 쓰지만 볼트 노트에 coauthor 가 없어 빠져 있다.
-    # 볼트에 적히면 여기에도 넣는다.
+    # ColdOndol_Positioning 은 2026-09-14 에 볼트 노트에 coauthor 가 적히면서 들어왔다
+    # (ColdOndol 과 같은 저장소·같은 draft/ 이고 공저자도 같다).
     {"label": "김우석 교수님",
      "kind": "coauthor",
-     "nodes": ["SFTF_SewerPOC", "ColdOndol", "SFTF_UrbanTraffic"],
+     "nodes": ["SFTF_SewerPOC", "ColdOndol", "ColdOndol_Positioning",
+               "SFTF_UrbanTraffic"],
      "color": "#65a30d", "labelColor": "#4d7c0f",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},

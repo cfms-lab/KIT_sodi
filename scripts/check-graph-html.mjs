@@ -160,7 +160,7 @@ const expectedHulls = {
     "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN", "HIPDetect"],
   "은종현 교수님": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM_Bezier",
     "TSE_SEM_Tensor", "TSE_SEM_AutoTune", "SFTF_HeatMethod", "SFTF_Holonomy"],
-  "김우석 교수님": ["SFTF_SewerPOC", "ColdOndol", "SFTF_UrbanTraffic"],
+  "김우석 교수님": ["SFTF_SewerPOC", "ColdOndol", "ColdOndol_Positioning", "SFTF_UrbanTraffic"],
 };
 
 if (duplicateIds || danglingEdges.length || missingPositions.length || danglingHyperedges.length) {
