@@ -1,5 +1,9 @@
-// portfolio.html 가드 — 구운 값이 페이지가 기대하는 모양인지 본다.
-// build-portfolio.mjs 가 마지막에 이걸 돌리고, publish-research-views.ps1 도 함께 돌린다.
+// portfolio.html 가드.
+//
+// 이 페이지의 약속은 하나다 — **데이터를 파일에 담지 않는다.** GitHub Pages 는 파일을
+// 누구에게나 내주므로, 표가 HTML 안에 있으면 로그인 화면은 장식이 된다. 그래서 아래 검사는
+// 대부분 「없어야 할 것이 없는가」를 본다. 데이터 자체는 Supabase portfolio_rows 에 있고
+// RLS 가 지킨다(schema_portfolio_rows.sql).
 import { readFileSync } from "node:fs";
 
 const html = readFileSync(new URL("../portfolio.html", import.meta.url), "utf8");
@@ -19,67 +23,41 @@ for (const [index, script] of scripts.entries()) {
   }
 }
 
-// 마커 사이의 JSON 을 꺼낸다. build-portfolio.mjs 가 갈아 끼우는 바로 그 두 줄이다.
-function marked(name) {
-  const open = `/*${name}_START*/`;
-  const close = `/*${name}_END*/`;
-  const start = html.indexOf(open);
-  const end = html.indexOf(close, start);
-  if (start < 0 || end < 0) throw new Error(`portfolio.html is missing the ${name} markers`);
-  try {
-    return JSON.parse(html.slice(start + open.length, end));
-  } catch (error) {
-    throw new Error(`portfolio.html ${name} block is not valid JSON: ${error.message}`);
-  }
+// ① 구워 넣은 표가 없어야 한다. 옛 판(2026-09-13 이전)은 /*ROWS_START*/[{…}] 한 줄로
+//    75행을 담고 있었다. 그 자리로 되돌아가면 여기서 멈춘다.
+if (/\/\*ROWS_(START|END)\*\//.test(html)) {
+  throw new Error("portfolio.html still has the baked ROWS markers; the table must live in Supabase");
+}
+if (html.includes('[{"')) {
+  throw new Error("portfolio.html contains an inline JSON array; page data must come from Supabase at runtime");
+}
+for (const leak of ["completenessKey\":", "coauthorKey\":", "stageRank\":"]) {
+  if (html.includes(leak)) throw new Error(`portfolio.html looks like it carries row data (${leak})`);
 }
 
-const rows = marked("ROWS");
-const meta = marked("META");
-if (!Array.isArray(rows) || rows.length < 20) {
-  throw new Error(`portfolio.html has ${Array.isArray(rows) ? rows.length : "no"} rows; the vault build must have failed`);
+// ② 로그인 게이트가 있어야 하고, 표는 기본으로 감춰져 있어야 한다.
+if (!/id="gate"/.test(html)) throw new Error("portfolio.html is missing the login gate");
+if (!/id="view"\s+hidden/.test(html)) throw new Error("portfolio.html must keep the table hidden until login");
+if (!/id="toolbar"\s+hidden/.test(html)) throw new Error("portfolio.html must keep the toolbar hidden until login");
+
+// ③ 표는 **사용자 토큰**으로만 읽어야 한다. anon 키로 읽으면 RLS 가 막아 주더라도
+//    코드의 의도가 흐려지므로 여기서 못 박는다.
+if (!/rest\/v1\/portfolio_rows\?/.test(html)) {
+  throw new Error("portfolio.html does not read portfolio_rows");
+}
+if (!/Authorization:\s*"Bearer "\s*\+\s*SESSION\.access_token/.test(html)) {
+  throw new Error("portfolio.html must read portfolio_rows with the signed-in user's token");
 }
 
-// 페이지가 읽는 키. 하나라도 빠지면 칸이 조용히 비므로 여기서 멈춘다.
-const required = ["id", "name", "grade", "bucket", "order", "completeness", "coauthor", "journal", "gate", "intro"];
-const ids = new Set();
-for (const row of rows) {
-  for (const key of required) {
-    if (!(key in row)) throw new Error(`portfolio.html row [${row.id ?? "?"}] is missing "${key}"`);
-  }
-  if (ids.has(row.id)) throw new Error(`portfolio.html has a duplicate row id [${row.id}]`);
-  ids.add(row.id);
-  if (row.stage && !meta.stages?.[row.stage]) {
-    throw new Error(`portfolio.html row [${row.id}] has stage [${row.stage}] with no icon in META.stages`);
-  }
+// ④ 정렬 규칙이 쓰는 볼트 쪽 이름표. 볼트에서 새 이름이 오면 페이지가 조용히 정렬을 빠뜨리므로
+//    두 곳이 같은 낱말을 쓰는지 본다.
+for (const field of ["순서", "완성도", "등급", "공저자키", "투고"]) {
+  if (!html.includes(field)) throw new Error(`portfolio.html lost the BLANK_FIELD entry for ${field}`);
 }
 
-// 등급은 graph.html 의 QUALITY_COLORS 와 같은 낱말이어야 색이 붙는다.
-const grades = new Set(["상", "중", "하", "ToDo", "Closed", "그룹", "등급 없음", "—"]);
-const unknownGrades = [...new Set(rows.map(row => row.grade))].filter(grade => !grades.has(grade));
-if (unknownGrades.length) {
-  throw new Error(`portfolio.html has grades with no colour: ${unknownGrades.join(", ")}`);
-}
-
-if (!Array.isArray(meta.columns) || meta.columns.length !== 8) {
-  throw new Error(`portfolio.html META.columns must be the vault's 8 headers (got ${meta.columns?.length})`);
-}
-// 빈값열은 페이지의 BLANK_FIELD 가 아는 이름이어야 한다. 볼트에서 새 이름이 오면 여기서 걸린다.
-const blankFields = new Set(["순서", "완성도", "등급", "공저자키", "투고"]);
-for (const [column, field] of Object.entries(meta.blankColumns || {})) {
-  if (!blankFields.has(field)) {
-    throw new Error(`portfolio.html META.blankColumns[${column}] = "${field}" is unknown to the page's BLANK_FIELD map`);
-  }
-}
-if (!/^\d{4}-\d{2}-\d{2}$/.test(String(meta.builtOn || ""))) {
-  throw new Error(`portfolio.html META.builtOn must be a YYYY-MM-DD date (got ${meta.builtOn})`);
-}
-
-const stages = {};
-for (const row of rows) stages[row.stage ?? "-"] = (stages[row.stage ?? "-"] || 0) + 1;
 console.log(JSON.stringify({
   inlineScripts: scripts.length,
-  rows: rows.length,
-  repos: rows.filter(row => row.repo).length,
-  stages,
-  builtOn: meta.builtOn,
+  bakedRows: 0,
+  loginGate: true,
+  source: "supabase:portfolio_rows (RLS, authenticated only)",
 }));

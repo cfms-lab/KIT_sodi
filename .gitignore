@@ -6,3 +6,4 @@ _to_delete
 __pycache__/
 graphify-out/*
 !graphify-out/README.md
+tmp/
