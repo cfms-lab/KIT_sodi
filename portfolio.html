@@ -54,6 +54,8 @@
     display:flex;gap:12px;align-items:center;flex-wrap:wrap}
   .toolbar input{padding:6px 9px;border:1px solid var(--line);border-radius:7px;font-size:13px;min-width:260px}
   .count{font-size:12px;color:var(--dim)}
+  .chk{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#475569;cursor:pointer;user-select:none}
+  .chk input{cursor:pointer}
   .hint{margin-left:auto;font-size:11.5px;color:var(--dim)}
   main{padding:14px 16px 40px}
   /* 로그인 전 화면. 표·검색·범례는 통째로 숨는다 — 받아 온 데이터도 없다. */
@@ -125,6 +127,9 @@
 
 <div class="toolbar" id="toolbar" hidden>
   <input id="q" type="search" placeholder="검색 (프로젝트 · 투고 · 게이트 · 소개)" autocomplete="off">
+  <label class="chk" title="논문 완성도 8 이상 — 점수를 매길 원고가 아직 없거나 초기 단계인 프로젝트입니다">
+    <input type="checkbox" id="showAll"> 완성도 8+ 포함
+  </label>
   <span class="count" id="count"></span>
   <span class="hint">읽기 전용 · 고치는 곳은 볼트의 <code>Projects/*.md</code> 와 <code>Dashboards/프로젝트현황.md</code></span>
 </div>
@@ -175,8 +180,10 @@ let SESSION=null;
 try{ SESSION=JSON.parse(lsGet("cfms_session")||"null"); }catch(e){}
 function isLoggedIn(){return !!(SESSION&&SESSION.access_token);}
 
-let ROWS=[];
+let ROWS=[];       // 화면이 쓰는 행 — 아래 토글에 따라 걸러진 것
+let ALL_ROWS=[];   // 표에서 받은 전부. 토글을 켜면 이쪽이 그대로 간다
 let HIDDEN=0;
+let 완성도포함=false;
 /* 논문 완성도 8 이상은 표에서 뺀다 (2026-09-13, 사용자 지시). 완성도는 1=높음 … 10=낮음이고
    10 은 「점수를 매길 원고가 아직 없다」는 뜻이라 대부분이 여기 걸린다 — 투고를 눈앞에 둔
    원고만 남기려는 것이다. 게재 완료 행은 완성도가 숫자가 아니라 「—」 라 그대로 남는다.
@@ -220,9 +227,17 @@ async function loadRows(){
     {headers:{apikey:CFG.key,Authorization:"Bearer "+SESSION.access_token}}) || [];
   const meta=data.find(r=>r.kind==='meta');
   if(meta&&meta.data) META=Object.assign({},META,meta.data);
-  const all=data.filter(r=>r.kind==='row').map(r=>r.data);
-  ROWS=all.filter(r=>!(typeof r.completeness==='number' && r.completeness>=완성도_상한));
-  HIDDEN=all.length-ROWS.length;
+  ALL_ROWS=data.filter(r=>r.kind==='row').map(r=>r.data);
+  적용완성도필터();
+}
+
+/* 완성도 필터. 토글은 이 브라우저에만 기억하고(다른 사람 화면을 바꾸지 않는다),
+   기본값은 꺼짐 — 투고를 눈앞에 둔 원고만 보이는 쪽이다. */
+const SHOW_ALL_KEY = "cfms_portfolio_show_all_v1";
+function 적용완성도필터(){
+  ROWS = 완성도포함 ? ALL_ROWS.slice()
+    : ALL_ROWS.filter(r=>!(typeof r.completeness==='number' && r.completeness>=완성도_상한));
+  HIDDEN = ALL_ROWS.length - ROWS.length;
 }
 
 const 빈값 = "—";
@@ -482,6 +497,17 @@ document.getElementById('loginBtn').addEventListener('click', login);
 document.getElementById('liPw').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
 document.getElementById('liEmail').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
 document.getElementById('q').addEventListener('input', 그리기);
+
+/* 완성도 8+ 토글 — 켜면 표에서 받은 행이 전부 보인다. 선택은 이 브라우저에만 남는다. */
+const showAll = document.getElementById('showAll');
+완성도포함 = lsGet(SHOW_ALL_KEY) === '1';
+showAll.checked = 완성도포함;
+showAll.addEventListener('change', () => {
+  완성도포함 = showAll.checked;
+  lsSet(SHOW_ALL_KEY, 완성도포함 ? '1' : '0');
+  적용완성도필터();
+  그리기();
+});
 
 if(isLoggedIn()) showTable(); else showGate();
 </script>
