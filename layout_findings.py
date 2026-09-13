@@ -302,6 +302,12 @@ HYPEREDGES = [
     for h in HYPEREDGES
 ]
 
+# 투고 뒤 등급 (2026-09-14, 사용자 규칙)
+#   원고가 저널에 나간 뒤의 등급은 **투고한 저널의 급**으로 본다 — SCIE 上 · Scopus 中 ·
+#   국내 저널 下. 투고 전 등급은 「이 원고가 어디까지 갈 수 있나」는 전망이지만, 나간 뒤에는
+#   그 전망이 실제 선택으로 확정되기 때문이다. 정본은 볼트 노트의 grade 이고 여기 표는 그
+#   스냅샷이다.
+#
 # Paper-quality snapshot synchronized from the Obsidian Projects frontmatter.
 # ``등급 없음`` is distinct from ToDo: it marks repositories that are useful
 # infrastructure/integration records but are not paper-quality candidates.
@@ -350,7 +356,8 @@ QUALITY_ROWS = [
      "profile-conditioned GNN proposer → DFSVR first-hit refiner → held-out slicer verifier; frozen budget-matched A–E benchmark 전"),
     ("ColdOndol", "ColdOndol", "하", "온돌 냉방 중 숨은 에어컨 검출 한계"),
     ("ColdOndol_Positioning", "ColdOndol_Positioning", "하", "부하·이슬점 기반 냉방 배분 최적화"),
-    ("cfmsCIPC", "cfmsCIPC", "중", "의복 충돌 강건성 벤치마크"),
+    # 2026-09-14 中 → 下: 투고 뒤에는 투고한 저널의 등급으로 본다(아래 「투고 뒤 등급」).
+    ("cfmsCIPC", "cfmsCIPC", "하", "의복 충돌 강건성 벤치마크; TSE(국내) 26M-08-030 투고"),
     # 2026-09-11: TSE_SEM 한 저장소의 논문 3편 트랙을 mindmap.html 의 SEM1·SEM2·SEM3 노드와
     # 같은 이름으로 나눈다.  등급은 볼트 노트(TSE_SEM.md, grade 하)와 마인드맵 kind(low)를
     # 따르고, 근거는 노트의 「논문 트랙」·「투고 일정」 절을 요약한 것이다.

@@ -65,7 +65,7 @@ const qualityById = new Map(qualityRows.map((row) => [row.id, row.grade]));
 const expectedVaultGrades = {
   cfmsAutoPlace_IJCST: "중",
   cfmsAutoPlace_JCDE: "중",
-  cfmsCIPC: "중",
+  cfmsCIPC: "하",   // 2026-09-14 투고 뒤 저널 등급(TSE 국내)
   cfmsDrape: "등급 없음",
   cfmsMiindo: "등급 없음",
   cfmsPINNCAD: "하",
