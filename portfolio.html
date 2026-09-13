@@ -176,6 +176,12 @@ try{ SESSION=JSON.parse(lsGet("cfms_session")||"null"); }catch(e){}
 function isLoggedIn(){return !!(SESSION&&SESSION.access_token);}
 
 let ROWS=[];
+let HIDDEN=0;
+/* 논문 완성도 8 이상은 표에서 뺀다 (2026-09-13, 사용자 지시). 완성도는 1=높음 … 10=낮음이고
+   10 은 「점수를 매길 원고가 아직 없다」는 뜻이라 대부분이 여기 걸린다 — 투고를 눈앞에 둔
+   원고만 남기려는 것이다. 게재 완료 행은 완성도가 숫자가 아니라 「—」 라 그대로 남는다.
+   숨긴 수는 화면에 적는다. 표가 통째로 다 보이는 줄 알면 없는 프로젝트를 없다고 읽는다. */
+const 완성도_상한 = 8;
 let META={columns:["프로젝트","투고순서","논문 완성도","등급","공저자","투고","다음 게이트","소개"],
           blankColumns:{},stages:{},rank:{}};
 
@@ -214,7 +220,9 @@ async function loadRows(){
     {headers:{apikey:CFG.key,Authorization:"Bearer "+SESSION.access_token}}) || [];
   const meta=data.find(r=>r.kind==='meta');
   if(meta&&meta.data) META=Object.assign({},META,meta.data);
-  ROWS=data.filter(r=>r.kind==='row').map(r=>r.data);
+  const all=data.filter(r=>r.kind==='row').map(r=>r.data);
+  ROWS=all.filter(r=>!(typeof r.completeness==='number' && r.completeness>=완성도_상한));
+  HIDDEN=all.length-ROWS.length;
 }
 
 const 빈값 = "—";
@@ -360,8 +368,13 @@ function 그리기() {
   body.textContent = "";
   for (const row of rows) body.appendChild(행그리기(row));
   document.getElementById("empty").hidden = rows.length > 0;
-  document.getElementById("count").textContent =
-    rows.length === ROWS.length ? `${ROWS.length}개` : `${rows.length} / ${ROWS.length}개`;
+  const count = document.getElementById("count");
+  const 숨김 = HIDDEN ? ` · 완성도 ${완성도_상한}+ ${HIDDEN}개 숨김` : "";
+  count.textContent =
+    (rows.length === ROWS.length ? `${ROWS.length}개` : `${rows.length} / ${ROWS.length}개`) + 숨김;
+  count.title = HIDDEN
+    ? `논문 완성도 ${완성도_상한} 이상(원고가 아직 없거나 초기 단계)인 ${HIDDEN}개는 표에서 뺐습니다. 볼트에는 그대로 있습니다.`
+    : "";
 }
 
 function 범례() {
