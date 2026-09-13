@@ -167,50 +167,50 @@ POS = {
     # 2026-08-31: 사용자가 graph.html에서 조정한 34-node 배치를 정본으로 승격.
     "Tomo_SFTF": (9, -28),
     "Tomo_SFTFSoft": (63, 173),
-    "SFTF_Clustering": (-224, 326),
-    "PFTF": (465, 242),
+    "SFTF_Clustering": (-255, 300),
+    "PFTF": (358, 198),
     "SFTF_Composite": (611, 32),
     "SFTF_InjMold": (-82, 908),
-    "PFTF_Compression": (502, 379),
-    "Tomo_DFSVR": (142, 545),
+    "PFTF_Compression": (519, 291),
+    "Tomo_DFSVR": (157, 563),
     "PFTF_VisCull_kDop": (311, 554),
     "SFTF_SewerPOC": (-320, 852),
-    "SFTFSoft_GNN": (-25, 380),
-    "SFTF_DrapePrior": (376, 775),
-    "PFTF_AsymTensor": (-204, 536),
-    "PFTF_DrapePrior_VisCull_kDop": (481, 546),
-    "PFTF_ResearchOptimize": (420, 39),
-    "PFTF_GFiberCT": (779, 104),
-    "SFTF_QEM": (-189, 131),
+    "SFTFSoft_GNN": (-168, 453),
+    "SFTF_DrapePrior": (507, 498),
+    "PFTF_AsymTensor": (33, 481),
+    "PFTF_DrapePrior_VisCull_kDop": (337, 854),
+    "PFTF_ResearchOptimize": (345, -1),
+    "PFTF_GFiberCT": (805, 132),
+    "SFTF_QEM": (-58, 190),
     "SFTF_DynamicTargetSearch": (-229, -34),
-    "DFSVR_VisCull": (163, 784),
-    "SFTFSoft_GNN_DFSVR": (6, 681),
+    "DFSVR_VisCull": (184, 785),
+    "SFTFSoft_GNN_DFSVR": (0, 748),
     "SFTF_ActiveOverprint": (-402, 197),
     "ColdOndol": (-368, 491),
     "ColdOndol_Positioning": (-487, 626),
     "cfmsCIPC": (800, 524),
     # 2026-09-11: TSE_SEM 을 논문 3편 트랙으로 나눴다.  ① 은 옛 TSE_SEM 자리를 잇고
     # ②·③ 은 SFTF_Composite → ① 방향을 따라 위쪽으로 한 칸씩 이어진다.
-    "TSE_SEM_Bezier": (344, -84),
+    "TSE_SEM_Bezier": (348, -96),
     "TSE_SEM_Tensor": (56, -162),
     "TSE_SEM_AutoTune": (-324, -152),
-    "SFTF_HeatMethod": (711, -126),
-    "cfmsPINNDrape": (983, 540),
-    "cfmsDrape": (651, 822),
-    "cfmsMiindo": (590, 626),
+    "SFTF_HeatMethod": (667, -122),
+    "cfmsPINNDrape": (988, 563),
+    "cfmsDrape": (629, 879),
+    "cfmsMiindo": (616, 616),
     "cfmsPINNCAD": (986, 351),
-    "SFTFSoft_DFSVR": (245, 338),
+    "SFTFSoft_DFSVR": (233, 378),
     # Restored from the last pre-archive graph snapshot.
     "SFTF_UrbanTraffic": (-130, 736),
-    "cfmsAutoSew": (1184, 618),
-    "cfmsAutoPlace_IJCST": (984, 672),
-    "cfmsAutoPlace_JCDE": (905, 859),
+    "cfmsAutoSew": (1273, 613),
+    "cfmsAutoPlace_IJCST": (988, 705),
+    "cfmsAutoPlace_JCDE": (996, 867),
     # 2026-09-01: ToDo DrapeSCAN onboarding from the Obsidian project note.
     "cfmsDrapeSCAN": (752, 304),
     # 2026-09-07: graph.html 의 큐레이션 노드(SFTF_HOLONOMY_NODE)와 짝을 이룬다.
     "SFTF_Holonomy": (1051, 51),
     # 2026-09-10: graph.html 의 큐레이션 노드(HIPDETECT_NODE)와 짝을 이룬다.
-    "HIPDetect": (945, 151),
+    "HIPDetect": (949, 132),
 }
 
 HYPEREDGES = [
@@ -2360,7 +2360,7 @@ s = s.replace("// Track hovered node — hover detection is more reliable than c
 # marked block makes this safe to rerun after future graph refreshes.
 s = re.sub(r"\n// EDGE_LABEL_LAYOUT_BEGIN.*?// EDGE_LABEL_LAYOUT_END\n?",
            "\n", s, flags=re.S)
-edge_label_anchor = "\n</script>\n<script>\n/* ====== Supabase 공유 노드(project_nodes) 오버라이드"
+edge_label_anchor = "\n</script>\n<script>\n/* ====== Supabase 공유 노드(research_outputs, kind='node') 오버라이드"
 assert edge_label_anchor in s, "Supabase script anchor not found"
 s = s.replace(
     edge_label_anchor,
