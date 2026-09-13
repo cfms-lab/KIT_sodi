@@ -103,6 +103,26 @@ Get-Clipboard | node scripts/apply-graph-positions.mjs
 마지막 명령에 `-Push`를 붙입니다. 스크립트는 원격이 앞서 있거나 관련 없는 작업 파일이
 있으면 push를 중단합니다.
 
+## 포트폴리오 표 (portfolio.html)
+
+볼트 `Dashboards\프로젝트현황.md` 의 「포트폴리오 한눈에」 표를 웹에서 보는 읽기 전용
+페이지입니다. `upjuk.html`과 같은 규율로 **정본은 옵시디언 볼트**이고 페이지는 생성물입니다.
+`mindmap.html` 머리말의 **📋 포트폴리오** 에서 바로 갑니다.
+
+```powershell
+node scripts/build-portfolio.mjs D:\cfms-research-vault
+```
+
+볼트에서 굽고 `scripts/check-portfolio-html.mjs`로 검증까지 합니다. `--dry-run`을 붙이면 행 수와
+투고 단계 분포만 찍습니다. 볼트 경로를 생략하면 `$env:CFMS_RESEARCH_VAULT`, 그것도 없으면
+`D:\cfms-research-vault`를 씁니다.
+
+표의 **행을 만드는 규칙(투고순서 맵·분리트랙·투고 단계 해석)은 볼트 노트의 dataviewjs에
+그대로 둡니다** — 빌드 스크립트가 그 코드의 데이터 절반(`function 비교(` 앞까지)을 잘라
+Dataview 대신 `node:vm`에서 돌리므로, 노트를 고치면 다시 굽는 것만으로 따라옵니다. 이
+저장소에는 **그리는 규칙(정렬·아이콘·레이아웃)만** 둡니다. 정렬 비교자는 노트의 것을 옮겨
+적은 유일한 부분이라, 노트 쪽 정렬을 바꾸면 `portfolio.html`의 `정렬기`도 같이 고칩니다.
+
 ## graph.html 로컬 3D 뷰어
 
 `graph.py`는 실행할 때마다 `graph.html` 안의 노드, 엣지, `POS`, hyperedge를 직접 읽고 Polyscope로 표시합니다. 뷰어가 열린 동안에도 `graph.html` 변경을 1초 간격으로 감지해 노드 수와 위치를 자동 갱신합니다. XY 배치는 같은 비율로 유지되며 Z 좌표는 방향과 무관한 고유 이웃 수(Degree)입니다.

@@ -22,6 +22,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "graph.html validation failed" }
     node scripts/check-mindmap-html.mjs
     if ($LASTEXITCODE -ne 0) { throw "mindmap.html validation failed" }
+    node scripts/check-portfolio-html.mjs
+    if ($LASTEXITCODE -ne 0) { throw "portfolio.html validation failed" }
     git diff --check
     if ($LASTEXITCODE -ne 0) { throw "git diff --check failed" }
 
@@ -36,7 +38,7 @@ try {
     $counts = (git rev-list --left-right --count HEAD...origin/main) -split "\s+"
     if ([int]$counts[1] -ne 0) { throw "origin/main is ahead; merge or rebase it before publishing" }
 
-    $allowed = @("graph.html", "graph3d.html", "graph_계층형.html", "mindmap.html")
+    $allowed = @("graph.html", "graph3d.html", "graph_계층형.html", "mindmap.html", "portfolio.html")
     $changed = @(
         git diff --name-only
         git diff --cached --name-only
