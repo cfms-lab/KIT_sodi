@@ -5,20 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Graphify WebGL 3D</title>
   <style>
+    /* ── 기본색 (2026-09-13) ────────────────────────────────────────────────
+       Dark Reader(Dynamic 모드)를 켜고 본 화면이 더 낫다는 사용자 판단에 따라, 그 확장이
+       이 페이지에 실제로 내던 색을 기본값으로 삼았다. 값은 눈으로 맞춘 근사치가 아니라
+       크롬에서 getComputedStyle 로 읽어 온 것이다.
+
+       ⚠️ **3D 장면은 일부러 밝게 남긴다.** Dark Reader 는 WebGL 캔버스를 건드리지 못해서
+       (canvas 에 필터도 안 걸리고 clear color 도 그대로다) 사용자가 좋다고 한 화면은
+       「어두운 패널 + 밝은 장면」 조합이었다. scene.background·fog·grid·조명·HULL_PALETTE·
+       RELATION_COLORS 를 어둡게 바꾸면 그 화면이 아니게 되므로 손대지 않는다.
+       범례 스와치도 밝은 원색 그대로다 — 장면의 연결선 색과 같아야 범례 구실을 한다.      */
     :root {
-      color-scheme: light;
+      color-scheme: dark;
       font-family: Inter, Pretendard, "Noto Sans KR", system-ui, sans-serif;
-      --ink: #172033;
-      --muted: #657087;
-      --panel: rgba(255, 255, 255, 0.88);
-      --line: rgba(38, 53, 79, 0.14);
-      --accent: #1c63e3;
+      --ink: #d4cfc8;
+      --muted: #9e968a;
+      --panel: rgba(25, 26, 27, 0.88);
+      --line: rgba(79, 100, 136, 0.14);
+      --accent: #1c63e3;   /* accent-color 는 Dark Reader 도 바꾸지 않는다 */
     }
 
     * { box-sizing: border-box; }
     html, body, #app { width: 100%; height: 100%; margin: 0; overflow: hidden; }
     body {
-      background: radial-gradient(circle at 50% 22%, #ffffff 0, #f3f6fb 45%, #e8edf5 100%);
+      background: radial-gradient(circle at 50% 22%, #191a1b 0, #1e1f20 45%, #222425 100%);
       color: var(--ink);
     }
 
@@ -31,7 +41,7 @@
       border: 1px solid var(--line);
       border-radius: 14px;
       background: var(--panel);
-      box-shadow: 0 14px 40px rgba(34, 48, 75, 0.13);
+      box-shadow: 0 14px 40px rgba(30, 38, 54, 0.13);
       backdrop-filter: blur(14px);
     }
 
@@ -51,21 +61,21 @@
     #status { margin-top: 3px; color: var(--muted); font-size: 11px; white-space: nowrap; }
 
     .controls { display: flex; align-items: center; gap: 9px; flex: 1; flex-wrap: wrap; }
-    label.control { display: inline-flex; align-items: center; gap: 6px; color: #3b465c; font-size: 12px; white-space: nowrap; }
+    label.control { display: inline-flex; align-items: center; gap: 6px; color: #bab4ab; font-size: 12px; white-space: nowrap; }
     select, button, .file-button {
       min-height: 31px;
-      border: 1px solid rgba(38, 53, 79, 0.19);
+      border: 1px solid rgba(79, 100, 136, 0.19);
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.94);
+      background: rgba(25, 26, 27, 0.94);
       color: var(--ink);
       padding: 5px 9px;
       font: inherit;
       font-size: 12px;
       cursor: pointer;
     }
-    button:hover, .file-button:hover, select:hover { border-color: rgba(28, 99, 227, .55); }
+    button:hover, .file-button:hover, select:hover { border-color: rgba(32, 69, 136, .55); }
     button:focus-visible, select:focus-visible, input:focus-visible, .file-button:focus-visible {
-      outline: 2px solid rgba(28, 99, 227, .35);
+      outline: 2px solid rgba(32, 69, 136, .35);
       outline-offset: 2px;
     }
     input[type="checkbox"] { accent-color: var(--accent); }
@@ -75,9 +85,9 @@
     #details { left: 14px; bottom: 14px; width: min(330px, calc(100vw - 28px)); padding: 13px 15px; }
     #details h2 { margin: 0 0 4px; font-size: 15px; overflow-wrap: anywhere; }
     #details p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
-    #details .hint { color: #778198; }
+    #details .hint { color: #9e968a; }
 
-    #legend { right: 14px; bottom: 14px; padding: 10px 12px; font-size: 11px; color: #455066; }
+    #legend { right: 14px; bottom: 14px; padding: 10px 12px; font-size: 11px; color: #b4ada3; }
     .legend-row { display: flex; align-items: center; gap: 7px; margin: 4px 0; }
     .swatch { width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
 
@@ -90,8 +100,8 @@
       transform: translateX(-50%);
       padding: 9px 13px;
       border-radius: 9px;
-      background: rgba(32, 40, 57, .91);
-      color: #fff;
+      background: rgba(28, 32, 42, .91);
+      color: #ece8e2;
       font-size: 12px;
       line-height: 1.45;
       opacity: 0;
@@ -105,14 +115,14 @@
       user-select: none;
       white-space: pre-line;
       text-align: center;
-      text-shadow: 0 1px 2px #fff, 0 0 4px #fff, 0 0 8px #fff;
+      text-shadow: 0 1px 2px #191a1b, 0 0 4px #191a1b, 0 0 8px #191a1b;
       transition: opacity .12s ease;
     }
-    .node-label { color: #192238; font-size: 11px; font-weight: 650; line-height: 1.08; }
+    .node-label { color: #d1ccc5; font-size: 11px; font-weight: 650; line-height: 1.08; }
     .hyper-label {
       padding: 2px 6px;
       border-radius: 999px;
-      background: rgba(255,255,255,.72);
+      background: rgba(25,26,27,.72);
       font-size: 11px;
       font-weight: 750;
     }
