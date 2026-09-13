@@ -241,6 +241,9 @@ POS = {
     "SFTF_Holonomy": (457, 1372),
     # 2026-09-10: graph.html 의 큐레이션 노드(HIPDETECT_NODE)와 짝을 이룬다.
     "HIPDetect": (509, 992),
+    # 2026-09-14: graph.html 의 큐레이션 노드(CFMSDISPERSITY_NODE)와 짝을 이룬다.
+    # 이미 나온 논문인데 그래프에 없었다. 자리는 은종현 교수님 묶음 오른쪽의 빈 곳이다.
+    "cfmsDispersity": (960, 370),
 }
 
 # 2026-09-14: 발견1~6 · METHOD · PIPELINE · 도메인 오버레이를 걷어냈다.
@@ -280,7 +283,7 @@ HYPEREDGES = [
      "kind": "coauthor",
      "nodes": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM_Bezier",
                "TSE_SEM_Tensor", "TSE_SEM_AutoTune", "SFTF_HeatMethod",
-               "SFTF_Holonomy"],
+               "SFTF_Holonomy", "cfmsDispersity"],
      "color": "#db2777", "labelColor": "#be185d",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
@@ -370,6 +373,9 @@ QUALITY_ROWS = [
     # graph.html 의 큐레이션 노드는 RAW_NODES 밖에 있어도 등급 행은 여기서 나가야 한다.
     ("HIPDetect", "HIPDetect", "중",
      "엉덩이높이 기준점 논문 트랙; 평탄 구간 중앙 추정량이 LOSO 잔차 RMS 1.285 → 0.358 cm (9명 중 8명, 부호검정 p 0.0195), IJCST 원고 3종·그림 5개·커버레터 완비, 미투고. held-out 0건·N=10 한 조사가 남은 심사 위험"),
+    # 2026-09-14: 이미 게재된 논문(TSE 63(4) 248-257). 그래프에 노드가 없어 새로 넣었다.
+    ("cfmsDispersity", "cfmsDispersity", "하",
+     "게재 완료 — Textile Science and Engineering 63(4), 248-257 (2026), DOI 10.12772/TSE.2026.63.248; 정적 kNN 반발에너지 분산도 지표"),
     ("SFTFSoft_DFSVR", "SFTFSoft_DFSVR", "중", "SFTFSoft와 DFSVR 결합 연구선"),
     ("Tomo_DFSVR", "Tomo_DFSVR", "중", "미분 가능한 지지 구조 계산 연구선"),
     ("cfmsAutoSew", "cfmsAutoSew", "하", "패턴 봉제 대응 자동화 연구선"),
@@ -1864,7 +1870,7 @@ s, n1 = re.subn(r"const POS = \{.*?\};", lambda _m: pos_js, s, count=1,
 # 재생성 뒤에 좌표가 사라지지 않는다.
 curated_position_ids = (
     "cfmsAutoSew", "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN",
-    "SFTF_Holonomy", "HIPDetect",
+    "SFTF_Holonomy", "HIPDetect", "cfmsDispersity",
 )
 curated_pos_js = "const CURATED_POSITIONS = " + json.dumps(
     {
