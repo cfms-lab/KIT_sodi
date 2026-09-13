@@ -252,13 +252,22 @@ POS = {
 # 그 값을 물려받는다). 여기 적힌 목록은 그 스냅샷이고, 볼트에서 공저자가 바뀌면 이 목록도
 # 같이 고친다 — 등급·단계와 달리 hyperedge 는 아직 발행 경로가 없다.
 HYPEREDGES = [
-    # 네 방법론 기반. 예전 그대로 둔다.
-    {"label": "BASE",
-     "kind": "base",
-     "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering", "PFTF"],
+    # 2026-09-14: BASE(네 방법론 기반)를 내리고 주제 훌 하나를 세웠다. BASE 는 PFTF 를
+    # 기둥으로 세운 묶음이었는데 그 일반화가 아직 논문이 아니라서, 화면에서 자리만 차지하고
+    # 다른 훌을 가로막았다(사용자 판단). 대신 실제로 굴러가는 주제인 3D 프린팅·지지구조를
+    # 묶는다. **PFTF 노드는 넣지 않는다** — 논문 가능성이 아직 없다는 같은 이유다.
+    #
+    # 구성원은 「출력·지지대·슬라이서·빌드 방향」이 연구 주장의 축인 노드들이다. 판단이
+    # 갈리는 둘은 빼 두었다: SFTF_InjMold(사출 성형이라 적층이 아니다),
+    # SFTF_Composite·PFTF_GFiberCT(복합재 적층·CT 계측 쪽이고 이미 은종현 교수님 훌이다).
+    {"label": "3D프린팅",
+     "kind": "topic",
+     "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "Tomo_DFSVR", "SFTF_Clustering",
+               "SFTFSoft_GNN", "SFTFSoft_DFSVR", "SFTFSoft_GNN_DFSVR",
+               "DFSVR_VisCull", "SFTF_QEM", "SFTF_ActiveOverprint"],
      "color": "#0f766e", "labelColor": "#115e59",
-     "fillAlpha": 0.10, "strokeAlpha": 0.85, "labelAlpha": 0.95,
-     "lineWidth": 3, "dash": [12, 6], "scale": 1.18},
+     "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95,
+     "lineWidth": 3, "dash": [12, 6], "scale": 1.14},
     {"label": "이희란 교수님",
      "kind": "coauthor",
      "nodes": ["SFTF_Clustering", "PFTF_Compression", "cfmsAutoSew",

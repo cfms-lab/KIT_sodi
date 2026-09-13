@@ -150,12 +150,15 @@ const danglingHyperedges = hyperedges.flatMap((hyperedge) =>
     .map((nodeId) => `${hyperedge.label}:${nodeId}`),
 );
 const urbanNode = nodes.find((node) => node.id === "SFTF_UrbanTraffic");
-// 2026-09-14: 훌 구성이 바뀌었다. 발견1~6·METHOD·PIPELINE·도메인 오버레이를 걷어내고
-// BASE 와 공저자 셋만 남겼다(SFTF → PFTF 일반화를 전제한 틀이라 지금 구조와 맞지 않는다).
+// 2026-09-14: 훌 구성이 바뀌었다. 발견1~6·METHOD·PIPELINE·도메인 오버레이에 이어 BASE 까지
+// 걷어냈다 — 셋 다 SFTF → PFTF 일반화를 전제한 틀인데 그 일반화가 아직 논문이 아니다.
+// 지금은 주제 하나(3D프린팅)와 공저자 셋이다. PFTF 노드는 어느 훌에도 들어가지 않는다.
 // 구성원 정본은 볼트의 coauthors/coauthor 이고, layout_findings.py 의 HYPEREDGES 가 그
 // 스냅샷이다. 여기서는 그 스냅샷이 배포본에 그대로 나갔는지만 본다.
 const expectedHulls = {
-  "BASE": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering", "PFTF"],
+  "3D프린팅": ["Tomo_SFTF", "Tomo_SFTFSoft", "Tomo_DFSVR", "SFTF_Clustering",
+    "SFTFSoft_GNN", "SFTFSoft_DFSVR", "SFTFSoft_GNN_DFSVR", "DFSVR_VisCull",
+    "SFTF_QEM", "SFTF_ActiveOverprint"],
   "이희란 교수님": ["SFTF_Clustering", "PFTF_Compression", "cfmsAutoSew",
     "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN", "HIPDetect"],
   "은종현 교수님": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM_Bezier",
