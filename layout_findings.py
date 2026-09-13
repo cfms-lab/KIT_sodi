@@ -464,16 +464,8 @@ GRADE_COLORS = {
     "등급 없음": "#94a3b8",
 }
 
-QUALITY_CSS = r'''/* QUALITY_BOARD_BEGIN */
-#quality-board { padding: 10px 12px; border-bottom: 1px solid #dddddd; max-height: 255px; overflow-y: auto; background: #fafafa; }
-#quality-board h3 { font-size: 16px; color: #555555; margin-bottom: 5px; letter-spacing: 0.02em; }
-#quality-board .quality-meta { font-size: 13px; color: #888888; margin-bottom: 6px; line-height: 1.35; }
-#quality-board table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-#quality-board th { color: #777777; text-align: left; font-weight: 600; border-bottom: 1px solid #dddddd; padding: 2px 2px 4px; }
-#quality-board td { padding: 3px 2px; border-bottom: 1px solid #eeeeee; vertical-align: top; line-height: 1.25; }
-#quality-board td:first-child { white-space: nowrap; font-weight: 600; }
-.quality-grade { display: inline-block; min-width: 18px; text-align: center; color: #fff; border-radius: 3px; padding: 1px 3px; font-weight: 700; }
-/* QUALITY_BOARD_END */'''
+# (2026-09-13: 「최근 논문 quality」 보드를 걷어내면서 그 CSS(QUALITY_CSS)도 지웠다.
+#  자세한 사연은 아래 보드 제거 주석에 있다.)
 
 # 영역 간 의존성 (인덱스 = HYPEREDGES 순서: 0=발견1 1=발견2 2=발견3 3=발견3' 4=발견4·5·6)
 DEPS_JS = """// FINDING_DEPS_BEGIN — 발견 간 의존성 (분류표 노트의 DAG, layout_findings.py 정본)
@@ -1846,26 +1838,14 @@ if edges_only:
         io.open(dst, "w", encoding="utf-8", newline="").write(s)
     print(f"wrote {', '.join(str(dst) for dst in DSTS)} | edges only")
     raise SystemExit(0)
-quality_html_rows = "".join(
-    # data-project-id: 캡션(label)이 id 와 다른 트랙 노드(SEM1(Bezier) 등)도
-    # syncQualityBoard() 가 QUALITY_BY_ID 로 찾을 수 있게 id 를 따로 싣는다.
-    f'<tr data-project-id="{html_escape(_id)}"><td>{html_escape(label)}</td>'
-    f'<td><span class="quality-grade" style="background:{GRADE_COLORS[grade]};color:{"#333333" if grade == "ToDo" else "#ffffff"}">{grade}</span></td>'
-    f'<td>{html_escape(note)}</td></tr>'
-    for _id, label, grade, note in QUALITY_ROWS
-)
-quality_html = (
-    '<div id="quality-board">'
-    # QUALITY_ROWS 를 손댈 때 이 날짜도 같이 올린다.  하드코딩이라, 갱신하지 않으면
-    # 재생성이 graph.html 의 최신 날짜를 조용히 되돌린다(2026-07-27 에 실제로 발생).
-    '<h3>최근 논문 quality (2026-09-11)</h3>'
-    '<div class="quality-meta">상=상위권 심사 대응 가능 · 중=핵심 gate 잔여 · 하=PoC/원고 미완료 · ToDo=새 설계선/검증 전 · 등급 없음=논문 판정 대상 아님<br>'
-    '등급 정본: Obsidian Projects frontmatter + 논문 트랙 분리 (2026-09-11) · 공개 화면에는 최소 메타데이터만 동기화</div>'
-    '<table><thead><tr><th>프로젝트</th><th>등급</th><th>핵심 근거</th></tr></thead>'
-    f'<tbody>{quality_html_rows}</tbody></table></div>'
-)
-
-s = s.replace("</style>", QUALITY_CSS + "\n</style>", 1)
+# 2026-09-13: 사이드바의 「최근 논문 quality」 보드를 걷어냈다. 등급은 노드 색과 Node Info
+# 로 읽으므로 같은 내용을 표로 한 번 더 늘어놓을 이유가 없다(사용자 판단). 보드를 만들던
+# quality_html·quality_html_rows 와 그 CSS 를 함께 지웠다.
+#
+# 위쪽의 제거 정규식(QUALITY_BOARD_BEGIN/END·<div id="quality-board">)은 **그대로 둔다** —
+# 이미 배포된 graph.html 에서 옛 보드를 걷어내는 일을 그것들이 한다.
+# QUALITY_ROWS·QUALITY_BY_ID·syncQualityBoard() 도 남는다. 노드 등급 색이 그 지도를 쓰고,
+# 동기화 함수는 보드가 없으면 빈 NodeList 를 돌아 아무 일도 하지 않는다.
 s = re.sub(r"\n?/\* GRAPH3D_NAV_BEGIN \*/.*?/\* GRAPH3D_NAV_END \*/\n?", "", s, flags=re.S)
 s = re.sub(r'\n?<button id="open-3d-btn".*?</button>\n?', "\n", s, count=1, flags=re.S)
 GRAPH3D_NAV_CSS = """/* GRAPH3D_NAV_BEGIN */
@@ -1884,7 +1864,6 @@ s = s.replace(
     'onclick="window.location.href=\'./graph3d.html\'">3D WebGL 보기</button>',
     1,
 )
-s = s.replace('<div id="legend-wrap">', quality_html + '\n<div id="legend-wrap">', 1)
 
 # Communities is now the paper-quality axis; rebuild its legend from the
 # complete snapshot rather than retaining the historical research-track labels.
