@@ -502,66 +502,10 @@ function _regionCentroid(h) {
   ctx.restore();
 })(ctx);
 // 발견 영역 라벨 왼쪽에 사다리 글리프(0차·1차·2차·topology) — 시그니처 다이어그램과 동일 모티프
-const REGION_GLYPHS = [
-  [["m0", 0], ["topo", -34]],      // 발견1: 0차 + 연결지도
-  [["F", 0]],                       // 발견2: 2차
-  [["m", 0], ["kill", 0]],          // 발견3: 1차 소거(빨간 사선)
-  [["m", 0]],                       // 발견3': 1차 생존
-  [["gate", 0]],                    // 발견4·5·6: 게이트(체크)
-];
-function _glyph(ctx, type, x, y) {
-  ctx.save();
-  ctx.strokeStyle = "#4f46e5"; ctx.fillStyle = "#4f46e5"; ctx.lineWidth = 2;
-  if (type === "m0") { ctx.beginPath(); ctx.arc(x, y, 7, 0, 6.2832); ctx.fill(); }
-  else if (type === "m") {
-    ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(x - 9, y + 7); ctx.lineTo(x + 5, y - 3); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x + 10, y - 7);
-    ctx.lineTo(x + 1, y - 6); ctx.lineTo(x + 6, y + 2); ctx.closePath(); ctx.fill();
-  } else if (type === "F") {
-    ctx.translate(x, y); ctx.rotate(-0.42);
-    ctx.beginPath(); ctx.ellipse(0, 0, 12, 6.5, 0, 0, 6.2832); ctx.stroke();
-    ctx.lineWidth = 1.1;
-    ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(12, 0); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0, -6.5); ctx.lineTo(0, 6.5); ctx.stroke();
-  } else if (type === "topo") {
-    ctx.fillStyle = "#666666"; ctx.strokeStyle = "#666666"; ctx.lineWidth = 1.4;
-    [[-8, -8], [0, -10], [8, -7]].forEach(p => {
-      ctx.beginPath(); ctx.arc(x + p[0], y + p[1], 2.6, 0, 6.2832); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(x + p[0], y + p[1]); ctx.lineTo(x, y + 5); ctx.stroke();
-    });
-    ctx.fillStyle = "#4f46e5"; ctx.fillRect(x - 4, y + 4, 8, 7);
-    ctx.strokeStyle = "#4f46e5"; ctx.lineWidth = 1.3;
-    ctx.beginPath(); ctx.moveTo(x - 6, y + 14); ctx.lineTo(x + 6, y + 14); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x - 3.5, y + 17); ctx.lineTo(x + 3.5, y + 17); ctx.stroke();
-  } else if (type === "kill") {
-    ctx.strokeStyle = "#c04040"; ctx.lineWidth = 2.6;
-    ctx.beginPath(); ctx.moveTo(x - 11, y + 10); ctx.lineTo(x + 11, y - 10); ctx.stroke();
-  } else if (type === "gate") {
-    ctx.strokeStyle = "#2e9e44"; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(x - 8, y); ctx.lineTo(x - 2, y + 7); ctx.lineTo(x + 9, y - 8);
-    ctx.stroke();
-  }
-  ctx.restore();
-}
-(function(ctx) {
-  hyperedges.forEach((h, i) => {
-    const glyphs = REGION_GLYPHS[i] || [];
-    if (!glyphs.length) return;
-    const ps = h.nodes.map(nid => network.getPositions([nid])[nid]).filter(p => p);
-    if (ps.length < 1) return;
-    const cy = ps.reduce((s, p) => s + p.y, 0) / ps.length;
-    const cx = ps.reduce((s, p) => s + p.x, 0) / ps.length;
-    const minY = Math.min.apply(null, ps.map(p => p.y));
-    const topY = ps.length === 1
-      ? cy - 60                                   // 단일 노드 padded hull의 상단
-      : cy + (minY - cy) * 1.25;                  // hull 라벨과 동일한 확장 규칙
-    ctx.font = "bold 20px sans-serif";
-    const w = ctx.measureText(h.label).width;
-    const gx = cx - w / 2 - 26, gy = topY - 23;    // 라벨 baseline(topY-16) 좌측
-    glyphs.forEach(g => _glyph(ctx, g[0], gx + g[1], gy));
-  });
-})(ctx);
+// 2026-09-14: 영역 캡션 옆 기호(REGION_GLYPHS·_glyph)를 걷어냈다.
+// 0차·2차·소거·게이트 같은 발견1~5 의 어휘였는데, 그 표는 **배열 순서(index)** 로 훌에
+// 붙는다. 훌을 3D프린팅·공저자로 갈아 끼운 뒤에도 그 자리에 그대로 달려서, 뜻이 없는
+// 작은 점·화살표·타원 넷이 새 캡션 옆에 남아 있었다(사용자 보고).
 // FINDING_DEPS_END"""
 
 HYPEREDGE_LABEL_HELPERS_JS = r'''// HYPEREDGE_LABEL_HELPERS_BEGIN
@@ -2031,7 +1975,7 @@ s = re.sub(
     count=1,
 )
 s, n3 = re.subn(r"<title>.*?</title>",
-                "<title>SFTF/PFTF 연구 그래프 — BASE + 공저자</title>", s, count=1,
+                "<title>SFTF/PFTF 연구 그래프 — 3D프린팅 + 공저자</title>", s, count=1,
                 flags=re.S)
 
 # Broad role overlays go behind the finding regions, while BASE stays at the

@@ -323,8 +323,10 @@ for (const [from, to, label, relation] of expectedSemChain) {
     throw new Error(`SEM chain edge ${from}->${to} is missing, duplicated, or incorrect`);
   }
 }
-if (!html.includes("if (positions.length < 1) return;") || !html.includes("if (ps.length < 1) return;")) {
-  throw new Error("singleton hyperedge rendering guards are missing");
+// 노드가 하나뿐인 훌도 그려야 한다(padded hull). 2026-09-14 에 짝이던 `ps.length < 1` 검사를
+// 뺐다 — 그쪽은 발견 캡션 옆 기호를 그리던 루프의 것이었고, 그 기호를 통째로 걷어냈다.
+if (!html.includes("if (positions.length < 1) return;")) {
+  throw new Error("singleton hyperedge rendering guard is missing");
 }
 if (
   !html.includes("// EDGE_LABEL_LAYOUT_BEGIN")
