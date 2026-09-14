@@ -279,6 +279,11 @@ TRACK_NOTES = {
 # 같은 값으로 고쳤다 — 포트폴리오 표와 그래프가 갈라지지 않게 둘을 함께 본다.
 TRACK_STAGES = {
     "TSE_SEM3_AutoTune": "blocked",
+    # 2026-09-14: TomoSh5 만 나갔다(한국섬유공학회지 26M-09-036). 부모 노트
+    # Tomo_Shell2026.md 의 stage 는 draft 인데 그것은 아직 안 나간 TomoSh4 쪽이다 —
+    # 한 노트가 논문 둘을 담고 있어서 노트의 단계 하나로는 둘을 다 못 적는다.
+    # 볼트 쪽 짝은 그 노트의 paper_stage 중첩 맵이다.
+    "TSE_TomoSh5": "submitted",
 }
 
 # 2026-09-14: 발견1~6 · METHOD · PIPELINE · 도메인 오버레이를 걷어냈다.
@@ -426,9 +431,9 @@ QUALITY_ROWS = [
     # 2026-09-14: 한 저장소(Tomo_Shell2026)의 미발표 두 편. 발표본 TomoSh1~3(한국섬유
     # 공학회지 2025, 62권)은 그래프 밖에 있고, 이 둘이 그 사슬을 잇는다.
     ("TSE_TomoSh4", "TSE_TomoSh4", "하",
-     "분할 트랙 — 이진 법선 패널티를 연속 가중으로 바꿔 점-뼈대 거리 분할의 파편화를 줄인다; 한국섬유공학회지 투고본 완성, TomoSh5 와 동시 투고(서로를 익명 companion 으로 인용)"),
+     "분할 트랙 — 이진 법선 패널티를 연속 가중으로 바꿔 점-뼈대 거리 분할의 파편화를 줄인다; 한국섬유공학회지 투고본 완성. 동시 투고 계획이었으나 TomoSh5 가 먼저 나가(26M-09-036) **익명 companion 인용 방향이 뒤집혔다** — 이 원고가 그 번호를 받아 적고 투고한다"),
     ("TSE_TomoSh5", "TSE_TomoSh5", "하",
-     "계측 트랙 — 허위 둘레선을 기각하고 실패를 격리해 계측 실패가 사용자에게 드러나게 한다; TomoSh4 선행 투고(익명 companion) 뒤 접수"),
+     "계측 트랙 — 허위 둘레선을 기각하고 실패를 격리해 계측 실패가 사용자에게 드러나게 한다; **2026-09-14 한국섬유공학회지 투고 완료(원고번호 26M-09-036)**, 심사 결과 대기"),
     ("SFTFSoft_DFSVR", "SFTFSoft_DFSVR", "중", "SFTFSoft와 DFSVR 결합 연구선"),
     ("Tomo_DFSVR", "Tomo_DFSVR", "중", "미분 가능한 지지 구조 계산 연구선"),
     ("cfmsAutoSew", "cfmsAutoSew", "하", "패턴 봉제 대응 자동화 연구선"),
@@ -879,7 +884,8 @@ if preserve_extended_quality:
             "TSE_SEM3_AutoTune": "보류(2027-03-01 이후 투고 · 한국섬유공학회지)",
             # 2026-09-14: TomoSh4·TomoSh5 는 서로를 익명 companion 으로 인용하며 동시 투고한다.
             "TSE_TomoSh4": "한국섬유공학회지,draft",
-            "TSE_TomoSh5": "한국섬유공학회지,draft",
+            # 2026-09-14: ⑤가 먼저 나갔다. 동시 투고 계획은 지켜지지 않았다.
+            "TSE_TomoSh5": "한국섬유공학회지 투고 완료 (2026-09-14, 26M-09-036)",
         },
         # 옛 노드 id 도 함께 지운다.  이 갱신기는 **병합**이라 적어 주지 않으면 옛 키가
         # 남아, 그래프에 없는 id 의 배지가 파일에 계속 실린다(2026-09-14 개명 때 실제로 그랬다).
@@ -898,8 +904,8 @@ if preserve_extended_quality:
             # 시점이 2027-03-01 이후로 정해져 그때까지 보류다 — 남은 일은 순서와 분량뿐이다.
             "TSE_SEM3_AutoTune": "2027-03-01 까지 보류(일정), ② 접수번호로 상호 인용 확정, 23면 → 20면 분량 조절",
             # 볼트 Tomo_Shell2026.md 의 next_gate 를 트랙별로 나눈 것이다.
-            "TSE_TomoSh4": "저자 확인 4건(기여 문구·대학원생 이름, Mixamo 라이선스, SizeKorea 약관, 학회지 규정) 반영, 커버레터·과제번호, TomoSh5 와 동시 투고",
-            "TSE_TomoSh5": "TomoSh4 선행 투고(익명 companion), 커버레터·과제번호",
+            "TSE_TomoSh4": "저자 확인 4건(기여 문구·대학원생 이름, Mixamo 라이선스, SizeKorea 약관, 학회지 규정) 반영, docx 육안 확인, TomoSh5(26M-09-036)를 익명 companion 으로 인용하도록 고쳐 투고",
+            "TSE_TomoSh5": "심사 결과 대기 (2026-09-14 투고, 원고번호 26M-09-036)",
             "PFTF_DrapePrior_VisCull_kDop": "독립 논문 등급 미적용 — 통합 evidence 저장소",
             "PFTF_ResearchOptimize": "독립 논문 등급 미적용 — 연구 보조 도구",
             "DFSVR_VisCull": "값·gradient parity·거짓음성 0 및 실제 end-to-end utility 검증",
