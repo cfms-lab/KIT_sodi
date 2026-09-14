@@ -994,7 +994,11 @@ function normalizeKinds(data){
   });
   return changed;
 }
-const STATUS={published:'published',inprint:'in print',accepted:'accepted',submitted:'submitted',draft:'draft',cancelled:'cancelled'};
+/* 2026-09-14: blocked(보류)를 어휘에 넣었다. 그전에는 이 페이지에 보류가 아예 없어서
+   STAGE_TO_NODE 가 blocked 를 draft 로 접어 넣었고, 보류된 원고가 초고로 보였다.
+   보류는 「하다가 미뤄 둔 것」이고 초고는 「쓰는 중」이라 같은 칸에 둘 수 없다
+   (낱말의 정본은 볼트 scripts/lib/stage.mjs). 순서는 진도 순이다. */
+const STATUS={published:'published',inprint:'in print',accepted:'accepted',submitted:'submitted',draft:'draft',blocked:'blocked',cancelled:'cancelled'};
 
 /* ====================== 진도 아이콘 (XMind 풍 파이) ======================
    노드가 많아 어느 것이 투고/출판인지 안 보이는 문제. 논문 진행선만 아이콘으로
@@ -1007,7 +1011,11 @@ const STATUS={published:'published',inprint:'in print',accepted:'accepted',submi
    볼트 `Dashboards/프로젝트현황.md` 의 「투고」 열도 같은 규칙으로 맞췄다. */
 const PROG_GREEN='#16a34a';            // 출판(끝난 것). 밝은 배경일 때 값이다.
 const PROG_YELLOW='#eab308';           // 저널 손에 가 있는 단계(투고·게재확정·인쇄중)
+const PROG_RED='#dc2626';              // 보류(멈춰 세운 것). graph.html·대시보드와 같은 값이다.
 const PROGRESS={
+  // 2026-09-14: 보류를 맨 앞에 둔다. 저널로 가기 전에 멈춘 것이라 투고보다 뒤에 있다.
+  // 아이콘은 빗금 한 획 — graph.html 의 drawNodePie 와 같은 모양이라 세 화면이 같은 말을 한다.
+  blocked:  {x:true,     color:PROG_RED,    label:'보류(blocked)'},
   submitted:{frac:0.5,   color:PROG_YELLOW, label:'투고(submitted)'},
   accepted: {frac:0.75,  color:PROG_YELLOW, label:'게재확정(accepted)'},
   inprint:  {frac:0.875, color:PROG_YELLOW, label:'인쇄중(in print)'},
@@ -1034,6 +1042,12 @@ function progIcon(status, cx, cy, color, checkColor, outline){
          + `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}"/>`
          + `<path d="M${cx-2.9},${cy+0.2} l2.1,2.2 l3.9,-4.4" fill="none" stroke="${checkColor}"`
          + ` stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+  if(p.x){                             // 보류: 빈 원에 빗금 한 획 (취소의 X 와 구분된다)
+    return halo(7.4)
+         + `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" stroke="${color}" stroke-width="1.6"/>`
+         + `<path d="M${cx-3.2},${cy+3.2} L${cx+3.2},${cy-3.2}" fill="none" stroke="${color}"`
+         + ` stroke-width="1.8" stroke-linecap="round"/>`;
   }
   const a=2*Math.PI*p.frac;            // 12시에서 시계방향으로 채운다
   const ex=cx+r*Math.sin(a), ey=cy-r*Math.cos(a), big=p.frac>0.5?1:0;
@@ -1373,7 +1387,9 @@ const GRADE_TO_KIND={'상':'high','중':'medium','하':'low','ToDo':'todo','Clos
    볼트 publish-to-supabase.mjs 의 WIRE_STATUS 와 같은 매핑이어야 한다. */
 const STAGE_TO_NODE={published:'published',inprint:'inprint',accepted:'accepted',
   revision:'submitted',submitted:'submitted',
-  draft:'draft',blocked:'draft',undecided:'draft',idea:'draft',
+  // 2026-09-14: blocked 를 draft 로 접지 않는다 — 이 페이지에 보류 칸이 생겼다.
+  // undecided(미정)는 아직 접어 둔다. 이 지도에 「손도 안 댐」 칸이 따로 없다.
+  draft:'draft',blocked:'blocked',undecided:'draft',idea:'draft',
   cancelled:'cancelled'};
 
 /** 표에서 노드 값을 읽어 트리에 덮어쓴다. 저장하지 않는다(화면에만 반영). */
