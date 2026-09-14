@@ -82,9 +82,9 @@ const expectedVaultGrades = {
   SFTF_SewerPOC: "하",
   SFTFSoft_DFSVR: "중",
   cfmsDrapeSCAN: "ToDo",
-  TSE_SEM_Bezier: "하",
-  TSE_SEM_Tensor: "하",
-  TSE_SEM_AutoTune: "하",
+  TSE_SEM1_Bezier: "하",
+  TSE_SEM2_Tensor: "하",
+  TSE_SEM3_AutoTune: "하",
 };
 for (const [nodeId, grade] of Object.entries(expectedVaultGrades)) {
   const node = nodes.find((candidate) => candidate.id === nodeId);
@@ -129,7 +129,7 @@ const positions = Object.assign(
   readJsonConstant("CURATED_POSITIONS", "{"),
 );
 // 2026-09-10: graph.html 의 POS + CURATED_POSITIONS 병합 결과 전체를 그대로 적는다.
-const expectedPositions = {"Tomo_SFTF":{"x":705,"y":149},"Tomo_SFTFSoft":{"x":492,"y":-68},"SFTF_Clustering":{"x":419,"y":-310},"PFTF":{"x":507,"y":422},"SFTF_Composite":{"x":607,"y":732},"SFTF_InjMold":{"x":-267,"y":-85},"PFTF_Compression":{"x":426,"y":681},"Tomo_DFSVR":{"x":39,"y":-37},"PFTF_VisCull_kDop":{"x":107,"y":447},"SFTF_SewerPOC":{"x":-192,"y":-299},"SFTFSoft_GNN":{"x":160,"y":85},"SFTF_DrapePrior":{"x":168,"y":685},"PFTF_AsymTensor":{"x":317,"y":255},"PFTF_DrapePrior_VisCull_kDop":{"x":-260,"y":448},"PFTF_ResearchOptimize":{"x":714,"y":478},"PFTF_GFiberCT":{"x":280,"y":586},"SFTF_QEM":{"x":519,"y":90},"SFTF_DynamicTargetSearch":{"x":697,"y":-261},"DFSVR_VisCull":{"x":-180,"y":212},"SFTFSoft_GNN_DFSVR":{"x":-90,"y":313},"SFTF_ActiveOverprint":{"x":498,"y":-475},"ColdOndol":{"x":189,"y":-318},"ColdOndol_Positioning":{"x":29,"y":-557},"cfmsCIPC":{"x":153,"y":940},"TSE_SEM_Bezier":{"x":804,"y":536},"TSE_SEM_Tensor":{"x":839,"y":196},"TSE_SEM_AutoTune":{"x":829,"y":-184},"SFTF_HeatMethod":{"x":587,"y":1135},"cfmsPINNDrape":{"x":114,"y":1128},"cfmsDrape":{"x":-262,"y":782},"cfmsMiindo":{"x":57,"y":779},"cfmsPINNCAD":{"x":328,"y":1186},"SFTFSoft_DFSVR":{"x":173,"y":-153},"SFTF_UrbanTraffic":{"x":-60,"y":-168},"cfmsAutoSew":{"x":128,"y":1429},"cfmsAutoPlace_IJCST":{"x":-28,"y":1128},"cfmsAutoPlace_JCDE":{"x":-190,"y":1136},"cfmsDrapeSCAN":{"x":427,"y":932},"SFTF_Holonomy":{"x":457,"y":1372},"HIPDetect":{"x":509,"y":992},"cfmsDispersity":{"x":960,"y":370}};
+const expectedPositions = {"Tomo_SFTF":{"x":705,"y":149},"Tomo_SFTFSoft":{"x":492,"y":-68},"SFTF_Clustering":{"x":419,"y":-310},"PFTF":{"x":507,"y":422},"SFTF_Composite":{"x":607,"y":732},"SFTF_InjMold":{"x":-267,"y":-85},"PFTF_Compression":{"x":426,"y":681},"Tomo_DFSVR":{"x":39,"y":-37},"PFTF_VisCull_kDop":{"x":107,"y":447},"SFTF_SewerPOC":{"x":-192,"y":-299},"SFTFSoft_GNN":{"x":160,"y":85},"SFTF_DrapePrior":{"x":168,"y":685},"PFTF_AsymTensor":{"x":317,"y":255},"PFTF_DrapePrior_VisCull_kDop":{"x":-260,"y":448},"PFTF_ResearchOptimize":{"x":714,"y":478},"PFTF_GFiberCT":{"x":280,"y":586},"SFTF_QEM":{"x":519,"y":90},"SFTF_DynamicTargetSearch":{"x":697,"y":-261},"DFSVR_VisCull":{"x":-180,"y":212},"SFTFSoft_GNN_DFSVR":{"x":-90,"y":313},"SFTF_ActiveOverprint":{"x":498,"y":-475},"ColdOndol":{"x":189,"y":-318},"ColdOndol_Positioning":{"x":29,"y":-557},"cfmsCIPC":{"x":153,"y":940},"TSE_SEM1_Bezier":{"x":804,"y":536},"TSE_SEM2_Tensor":{"x":839,"y":196},"TSE_SEM3_AutoTune":{"x":829,"y":-184},"SFTF_HeatMethod":{"x":587,"y":1135},"cfmsPINNDrape":{"x":114,"y":1128},"cfmsDrape":{"x":-262,"y":782},"cfmsMiindo":{"x":57,"y":779},"cfmsPINNCAD":{"x":328,"y":1186},"SFTFSoft_DFSVR":{"x":173,"y":-153},"SFTF_UrbanTraffic":{"x":-60,"y":-168},"cfmsAutoSew":{"x":128,"y":1429},"cfmsAutoPlace_IJCST":{"x":-28,"y":1128},"cfmsAutoPlace_JCDE":{"x":-190,"y":1136},"cfmsDrapeSCAN":{"x":427,"y":932},"SFTF_Holonomy":{"x":457,"y":1372},"HIPDetect":{"x":509,"y":992},"cfmsDispersity":{"x":960,"y":370}};
 const hyperedges = readJsonConstant("hyperedges", "[");
 const curatedHyperedgeMembers = readJsonConstant("CURATED_HYPEREDGE_MEMBERS", "{");
 for (const [label, nodeIds] of Object.entries(curatedHyperedgeMembers)) {
@@ -162,8 +162,8 @@ const expectedHulls = {
     "SFTF_QEM", "SFTF_ActiveOverprint"],
   "이희란 교수님": ["SFTF_Clustering", "PFTF_Compression", "cfmsAutoSew",
     "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN", "HIPDetect"],
-  "은종현 교수님": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM_Bezier",
-    "TSE_SEM_Tensor", "TSE_SEM_AutoTune", "SFTF_HeatMethod", "SFTF_Holonomy",
+  "은종현 교수님": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier",
+    "TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "SFTF_HeatMethod", "SFTF_Holonomy",
     "cfmsDispersity"],
   "김우석 교수님": ["SFTF_SewerPOC", "ColdOndol", "ColdOndol_Positioning", "SFTF_UrbanTraffic"],
 };
@@ -289,15 +289,20 @@ if (
     "Tomo_SFTF -> SFTF_DynamicTargetSearch -> SFTF_ActiveOverprint lineage edges are missing or incorrect",
   );
 }
-// 2026-09-11: TSE_SEM 한 저장소의 논문 3편이 mindmap.html 의 SEM1·SEM2·SEM3 와 같은 이름의
-// 세 노드로 갈라졌다. 옛 노드는 사라지고, 화살표는 SFTF_Composite → ① → ② → ③ 한 줄뿐이다.
-if (ids.has("TSE_SEM")) {
-  throw new Error("legacy TSE_SEM node still exists after the three-paper split");
+// 2026-09-11: TSE_SEM 한 저장소의 논문 3편이 세 노드로 갈라졌다. 옛 노드는 사라지고,
+// 화살표는 SFTF_Composite → ① → ② → ③ 한 줄뿐이다.
+// 2026-09-14: 이름을 TSE_SEM1_Bezier 꼴로 통일했다 — 포트폴리오 표·그래프·캡션이 모두
+// 같은 낱말을 쓴다. 옛 이름 셋도 함께 막는다. 생성기가 걷어내기 전에는 재생성이 옛 노드를
+// 남긴 채 새 노드를 더해 같은 논문이 두 번 서고, 좌표도 바깥 고리로 튀었다.
+for (const legacy of ["TSE_SEM", "TSE_SEM_Bezier", "TSE_SEM_Tensor", "TSE_SEM_AutoTune"]) {
+  if (ids.has(legacy)) {
+    throw new Error(`legacy SEM node ${legacy} still exists after the three-paper split`);
+  }
 }
 const expectedSemLabels = {
-  TSE_SEM_Bezier: "SEM1(Bezier)",
-  TSE_SEM_Tensor: "SEM2(Tensor)",
-  TSE_SEM_AutoTune: "SEM3(AutoTune)",
+  TSE_SEM1_Bezier: "TSE_SEM1_Bezier",
+  TSE_SEM2_Tensor: "TSE_SEM2_Tensor",
+  TSE_SEM3_AutoTune: "TSE_SEM3_AutoTune",
 };
 for (const [nodeId, label] of Object.entries(expectedSemLabels)) {
   const node = nodes.find((candidate) => candidate.id === nodeId);
@@ -306,9 +311,9 @@ for (const [nodeId, label] of Object.entries(expectedSemLabels)) {
   }
 }
 const expectedSemChain = [
-  ["SFTF_Composite", "TSE_SEM_Bezier", "섬유 계측", "확장"],
-  ["TSE_SEM_Bezier", "TSE_SEM_Tensor", "배향 텐서장", "확장"],
-  ["TSE_SEM_Tensor", "TSE_SEM_AutoTune", "자동 파라미터 선택", "정확도"],
+  ["SFTF_Composite", "TSE_SEM1_Bezier", "섬유 계측", "확장"],
+  ["TSE_SEM1_Bezier", "TSE_SEM2_Tensor", "배향 텐서장", "확장"],
+  ["TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "자동 파라미터 선택", "정확도"],
 ];
 const semEdges = edges.filter(
   (edge) => edge.from in expectedSemLabels || edge.to in expectedSemLabels,

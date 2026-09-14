@@ -221,9 +221,9 @@ POS = {
     "cfmsCIPC": (153, 940),
     # 2026-09-11: TSE_SEM 을 논문 3편 트랙으로 나눴다.  ① 은 옛 TSE_SEM 자리를 잇고
     # ②·③ 은 SFTF_Composite → ① 방향을 따라 위쪽으로 한 칸씩 이어진다.
-    "TSE_SEM_Bezier": (804, 536),
-    "TSE_SEM_Tensor": (839, 196),
-    "TSE_SEM_AutoTune": (829, -184),
+    "TSE_SEM1_Bezier": (804, 536),
+    "TSE_SEM2_Tensor": (839, 196),
+    "TSE_SEM3_AutoTune": (829, -184),
     "SFTF_HeatMethod": (587, 1135),
     "cfmsPINNDrape": (114, 1128),
     "cfmsDrape": (-262, 782),
@@ -281,8 +281,8 @@ HYPEREDGES = [
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
     {"label": "은종현 교수님",
      "kind": "coauthor",
-     "nodes": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM_Bezier",
-               "TSE_SEM_Tensor", "TSE_SEM_AutoTune", "SFTF_HeatMethod",
+     "nodes": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier",
+               "TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "SFTF_HeatMethod",
                "SFTF_Holonomy", "cfmsDispersity"],
      "color": "#db2777", "labelColor": "#be185d",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
@@ -361,11 +361,11 @@ QUALITY_ROWS = [
     # 2026-09-11: TSE_SEM 한 저장소의 논문 3편 트랙을 mindmap.html 의 SEM1·SEM2·SEM3 노드와
     # 같은 이름으로 나눈다.  등급은 볼트 노트(TSE_SEM.md, grade 하)와 마인드맵 kind(low)를
     # 따르고, 근거는 노트의 「논문 트랙」·「투고 일정」 절을 요약한 것이다.
-    ("TSE_SEM_Bezier", "SEM1(Bezier)", "하",
+    ("TSE_SEM1_Bezier", "TSE_SEM1_Bezier", "하",
      "① 방향 리프팅+3차 Bézier 관 재구성; 실제 SEM IoU 0.814·팬텀 12종 배향 오차 2.3–11.6°, 원고 완성, 한국섬유공학회지 즉시 투고 대기(저자·COI·수치 대조 잔여)"),
-    ("TSE_SEM_Tensor", "SEM2(Tensor)", "하",
+    ("TSE_SEM2_Tensor", "TSE_SEM2_Tensor", "하",
      "② 이진화 없는 배향 텐서장, 하부층 포함; 저배율 SEM 9장 observed fraction 0.86–0.93, 원고 완성, ① 접수 후 companion 인용으로 투고"),
-    ("TSE_SEM_AutoTune", "SEM3(AutoTune)", "하",
+    ("TSE_SEM3_AutoTune", "TSE_SEM3_AutoTune", "하",
      "③ 증거 제약 기반 자동 파라미터 선택; 자체 SCI(E) 사전심사 major revision(held-out 누출·예산 불일치·최종 조합 미검증·XCT 서술)으로 보류, 투고 3순위"),
     ("SFTF_HeatMethod", "SFTF_HeatMethod", "중", "열전달 기반 복합재 설계 연구선"),
     # 2026-09-07: SFTF_Holonomy 논문 트랙 편입.  graph.html 의 큐레이션 노드는
@@ -437,9 +437,9 @@ INTRODUCTIONS = {
     "cfmsAutoPlace_IJCST": "IJCST 패턴 관점에서 라벨 없는 의복 패턴의 배치와 검증을 다루는 논문 트랙이다.",
     "cfmsAutoPlace_JCDE": "JCDE CAD 관점에서 패널의 신체 부위와 전역 조립·배치 가설을 다루는 논문 트랙이다.",
     "cfmsDrapeSCAN": "고정형·핸드헬드 스캔 패치를 cfmsDrape 물리와 소프트 대응으로 정합해 인체 표면을 복원하려는 실험선이다.",
-    "TSE_SEM_Bezier": "전자현미경 사진 한 장에서 섬유 한 올 한 올을 매끈한 곡선으로 따라가며 굵기와 방향을 재어내는 방법이다.",
-    "TSE_SEM_Tensor": "섬유를 하나씩 오려내지 않고 사진 전체에서 섬유가 어느 쪽으로 누워 있는지와 겹친 아래층까지 한꺼번에 재는 방법이다.",
-    "TSE_SEM_AutoTune": "정답을 모르는 실제 사진에서도 측정기의 손잡이를 스스로 안전하게 맞추는 방법을 다루는 연구다.",
+    "TSE_SEM1_Bezier": "전자현미경 사진 한 장에서 섬유 한 올 한 올을 매끈한 곡선으로 따라가며 굵기와 방향을 재어내는 방법이다.",
+    "TSE_SEM2_Tensor": "섬유를 하나씩 오려내지 않고 사진 전체에서 섬유가 어느 쪽으로 누워 있는지와 겹친 아래층까지 한꺼번에 재는 방법이다.",
+    "TSE_SEM3_AutoTune": "정답을 모르는 실제 사진에서도 측정기의 손잡이를 스스로 안전하게 맞추는 방법을 다루는 연구다.",
 }
 
 # 발견을 확정하는 hyperedge와 구분되는 그래프 해석용 역할 및 후보 표지.
@@ -824,9 +824,9 @@ if preserve_extended_quality:
             "PFTF_GFiberCT": "한국섬유공학회지,draft",
             # 2026-09-11: TSE_SEM 의 배지 「섬유공학회지,draft」를 세 트랙이 나눠 갖는다.
             # ③ 은 자체 SCI(E) 사전심사 판정으로 보류 중이라 투고 상태가 아니다.
-            "TSE_SEM_Bezier": "한국섬유공학회지,draft",
-            "TSE_SEM_Tensor": "한국섬유공학회지,draft",
-            "TSE_SEM_AutoTune": "보류(사전심사 major revision · 투고 3순위)",
+            "TSE_SEM1_Bezier": "한국섬유공학회지,draft",
+            "TSE_SEM2_Tensor": "한국섬유공학회지,draft",
+            "TSE_SEM3_AutoTune": "보류(사전심사 major revision · 투고 3순위)",
         },
         remove=("TSE_SEM",),
     )
@@ -836,9 +836,9 @@ if preserve_extended_quality:
         {
             "PFTF_GFiberCT": "A안 보강 중 — 초록의 시편 표기, 일반 복원 대조군(Poisson/Ball Pivoting), 복원 메시 기반 간격 지도; 시편 1개·ρ=4 는 한 패널의 값; PFTF/local-SPD 우월성 주장 금지",
             # 2026-09-11: 볼트 TSE_SEM.md 「투고 일정」의 트랙별 남은 일.
-            "TSE_SEM_Bezier": "저자·소속·사사·COI 확정, validation_summary.csv 와 본문 수치 대조, 투고요령 참고문헌 형식 점검",
-            "TSE_SEM_Tensor": "① 접수번호로 companion 인용 확정, ①과의 방법·그림·검증 주장 중복 정리",
-            "TSE_SEM_AutoTune": "grid 예산 버그 수정 → 최종 조합 고정 → 미사용 test 재검증 → guarantee 를 empirical guardrail 로 하향",
+            "TSE_SEM1_Bezier": "저자·소속·사사·COI 확정, validation_summary.csv 와 본문 수치 대조, 투고요령 참고문헌 형식 점검",
+            "TSE_SEM2_Tensor": "① 접수번호로 companion 인용 확정, ①과의 방법·그림·검증 주장 중복 정리",
+            "TSE_SEM3_AutoTune": "grid 예산 버그 수정 → 최종 조합 고정 → 미사용 test 재검증 → guarantee 를 empirical guardrail 로 하향",
             "PFTF_DrapePrior_VisCull_kDop": "독립 논문 등급 미적용 — 통합 evidence 저장소",
             "PFTF_ResearchOptimize": "독립 논문 등급 미적용 — 연구 보조 도구",
             "DFSVR_VisCull": "값·gradient parity·거짓음성 0 및 실제 end-to-end utility 검증",
@@ -1423,51 +1423,70 @@ DYNAMIC_TARGET_SEARCH_GOAL_EDGES = [
 
 # ------------------------------------------------ TSE_SEM 논문 트랙 분리 (2026-09-11)
 # TSE_SEM2026_dev 한 저장소에 논문 3편이 있고(볼트 Projects/TSE_SEM.md 의 draft_keyword),
-# mindmap.html 의 클라우드 문서는 이미 SEM1(Bezier) → SEM2(Tensor) → SEM3(AutoTune) 세
-# 노드로 나뉘어 있다.  graph.html 도 같은 이름으로 나눈다.  노드 id 는 볼트 노트의
-# «노트_트랙» 규약(cfmsAutoPlace_IJCST 와 같은 꼴이고 paper_completeness 중첩 맵의 키)을
-# 따르고, 캡션은 마인드맵 제목을 그대로 쓴다.  화살표는 «먼저 선 것 → 갈라져 나온 것»
-# 규칙과 투고 순서(Bezier → Tensor → AutoTune)를 따라 SFTF_Composite → ① → ② → ③ 한 줄이다.
+# mindmap.html 의 클라우드 문서는 이미 세 노드로 나뉘어 있다.  graph.html 도 나눈다.
+#
+# 2026-09-14: 이름을 «TSE_SEM1_Bezier» 꼴로 통일했다(사용자 지시).  그 전에는 캡션이
+# 마인드맵 제목인 «SEM1(Bezier)» 이고 노드 id 는 볼트의 «노트_트랙» 규약인
+# «TSE_SEM_Bezier» 라서, 같은 논문이 포트폴리오 표와 그래프에서 다른 이름으로 보였다.
+# 이제 id 와 캡션이 같고 포트폴리오 행 이름도 같다.  투고 순서를 이름에 넣었으므로
+# 어느 화면에서 보든 ①②③ 이 드러난다.  볼트 paper_completeness 중첩 맵의 키는 노트
+# 안의 트랙 이름(Bezier/Tensor/AutoTune)이라 그대로고, 아래 vault_key 가 이어 준다.
+#
+# 화살표는 «먼저 선 것 → 갈라져 나온 것» 규칙과 투고 순서(Bezier → Tensor → AutoTune)를
+# 따라 SFTF_Composite → ① → ② → ③ 한 줄이다.
 LEGACY_SEM_ID = "TSE_SEM"
 SEM_TRACKS = [
     {
-        "id": "TSE_SEM_Bezier",
-        "label": "SEM1(Bezier)",
+        "id": "TSE_SEM1_Bezier",
+        "label": "TSE_SEM1_Bezier",
+        # 볼트 TSE_SEM.md 의 paper_completeness 중첩 맵 키 → _load_paper_completeness 가
+        # 만드는 «노트_트랙» 키. 노드 id 와 다르므로 여기서 이어 준다.
+        "vault_key": "TSE_SEM_Bezier",
         "level": 3,
         "scope": "① Bézier 관 재구성 트랙",
         "summary": "방향 리프팅과 3차 Bézier 곡선으로 SEM 나노섬유 웹의 개별 섬유 중심선·반지름을 3차원 복원",
     },
     {
-        "id": "TSE_SEM_Tensor",
-        "label": "SEM2(Tensor)",
+        "id": "TSE_SEM2_Tensor",
+        "label": "TSE_SEM2_Tensor",
+        # 볼트 TSE_SEM.md 의 paper_completeness 중첩 맵 키 → _load_paper_completeness 가
+        # 만드는 «노트_트랙» 키. 노드 id 와 다르므로 여기서 이어 준다.
+        "vault_key": "TSE_SEM_Tensor",
         "level": 4,
         "scope": "② 배향 텐서장 트랙",
         "summary": "이진화 없는 섬유 배향 텐서장으로 전체 배향·교차점·하부층까지 정량화",
     },
     {
-        "id": "TSE_SEM_AutoTune",
-        "label": "SEM3(AutoTune)",
+        "id": "TSE_SEM3_AutoTune",
+        "label": "TSE_SEM3_AutoTune",
+        # 볼트 TSE_SEM.md 의 paper_completeness 중첩 맵 키 → _load_paper_completeness 가
+        # 만드는 «노트_트랙» 키. 노드 id 와 다르므로 여기서 이어 준다.
+        "vault_key": "TSE_SEM_AutoTune",
         "level": 5,
         "scope": "③ AutoTune 트랙(보류)",
         "summary": "정답 없는 SEM 영상에서 증거 제약만으로 텐서 파이프라인의 파라미터를 자동 선택",
     },
 ]
 SEM_TRACK_IDS = [track["id"] for track in SEM_TRACKS]
-SEM_IDS = {LEGACY_SEM_ID, *SEM_TRACK_IDS}
+# 2026-09-14 이름 통일 전의 노드 id 도 함께 걷어낸다.  이것이 없으면 재생성이 옛 노드를
+# 남겨 둔 채 새 노드를 더해, 같은 논문이 그래프에 두 번 선다(좌표도 바깥 고리로 튄다).
+# 볼트 paper_completeness 중첩 맵의 «노트_트랙» 키와 같은 문자열이라 vault_key 를 쓴다.
+LEGACY_SEM_TRACK_IDS = {track["vault_key"] for track in SEM_TRACKS}
+SEM_IDS = {LEGACY_SEM_ID, *LEGACY_SEM_TRACK_IDS, *SEM_TRACK_IDS}
 
 SEM_GOAL_EDGES = [
     # 옛 SFTF_Composite → TSE_SEM 화살표의 라벨·설명은 첫 트랙이 물려받는다.
     _autoplace_goal_edge(
-        "SFTF_Composite", "TSE_SEM_Bezier", "섬유 계측",
+        "SFTF_Composite", "TSE_SEM1_Bezier", "섬유 계측",
         "SEM 사진에서 섬유 굵기·방향을 자동으로 재어 입력을 만든다", "확장",
     ),
     _autoplace_goal_edge(
-        "TSE_SEM_Bezier", "TSE_SEM_Tensor", "배향 텐서장",
+        "TSE_SEM1_Bezier", "TSE_SEM2_Tensor", "배향 텐서장",
         "개별 섬유의 중심선·반지름 복원에서 이진화 없는 전체 배향장·교차점·하부층 정량화로 넓힌다",
         "확장",
     ),
     _autoplace_goal_edge(
-        "TSE_SEM_Tensor", "TSE_SEM_AutoTune", "자동 파라미터 선택",
+        "TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "자동 파라미터 선택",
         "정답이 없는 실제 SEM 에서 관측 가능한 자기일관성 지표와 baseline 상대 안전 제약만으로 텐서 파이프라인의 파라미터를 고른다",
         "정확도",
     ),
@@ -1900,8 +1919,14 @@ assert ncurated_pos == 1, "CURATED_POSITIONS block not found"
 # 읽으므로, 여기 실어야 볼트가 바뀔 때 높이도 따라온다.
 completeness_by_id = dict(PAPER_COMPLETENESS)
 # 2026-09-14 부터 볼트 노트가 cfmsAutoPlace 처럼 트랙별 중첩 맵(Bezier/Tensor/AutoTune)이라
-# _load_paper_completeness 가 TSE_SEM_Bezier 꼴 키를 곧바로 만든다 — 아래 물려주기는 그 전
-# 형태(노트 하나에 값 하나)로 되돌아갔을 때의 대비책이고, 지금은 걸리지 않는다.
+# _load_paper_completeness 가 «TSE_SEM_Bezier» 꼴 키를 만든다.  노드 id 는 같은 날 사용자
+# 지시로 «TSE_SEM1_Bezier» 꼴이 되었으므로 vault_key 로 옮겨 싣고 볼트 키는 버린다 —
+# 남겨 두면 그래프에 없는 id 가 3D 뷰의 높이 지도에 끼어든다.
+for track in SEM_TRACKS:
+    score = completeness_by_id.pop(track["vault_key"], None)
+    if score is not None:
+        completeness_by_id[track["id"]] = score
+# 노트가 옛 형태(노트 하나에 값 하나)로 되돌아갔을 때의 대비책.  지금은 걸리지 않는다.
 if LEGACY_SEM_ID in completeness_by_id:
     for track_id in SEM_TRACK_IDS:
         completeness_by_id.setdefault(track_id, completeness_by_id[LEGACY_SEM_ID])
