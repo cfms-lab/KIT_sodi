@@ -104,6 +104,28 @@ SFTF_Holonomy 의 좌표·등급 행과 품질 보드 날짜가 이렇게 되돌
   `layout_findings.py` 의 `POS`, `QUALITY_ROWS`, `curated_position_ids` 세 곳과 품질 보드
   하드코딩 날짜, 그리고 `scripts/check-graph-html.mjs` 의 `expectedVaultGrades` 까지
   맞춰야 재생성 뒤에 살아남는다.
+- **노드 id 를 바꾸면 표의 id 도 함께 옮긴다.** `graph_positions.id` 가 곧 `graph.html` 의
+  노드 id 라서(`schema_graph_positions.sql`), 파일에서 이름만 바꾸면 웹에서 끌어 놓은
+  좌표가 옛 id 로 남아 고아가 되고 그 노드는 파일 씨앗 자리로 돌아간다. **조용히**
+  돌아간다 — 가드는 파일 안만 보므로 아무 말도 하지 않는다. 개명은 세 가지가 한 묶음이다.
+  1. `layout_findings.py` 의 `POS`·`QUALITY_ROWS`·화살표·훌 멤버 등 옛 id 를 모두 새 id 로.
+  2. **옛 id 를 생성기가 걷어내게 한다.** 그러지 않으면 재생성이 옛 노드를 남긴 채 새
+     노드를 더해 같은 논문이 두 번 서고, 좌표 없는 새 노드는 바깥 고리로 튄다.
+     SEM 트랙이 그 본보기다 — `SEM_IDS` 에 옛 이름을 넣어 `_replace_sem_tracks` 가
+     함께 지운다. 가드에도 옛 이름을 적어 두면 되살아날 때 바로 걸린다.
+  3. 표의 행을 옮기는 SQL 을 Supabase SQL Editor 에서 돌린다. 새 id 가 이미 있으면
+     (그 사이 웹에서 저장했으면) 그 값을 이기지 않게 하고 옛 행만 지운다.
+     ```sql
+     update public.graph_positions p set id = '새id', updated_at = now()
+      where p.id = '옛id'
+        and not exists (select 1 from public.graph_positions q where q.id = '새id');
+     delete from public.graph_positions where id = '옛id';
+     ```
+  2026-09-14 `TSE_SEM_Bezier` → `TSE_SEM1_Bezier` 개명이 실제 사례다(세 노드). 확인은
+  공개 읽기라 로그인이 필요 없다 — `graph_positions?select=id` 로 받은 id 집합과
+  `graph.html` 의 `POS` 키가 정확히 같아야 한다. 한쪽에만 있으면 그게 고아다.
+  (노드 **캡션**은 이 표와 무관하다. 마인드맵 제목은 `research_outputs.title` 이고
+  그쪽은 마인드맵 노드 id 로 짝짓는다.)
 - **재생성은 멱등하다.** 의심스러우면 두 번 돌려 `git diff` 가 그대로인지 본다.
 
 ## 참고
