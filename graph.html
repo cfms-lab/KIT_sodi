@@ -501,7 +501,7 @@ EDGE_DIRECTION_FIXES.forEach(([from, to]) => {
 
 const CURATED_POSITIONS = {"cfmsAutoSew": {"x": 104, "y": 1321}, "cfmsAutoPlace_IJCST": {"x": -81, "y": 1092}, "cfmsAutoPlace_JCDE": {"x": -264, "y": 1139}, "cfmsDrapeSCAN": {"x": 256, "y": 875}, "SFTF_Holonomy": {"x": 564, "y": 1333}, "HIPDetect": {"x": 331, "y": 1330}, "cfmsDispersity": {"x": 736, "y": 1340}, "TSE_TomoSh4": {"x": 136, "y": 535}, "TSE_TomoSh5": {"x": 367, "y": 544}};
 const PAPER_COMPLETENESS = {"ColdOndol": 3, "ColdOndol_Materials": 4, "ColdOndol_Positioning": 3, "HipDetect": 1, "PFTF": 5, "PFTF_AsymTensor": 3, "PFTF_Compression": 6, "PFTF_FXShock": 8, "PFTF_GFiberCT": 2, "PFTF_Mold": 8, "PFTF_VisCull_kDop": 4, "SFTFSoft_DFSVR": 5, "SFTFSoft_GNN": 4, "SFTF_Clustering": 4, "SFTF_Composite": 3, "SFTF_DrapePrior": 1, "SFTF_HeatMethod": 1, "SFTF_Holonomy": 2, "SFTF_QEM": 4, "SFTF_SewerPOC": 5, "SFTF_ThermalChip": 5, "SFTF_UrbanTraffic": 6, "TSE_SEM1_Bezier": 2, "TSE_SEM2_Tensor": 2, "TSE_SEM3_AutoTune": 1, "TSE_TomoSh4": 2, "TSE_TomoSh5": 2, "Tomo_DFSVR": 4, "Tomo_SFTF": 1, "Tomo_SFTFSoft": 2, "cfmsAutoPlace_IJCST": 3, "cfmsAutoPlace_JCDE": 3, "cfmsAutoSew": 4, "cfmsCIPC": 1, "cfmsDispersity": 1, "cfmsDrapeSCAN": 10, "cfmsPINNCAD": 10, "cfmsPINNDrape": 5};
-const VAULT_STAGES = {"ColdOndol": "undecided", "ColdOndol_Positioning": "draft", "DFSVR_VisCull": "draft", "HIPDetect": "draft", "PFTF": "blocked", "PFTF_AsymTensor": "draft", "PFTF_Compression": "draft", "PFTF_DrapePrior_VisCull_kDop": "draft", "PFTF_GFiberCT": "draft", "PFTF_ResearchOptimize": "draft", "PFTF_VisCull_kDop": "draft", "SFTFSoft_DFSVR": "blocked", "SFTFSoft_GNN": "draft", "SFTFSoft_GNN_DFSVR": "draft", "SFTF_ActiveOverprint": "draft", "SFTF_Clustering": "draft", "SFTF_Composite": "draft", "SFTF_DrapePrior": "revision", "SFTF_DynamicTargetSearch": "draft", "SFTF_HeatMethod": "draft", "SFTF_Holonomy": "draft", "SFTF_InjMold": "draft", "SFTF_QEM": "draft", "SFTF_SewerPOC": "undecided", "SFTF_UrbanTraffic": "undecided", "TSE_SEM1_Bezier": "draft", "TSE_SEM2_Tensor": "draft", "TSE_SEM3_AutoTune": "blocked", "TSE_TomoSh4": "draft", "TSE_TomoSh5": "draft", "Tomo_DFSVR": "draft", "Tomo_SFTF": "submitted", "Tomo_SFTFSoft": "draft", "cfmsAutoPlace_IJCST": "draft", "cfmsAutoPlace_JCDE": "draft", "cfmsAutoSew": "draft", "cfmsCIPC": "submitted", "cfmsDispersity": "published", "cfmsDrape": "draft", "cfmsDrapeSCAN": "draft", "cfmsPINNCAD": "undecided", "cfmsPINNDrape": "undecided"};
+const VAULT_STAGES = {"ColdOndol": "undecided", "ColdOndol_Positioning": "draft", "DFSVR_VisCull": "draft", "HIPDetect": "draft", "PFTF": "blocked", "PFTF_AsymTensor": "draft", "PFTF_Compression": "draft", "PFTF_DrapePrior_VisCull_kDop": "draft", "PFTF_GFiberCT": "draft", "PFTF_ResearchOptimize": "draft", "PFTF_VisCull_kDop": "draft", "SFTFSoft_DFSVR": "blocked", "SFTFSoft_GNN": "draft", "SFTFSoft_GNN_DFSVR": "draft", "SFTF_ActiveOverprint": "draft", "SFTF_Clustering": "draft", "SFTF_Composite": "draft", "SFTF_DrapePrior": "revision", "SFTF_DynamicTargetSearch": "draft", "SFTF_HeatMethod": "draft", "SFTF_Holonomy": "draft", "SFTF_InjMold": "draft", "SFTF_QEM": "draft", "SFTF_SewerPOC": "undecided", "SFTF_UrbanTraffic": "undecided", "TSE_SEM1_Bezier": "draft", "TSE_SEM2_Tensor": "draft", "TSE_SEM3_AutoTune": "blocked", "TSE_TomoSh4": "draft", "TSE_TomoSh5": "draft", "Tomo_DFSVR": "draft", "Tomo_SFTF": "submitted", "Tomo_SFTFSoft": "draft", "cfmsAutoPlace_IJCST": "draft", "cfmsAutoPlace_JCDE": "draft", "cfmsAutoSew": "draft", "cfmsCIPC": "submitted", "cfmsDispersity": "published", "cfmsDrape": "draft", "cfmsDrapeSCAN": "blocked", "cfmsPINNCAD": "blocked", "cfmsPINNDrape": "undecided"};
 Object.assign(POS, CURATED_POSITIONS);
 
 // 새 관계를 반영해 모든 노드의 차수 메타데이터도 같은 실행에서 맞춘다.
@@ -1533,8 +1533,11 @@ const STAGE_PIE = {
   revision:  { frac: 0.625,             label: '심사 수정(revision)' },
   submitted: { frac: 0.5,               label: '투고(submitted)' },
   draft:     { frac: 0.25,              label: '초고(draft)' },
-  undecided: { frac: 0,                 label: '미정(undecided)' },
-  blocked:   { frac: 0,     x: true,    label: '보류(blocked)' },
+  /* 2026-09-14: 미정·보류를 가르는 기준이 바뀌었다(사용자). 전에는 **낼 곳**이 기준이라
+     「게재지 미정」이 undecided 였다. 이제는 **손을 댔는가**가 기준이다 — 아예 시작하지
+     않은 것만 미정이고, 하다가 미뤄 둔 것은 보류다. 범례에 그 뜻을 적어 둔다. */
+  undecided: { frac: 0,                 label: '미정(undecided) · 손대지 않음' },
+  blocked:   { frac: 0,     x: true,    label: '보류(blocked) · 하다가 미룸' },
   cancelled: { frac: 0,     xx: true,   label: '취소(cancelled)' },
   idea:      { frac: 0,                 label: '아이디어(idea)' },
 };
