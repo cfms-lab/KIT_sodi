@@ -1616,8 +1616,27 @@ function nodeFillColor(n) {
   const c = n.color && (n.color.background || n.color);
   return typeof c === 'string' ? c : '#999999';
 }
+function nodeStrokeColor(n) {
+  const c = n.color && n.color.border;
+  return typeof c === 'string' ? c : null;
+}
 
-function drawNodePie(ctx, cx, cy, R, p, color) {
+/* 진도 자국을 그릴 색 (2026-09-14).
+   파이는 흰 원을 깔고 그 위에 **등급 색**으로 자국을 낸다. 그런데 ToDo 등급의 색은
+   흰색이라(QUALITY_COLORS.ToDo = #ffffff) 흰 바탕에 흰 자국이 되어 아무것도 안 보인다.
+   cfmsDrapeSCAN 이 보류인데 화면에서는 미정(빈 원)과 똑같아 보인 것이 이 때문이고,
+   ToDo 노드 다섯이 전부 같은 처지였다 — 단계를 갖고 있는데 그리지 못하고 있었다.
+   너무 밝으면 테두리 색으로 그린다. ToDo 의 테두리는 검정이라 그대로 쓸 수 있다. */
+function pieInk(fill, border) {
+  const m = /^#([0-9a-f]{6})$/i.exec(fill || '');
+  if (!m) return fill;
+  const v = parseInt(m[1], 16);
+  const lum = 0.299 * (v >> 16) + 0.587 * ((v >> 8) & 255) + 0.114 * (v & 255);
+  return lum > 230 ? (border || '#333333') : fill;
+}
+
+function drawNodePie(ctx, cx, cy, R, p, color, border) {
+  const ink = pieInk(color, border);
   ctx.save();
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
@@ -1635,12 +1654,13 @@ function drawNodePie(ctx, cx, cy, R, p, color) {
     ctx.moveTo(cx - 0.48 * R, cy + 0.03 * R);
     ctx.lineTo(cx - 0.13 * R, cy + 0.40 * R);
     ctx.lineTo(cx + 0.52 * R, cy - 0.33 * R);
-    ctx.strokeStyle = '#ffffff';
+    // 꽉 찬 원 위의 체크는 흰색이다. 다만 원 자체가 흰색이면(ToDo) 그때는 먹색으로.
+    ctx.strokeStyle = ink === color ? '#ffffff' : ink;
     ctx.lineWidth = 0.22 * R;
     ctx.stroke();
   } else if (p.x || p.xx) {
     // 보류는 빗금 한 획(멈췄을 뿐), 취소는 X(접었음). 볼트 대시보드와 같은 구분이다.
-    ctx.strokeStyle = color;
+    ctx.strokeStyle = ink;
     ctx.lineWidth = 0.16 * R;
     ctx.beginPath();
     ctx.moveTo(cx - 0.5 * R, cy + 0.5 * R);
@@ -1657,7 +1677,7 @@ function drawNodePie(ctx, cx, cy, R, p, color) {
     ctx.moveTo(cx, cy);
     ctx.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * p.frac);
     ctx.closePath();
-    ctx.fillStyle = color;
+    ctx.fillStyle = ink;
     ctx.fill();
   }
   // 테두리는 언제나 등급 색이다 — 파이가 비어 있어도 노드의 등급이 읽힌다.
@@ -1677,7 +1697,7 @@ network.on('afterDrawing', function (ctx) {
     if (n.shape === 'circle') return;          // 종료 노드(×)는 라벨이 원 안에 있어 덮으면 안 된다
     const pos = network.getPositions([n.id])[n.id];
     if (!pos) return;
-    drawNodePie(ctx, pos.x, pos.y, n.size || 12, p, nodeFillColor(n));
+    drawNodePie(ctx, pos.x, pos.y, n.size || 12, p, nodeFillColor(n), nodeStrokeColor(n));
   });
 });
 
