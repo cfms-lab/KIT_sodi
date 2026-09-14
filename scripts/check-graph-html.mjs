@@ -55,6 +55,7 @@ const curatedNodes = [
   readJsonConstant("SFTF_HOLONOMY_NODE", "{"),
   readJsonConstant("HIPDETECT_NODE", "{"),
   readJsonConstant("CFMSDISPERSITY_NODE", "{"),   // 2026-09-14
+  ...readJsonConstant("TOMO_SHELL_NODES", "["),   // 2026-09-14
 ];
 for (const curatedNode of curatedNodes) {
   if (!nodes.some((node) => node.id === curatedNode.id)) nodes.push(curatedNode);
@@ -99,6 +100,7 @@ const curatedEdges = [
   ...readJsonConstant("CURATED_GARMENT_EDGES", "["),
   ...readJsonConstant("SFTF_HOLONOMY_EDGES", "["),
   ...readJsonConstant("HIPDETECT_EDGES", "["),
+  ...readJsonConstant("TOMO_SHELL_EDGES", "["),   // 2026-09-14
 ];
 for (const curatedEdge of curatedEdges) {
   const index = edges.findIndex(
@@ -129,7 +131,7 @@ const positions = Object.assign(
   readJsonConstant("CURATED_POSITIONS", "{"),
 );
 // 2026-09-10: graph.html 의 POS + CURATED_POSITIONS 병합 결과 전체를 그대로 적는다.
-const expectedPositions = {"Tomo_SFTF":{"x":705,"y":149},"Tomo_SFTFSoft":{"x":492,"y":-68},"SFTF_Clustering":{"x":419,"y":-310},"PFTF":{"x":507,"y":422},"SFTF_Composite":{"x":607,"y":732},"SFTF_InjMold":{"x":-267,"y":-85},"PFTF_Compression":{"x":426,"y":681},"Tomo_DFSVR":{"x":39,"y":-37},"PFTF_VisCull_kDop":{"x":107,"y":447},"SFTF_SewerPOC":{"x":-192,"y":-299},"SFTFSoft_GNN":{"x":160,"y":85},"SFTF_DrapePrior":{"x":168,"y":685},"PFTF_AsymTensor":{"x":317,"y":255},"PFTF_DrapePrior_VisCull_kDop":{"x":-260,"y":448},"PFTF_ResearchOptimize":{"x":714,"y":478},"PFTF_GFiberCT":{"x":280,"y":586},"SFTF_QEM":{"x":519,"y":90},"SFTF_DynamicTargetSearch":{"x":697,"y":-261},"DFSVR_VisCull":{"x":-180,"y":212},"SFTFSoft_GNN_DFSVR":{"x":-90,"y":313},"SFTF_ActiveOverprint":{"x":498,"y":-475},"ColdOndol":{"x":189,"y":-318},"ColdOndol_Positioning":{"x":29,"y":-557},"cfmsCIPC":{"x":153,"y":940},"TSE_SEM1_Bezier":{"x":804,"y":536},"TSE_SEM2_Tensor":{"x":839,"y":196},"TSE_SEM3_AutoTune":{"x":829,"y":-184},"SFTF_HeatMethod":{"x":587,"y":1135},"cfmsPINNDrape":{"x":114,"y":1128},"cfmsDrape":{"x":-262,"y":782},"cfmsMiindo":{"x":57,"y":779},"cfmsPINNCAD":{"x":328,"y":1186},"SFTFSoft_DFSVR":{"x":173,"y":-153},"SFTF_UrbanTraffic":{"x":-60,"y":-168},"cfmsAutoSew":{"x":128,"y":1429},"cfmsAutoPlace_IJCST":{"x":-28,"y":1128},"cfmsAutoPlace_JCDE":{"x":-190,"y":1136},"cfmsDrapeSCAN":{"x":427,"y":932},"SFTF_Holonomy":{"x":457,"y":1372},"HIPDetect":{"x":509,"y":992},"cfmsDispersity":{"x":960,"y":370}};
+const expectedPositions = {"Tomo_SFTF":{"x":705,"y":149},"Tomo_SFTFSoft":{"x":492,"y":-68},"SFTF_Clustering":{"x":419,"y":-310},"PFTF":{"x":507,"y":422},"SFTF_Composite":{"x":607,"y":732},"SFTF_InjMold":{"x":-267,"y":-85},"PFTF_Compression":{"x":426,"y":681},"Tomo_DFSVR":{"x":39,"y":-37},"PFTF_VisCull_kDop":{"x":107,"y":447},"SFTF_SewerPOC":{"x":-192,"y":-299},"SFTFSoft_GNN":{"x":160,"y":85},"SFTF_DrapePrior":{"x":168,"y":685},"PFTF_AsymTensor":{"x":317,"y":255},"PFTF_DrapePrior_VisCull_kDop":{"x":-260,"y":448},"PFTF_ResearchOptimize":{"x":714,"y":478},"PFTF_GFiberCT":{"x":280,"y":586},"SFTF_QEM":{"x":519,"y":90},"SFTF_DynamicTargetSearch":{"x":697,"y":-261},"DFSVR_VisCull":{"x":-180,"y":212},"SFTFSoft_GNN_DFSVR":{"x":-90,"y":313},"SFTF_ActiveOverprint":{"x":498,"y":-475},"ColdOndol":{"x":189,"y":-318},"ColdOndol_Positioning":{"x":29,"y":-557},"cfmsCIPC":{"x":153,"y":940},"TSE_SEM1_Bezier":{"x":804,"y":536},"TSE_SEM2_Tensor":{"x":839,"y":196},"TSE_SEM3_AutoTune":{"x":829,"y":-184},"SFTF_HeatMethod":{"x":587,"y":1135},"cfmsPINNDrape":{"x":114,"y":1128},"cfmsDrape":{"x":-262,"y":782},"cfmsMiindo":{"x":57,"y":779},"cfmsPINNCAD":{"x":328,"y":1186},"SFTFSoft_DFSVR":{"x":173,"y":-153},"SFTF_UrbanTraffic":{"x":-60,"y":-168},"cfmsAutoSew":{"x":128,"y":1429},"cfmsAutoPlace_IJCST":{"x":-28,"y":1128},"cfmsAutoPlace_JCDE":{"x":-190,"y":1136},"cfmsDrapeSCAN":{"x":427,"y":932},"SFTF_Holonomy":{"x":457,"y":1372},"HIPDetect":{"x":509,"y":992},"cfmsDispersity":{"x":960,"y":370},"TSE_TomoSh4":{"x":-215,"y":1380},"TSE_TomoSh5":{"x":-185,"y":1560}};
 const hyperedges = readJsonConstant("hyperedges", "[");
 const curatedHyperedgeMembers = readJsonConstant("CURATED_HYPEREDGE_MEMBERS", "{");
 for (const [label, nodeIds] of Object.entries(curatedHyperedgeMembers)) {
@@ -161,7 +163,8 @@ const expectedHulls = {
     "SFTFSoft_GNN", "SFTFSoft_DFSVR", "SFTFSoft_GNN_DFSVR", "DFSVR_VisCull",
     "SFTF_QEM", "SFTF_ActiveOverprint"],
   "이희란 교수님": ["SFTF_Clustering", "PFTF_Compression", "cfmsAutoSew",
-    "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN", "HIPDetect"],
+    "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN", "HIPDetect",
+    "TSE_TomoSh4", "TSE_TomoSh5"],
   "은종현 교수님": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier",
     "TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "SFTF_HeatMethod", "SFTF_Holonomy",
     "cfmsDispersity"],

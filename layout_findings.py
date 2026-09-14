@@ -244,6 +244,28 @@ POS = {
     # 2026-09-14: graph.html 의 큐레이션 노드(CFMSDISPERSITY_NODE)와 짝을 이룬다.
     # 이미 나온 논문인데 그래프에 없었다. 자리는 은종현 교수님 묶음 오른쪽의 빈 곳이다.
     "cfmsDispersity": (960, 370),
+    # 2026-09-14: graph.html 의 큐레이션 노드(TOMO_SHELL_NODES)와 짝을 이룬다.
+    # 포트폴리오 표에는 두 트랙이 있는데 그래프에는 노드가 없었다(사용자 지적).
+    # 자리는 이희란 교수님 묶음 왼쪽 아래의 빈 곳이다 — 파일 씨앗과 표(graph_positions)
+    # 양쪽에서 가장 한산한 자리를 골랐다.
+    "TSE_TomoSh4": (-215, 1380),
+    "TSE_TomoSh5": (-185, 1560),
+}
+
+# 노드 id 가 노트 이름에서 규칙으로 나오지 않는 트랙 노드 → (볼트 노트 stem,
+# paper_completeness 중첩 맵의 키).  한 노트가 논문 여럿을 담을 때 생기는 짝이다.
+#
+# 이 표가 없으면 두 가지가 조용히 빠진다 — 노드의 **투고 단계**(VAULT_STAGES: 파이의
+# 채운 정도와 지름이 여기서 나온다)와 **논문 완성도**(graph3d 의 z 축).  2026-09-14 에
+# SEM 트랙 이름을 TSE_SEM_Bezier → TSE_SEM1_Bezier 로 바꾸면서 실제로 그렇게 됐다:
+# 「노트이름_」 접두어 규칙이 더는 맞지 않아 세 노드가 단계를 잃고 가장 작은 원이 됐다.
+# cfmsAutoPlace_IJCST 처럼 접두어 규칙으로 풀리는 짝은 여기 적을 필요가 없다.
+TRACK_NOTES = {
+    "TSE_SEM1_Bezier": ("TSE_SEM", "Bezier"),
+    "TSE_SEM2_Tensor": ("TSE_SEM", "Tensor"),
+    "TSE_SEM3_AutoTune": ("TSE_SEM", "AutoTune"),
+    "TSE_TomoSh4": ("Tomo_Shell2026", "TomoSh4"),
+    "TSE_TomoSh5": ("Tomo_Shell2026", "TomoSh5"),
 }
 
 # 2026-09-14: 발견1~6 · METHOD · PIPELINE · 도메인 오버레이를 걷어냈다.
@@ -275,7 +297,7 @@ HYPEREDGES = [
      "kind": "coauthor",
      "nodes": ["SFTF_Clustering", "PFTF_Compression", "cfmsAutoSew",
                "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN",
-               "HIPDetect"],
+               "HIPDetect", "TSE_TomoSh4", "TSE_TomoSh5"],
      "color": "#7c3aed", "labelColor": "#6d28d9",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
@@ -383,6 +405,12 @@ QUALITY_ROWS = [
     # 2026-09-14: 이미 게재된 논문(TSE 63(4) 248-257). 그래프에 노드가 없어 새로 넣었다.
     ("cfmsDispersity", "cfmsDispersity", "하",
      "게재 완료 — Textile Science and Engineering 63(4), 248-257 (2026), DOI 10.12772/TSE.2026.63.248; 정적 kNN 반발에너지 분산도 지표"),
+    # 2026-09-14: 한 저장소(Tomo_Shell2026)의 미발표 두 편. 발표본 TomoSh1~3(한국섬유
+    # 공학회지 2025, 62권)은 그래프 밖에 있고, 이 둘이 그 사슬을 잇는다.
+    ("TSE_TomoSh4", "TSE_TomoSh4", "하",
+     "분할 트랙 — 이진 법선 패널티를 연속 가중으로 바꿔 점-뼈대 거리 분할의 파편화를 줄인다; 한국섬유공학회지 투고본 완성, TomoSh5 와 동시 투고(서로를 익명 companion 으로 인용)"),
+    ("TSE_TomoSh5", "TSE_TomoSh5", "하",
+     "계측 트랙 — 허위 둘레선을 기각하고 실패를 격리해 계측 실패가 사용자에게 드러나게 한다; TomoSh4 선행 투고(익명 companion) 뒤 접수"),
     ("SFTFSoft_DFSVR", "SFTFSoft_DFSVR", "중", "SFTFSoft와 DFSVR 결합 연구선"),
     ("Tomo_DFSVR", "Tomo_DFSVR", "중", "미분 가능한 지지 구조 계산 연구선"),
     ("cfmsAutoSew", "cfmsAutoSew", "하", "패턴 봉제 대응 자동화 연구선"),
@@ -828,6 +856,9 @@ if preserve_extended_quality:
             "TSE_SEM1_Bezier": "한국섬유공학회지,draft",
             "TSE_SEM2_Tensor": "한국섬유공학회지,draft",
             "TSE_SEM3_AutoTune": "한국섬유공학회지,draft",
+            # 2026-09-14: TomoSh4·TomoSh5 는 서로를 익명 companion 으로 인용하며 동시 투고한다.
+            "TSE_TomoSh4": "한국섬유공학회지,draft",
+            "TSE_TomoSh5": "한국섬유공학회지,draft",
         },
         # 옛 노드 id 도 함께 지운다.  이 갱신기는 **병합**이라 적어 주지 않으면 옛 키가
         # 남아, 그래프에 없는 id 의 배지가 파일에 계속 실린다(2026-09-14 개명 때 실제로 그랬다).
@@ -843,6 +874,9 @@ if preserve_extended_quality:
             "TSE_SEM2_Tensor": "① 접수번호로 companion 인용 확정, ①과의 방법·그림·검증 주장 중복 정리",
             # 2026-09-14: C1~C4 가 전부 처리되어 남은 것은 ①② 와 같은 행정 항목과 순서뿐이다.
             "TSE_SEM3_AutoTune": "② 접수번호로 상호 인용 확정, 저자·기여·COI 확정, ② 선행 투고",
+            # 볼트 Tomo_Shell2026.md 의 next_gate 를 트랙별로 나눈 것이다.
+            "TSE_TomoSh4": "저자 확인 4건(기여 문구·대학원생 이름, Mixamo 라이선스, SizeKorea 약관, 학회지 규정) 반영, 커버레터·과제번호, TomoSh5 와 동시 투고",
+            "TSE_TomoSh5": "TomoSh4 선행 투고(익명 companion), 커버레터·과제번호",
             "PFTF_DrapePrior_VisCull_kDop": "독립 논문 등급 미적용 — 통합 evidence 저장소",
             "PFTF_ResearchOptimize": "독립 논문 등급 미적용 — 연구 보조 도구",
             "DFSVR_VisCull": "값·gradient parity·거짓음성 0 및 실제 end-to-end utility 검증",
@@ -1444,9 +1478,6 @@ SEM_TRACKS = [
     {
         "id": "TSE_SEM1_Bezier",
         "label": "TSE_SEM1_Bezier",
-        # 볼트 TSE_SEM.md 의 paper_completeness 중첩 맵 키 → _load_paper_completeness 가
-        # 만드는 «노트_트랙» 키. 노드 id 와 다르므로 여기서 이어 준다.
-        "vault_key": "TSE_SEM_Bezier",
         "level": 3,
         "scope": "① Bézier 관 재구성 트랙",
         "summary": "방향 리프팅과 3차 Bézier 곡선으로 SEM 나노섬유 웹의 개별 섬유 중심선·반지름을 3차원 복원",
@@ -1454,9 +1485,6 @@ SEM_TRACKS = [
     {
         "id": "TSE_SEM2_Tensor",
         "label": "TSE_SEM2_Tensor",
-        # 볼트 TSE_SEM.md 의 paper_completeness 중첩 맵 키 → _load_paper_completeness 가
-        # 만드는 «노트_트랙» 키. 노드 id 와 다르므로 여기서 이어 준다.
-        "vault_key": "TSE_SEM_Tensor",
         "level": 4,
         "scope": "② 배향 텐서장 트랙",
         "summary": "이진화 없는 섬유 배향 텐서장으로 전체 배향·교차점·하부층까지 정량화",
@@ -1464,14 +1492,14 @@ SEM_TRACKS = [
     {
         "id": "TSE_SEM3_AutoTune",
         "label": "TSE_SEM3_AutoTune",
-        # 볼트 TSE_SEM.md 의 paper_completeness 중첩 맵 키 → _load_paper_completeness 가
-        # 만드는 «노트_트랙» 키. 노드 id 와 다르므로 여기서 이어 준다.
-        "vault_key": "TSE_SEM_AutoTune",
         "level": 5,
         "scope": "③ AutoTune 트랙",
         "summary": "정답 없는 SEM 영상에서 증거 제약만으로 텐서 파이프라인의 파라미터를 자동 선택",
     },
 ]
+# 볼트 paper_completeness 중첩 맵의 «노트_트랙» 키. 정본은 위 TRACK_NOTES 하나다.
+for _track in SEM_TRACKS:
+    _track["vault_key"] = "_".join(TRACK_NOTES[_track["id"]])
 SEM_TRACK_IDS = [track["id"] for track in SEM_TRACKS]
 # 2026-09-14 이름 통일 전의 노드 id 도 함께 걷어낸다.  이것이 없으면 재생성이 옛 노드를
 # 남겨 둔 채 새 노드를 더해, 같은 논문이 그래프에 두 번 선다(좌표도 바깥 고리로 튄다).
@@ -1902,6 +1930,7 @@ s, n1 = re.subn(r"const POS = \{.*?\};", lambda _m: pos_js, s, count=1,
 curated_position_ids = (
     "cfmsAutoSew", "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN",
     "SFTF_Holonomy", "HIPDetect", "cfmsDispersity",
+    "TSE_TomoSh4", "TSE_TomoSh5",
 )
 curated_pos_js = "const CURATED_POSITIONS = " + json.dumps(
     {
@@ -1927,10 +1956,10 @@ completeness_by_id = dict(PAPER_COMPLETENESS)
 # _load_paper_completeness 가 «TSE_SEM_Bezier» 꼴 키를 만든다.  노드 id 는 같은 날 사용자
 # 지시로 «TSE_SEM1_Bezier» 꼴이 되었으므로 vault_key 로 옮겨 싣고 볼트 키는 버린다 —
 # 남겨 두면 그래프에 없는 id 가 3D 뷰의 높이 지도에 끼어든다.
-for track in SEM_TRACKS:
-    score = completeness_by_id.pop(track["vault_key"], None)
+for _node_id, (_stem, _key) in TRACK_NOTES.items():
+    score = completeness_by_id.pop(f"{_stem}_{_key}", None)
     if score is not None:
-        completeness_by_id[track["id"]] = score
+        completeness_by_id[_node_id] = score
 # 노트가 옛 형태(노트 하나에 값 하나)로 되돌아갔을 때의 대비책.  지금은 걸리지 않는다.
 if LEGACY_SEM_ID in completeness_by_id:
     for track_id in SEM_TRACK_IDS:
@@ -1960,6 +1989,11 @@ stage_by_id = {}
 # 노드 id 와 노트 이름의 대소문자가 어긋난 짝이 있다(HIPDetect 노드 ↔ HipDetect.md).
 _stage_ci = {stem.lower(): stage for stem, stage in NOTE_STAGES.items()}
 for _node_id in POS:
+    # 트랙 노드는 이름 규칙으로 못 푸는 짝이라 표를 먼저 본다.
+    _track_note = TRACK_NOTES.get(_node_id, (None, None))[0]
+    if _track_note in NOTE_STAGES:
+        stage_by_id[_node_id] = NOTE_STAGES[_track_note]
+        continue
     if _node_id in NOTE_STAGES:
         stage_by_id[_node_id] = NOTE_STAGES[_node_id]
         continue
