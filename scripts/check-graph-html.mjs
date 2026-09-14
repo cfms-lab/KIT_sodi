@@ -165,8 +165,9 @@ const expectedHulls = {
   "이희란 교수님": ["SFTF_Clustering", "PFTF_Compression", "cfmsAutoSew",
     "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN", "HIPDetect",
     "TSE_TomoSh4", "TSE_TomoSh5"],
+  // 2026-09-14: TSE_SEM3_AutoTune 이 빠졌다 — ③ 만 설인환 단독 저자로 바뀌었다.
   "은종현 교수님": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier",
-    "TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "SFTF_HeatMethod", "SFTF_Holonomy",
+    "TSE_SEM2_Tensor", "SFTF_HeatMethod", "SFTF_Holonomy",
     "cfmsDispersity"],
   "김우석 교수님": ["SFTF_SewerPOC", "ColdOndol", "ColdOndol_Positioning", "SFTF_UrbanTraffic"],
 };

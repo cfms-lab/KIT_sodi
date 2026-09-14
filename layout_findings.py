@@ -268,6 +268,19 @@ TRACK_NOTES = {
     "TSE_TomoSh5": ("Tomo_Shell2026", "TomoSh5"),
 }
 
+# 트랙 노드의 **단계만** 부모 노트와 다를 때 적는다.  트랙 노드는 부모 노트의 `stage:` 를
+# 물려받는 것이 원칙이고(아래 stage_by_id), 그 원칙이 맞지 않는 예외가 여기 모인다.
+#
+# 2026-09-14: TSE_SEM3_AutoTune 이 보류로 돌아왔다.  부모 노트 TSE_SEM.md 의 `stage:` 는
+# `draft` 인데 그것은 ①② 의 상태다 — 노트 하나가 논문 셋을 담고 있어서, 노트의 단계를
+# 보류로 바꾸면 멀쩡한 ①② 까지 투고 불가로 그려진다.  그래서 ③ 만 여기서 덮는다.
+# 사유는 게이트도 게재지도 아니고 **일정**이다(사용자 지시: 투고 시점 2027-03-01 이후).
+# 볼트 쪽 짝은 Dashboards/프로젝트현황.md 의 분리트랙 `투고상태` 이고, 그쪽도 같은 날
+# 같은 값으로 고쳤다 — 포트폴리오 표와 그래프가 갈라지지 않게 둘을 함께 본다.
+TRACK_STAGES = {
+    "TSE_SEM3_AutoTune": "blocked",
+}
+
 # 2026-09-14: 발견1~6 · METHOD · PIPELINE · 도메인 오버레이를 걷어냈다.
 # 그 틀은 SFTF → PFTF 일반화가 잘 풀렸을 때를 가정하고 그린 것인데, PFTF 논문 진도가
 # 그렇게 가지 않았다. 화면에 남겨 두면 없는 구조를 있다고 말하게 되므로 사용자 판단으로
@@ -301,10 +314,15 @@ HYPEREDGES = [
      "color": "#7c3aed", "labelColor": "#6d28d9",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
+    # 2026-09-14: TSE_SEM3_AutoTune 을 뺐다.  ③ 만 **설인환 단독 저자**로 바뀌었다
+    # (볼트 TSE_SEM.md 2026-09-14 「③ 단독 저자 전환」 — authors_ko·authors_en·corresp 를
+    # 고치고 고지 절의 저자 기여 항목을 지웠다).  사사도 ①② 의 NRF 가 아니라 금오공대
+    # 대학 연구과제비(2026-2027)다.  ①② 는 세 저자(대학원생·설인환†·은종현†) 그대로라
+    # 훌에 남는다 — 이 훌은 공저자 관계를 그리는 것이므로 셋을 한 묶음으로 둘 수 없다.
     {"label": "은종현 교수님",
      "kind": "coauthor",
      "nodes": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier",
-               "TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "SFTF_HeatMethod",
+               "TSE_SEM2_Tensor", "SFTF_HeatMethod",
                "SFTF_Holonomy", "cfmsDispersity"],
      "color": "#db2777", "labelColor": "#be185d",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
@@ -388,7 +406,7 @@ QUALITY_ROWS = [
     ("TSE_SEM2_Tensor", "TSE_SEM2_Tensor", "하",
      "② 이진화 없는 배향 텐서장, 하부층 포함; 저배율 SEM 9장 observed fraction 0.86–0.93, 원고 완성, ① 접수 후 companion 인용으로 투고"),
     ("TSE_SEM3_AutoTune", "TSE_SEM3_AutoTune", "하",
-     "③ 증거 제약 기반 자동 파라미터 선택; 게이트 C1~C4 전부 처리(2026-09-14), 사전 등록한 확인 실험은 불통과여서 부정 결과·경계 설정 논문으로 주장이 좁아졌다. 투고처 한국섬유공학회지 확정·20면 충족, 투고 3순위"),
+     "③ 증거 제약 기반 자동 파라미터 선택; 게이트 C1~C4 전부 처리(2026-09-14), 사전 등록한 확인 실험은 불통과여서 부정 결과·경계 설정 논문으로 주장이 좁아졌다. 투고처 한국섬유공학회지 확정. **설인환 단독 저자**·금오공대 대학 연구과제비(2026-2027)로 ①② 와 저자·사사가 갈렸고, 투고 시점이 2027-03-01 이후로 정해져 그때까지 보류(일정 사유)"),
     ("SFTF_HeatMethod", "SFTF_HeatMethod", "중", "열전달 기반 복합재 설계 연구선"),
     # 2026-09-07: SFTF_Holonomy 논문 트랙 편입.  graph.html 의 큐레이션 노드는
     # RAW_NODES 밖에 있어도 등급 행은 여기서 나가야 재생성 뒤에 살아남는다.
@@ -851,11 +869,14 @@ if preserve_extended_quality:
         {
             "PFTF_GFiberCT": "한국섬유공학회지,draft",
             # 2026-09-11: TSE_SEM 의 배지 「섬유공학회지,draft」를 세 트랙이 나눠 갖는다.
-            # 2026-09-14: ③ 의 보류가 풀렸다 — 게이트 C1~C4 를 전부 처리했고 투고처도
-            # 한국섬유공학회지로 확정해, 이제 셋이 같은 배지를 단다(볼트 노트 「투고 일정」).
+            # 2026-09-14 아침: ③ 의 보류가 풀렸다 — 게이트 C1~C4 를 전부 처리했고 투고처도
+            # 한국섬유공학회지로 확정해, 셋이 같은 배지를 달았다.
+            # 2026-09-14 오후: ③ 이 **다시 보류**다.  이번 사유는 앞과 다르다 — 게이트도
+            # 게재지도 면수도 아니고 **일정**이다(사용자 지시: 투고 시점 2027-03-01 이후).
+            # 게재지는 한국섬유공학회지로 확정된 채 남으므로 배지에 함께 적는다.
             "TSE_SEM1_Bezier": "한국섬유공학회지,draft",
             "TSE_SEM2_Tensor": "한국섬유공학회지,draft",
-            "TSE_SEM3_AutoTune": "한국섬유공학회지,draft",
+            "TSE_SEM3_AutoTune": "보류(2027-03-01 이후 투고 · 한국섬유공학회지)",
             # 2026-09-14: TomoSh4·TomoSh5 는 서로를 익명 companion 으로 인용하며 동시 투고한다.
             "TSE_TomoSh4": "한국섬유공학회지,draft",
             "TSE_TomoSh5": "한국섬유공학회지,draft",
@@ -872,8 +893,10 @@ if preserve_extended_quality:
             # 2026-09-11: 볼트 TSE_SEM.md 「투고 일정」의 트랙별 남은 일.
             "TSE_SEM1_Bezier": "저자·소속·사사·COI 확정, validation_summary.csv 와 본문 수치 대조, 투고요령 참고문헌 형식 점검",
             "TSE_SEM2_Tensor": "① 접수번호로 companion 인용 확정, ①과의 방법·그림·검증 주장 중복 정리",
-            # 2026-09-14: C1~C4 가 전부 처리되어 남은 것은 ①② 와 같은 행정 항목과 순서뿐이다.
-            "TSE_SEM3_AutoTune": "② 접수번호로 상호 인용 확정, 저자·기여·COI 확정, ② 선행 투고",
+            # 2026-09-14: C1~C4 가 전부 처리됐고, 같은 날 저자가 **설인환 단독**으로 확정되어
+            # 「저자·기여·COI 확정」이 없어졌다(단독 저자라 기여를 나누지 않는다).  대신 투고
+            # 시점이 2027-03-01 이후로 정해져 그때까지 보류다 — 남은 일은 순서와 분량뿐이다.
+            "TSE_SEM3_AutoTune": "2027-03-01 까지 보류(일정), ② 접수번호로 상호 인용 확정, 23면 → 20면 분량 조절",
             # 볼트 Tomo_Shell2026.md 의 next_gate 를 트랙별로 나눈 것이다.
             "TSE_TomoSh4": "저자 확인 4건(기여 문구·대학원생 이름, Mixamo 라이선스, SizeKorea 약관, 학회지 규정) 반영, 커버레터·과제번호, TomoSh5 와 동시 투고",
             "TSE_TomoSh5": "TomoSh4 선행 투고(익명 companion), 커버레터·과제번호",
@@ -1493,7 +1516,8 @@ SEM_TRACKS = [
         "id": "TSE_SEM3_AutoTune",
         "label": "TSE_SEM3_AutoTune",
         "level": 5,
-        "scope": "③ AutoTune 트랙",
+        # 2026-09-14: 보류가 돌아왔다.  사유가 앞과 다르므로(게이트가 아니라 일정) 적어 둔다.
+        "scope": "③ AutoTune 트랙(보류 — 2027-03-01 이후 투고) · 설인환 단독 저자",
         "summary": "정답 없는 SEM 영상에서 증거 제약만으로 텐서 파이프라인의 파라미터를 자동 선택",
     },
 ]
@@ -1989,6 +2013,10 @@ stage_by_id = {}
 # 노드 id 와 노트 이름의 대소문자가 어긋난 짝이 있다(HIPDetect 노드 ↔ HipDetect.md).
 _stage_ci = {stem.lower(): stage for stem, stage in NOTE_STAGES.items()}
 for _node_id in POS:
+    # 부모 노트와 단계가 갈린 트랙은 물려받기 전에 덮는다(TRACK_STAGES 주석 참고).
+    if _node_id in TRACK_STAGES:
+        stage_by_id[_node_id] = TRACK_STAGES[_node_id]
+        continue
     # 트랙 노드는 이름 규칙으로 못 푸는 짝이라 표를 먼저 본다.
     _track_note = TRACK_NOTES.get(_node_id, (None, None))[0]
     if _track_note in NOTE_STAGES:
