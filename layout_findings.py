@@ -366,7 +366,7 @@ QUALITY_ROWS = [
     ("TSE_SEM2_Tensor", "TSE_SEM2_Tensor", "하",
      "② 이진화 없는 배향 텐서장, 하부층 포함; 저배율 SEM 9장 observed fraction 0.86–0.93, 원고 완성, ① 접수 후 companion 인용으로 투고"),
     ("TSE_SEM3_AutoTune", "TSE_SEM3_AutoTune", "하",
-     "③ 증거 제약 기반 자동 파라미터 선택; 자체 SCI(E) 사전심사 major revision(held-out 누출·예산 불일치·최종 조합 미검증·XCT 서술)으로 보류, 투고 3순위"),
+     "③ 증거 제약 기반 자동 파라미터 선택; 게이트 C1~C4 전부 처리(2026-09-14), 사전 등록한 확인 실험은 불통과여서 부정 결과·경계 설정 논문으로 주장이 좁아졌다. 투고처 한국섬유공학회지 확정·20면 충족, 투고 3순위"),
     ("SFTF_HeatMethod", "SFTF_HeatMethod", "중", "열전달 기반 복합재 설계 연구선"),
     # 2026-09-07: SFTF_Holonomy 논문 트랙 편입.  graph.html 의 큐레이션 노드는
     # RAW_NODES 밖에 있어도 등급 행은 여기서 나가야 재생성 뒤에 살아남는다.
@@ -823,12 +823,15 @@ if preserve_extended_quality:
         {
             "PFTF_GFiberCT": "한국섬유공학회지,draft",
             # 2026-09-11: TSE_SEM 의 배지 「섬유공학회지,draft」를 세 트랙이 나눠 갖는다.
-            # ③ 은 자체 SCI(E) 사전심사 판정으로 보류 중이라 투고 상태가 아니다.
+            # 2026-09-14: ③ 의 보류가 풀렸다 — 게이트 C1~C4 를 전부 처리했고 투고처도
+            # 한국섬유공학회지로 확정해, 이제 셋이 같은 배지를 단다(볼트 노트 「투고 일정」).
             "TSE_SEM1_Bezier": "한국섬유공학회지,draft",
             "TSE_SEM2_Tensor": "한국섬유공학회지,draft",
-            "TSE_SEM3_AutoTune": "보류(사전심사 major revision · 투고 3순위)",
+            "TSE_SEM3_AutoTune": "한국섬유공학회지,draft",
         },
-        remove=("TSE_SEM",),
+        # 옛 노드 id 도 함께 지운다.  이 갱신기는 **병합**이라 적어 주지 않으면 옛 키가
+        # 남아, 그래프에 없는 id 의 배지가 파일에 계속 실린다(2026-09-14 개명 때 실제로 그랬다).
+        remove=("TSE_SEM", "TSE_SEM_Bezier", "TSE_SEM_Tensor", "TSE_SEM_AutoTune"),
     )
     existing_quality_js = _update_json_object_constant(
         existing_quality_js,
@@ -838,12 +841,14 @@ if preserve_extended_quality:
             # 2026-09-11: 볼트 TSE_SEM.md 「투고 일정」의 트랙별 남은 일.
             "TSE_SEM1_Bezier": "저자·소속·사사·COI 확정, validation_summary.csv 와 본문 수치 대조, 투고요령 참고문헌 형식 점검",
             "TSE_SEM2_Tensor": "① 접수번호로 companion 인용 확정, ①과의 방법·그림·검증 주장 중복 정리",
-            "TSE_SEM3_AutoTune": "grid 예산 버그 수정 → 최종 조합 고정 → 미사용 test 재검증 → guarantee 를 empirical guardrail 로 하향",
+            # 2026-09-14: C1~C4 가 전부 처리되어 남은 것은 ①② 와 같은 행정 항목과 순서뿐이다.
+            "TSE_SEM3_AutoTune": "② 접수번호로 상호 인용 확정, 저자·기여·COI 확정, ② 선행 투고",
             "PFTF_DrapePrior_VisCull_kDop": "독립 논문 등급 미적용 — 통합 evidence 저장소",
             "PFTF_ResearchOptimize": "독립 논문 등급 미적용 — 연구 보조 도구",
             "DFSVR_VisCull": "값·gradient parity·거짓음성 0 및 실제 end-to-end utility 검증",
             "SFTFSoft_GNN_DFSVR": "frozen budget-matched A–E baseline, held-out slicer 전이 및 latency/quality 동시 검증",
         },
+        remove=("TSE_SEM", "TSE_SEM_Bezier", "TSE_SEM_Tensor", "TSE_SEM_AutoTune"),
     )
     s = _update_json_object_constant(
         s,
@@ -1463,7 +1468,7 @@ SEM_TRACKS = [
         # 만드는 «노트_트랙» 키. 노드 id 와 다르므로 여기서 이어 준다.
         "vault_key": "TSE_SEM_AutoTune",
         "level": 5,
-        "scope": "③ AutoTune 트랙(보류)",
+        "scope": "③ AutoTune 트랙",
         "summary": "정답 없는 SEM 영상에서 증거 제약만으로 텐서 파이프라인의 파라미터를 자동 선택",
     },
 ]

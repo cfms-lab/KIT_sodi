@@ -299,6 +299,15 @@ for (const legacy of ["TSE_SEM", "TSE_SEM_Bezier", "TSE_SEM_Tensor", "TSE_SEM_Au
     throw new Error(`legacy SEM node ${legacy} still exists after the three-paper split`);
   }
 }
+// 노드 목록만 보면 모자란다. STATUS_BADGES·REMAINING_BOTTLENECKS 는 생성기가 **병합**하는
+// 상수라, 지우라고 적어 주지 않으면 그래프에 없는 옛 id 의 배지·병목이 파일에 남는다
+// (2026-09-14 개명 때 실제로 남았다). 파일 전체에서 옛 이름 셋을 막는다 — 「TSE_SEM」 자체는
+// source_file 로 정상적으로 쓰이므로 트랙 이름만 본다.
+for (const legacy of ["TSE_SEM_Bezier", "TSE_SEM_Tensor", "TSE_SEM_AutoTune"]) {
+  if (html.includes(legacy)) {
+    throw new Error(`legacy SEM id ${legacy} still appears in graph.html (stale merged constant?)`);
+  }
+}
 const expectedSemLabels = {
   TSE_SEM1_Bezier: "TSE_SEM1_Bezier",
   TSE_SEM2_Tensor: "TSE_SEM2_Tensor",
