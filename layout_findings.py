@@ -1899,9 +1899,9 @@ assert ncurated_pos == 1, "CURATED_POSITIONS block not found"
 # 값을 나르기만 하고 2D 화면에서는 쓰지 않는다 — 3D 뷰가 정본 파일을 실시간으로
 # 읽으므로, 여기 실어야 볼트가 바뀔 때 높이도 따라온다.
 completeness_by_id = dict(PAPER_COMPLETENESS)
-# TSE_SEM 트랙 노드는 볼트 노트가 아직 노트 하나에 값 하나(TSE_SEM: n)라서 그 값을 세 트랙이
-# 물려받는다.  노트의 paper_completeness 를 cfmsAutoPlace 처럼 트랙별 중첩 맵(Bezier/Tensor/
-# AutoTune)으로 바꾸면 _load_paper_completeness 가 TSE_SEM_Bezier 꼴 키를 만들어 이쪽이 이긴다.
+# 2026-09-14 부터 볼트 노트가 cfmsAutoPlace 처럼 트랙별 중첩 맵(Bezier/Tensor/AutoTune)이라
+# _load_paper_completeness 가 TSE_SEM_Bezier 꼴 키를 곧바로 만든다 — 아래 물려주기는 그 전
+# 형태(노트 하나에 값 하나)로 되돌아갔을 때의 대비책이고, 지금은 걸리지 않는다.
 if LEGACY_SEM_ID in completeness_by_id:
     for track_id in SEM_TRACK_IDS:
         completeness_by_id.setdefault(track_id, completeness_by_id[LEGACY_SEM_ID])
