@@ -318,6 +318,7 @@ function normalizePaper(r){
     PAGE:r.page||"",DOI:r.doi||"",MEMO:r.memo||"",
     PrintStatus:STAGE_TO_PRINT[r.stage]||1, STAGE:r.stage||"",
     SCIFACTOR:r.scifactor||"",PDF:r.pdf||"",COUNTRY:r.country||"",SCISTATUS:num(r.scistatus),
+    PAPERS_ID:r.papers_id==null?"":String(r.papers_id),   // 옛 papers."ID" — 버킷의 파일 이름이 이것이다
     FUNDING:r.funding||"", PROJECT_ID:r.project_id||"", VAULT_NOTE:r.vault_note||""};
 }
 
@@ -386,6 +387,14 @@ function searchPapers(f){const eng=f.author!=="ALL"?authorEng(f.author):{f:"",s:
   return res;}
 function doSearch(){const f=getFilters();renderList(searchPapers(f),f);}
 function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+/* 인라인 onclick 안에 넣을 **문자열 인자**를 따옴표까지 붙여서 만든다.
+   2026-09-14: research_outputs 로 옮기며 업적 ID 가 숫자 968 에서 글자 p968 이 되었는데
+   `openEdit(${p.ID})` 처럼 따옴표 없이 박고 있었다. 브라우저가 `openEdit(p968)` 을
+   읽고 ReferenceError 로 죽어, 제목·PDF·수정 버튼이 **아무 반응 없이** 조용히 멈췄다.
+   값은 반드시 이 함수를 거친다. */
+function jsArg(v){
+  return "'"+esc(String(v==null?"":v)).replace(/\\/g,"\\\\").replace(/'/g,"\\'")+"'";
+}
 function renderList(res,f){
   const info=document.getElementById("countInfo");
   // TODO(프로젝트 노드)는 연도·저자와 무관한 할일 목록이라, 전체 보기 또는 TODO 선택 시에만 붙인다.
@@ -435,7 +444,7 @@ function renderPaper(p,i){const st=p.PrintStatus;let x=[];
   if(p.FUNDING)x.push(`<span class="funding">[${esc(p.FUNDING)}]</span>`);
   x.push(`<span class="badge b${st}">${["","Pub","InPrint","Accept","Submit","Draft"][st]||""}</span>`);
   x.push(`<span class="authors">${esc(p.AUTHORS)}</span>, `);
-  x.push(`<span class="title" onclick="openEdit(${p.ID})">"${esc(p.TITLE)}"</span>`);
+  x.push(`<span class="title" onclick="openEdit(${jsArg(p.ID)})">"${esc(p.TITLE)}"</span>`);
   x.push(`, <span class="journal">${esc(p.JOURNAL_NAME)+(PRINT_SUFFIX[st]||"")}</span>, `);
   if(p.CATEG==="IJ"||p.CATEG==="DJ"){
     if(p.VOLUME&&p.VOLUME!=="TAG_NO_VOLUME")x.push(`<span class="vol">${esc(p.VOLUME)}</span>, `);
@@ -446,12 +455,12 @@ function renderPaper(p,i){const st=p.PrintStatus;let x=[];
   const doiLink=p.DOI?`<a class="doi" href="https://dx.doi.org/${esc(p.DOI)}" target="_blank">DOI</a>`:"";
   let access="";
   if(isLoggedIn()){
-    if(p.PDF) access=`<button class="pdf" onclick="openPdf(${p.ID},'${esc(p.PDF).replace(/'/g,"\\'")}')">PDF</button>`;
+    if(p.PDF) access=`<button class="pdf" onclick="openPdf(${jsArg(pdfKeyIds(p).join(","))},${jsArg(p.PDF)})">PDF</button>`;
     else if(p.DOI) access=doiLink;
   }else{
     access=doiLink; // 비로그인: DOI 링크만 (PDF 비공개)
   }
-  const edit=isLoggedIn()?`<div class="rowtools"><button onclick="openEdit(${p.ID})">수정</button></div>`:"";
+  const edit=isLoggedIn()?`<div class="rowtools"><button onclick="openEdit(${jsArg(p.ID)})">수정</button></div>`:"";
   return `<div class="paper${rowClass(p)}"><div class="num">${i}.</div><div class="body">${x.join("")} ${access}</div>${edit}</div>`;
 }
 function publicationCounts(items){
@@ -525,17 +534,32 @@ function closeEdit(){document.getElementById("modalBg").style.display="none";}
 const PDF_BUCKET="pdfs";
 function fileExt(name){const m=(name||"").match(/\.([A-Za-z0-9]+)$/);return m?m[1].toLowerCase():"pdf";}
 function pdfKey(id,name){return id+"."+fileExt(name);}   // 예: 968.pdf
-async function openPdf(id,name){
+/* 저장 키의 앞자리. 2026-09-14: research_outputs 로 옮기며 ID 가 968 에서 p968 로
+   바뀌었다. 버킷에 이미 있는 파일은 **옮기기 전 숫자 이름**일 테니 그쪽을 먼저 보고,
+   그래도 없으면 새 ID 로 한 번 더 본다 — 어느 쪽으로 올라갔든 열린다.
+   올릴 때는 첫 번째 것 하나만 쓴다(uploadPdfs). */
+function pdfKeyIds(p){
+  const ids=[]; if(p.PAPERS_ID)ids.push(p.PAPERS_ID); if(!ids.includes(p.ID))ids.push(p.ID);
+  return ids;
+}
+function pdfKeyId(p){return pdfKeyIds(p)[0];}
+async function openPdf(keyIds,name){   // keyIds: pdfKeyIds(p) 가 준 후보들, 쉼표로 이어 붙인 것
   if(!isLoggedIn()){toast("PDF는 로그인 후 볼 수 있습니다.");return;}
-  const key=pdfKey(id,name);
-  try{
-    const r=await api('/storage/v1/object/sign/'+PDF_BUCKET+'/'+encodeURIComponent(key),
-      {method:"POST",headers:authHeaders(true),body:JSON.stringify({expiresIn:300})});
-    window.open(CFG.url+'/storage/v1'+r.signedURL,"_blank");
-  }catch(e){
-    if(/not.*found|404/i.test(e.message)) toast("아직 업로드되지 않은 PDF입니다: "+name);
-    else toast("PDF 열기 실패: "+e.message.slice(0,120));
+  let last=null;
+  for(const id of String(keyIds).split(",")){
+    const key=pdfKey(id,name);
+    try{
+      const r=await api('/storage/v1/object/sign/'+PDF_BUCKET+'/'+encodeURIComponent(key),
+        {method:"POST",headers:authHeaders(true),body:JSON.stringify({expiresIn:300})});
+      window.open(CFG.url+'/storage/v1'+r.signedURL,"_blank");
+      return;
+    }catch(e){
+      last=e;
+      if(!/not.*found|404/i.test(e.message)) break;   // 없어서가 아니면 더 볼 것 없다
+    }
   }
+  if(last&&/not.*found|404/i.test(last.message)) toast("아직 업로드되지 않은 PDF입니다: "+name);
+  else if(last) toast("PDF 열기 실패: "+last.message.slice(0,120));
 }
 function openUpload(){if(!requireLogin())return;document.getElementById("upBg").style.display="flex";
   document.getElementById("upLog").textContent="";document.getElementById("upBar").style.width="0";
@@ -556,7 +580,7 @@ async function uploadPdfs(){
   const jobs=[];
   for(const f of files){
     const ps=byName.get(f.name);
-    if(ps&&ps.length){ for(const p of ps) jobs.push({f,key:pdfKey(p.ID,f.name)}); }
+    if(ps&&ps.length){ for(const p of ps) jobs.push({f,key:pdfKey(pdfKeyId(p),f.name)}); }
     else if(!onlyMissing){ skip++; }   // 참조 없는 파일은 ID 키를 만들 수 없어 건너뜀
   }
   if(!jobs.length){toast("업로드할 (논문에 연결된) PDF가 없습니다. 폴더 선택을 확인하세요.");return;}
