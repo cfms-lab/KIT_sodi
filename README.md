@@ -149,6 +149,14 @@ node scripts/publish-portfolio.mjs --push
 node scripts/publish-portfolio.mjs --sql
 ```
 
+### 공저 후보 (`coauthor_candidate`, 2026-09-16)
+
+공저자가 없는 프로젝트에 교내 교수를 붙일 **후보**는 볼트 노트 frontmatter 의 `coauthor_candidate` 에
+적는다(맨 앞이 1순위, 근거는 볼트 `Dashboards/cfms_cowork_KIT.md`). 확정이 아니라 제안이므로 세 화면은
+이렇게만 보인다 — `portfolio.html` 공저자 칸의 「(후보) 이름」(정렬은 공저자 없음과 같다), `graph.html` 노드
+정보의 「공저 후보」 한 줄(`layout_findings.py` 가 볼트에서 읽어 `COAUTHOR_CANDIDATES` 로 굽는다; 훌에는
+넣지 않는다). `mindmap.html` 은 건드리지 않는다. 확정되면 볼트에서 `coauthors` 로 옮기고 이 필드를 지운다.
+
 `tmp/portfolio-rows.sql` (약 80KB) 이 나오고, 이것을 Supabase SQL Editor 에 통째로 붙여넣어
 Run 하면 `--push` 와 같은 결과가 됩니다 — 임시 표에 받아 한 번에 upsert 하고, 볼트에서 사라진
 행을 지웁니다. 여러 번 돌려도 안전합니다.

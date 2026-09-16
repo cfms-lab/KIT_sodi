@@ -294,11 +294,17 @@ const QUALITY_PIE = {"상":"#e02020","중":"#f28e2b","하":"#2a78d6","ToDo":"#9c
 const 파이색 = g => QUALITY_PIE[g] || "#94a3b8";
 
 /* ── 투고 파이 아이콘 — 볼트 노트의 투고셀() 과 같은 기하다(r=6, 12시에서 시계방향).
-   단계(채운 정도)와 설명은 META.stages 로 볼트에서 따라오고, 색은 호출부가 준다. */
+   단계(채운 정도)와 설명은 META.stages 로 볼트에서 따라오고, 색은 호출부가 준다.
+   2026-09-16: 아이콘이 단계가 나아갈수록 조금씩 커진다 — 미정·보류 14px 에서 출판 20px 까지,
+   채운 비율(frac)을 그대로 탄다(초고 15.5 · 투고 17 · 심사 수정 17.75 · 게재확정 18.5 · 인쇄중 19.25 · 출판 20).
+   graph.html 이 노드 지름을 같은 사다리(14 → 34)로 잡고, 볼트 대시보드의 투고셀() 도 같은 값이라
+   세 화면이 같은 눈으로 읽힌다. viewBox 는 그대로라 안의 기하는 변하지 않는다. */
+const PIE_MIN = 14, PIE_MAX = 20;
 function 파이(stage, color) {
   const s = META.stages && META.stages[stage];
   if (!s) return "";
   const r = 6, cx = 8, cy = 8, c = color || s.color;
+  const 크기 = PIE_MIN + (PIE_MAX - PIE_MIN) * (s.frac || 0);
   let 안 = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c}" stroke-width="1.6"/>`;
   if (s.done) {
     안 = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>`
@@ -314,7 +320,7 @@ function 파이(stage, color) {
     const ex = cx + r * Math.sin(a), ey = cy - r * Math.cos(a), big = s.frac > 0.5 ? 1 : 0;
     안 += `<path d="M${cx},${cy} L${cx},${cy - r} A${r},${r} 0 ${big} 1 ${ex},${ey} Z" fill="${c}"/>`;
   }
-  return `<svg viewBox="0 0 16 16" width="14" height="14" style="flex:0 0 auto">${안}</svg>`;
+  return `<svg viewBox="0 0 16 16" width="${크기}" height="${크기}" style="flex:0 0 auto">${안}</svg>`;
 }
 
 const esc = v => String(v ?? "").replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));

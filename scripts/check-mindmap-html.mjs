@@ -66,7 +66,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -278,6 +278,38 @@ if (findIn(customTitleSample.root, "nzyk4gd6").title !== "GFiberCT (손으로 �
 }
 const renameValidation = context.__validate(renameSample);
 if (!renameValidation.ok) throw new Error(`PFTF_GFiberCT rename sample is invalid: ${renameValidation.errors[0]}`);
+
+// 2026-09-16: PFTF_AsymTensor(nongkxm5)가 SFTF_QEM(nafefnc3) 밑에서 「은종현 교수님방」(nffg4ou5) 맨 뒤로 옮겨지고,
+// 끊긴 계보는 관계선 SFTF_QEM → PFTF_AsymTensor 하나로 남으며, 두 번째 실행은 아무것도 안 하는지 본다.
+const eunRoomSample = {
+  root: mk("root", [
+    mk("sftf", [mk("nafefnc3", [mk("nongkxm5")])]),
+    mk("nffg4ou5", [mk("nc593kj6"), mk("nro5uca3")]),
+  ]),
+  links: [],
+};
+if (!context.__applyEunRoomAsymTensor(eunRoomSample)) throw new Error("은종현 room AsymTensor migration did not run");
+if (context.__applyEunRoomAsymTensor(eunRoomSample)) throw new Error("은종현 room AsymTensor migration is not idempotent");
+for (const [id, expected] of [["nffg4ou5", "nc593kj6,nro5uca3,nongkxm5"], ["nafefnc3", ""], ["sftf", "nafefnc3"]]) {
+  const n = findIn(eunRoomSample.root, id);
+  const actual = n ? childIds(n) : "(missing)";
+  if (actual !== expected) throw new Error(`은종현 room: ${id} children are [${actual}], expected [${expected}]`);
+}
+if (eunRoomSample.links.length !== 1 || eunRoomSample.links[0].from !== "nafefnc3" || eunRoomSample.links[0].to !== "nongkxm5"
+    || eunRoomSample.links[0].label !== "지지 점수 시험" || eunRoomSample.links[0].type !== "engine") {
+  throw new Error("은종현 room: SFTF_QEM -> PFTF_AsymTensor link is missing or wrong");
+}
+const eunRoomValidation = context.__validate(eunRoomSample);
+if (!eunRoomValidation.ok) throw new Error(`은종현 room sample is invalid: ${eunRoomValidation.errors[0]}`);
+// 사용자가 이미 방 안으로 옮겨 둔 문서에서는 자리를 건드리지 않고, 계보 선만 긋는다.
+const eunRoomMovedSample = { root: mk("root", [mk("nafefnc3"), mk("nffg4ou5", [mk("nzyk4gd6", [mk("nongkxm5")])])]), links: [] };
+context.__applyEunRoomAsymTensor(eunRoomMovedSample);
+if (childIds(findIn(eunRoomMovedSample.root, "nzyk4gd6")) !== "nongkxm5") throw new Error("은종현 room: migration moved a node the user had already placed");
+if (eunRoomMovedSample.links.length !== 1) throw new Error("은종현 room: lineage link is missing for a user-moved node");
+// 노드가 없는 문서(기본 관계도)에서는 선을 긋지 않는다.
+const eunRoomNoNodeSample = { root: mk("root", [mk("nafefnc3"), mk("nffg4ou5")]), links: [] };
+context.__applyEunRoomAsymTensor(eunRoomNoNodeSample);
+if (eunRoomNoNodeSample.links.length) throw new Error("은종현 room: migration drew a link to a missing node");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);

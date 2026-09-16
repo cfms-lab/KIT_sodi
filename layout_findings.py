@@ -149,6 +149,36 @@ def _load_note_stages():
 
 NOTE_STAGES = _load_note_stages()
 
+
+def _load_coauthor_candidates():
+    """볼트 frontmatter 의 `coauthor_candidate:` 를 노트 이름 기준으로 모은다.
+
+    2026-09-16: 공저자가 없는 프로젝트 가운데 교내 교수를 공저자로 붙일 후보다
+    (볼트 Dashboards/cfms_cowork_KIT.md, 맨 앞이 1순위).  **확정이 아니라 제안**이므로
+    훌(HYPEREDGES)에는 넣지 않고 노드 정보의 「공저 후보」 한 줄로만 보인다.  확정되면
+    볼트가 coauthors 로 옮기고 이 필드를 지우므로 여기서도 자연히 빠진다.
+    """
+    candidates = {}
+    if not PROJECTS_DIR.is_dir():
+        return candidates
+    for note in PROJECTS_DIR.glob("*.md"):
+        try:
+            lines = note.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            continue
+        for line in lines:
+            head = re.match(r"^coauthor_candidate:[ \t]*(.*)$", line)
+            if not head:
+                continue
+            value = _strip_inline_comment(head.group(1)).strip().strip("\"'")
+            if value:
+                candidates[note.stem] = value
+            break
+    return candidates
+
+
+COAUTHOR_CANDIDATES = _load_coauthor_candidates()
+
 # Exact, project-specific caption suffixes requested for the graph view.
 # Keep these separate from Papers/투고현황.md: that source is reserved for
 # journal-qualified submission badges such as "[RPJ,draft]".
@@ -172,7 +202,7 @@ NODE_TITLES = {
                             "surface·next-view 계약 테스트 8개 완료; "
                             "Physical AI 의복 시뮬레이션 직접 통합선; "
                             "RGB-D replay·controlled textile print 전",
-    "SFTF_UrbanTraffic": "SFTF_UrbanTraffic — 도시 교통 가역차로 방향장 응용",
+    "SFTF_UrbanTraffic": "SFTF_UrbanTraffic — 하: 한국재난정보학회논문집(KOSDI) 투고 완료(2026-09-16, 김우석 교수 측 투고). 도시 교통 가역차로 방향장 응용",
     "PFTF_GFiberCT": "PFTF_GFiberCT — 중: positive two-layer draft; "
                   "Phase 50/51C frozen evidence, B5/M1 상대 207/207 paired wins·"
                   "topology error 0. PFTF/local-SPD 우월성은 주장하지 않으며 "
@@ -195,61 +225,61 @@ NODE_SOURCE_FILES = {
 # ----------------------------------------------------------------- 좌표 (발견 기준)
 POS = {
     # 2026-08-31: 사용자가 graph.html에서 조정한 34-node 배치를 정본으로 승격.
-    "Tomo_SFTF": (705, 149),
-    "Tomo_SFTFSoft": (492, -68),
-    "SFTF_Clustering": (219, 672),
-    "PFTF": (708, 436),
-    "SFTF_Composite": (729, 756),
-    "SFTF_InjMold": (-340, 178),
-    "PFTF_Compression": (470, 705),
-    "Tomo_DFSVR": (47, 35),
-    "PFTF_VisCull_kDop": (-98, 427),
-    "SFTF_SewerPOC": (-197, -148),
-    "SFTFSoft_GNN": (189, 184),
-    "SFTF_DrapePrior": (-103, 615),
-    "PFTF_AsymTensor": (315, 319),
-    "PFTF_DrapePrior_VisCull_kDop": (-319, 577),
-    "PFTF_ResearchOptimize": (874, 255),
-    "PFTF_GFiberCT": (603, 842),
-    "SFTF_QEM": (479, 125),
-    "SFTF_DynamicTargetSearch": (739, -119),
-    "DFSVR_VisCull": (-180, 212),
-    "SFTFSoft_GNN_DFSVR": (-90, 313),
-    "SFTF_ActiveOverprint": (452, -238),
-    "ColdOndol": (-99, -98),
-    "ColdOndol_Positioning": (142, -245),
-    "cfmsCIPC": (-199, 833),
+    "Tomo_SFTF": (727, 168),
+    "Tomo_SFTFSoft": (495, 10),
+    "SFTF_Clustering": (187, 672),
+    "PFTF": (727, 433),
+    "SFTF_Composite": (727, 728),
+    "SFTF_InjMold": (-291, 215),
+    "PFTF_Compression": (452, 680),
+    "Tomo_DFSVR": (71, -7),
+    "PFTF_VisCull_kDop": (-136, 452),
+    "SFTF_SewerPOC": (-176, -208),
+    "SFTFSoft_GNN": (466, 334),
+    "SFTF_DrapePrior": (-150, 610),
+    "PFTF_AsymTensor": (669, 836),
+    "PFTF_DrapePrior_VisCull_kDop": (-397, 604),
+    "PFTF_ResearchOptimize": (889, 289),
+    "PFTF_GFiberCT": (568, 896),
+    "SFTF_QEM": (577, 224),
+    "SFTF_DynamicTargetSearch": (726, -106),
+    "DFSVR_VisCull": (-114, 121),
+    "SFTFSoft_GNN_DFSVR": (-127, 306),
+    "SFTF_ActiveOverprint": (502, -274),
+    "ColdOndol": (-90, -95),
+    "ColdOndol_Positioning": (279, -289),
+    "cfmsCIPC": (-171, 844),
     # 2026-09-11: TSE_SEM 을 논문 3편 트랙으로 나눴다.  ① 은 옛 TSE_SEM 자리를 잇고
     # ②·③ 은 SFTF_Composite → ① 방향을 따라 위쪽으로 한 칸씩 이어진다.
-    "TSE_SEM1_Bezier": (830, 856),
-    "TSE_SEM2_Tensor": (867, 1093),
-    "TSE_SEM3_AutoTune": (916, 1349),
-    "SFTF_HeatMethod": (654, 1066),
-    "cfmsPINNDrape": (123, 1052),
-    "cfmsDrape": (-432, 732),
-    "cfmsMiindo": (-136, 732),
-    "cfmsPINNCAD": (386, 1030),
-    "SFTFSoft_DFSVR": (210, -108),
+    "TSE_SEM1_Bezier": (864, 847),
+    "TSE_SEM2_Tensor": (865, 1053),
+    "TSE_SEM3_AutoTune": (967, 1346),
+    "SFTF_HeatMethod": (708, 1058),
+    "cfmsPINNDrape": (161, 1100),
+    "cfmsDrape": (-400, 853),
+    "cfmsMiindo": (-159, 725),
+    "cfmsPINNCAD": (440, 1081),
+    "SFTFSoft_DFSVR": (262, -146),
     # Restored from the last pre-archive graph snapshot.
-    "SFTF_UrbanTraffic": (-248, 3),
-    "cfmsAutoSew": (104, 1321),
-    "cfmsAutoPlace_IJCST": (-81, 1092),
-    "cfmsAutoPlace_JCDE": (-264, 1139),
+    "SFTF_UrbanTraffic": (-256, 19),
+    "cfmsAutoSew": (135, 1336),
+    "cfmsAutoPlace_IJCST": (-195, 1072),
+    "cfmsAutoPlace_JCDE": (-214, 1331),
     # 2026-09-01: ToDo DrapeSCAN onboarding from the Obsidian project note.
-    "cfmsDrapeSCAN": (256, 875),
+    "cfmsDrapeSCAN": (171, 898),
     # 2026-09-07: graph.html 의 큐레이션 노드(SFTF_HOLONOMY_NODE)와 짝을 이룬다.
-    "SFTF_Holonomy": (564, 1333),
+    "SFTF_Holonomy": (598, 1342),
     # 2026-09-10: graph.html 의 큐레이션 노드(HIPDETECT_NODE)와 짝을 이룬다.
-    "HIPDetect": (331, 1330),
+    "HIPDetect": (432, 1333),
     # 2026-09-14: graph.html 의 큐레이션 노드(CFMSDISPERSITY_NODE)와 짝을 이룬다.
     # 이미 나온 논문인데 그래프에 없었다. 자리는 은종현 교수님 묶음 오른쪽의 빈 곳이다.
-    "cfmsDispersity": (736, 1340),
+    "cfmsDispersity": (836, 1342),
     # 2026-09-14: graph.html 의 큐레이션 노드(TOMO_SHELL_NODES)와 짝을 이룬다.
     # 포트폴리오 표에는 두 트랙이 있는데 그래프에는 노드가 없었다(사용자 지적).
     # 자리는 이희란 교수님 묶음 왼쪽 아래의 빈 곳이다 — 파일 씨앗과 표(graph_positions)
     # 양쪽에서 가장 한산한 자리를 골랐다.
-    "TSE_TomoSh4": (136, 535),
-    "TSE_TomoSh5": (367, 544),
+    "TSE_TomoSh4": (89, 540),
+    "TSE_TomoSh5": (383, 535),
 }
 
 # 노드 id 가 노트 이름에서 규칙으로 나오지 않는 트랙 노드 → (볼트 노트 stem,
@@ -324,11 +354,15 @@ HYPEREDGES = [
     # 고치고 고지 절의 저자 기여 항목을 지웠다).  사사도 ①② 의 NRF 가 아니라 금오공대
     # 대학 연구과제비(2026-2027)다.  ①② 는 세 저자(대학원생·설인환†·은종현†) 그대로라
     # 훌에 남는다 — 이 훌은 공저자 관계를 그리는 것이므로 셋을 한 묶음으로 둘 수 없다.
+    # 2026-09-16: PFTF_AsymTensor 가 들어왔다.  은종현 교수가 공저자로 확정됐다(볼트
+    # PFTF_AsymTensor.md coauthors, 저자 대학원생·설인환†·은종현†) — 주 결론이 부정으로 남은
+    # 원고의 축을 복합재 순서 뒤집기 실측으로 갈아 끼우는 자리다.  좌표는 사용자가 이미 웹에서
+    # 이 묶음 옆(669, 836)으로 끌어 두었고, 파일 씨앗은 pull-graph-positions 로 따라왔다.
     {"label": "은종현 교수님",
      "kind": "coauthor",
      "nodes": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier",
                "TSE_SEM2_Tensor", "SFTF_HeatMethod",
-               "SFTF_Holonomy", "cfmsDispersity"],
+               "SFTF_Holonomy", "cfmsDispersity", "PFTF_AsymTensor"],
      "color": "#db2777", "labelColor": "#be185d",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
@@ -357,7 +391,7 @@ HYPEREDGES = [
 # ``등급 없음`` is distinct from ToDo: it marks repositories that are useful
 # infrastructure/integration records but are not paper-quality candidates.
 QUALITY_ROWS = [
-    ("Tomo_SFTF", "Tomo_SFTF", "상", "TDP v2.1·외부 60-mesh 감사·budget–complexity·PiAM 연속성"),
+    ("Tomo_SFTF", "Tomo_SFTF", "상", "TDP v2.1·외부 60-mesh 감사·budget–complexity·PiAM 연속성; TDP 3DP-2026-0119 **1차 심사 결과 도착(2026-09-16) → revision 준비 중**"),
     ("Tomo_SFTFSoft", "Tomo_SFTFSoft", "상", "TDP v2.1·현대/legacy Cura·receiver 반례·조건부 first-hit 수렴"),
     ("SFTFSoft_GNN", "SFTFSoft_GNN", "상", "3,817 mesh·held-out·Cura 재라벨·Prusa 교차검증"),
     ("SFTF_Clustering", "SFTF_Clustering", "상", "SFTFCluster 계열 TDP 원고·cross-slicer/partition 자산; 독립성 게이트 잔여"),
@@ -366,7 +400,7 @@ QUALITY_ROWS = [
     ("SFTF_Composite", "SFTF_Composite", "상", "한·영문 완성·191 tests·R9–R13 사전등록/독립감사; R11 합성 held-out 음성, 공식 CAD·물리 검증 잔여"),
     ("SFTF_InjMold", "SFTF_InjMold", "중", "B24·exact integration·set-cover·B-rep·blind protocol; 원고 조립 잔여"),
     ("Tomo_DiffSupport", "Tomo_DiffSupport", "중", "claim–evidence matrix·JAX gradient·fail-closed; utility/print gate 미실행"),
-    ("PFTF_AsymTensor", "PFTF_AsymTensor", "중", "9/9 meshes·6 figures·TDP v1; 응용 held-out 부족"),
+    ("PFTF_AsymTensor", "PFTF_AsymTensor", "중", "사전 동료심사 2라운드(2026-09-13)로 인증·성분 귀속 철회, 주 결론이 부정만 남아 ⛔ 주 기여 축 교체 전 투고 보류(RPJ). 축 교체 후보는 복합재 순서 뒤집기(은종현 교수 실측, 09-15 보완안). **2026-09-16 은종현 교수 공저 확정** — 저자 대학원생·설인환†·은종현†"),
     ("PFTF_Compression", "PFTF_Compression", "중", "역설계·orthotropic contact·friction·held-out 원고; 임상 cohort 잔여"),
     ("PFTF_Mold", "PFTF_Mold", "중", "IBOF gate·영문 원고; held-out 일반화 0%"),
     ("PFTF_FXShock", "PFTF_FXShock", "중", "frozen/event holdout/falsification; n=8·실제 시장/인과 근거 제한"),
@@ -384,7 +418,7 @@ QUALITY_ROWS = [
     ("PFTF_CNC", "PFTF_CNC", "중", "완료조건 4/4·dense oracle·undercut/normal 검증; 실기계·held-out cohort 잔여"),
     ("PFTF_Radiotherapy", "PFTF_Radiotherapy", "하", "train 20/held-out 8·surrogate gate; clinical/TCIA cohort·외부 검증 미완료"),
     ("SFTF_DataCenterTraffic", "SFTF_DataCenterTraffic", "하", "96-node PoC·warm-start·4–47x 개선; 실운영 trace·외부 재현 잔여"),
-    ("SFTF_UrbanTraffic", "SFTF_UrbanTraffic", "하", "M2–M4 계획·solver gap 미해결·추가 DP 필요; 완성 원고·외부 검증 부족"),
+    ("SFTF_UrbanTraffic", "SFTF_UrbanTraffic", "하", "**2026-09-16 한국재난정보학회논문집(KOSDI) 투고 완료** — 김우석 교수 측 투고(제1저자 유인근·교신 김우석, 설인환 3저자), 실측 VDS 예측·경보 응용 원고(hwpx). 원고번호 대기. D-SFTF 방법론 원고(M2 기각·합성 시간화)는 이 경로로 대체됐다"),
     ("SFTF_WarehouseAGV", "SFTF_WarehouseAGV", "하", "DES 초기 검증·proxy 실패·정책 비교 잔여; 실창고 trace·원고 부족"),
     ("PFTF_AssetShock", "PFTF_AssetShock", "하", "38 benchmark/provider rehearsal; draft 원고와 실제 provider outcome 없음"),
     ("PFTF_DrapePrior_VisCull_kDop", "PFTF_DrapePrior_VisCull_kDop", "등급 없음", "통합 evidence 저장소; 독립 논문 등급 미적용"),
@@ -407,9 +441,9 @@ QUALITY_ROWS = [
     # 같은 이름으로 나눈다.  등급은 볼트 노트(TSE_SEM.md, grade 하)와 마인드맵 kind(low)를
     # 따르고, 근거는 노트의 「논문 트랙」·「투고 일정」 절을 요약한 것이다.
     ("TSE_SEM1_Bezier", "TSE_SEM1_Bezier", "하",
-     "① 방향 리프팅+3차 Bézier 관 재구성; 실제 SEM IoU 0.814·팬텀 12종 배향 오차 2.3–11.6°, 원고 완성, 한국섬유공학회지 즉시 투고 대기(저자·COI·수치 대조 잔여)"),
+     "① 방향 리프팅+3차 Bézier 관 재구성; 실제 SEM IoU 0.814·팬텀 12종 배향 오차 2.3–11.6°, 원고 완성, **한국복합재료학회지**(2026-09-16 변경)로 은종현 교수 측이 투고(박명진 학생 학회 양식 변환, 금주) — 저자·COI·수치 대조 잔여"),
     ("TSE_SEM2_Tensor", "TSE_SEM2_Tensor", "하",
-     "② 이진화 없는 배향 텐서장, 하부층 포함; 저배율 SEM 9장 observed fraction 0.86–0.93, 원고 완성, ① 접수 후 companion 인용으로 투고"),
+     "② 이진화 없는 배향 텐서장, 하부층 포함; 저배율 SEM 9장 observed fraction 0.86–0.93, 원고 완성, ① 접수 후 companion 인용으로 **한국복합재료학회지**(2026-09-16 변경, ①과 같은 학회지)에 은종현 교수 측이 투고"),
     ("TSE_SEM3_AutoTune", "TSE_SEM3_AutoTune", "하",
      "③ 증거 제약 기반 자동 파라미터 선택; 게이트 C1~C4 전부 처리(2026-09-14), 사전 등록한 확인 실험은 불통과여서 부정 결과·경계 설정 논문으로 주장이 좁아졌다. 투고처 한국섬유공학회지 확정. **설인환 단독 저자**·금오공대 대학 연구과제비(2026-2027)로 ①② 와 저자·사사가 갈렸고, 투고 시점이 2027-03-01 이후로 정해져 그때까지 보류(일정 사유)"),
     ("SFTF_HeatMethod", "SFTF_HeatMethod", "중", "열전달 기반 복합재 설계 연구선"),
@@ -879,13 +913,20 @@ if preserve_extended_quality:
             # 2026-09-14 오후: ③ 이 **다시 보류**다.  이번 사유는 앞과 다르다 — 게이트도
             # 게재지도 면수도 아니고 **일정**이다(사용자 지시: 투고 시점 2027-03-01 이후).
             # 게재지는 한국섬유공학회지로 확정된 채 남으므로 배지에 함께 적는다.
-            "TSE_SEM1_Bezier": "한국섬유공학회지,draft",
-            "TSE_SEM2_Tensor": "한국섬유공학회지,draft",
+            # 2026-09-16: ①② 는 한국복합재료학회지로 간다 — 은종현 교수 메일로 ① 이 먼저, 같은 날
+            # 저녁 사용자 지시로 ② 도.  투고는 은종현 교수 담당.  ③ 만 한국섬유공학회지다.
+            # 노드 id 의 TSE_ 접두어는 그대로 둔다 — id 개명은 좌표를 조용히 버린다(런북).
+            "TSE_SEM1_Bezier": "한국복합재료학회지,draft",
+            "TSE_SEM2_Tensor": "한국복합재료학회지,draft",
             "TSE_SEM3_AutoTune": "보류(2027-03-01 이후 투고 · 한국섬유공학회지)",
             # 2026-09-14: TomoSh4·TomoSh5 는 서로를 익명 companion 으로 인용하며 동시 투고한다.
             "TSE_TomoSh4": "한국섬유공학회지,draft",
             # 2026-09-14: ⑤가 먼저 나갔다. 동시 투고 계획은 지켜지지 않았다.
             "TSE_TomoSh5": "한국섬유공학회지 투고 완료 (2026-09-14, 26M-09-036)",
+            # 2026-09-16: 김우석 교수 측이 투고했다(제1저자 유인근).  볼트 badge 와 같은 문구다.
+            "SFTF_UrbanTraffic": "한국재난정보학회논문집(KOSDI) 투고 완료 (2026-09-16, 김우석 교수 측 투고)",
+            # 2026-09-16: TDP 1차 리뷰 도착.  옛 「TDP,submit,08-13」 배지를 갈아 끼운다.
+            "Tomo_SFTF": "TDP 1차 심사 수정 준비 중 (2026-09-16, 3DP-2026-0119)",
         },
         # 옛 노드 id 도 함께 지운다.  이 갱신기는 **병합**이라 적어 주지 않으면 옛 키가
         # 남아, 그래프에 없는 id 의 배지가 파일에 계속 실린다(2026-09-14 개명 때 실제로 그랬다).
@@ -897,8 +938,9 @@ if preserve_extended_quality:
         {
             "PFTF_GFiberCT": "A안 보강 중 — 초록의 시편 표기, 일반 복원 대조군(Poisson/Ball Pivoting), 복원 메시 기반 간격 지도; 시편 1개·ρ=4 는 한 패널의 값; PFTF/local-SPD 우월성 주장 금지",
             # 2026-09-11: 볼트 TSE_SEM.md 「투고 일정」의 트랙별 남은 일.
-            "TSE_SEM1_Bezier": "저자·소속·사사·COI 확정, validation_summary.csv 와 본문 수치 대조, 투고요령 참고문헌 형식 점검",
-            "TSE_SEM2_Tensor": "① 접수번호로 companion 인용 확정, ①과의 방법·그림·검증 주장 중복 정리",
+            # 2026-09-16: ①② 는 은종현 교수 측이 한국복합재료학회지에 투고한다(박명진 학생 학회 양식 변환).
+            "TSE_SEM1_Bezier": "은종현 교수 측 투고(한국복합재료학회지, 금주) — 2026-09-13 심사의견 미반영 4건을 그대로 둘지 판단, 저자·기여·COI 확정, 제목의 three-dimensional 유지 여부",
+            "TSE_SEM2_Tensor": "① 접수 후 은종현 교수 측 투고(한국복합재료학회지) — ① 접수번호로 companion 인용 확정, ①과의 방법·그림·검증 주장 중복 정리",
             # 2026-09-14: C1~C4 가 전부 처리됐고, 같은 날 저자가 **설인환 단독**으로 확정되어
             # 「저자·기여·COI 확정」이 없어졌다(단독 저자라 기여를 나누지 않는다).  대신 투고
             # 시점이 2027-03-01 이후로 정해져 그때까지 보류다 — 남은 일은 순서와 분량뿐이다.
@@ -906,6 +948,10 @@ if preserve_extended_quality:
             # 볼트 Tomo_Shell2026.md 의 next_gate 를 트랙별로 나눈 것이다.
             "TSE_TomoSh4": "저자 확인 4건(기여 문구·대학원생 이름, Mixamo 라이선스, SizeKorea 약관, 학회지 규정) 반영, docx 육안 확인, TomoSh5(26M-09-036)를 익명 companion 으로 인용하도록 고쳐 투고",
             "TSE_TomoSh5": "심사 결과 대기 (2026-09-14 투고, 원고번호 26M-09-036)",
+            # 2026-09-16: 볼트 노트의 bottleneck·next_gate 를 옮긴 것이다(표가 살아 있으면 표 값이 이긴다).
+            "Tomo_SFTF": "TDP 1차 심사의견 대응 — 수정본·응답서 작성 → 재제출; PFTF V2/V3/V4 notation·인용 lockstep",
+            "SFTF_UrbanTraffic": "접수(원고번호) 회신 확인 → 심사 결과 대기; 설인환 몫은 hwpx v1 공저자 검토(방법·수치 정합)",
+            "PFTF_AsymTensor": "⛔ 긍정적 효과 규칙 — 주 기여 축 결정(복합재 순서 뒤집기, 은종현 교수 실측 회신 대기) 전에는 투고 불가; 그다음 60° 임계각 정합 재측정",
             "PFTF_DrapePrior_VisCull_kDop": "독립 논문 등급 미적용 — 통합 evidence 저장소",
             "PFTF_ResearchOptimize": "독립 논문 등급 미적용 — 연구 보조 도구",
             "DFSVR_VisCull": "값·gradient parity·거짓음성 0 및 실제 end-to-end utility 검증",
@@ -1508,14 +1554,14 @@ SEM_TRACKS = [
         "id": "TSE_SEM1_Bezier",
         "label": "TSE_SEM1_Bezier",
         "level": 3,
-        "scope": "① Bézier 관 재구성 트랙",
+        "scope": "① Bézier 관 재구성 트랙 · 한국복합재료학회지(은종현 교수 투고)",
         "summary": "방향 리프팅과 3차 Bézier 곡선으로 SEM 나노섬유 웹의 개별 섬유 중심선·반지름을 3차원 복원",
     },
     {
         "id": "TSE_SEM2_Tensor",
         "label": "TSE_SEM2_Tensor",
         "level": 4,
-        "scope": "② 배향 텐서장 트랙",
+        "scope": "② 배향 텐서장 트랙 · 한국복합재료학회지(① 접수 후, 은종현 교수 투고)",
         "summary": "이진화 없는 섬유 배향 텐서장으로 전체 배향·교차점·하부층까지 정량화",
     },
     {
@@ -2049,6 +2095,23 @@ if not nstages:
         flags=re.S,
     )
 assert nstages == 1, "VAULT_STAGES block not written"
+
+# 교내 공저 후보 (2026-09-16).  노드 id 와 노트 이름이 같은 것만 싣는다 — 후보가 적힌 여섯
+# 노트는 모두 그렇다.  VAULT_STAGES 바로 뒤에 두고, graph.html 의 showInfo 가 읽는다.
+_graph_node_ids = set(re.findall(r'"id": "([A-Za-z0-9_]+)"', s))
+candidates_js = "const COAUTHOR_CANDIDATES = " + json.dumps(
+    {stem: text for stem, text in sorted(COAUTHOR_CANDIDATES.items()) if stem in _graph_node_ids},
+    ensure_ascii=False) + ";"
+s, ncandidates = re.subn(r"const COAUTHOR_CANDIDATES = \{.*?\};", lambda _m: candidates_js, s, count=1, flags=re.S)
+if not ncandidates:
+    s, ncandidates = re.subn(
+        r"(const VAULT_STAGES = \{.*?\};)",
+        lambda match: match.group(1) + "\n" + candidates_js,
+        s,
+        count=1,
+        flags=re.S,
+    )
+assert ncandidates == 1, "COAUTHOR_CANDIDATES block not written"
 
 hyper_js = "const hyperedges = " + json.dumps(hyperedges_for_graph, ensure_ascii=False) + ";"
 s, n2 = re.subn(r"const hyperedges = \[.*?\];", lambda _m: hyper_js, s, count=1,

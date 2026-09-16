@@ -131,7 +131,7 @@ const positions = Object.assign(
   readJsonConstant("CURATED_POSITIONS", "{"),
 );
 // 2026-09-10: graph.html 의 POS + CURATED_POSITIONS 병합 결과 전체를 그대로 적는다.
-const expectedPositions = {"Tomo_SFTF":{"x":705,"y":149},"Tomo_SFTFSoft":{"x":492,"y":-68},"SFTF_Clustering":{"x":219,"y":672},"PFTF":{"x":708,"y":436},"SFTF_Composite":{"x":729,"y":756},"SFTF_InjMold":{"x":-340,"y":178},"PFTF_Compression":{"x":470,"y":705},"Tomo_DFSVR":{"x":47,"y":35},"PFTF_VisCull_kDop":{"x":-98,"y":427},"SFTF_SewerPOC":{"x":-197,"y":-148},"SFTFSoft_GNN":{"x":189,"y":184},"SFTF_DrapePrior":{"x":-103,"y":615},"PFTF_AsymTensor":{"x":315,"y":319},"PFTF_DrapePrior_VisCull_kDop":{"x":-319,"y":577},"PFTF_ResearchOptimize":{"x":874,"y":255},"PFTF_GFiberCT":{"x":603,"y":842},"SFTF_QEM":{"x":479,"y":125},"SFTF_DynamicTargetSearch":{"x":739,"y":-119},"DFSVR_VisCull":{"x":-180,"y":212},"SFTFSoft_GNN_DFSVR":{"x":-90,"y":313},"SFTF_ActiveOverprint":{"x":452,"y":-238},"ColdOndol":{"x":-99,"y":-98},"ColdOndol_Positioning":{"x":142,"y":-245},"cfmsCIPC":{"x":-199,"y":833},"TSE_SEM1_Bezier":{"x":830,"y":856},"TSE_SEM2_Tensor":{"x":867,"y":1093},"TSE_SEM3_AutoTune":{"x":916,"y":1349},"SFTF_HeatMethod":{"x":654,"y":1066},"cfmsPINNDrape":{"x":123,"y":1052},"cfmsDrape":{"x":-432,"y":732},"cfmsMiindo":{"x":-136,"y":732},"cfmsPINNCAD":{"x":386,"y":1030},"SFTFSoft_DFSVR":{"x":210,"y":-108},"SFTF_UrbanTraffic":{"x":-248,"y":3},"cfmsAutoSew":{"x":104,"y":1321},"cfmsAutoPlace_IJCST":{"x":-81,"y":1092},"cfmsAutoPlace_JCDE":{"x":-264,"y":1139},"cfmsDrapeSCAN":{"x":256,"y":875},"SFTF_Holonomy":{"x":564,"y":1333},"HIPDetect":{"x":331,"y":1330},"cfmsDispersity":{"x":736,"y":1340},"TSE_TomoSh4":{"x":136,"y":535},"TSE_TomoSh5":{"x":367,"y":544}};
+const expectedPositions = {"Tomo_SFTF":{"x":727,"y":168},"Tomo_SFTFSoft":{"x":495,"y":10},"SFTF_Clustering":{"x":187,"y":672},"PFTF":{"x":727,"y":433},"SFTF_Composite":{"x":727,"y":728},"SFTF_InjMold":{"x":-291,"y":215},"PFTF_Compression":{"x":452,"y":680},"Tomo_DFSVR":{"x":71,"y":-7},"PFTF_VisCull_kDop":{"x":-136,"y":452},"SFTF_SewerPOC":{"x":-176,"y":-208},"SFTFSoft_GNN":{"x":466,"y":334},"SFTF_DrapePrior":{"x":-150,"y":610},"PFTF_AsymTensor":{"x":669,"y":836},"PFTF_DrapePrior_VisCull_kDop":{"x":-397,"y":604},"PFTF_ResearchOptimize":{"x":889,"y":289},"PFTF_GFiberCT":{"x":568,"y":896},"SFTF_QEM":{"x":577,"y":224},"SFTF_DynamicTargetSearch":{"x":726,"y":-106},"DFSVR_VisCull":{"x":-114,"y":121},"SFTFSoft_GNN_DFSVR":{"x":-127,"y":306},"SFTF_ActiveOverprint":{"x":502,"y":-274},"ColdOndol":{"x":-90,"y":-95},"ColdOndol_Positioning":{"x":279,"y":-289},"cfmsCIPC":{"x":-171,"y":844},"TSE_SEM1_Bezier":{"x":864,"y":847},"TSE_SEM2_Tensor":{"x":865,"y":1053},"TSE_SEM3_AutoTune":{"x":967,"y":1346},"SFTF_HeatMethod":{"x":708,"y":1058},"cfmsPINNDrape":{"x":161,"y":1100},"cfmsDrape":{"x":-400,"y":853},"cfmsMiindo":{"x":-159,"y":725},"cfmsPINNCAD":{"x":440,"y":1081},"SFTFSoft_DFSVR":{"x":262,"y":-146},"SFTF_UrbanTraffic":{"x":-256,"y":19},"cfmsAutoSew":{"x":135,"y":1336},"cfmsAutoPlace_IJCST":{"x":-195,"y":1072},"cfmsAutoPlace_JCDE":{"x":-214,"y":1331},"cfmsDrapeSCAN":{"x":171,"y":898},"SFTF_Holonomy":{"x":598,"y":1342},"HIPDetect":{"x":432,"y":1333},"cfmsDispersity":{"x":836,"y":1342},"TSE_TomoSh4":{"x":89,"y":540},"TSE_TomoSh5":{"x":383,"y":535}};
 const hyperedges = readJsonConstant("hyperedges", "[");
 const curatedHyperedgeMembers = readJsonConstant("CURATED_HYPEREDGE_MEMBERS", "{");
 for (const [label, nodeIds] of Object.entries(curatedHyperedgeMembers)) {
@@ -166,9 +166,10 @@ const expectedHulls = {
     "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN", "HIPDetect",
     "TSE_TomoSh4", "TSE_TomoSh5"],
   // 2026-09-14: TSE_SEM3_AutoTune 이 빠졌다 — ③ 만 설인환 단독 저자로 바뀌었다.
+  // 2026-09-16: PFTF_AsymTensor 가 들어왔다 — 은종현 교수 공저 확정.
   "은종현 교수님": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier",
     "TSE_SEM2_Tensor", "SFTF_HeatMethod", "SFTF_Holonomy",
-    "cfmsDispersity"],
+    "cfmsDispersity", "PFTF_AsymTensor"],
   "김우석 교수님": ["SFTF_SewerPOC", "ColdOndol", "ColdOndol_Positioning", "SFTF_UrbanTraffic"],
 };
 
