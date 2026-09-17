@@ -71,11 +71,18 @@ try {
         git reset -q
         throw "Staged files outside the allowed list; publish aborted: $($badStaged -join ', ')"
     }
+    # 담을 것이 없어도 **미푸시 커밋이 있으면 push 는 해야 한다.** 원래 스크립트는
+    # 항상 push 로 끝났으므로, 여기서 조기 종료하면 이미 만들어 둔 뷰 커밋이 발이 묶인다.
+    $ahead = [int](@(git rev-list --count origin/main..HEAD)[0])
     if (-not $staged.Count) {
-        Write-Host "Nothing to publish: no view files changed."
-        exit 0
+        if ($ahead -eq 0) {
+            Write-Host "Nothing to publish: no view files changed and nothing to push."
+            exit 0
+        }
+        Write-Host "No file changes, but $ahead commit(s) to push."
+    } else {
+        Write-Host "Staging: $($staged -join ', ')"
     }
-    Write-Host "Staging: $($staged -join ', ')"
 
     git diff --cached --quiet
     if ($LASTEXITCODE -ne 0) {
