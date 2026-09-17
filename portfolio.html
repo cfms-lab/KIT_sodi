@@ -314,7 +314,11 @@ function 파이(stage, color) {
     안 += `<path d="M${cx - 3.2},${cy + 3.2} L${cx + 3.2},${cy - 3.2}" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`
         + `<path d="M${cx - 3.2},${cy - 3.2} L${cx + 3.2},${cy + 3.2}" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`;
   } else if (s.x) {
-    안 += `<path d="M${cx - 3.2},${cy + 3.2} L${cx + 3.2},${cy - 3.2}" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`;
+    // 보류는 ⛔ — 꽉 찬 원에 흰 가로 막대다 (2026-09-18, 사용자 지시).
+    // 빗금 한 획이던 때는 취소의 X 와 한 획 차이라 14px 아이콘에서 둘이 구별되지 않았다.
+    안 = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>`
+       + `<path d="M${cx - 3.5},${cy} L${cx + 3.5},${cy}" fill="none" stroke="#fff"`
+       + ` stroke-width="2.4" stroke-linecap="round"/>`;
   } else if (s.frac > 0) {
     const a = 2 * Math.PI * s.frac;
     const ex = cx + r * Math.sin(a), ey = cy - r * Math.cos(a), big = s.frac > 0.5 ? 1 : 0;

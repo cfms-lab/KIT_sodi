@@ -30,7 +30,10 @@ SRC = HERE / "graph.html"
 # graph.html is the canonical deployed graph.  graph_발견.html is a frozen
 # findings view and is intentionally not touched by new-project onboarding.
 DSTS = [HERE / "graph.html"]
-HIDDEN_NODE_IDS = {"PFTF_subMarine", "PFTF_Terrain"}
+# 2026-09-18: PFTF_ResearchOptimize 를 걷어냈다(사용자 판단 — 더 필요하지 않다).
+# graph.html 의 RAW_NODES 는 보존되는 스냅샷이라 정의를 지우는 것만으로는 노드가
+# 남으므로, 여기에 적어야 재생성이 노드와 그 엣지를 함께 걷어낸다.
+HIDDEN_NODE_IDS = {"PFTF_subMarine", "PFTF_Terrain", "PFTF_ResearchOptimize"}
 
 # Project notes are the single source of truth for local VS Code paths.  The
 # graph node id normally matches the Obsidian project-note stem, so the button
@@ -225,61 +228,60 @@ NODE_SOURCE_FILES = {
 # ----------------------------------------------------------------- 좌표 (발견 기준)
 POS = {
     # 2026-08-31: 사용자가 graph.html에서 조정한 34-node 배치를 정본으로 승격.
-    "Tomo_SFTF": (727, 168),
-    "Tomo_SFTFSoft": (466, 6),
-    "SFTF_Clustering": (213, 427),
-    "PFTF": (723, 403),
-    "SFTF_Composite": (724, 666),
-    "SFTF_InjMold": (-294, 179),
-    "PFTF_Compression": (192, 610),
+    "Tomo_SFTF": (724, 168),
+    "Tomo_SFTFSoft": (487, 9),
+    "SFTF_Clustering": (211, 427),
+    "PFTF": (724, 403),
+    "SFTF_Composite": (724, 663),
+    "SFTF_InjMold": (-295, 234),
+    "PFTF_Compression": (193, 612),
     "Tomo_DFSVR": (83, 5),
-    "PFTF_VisCull_kDop": (-136, 452),
+    "PFTF_VisCull_kDop": (-117, 428),
     "SFTF_SewerPOC": (-176, -208),
-    "SFTFSoft_GNN": (232, 155),
-    "SFTF_DrapePrior": (-150, 610),
-    "PFTF_AsymTensor": (539, 661),
-    "PFTF_DrapePrior_VisCull_kDop": (-397, 604),
-    "PFTF_ResearchOptimize": (933, 458),
-    "PFTF_GFiberCT": (524, 922),
-    "SFTF_QEM": (472, 152),
-    "SFTF_DynamicTargetSearch": (726, -106),
-    "DFSVR_VisCull": (-114, 133),
-    "SFTFSoft_GNN_DFSVR": (-127, 306),
-    "SFTF_ActiveOverprint": (482, -220),
+    "SFTFSoft_GNN": (238, 143),
+    "SFTF_DrapePrior": (-117, 612),
+    "PFTF_AsymTensor": (527, 663),
+    "PFTF_DrapePrior_VisCull_kDop": (-366, 612),
+    "PFTF_GFiberCT": (527, 923),
+    "SFTF_QEM": (487, 153),
+    "SFTF_DynamicTargetSearch": (724, -106),
+    "DFSVR_VisCull": (-117, 133),
+    "SFTFSoft_GNN_DFSVR": (-117, 305),
+    "SFTF_ActiveOverprint": (487, -234),
     "ColdOndol": (-90, -95),
-    "ColdOndol_Positioning": (279, -289),
-    "cfmsCIPC": (-171, 844),
+    "ColdOndol_Positioning": (280, -289),
+    "cfmsCIPC": (-117, 850),
     # 2026-09-11: TSE_SEM 을 논문 3편 트랙으로 나눴다.  ① 은 옛 TSE_SEM 자리를 잇고
     # ②·③ 은 SFTF_Composite → ① 방향을 따라 위쪽으로 한 칸씩 이어진다.
-    "TSE_SEM1_Bezier": (920, 663),
-    "TSE_SEM2_Tensor": (914, 924),
-    "TSE_SEM3_AutoTune": (907, 1183),
-    "SFTF_HeatMethod": (720, 923),
-    "cfmsPINNDrape": (136, 1181),
+    "TSE_SEM1_Bezier": (914, 663),
+    "TSE_SEM2_Tensor": (914, 923),
+    "TSE_SEM3_AutoTune": (914, 1175),
+    "SFTF_HeatMethod": (724, 923),
+    "cfmsPINNDrape": (138, 1181),
     "cfmsDrape": (-408, 907),
-    "cfmsMiindo": (-159, 725),
-    "cfmsPINNCAD": (382, 1188),
-    "SFTFSoft_DFSVR": (262, -146),
+    "cfmsMiindo": (-117, 725),
+    "cfmsPINNCAD": (363, 1188),
+    "SFTFSoft_DFSVR": (290, -129),
     # Restored from the last pre-archive graph snapshot.
     "SFTF_UrbanTraffic": (-256, 19),
     "cfmsAutoSew": (156, 993),
-    "cfmsAutoPlace_IJCST": (-37, 975),
-    "cfmsAutoPlace_JCDE": (-114, 1161),
+    "cfmsAutoPlace_IJCST": (-25, 979),
+    "cfmsAutoPlace_JCDE": (-117, 1161),
     # 2026-09-01: ToDo DrapeSCAN onboarding from the Obsidian project note.
-    "cfmsDrapeSCAN": (172, 856),
+    "cfmsDrapeSCAN": (169, 856),
     # 2026-09-07: graph.html 의 큐레이션 노드(SFTF_HOLONOMY_NODE)와 짝을 이룬다.
-    "SFTF_Holonomy": (721, 1173),
+    "SFTF_Holonomy": (724, 1175),
     # 2026-09-10: graph.html 의 큐레이션 노드(HIPDETECT_NODE)와 짝을 이룬다.
     "HIPDetect": (384, 973),
     # 2026-09-14: graph.html 의 큐레이션 노드(CFMSDISPERSITY_NODE)와 짝을 이룬다.
     # 이미 나온 논문인데 그래프에 없었다. 자리는 은종현 교수님 묶음 오른쪽의 빈 곳이다.
-    "cfmsDispersity": (518, 1170),
+    "cfmsDispersity": (527, 1175),
     # 2026-09-14: graph.html 의 큐레이션 노드(TOMO_SHELL_NODES)와 짝을 이룬다.
     # 포트폴리오 표에는 두 트랙이 있는데 그래프에는 노드가 없었다(사용자 지적).
     # 자리는 이희란 교수님 묶음 왼쪽 아래의 빈 곳이다 — 파일 씨앗과 표(graph_positions)
     # 양쪽에서 가장 한산한 자리를 골랐다.
-    "TSE_TomoSh4": (406, 623),
-    "TSE_TomoSh5": (341, 769),
+    "TSE_TomoSh4": (428, 612),
+    "TSE_TomoSh5": (332, 760),
 }
 
 # 노드 id 가 노트 이름에서 규칙으로 나오지 않는 트랙 노드 → (볼트 노트 stem,
@@ -422,7 +424,6 @@ QUALITY_ROWS = [
     ("SFTF_WarehouseAGV", "SFTF_WarehouseAGV", "하", "DES 초기 검증·proxy 실패·정책 비교 잔여; 실창고 trace·원고 부족"),
     ("PFTF_AssetShock", "PFTF_AssetShock", "하", "38 benchmark/provider rehearsal; draft 원고와 실제 provider outcome 없음"),
     ("PFTF_DrapePrior_VisCull_kDop", "PFTF_DrapePrior_VisCull_kDop", "등급 없음", "통합 evidence 저장소; 독립 논문 등급 미적용"),
-    ("PFTF_ResearchOptimize", "PFTF_ResearchOptimize", "등급 없음", "연구 보조 도구; 독립 논문 등급 미적용"),
     ("PFTF_GFiberCT", "PFTF_GFiberCT", "중", "합성 144건·NCF 유리섬유 복합재 X선 CT 17쌍(원저자 분할) 사전등록 검증, B5/M1 대비 사례별 144/144·17/17 승, 위상 오차 0; **한국복합재료학회지**(2026-09-16 변경, 그전 한국섬유공학회지) 국문 투고본 초고; PFTF/local-SPD 우월성 제외"),
     ("SFTF_QEM", "SFTF_QEM", "상", "여각 규약 오류 정정·Cura 교차검증(천장 ρ=+0.754)·코퍼스 50메쉬·원고 2편+설명서; 성능 우월 주장 없는 평가방법론 트랙, 미투고"),
     ("SFTF_DynamicTargetSearch", "SFTF_DynamicTargetSearch", "ToDo",
@@ -512,7 +513,6 @@ INTRODUCTIONS = {
     "SFTF_DrapePrior": "옷감이 몸과 바닥에 어떻게 닿을지 미리 예측해 천 시뮬레이션을 빠르게 시작하는 방법이다.",
     "PFTF_AsymTensor": "방향에 따라 다르게 반응하는 재료나 문제를 표현하기 위한 비대칭 텐서 이론이다.",
     "PFTF_DrapePrior_VisCull_kDop": "옷감의 좋은 시작 상태와 안전한 충돌 필터를 결합해 천 계산을 빠르게 하려는 새 연구선이다.",
-    "PFTF_ResearchOptimize": "프로젝트 사이의 연결과 작업량을 비교해 효율적인 논문 투고 순서를 찾는 방법이다.",
     "PFTF_GFiberCT": "서로 떨어진 두 표면을 먼저 구분해 각 층을 따로 복원함으로써 alpha 방법의 잘못된 연결과 위상 오류를 줄이는 연구다.",
     "SFTF_QEM": "메쉬를 줄여 방향 탐색을 빠르게 하려다 그 가설이 기각되었고, 대신 지지비용 계산의 검증 방법 자체를 다루게 된 연구다. 각도 규약 오류를 스스로 찾아 정정한 기록과, 서로 다른 두 슬라이서조차 완전히 일치하지 않는다는 측정이 주 내용이다.",
     "SFTF_DynamicTargetSearch": "여러 이동 센서의 불완전한 보고를 합쳐 구조가 바뀌는 공간에서 목표물과 다음 탐색 경로를 찾으려는 연구다.",
@@ -539,7 +539,6 @@ GRAPH_ROLES = {
     "DFSVR_VisCull": "PIPELINE / 다단계 통합",
     "SFTFSoft_GNN_DFSVR": "PIPELINE / 다단계 통합",
     "SFTF_QEM": "AUDIT / 평가·검증",
-    "PFTF_ResearchOptimize": "META / 연구 포트폴리오 도구",
 }
 
 FINDING_CANDIDATES = {
@@ -967,11 +966,11 @@ if preserve_extended_quality:
             "SFTF_UrbanTraffic": "접수(원고번호) 회신 확인 → 심사 결과 대기; 설인환 몫은 hwpx v1 공저자 검토(방법·수치 정합)",
             "PFTF_AsymTensor": "⛔ 긍정적 효과 규칙 — 주 기여 축 결정(복합재 순서 뒤집기, 은종현 교수 실측 회신 대기) 전에는 투고 불가; 그다음 60° 임계각 정합 재측정",
             "PFTF_DrapePrior_VisCull_kDop": "독립 논문 등급 미적용 — 통합 evidence 저장소",
-            "PFTF_ResearchOptimize": "독립 논문 등급 미적용 — 연구 보조 도구",
             "DFSVR_VisCull": "값·gradient parity·거짓음성 0 및 실제 end-to-end utility 검증",
             "SFTFSoft_GNN_DFSVR": "frozen budget-matched A–E baseline, held-out slicer 전이 및 latency/quality 동시 검증",
         },
-        remove=("TSE_SEM", "TSE_SEM_Bezier", "TSE_SEM_Tensor", "TSE_SEM_AutoTune"),
+        remove=("TSE_SEM", "TSE_SEM_Bezier", "TSE_SEM_Tensor", "TSE_SEM_AutoTune",
+                "PFTF_ResearchOptimize"),
     )
     s = _update_json_object_constant(
         s,
@@ -981,6 +980,7 @@ if preserve_extended_quality:
             "DFSVR_VisCull": "정확한 first-hit 결과를 유지하면서 불필요한 교차 후보를 안전하게 줄이면 미분가능 지지 구조 계산의 확장성을 높일 수 있다.",
             "SFTFSoft_GNN_DFSVR": "GNN의 빠른 후보 제안과 DFSVR의 정밀 보정을 결합해 출력 방향 탐색 시간과 검증 비용을 함께 줄이는 것을 목표로 한다.",
         },
+        remove=("PFTF_ResearchOptimize",),
     )
 
 # Remove a prior overlay before reinserting it so the generator remains
@@ -1011,21 +1011,6 @@ TODO_NODE = {
     "source_file": "PFTF_DrapePrior_VisCull_kDop.md",
     "file_type": "concept",
     "degree": 2,
-}
-
-RESEARCH_OPTIMIZE_NODE = {
-    "id": "PFTF_ResearchOptimize",
-    "label": "PFTF_ResearchOptimize",
-    "color": {"background": "#ffffff", "border": "#000000",
-               "highlight": {"background": "#ffffff", "border": "#000000"}},
-    "size": 16.4,
-    "font": {"size": 12, "color": "#333333", "bold": False},
-    "title": "PFTF_ResearchOptimize — ToDo: evidence-aware submission scheduling",
-    "community": 4,
-    "community_name": "ToDo",
-    "source_file": "PFTF_ResearchOptimize.md",
-    "file_type": "concept",
-    "degree": 1,
 }
 
 ALPHA_NODE = {
@@ -1158,7 +1143,6 @@ QEM_NODE = {
 # 주입하는 통로이므로 그대로 둔다.  이름이 등급을 뜻하지 않는다.
 TODO_NODES = [
     TODO_NODE,
-    RESEARCH_OPTIMIZE_NODE,
     ALPHA_NODE,
     QEM_NODE,
     DYNAMIC_TARGET_SEARCH_NODE,
@@ -1186,9 +1170,6 @@ TODO_EDGES = [
      "width": 2, "color": {"opacity": 0.7}, "confidence": "INFERRED"},
     {"from": "PFTF_DrapePrior_VisCull_kDop", "to": "PFTF_VisCull_kDop",
      "label": "extends", "title": "extends [INFERRED]", "dashes": True,
-     "width": 2, "color": {"opacity": 0.7}, "confidence": "INFERRED"},
-    {"from": "PFTF", "to": "PFTF_ResearchOptimize",
-     "label": "optimizes", "title": "optimizes [INFERRED]", "dashes": True,
      "width": 2, "color": {"opacity": 0.7}, "confidence": "INFERRED"},
     {"from": "PFTF", "to": "PFTF_GFiberCT",
      "label": "instantiates", "title": "instantiates [INFERRED]", "dashes": True,
@@ -2284,14 +2265,6 @@ s = s.replace(
     '"color": {"background": "#c8c8c8", "border": "#000000", '
     '"highlight": {"background": "#c8c8c8", "border": "#000000"}}',
     '"id": "PFTF_DrapePrior_VisCull_kDop", "label": "PFTF_DrapePrior_VisCull_kDop", '
-    '"color": {"background": "#ffffff", "border": "#000000", '
-    '"highlight": {"background": "#ffffff", "border": "#000000"}}',
-)
-s = s.replace(
-    '"id": "PFTF_ResearchOptimize", "label": "PFTF_ResearchOptimize", '
-    '"color": {"background": "#c8c8c8", "border": "#000000", '
-    '"highlight": {"background": "#c8c8c8", "border": "#000000"}}',
-    '"id": "PFTF_ResearchOptimize", "label": "PFTF_ResearchOptimize", '
     '"color": {"background": "#ffffff", "border": "#000000", '
     '"highlight": {"background": "#ffffff", "border": "#000000"}}',
 )

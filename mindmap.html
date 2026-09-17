@@ -382,7 +382,6 @@ function applyGraphNodes20260811(data){
     if(findNode(root,node.id)) return false;
     (parent.children||(parent.children=[])).push(node); parent.collapsed=false; return true;
   };
-  const lane=byTitle(/PFTF framework 투고 경로/);      // 투고 경로 그룹
   const framework=byTitle(/#5\s*PFTF framework/);      // #5 PFTF framework (PFTF 응용 인스턴스들이 모인 곳)
   const viscull=byTitle(/#2\s*PFTF_VisCull_kDop/);     // #2 PFTF_VisCull_kDop
   // CNC: PFTF depends_on → 다른 PFTF 응용(#5 framework 하위)들과 같은 자리
@@ -394,9 +393,8 @@ function applyGraphNodes20260811(data){
   // DrapePrior_VisCull_kDop: VisCull_kDop를 extends, DrapePrior를 complements → #2 VisCull_kDop 밑
   attach(viscull,{id:'gx_pftf_drapeprior_viscull_kdop',title:'PFTF_DrapePrior_VisCull_kDop',kind:'todo',status:'draft',
     note:'옷감의 좋은 시작 상태와 안전한 충돌 필터를 결합해 천 계산을 빠르게 하려는 새 연구선이다. (graph: SFTF_DrapePrior 보완 + PFTF_VisCull_kDop 확장)'});
-  // ResearchOptimize: 투고 순서 최적화 자체 → 투고 경로 그룹 밑
-  attach(lane,{id:'gx_pftf_researchoptimize',title:'PFTF_ResearchOptimize',kind:'todo',status:'draft',
-    note:'프로젝트 사이의 연결과 작업량을 비교해 효율적인 논문 투고 순서를 찾는 방법이다. (graph: PFTF의 인스턴스)'});
+  // 2026-09-18: 여기 있던 ResearchOptimize attach 를 걷어냈다 — 더 필요하지 않은 노드다.
+  // 이미 저장된 문서에서 걷어내는 일은 아래 applyResearchOptimizeRetire20260918 이 한다.
   data.graphNodesVersion=GRAPH_NODES_VERSION;
   return true;
 }
@@ -472,7 +470,6 @@ function applyGraphMeta20260811(data){
     'gx_pftf_cnc':{b:'CNC 가공 가능한 방향 선택',p:'D:\\__PFTF_Projects(2026)\\PFTF_CNC_dev'},
     'gx_pftf_assetshock':{b:'경제 충격의 자산별 위험 비교',p:'D:\\__PFTF_Projects(2026)\\PFTF_AssetShock_dev'},
     'gx_pftf_drapeprior_viscull_kdop':{b:'드레이프 예측과 충돌 필터 결합 가속',p:'D:\\__PFTF_Projects(2026)\\PFTF_DrapePrior_VisCull_kDop_dev'},
-    'gx_pftf_researchoptimize':{b:'연구 연결·작업량으로 투고 순서 최적화',p:'D:\\__PFTF_Projects(2026)\\PFTF_ResearchOptimize_dev'},
     'cfmsdrape':{p:'D:\\__VSCode_Projects\\cfmsMiindo_dev'}   // 'cfms미인도' — VSCODE 폴더 열기 버튼용 경로
   };
   let changed=false;
@@ -521,7 +518,6 @@ function applyLinkFill20260820(data){
     'nqov6ls1':                       {u:"https://github.com/cfms-lab/PFTF_subMarine_dev"},   // PFTF_subMarine  ← PFTF_subMarine
     'gx_pftf_cnc':                    {u:"https://github.com/cfms-lab/PFTF_CNC_dev"},   // PFTF_CNC  ← PFTF_CNC
     'gx_pftf_assetshock':             {u:"https://github.com/cfms-lab/PFTF_AssetShock_dev"},   // PFTF_AssetShock  ← PFTF_AssetShock
-    'gx_pftf_researchoptimize':       {u:"https://github.com/cfms-lab/PFTF_ResearchOptimize_dev"},   // PFTF_ResearchOptimize  ← PFTF_ResearchOptimize
     'nkbfa3m1':                       {u:"https://github.com/cfms-lab/SFTF_DynamicTargetSearch_dev"},   // SFTF_DynamicTargetSearch  ← SFTF_DynamicTargetSearch
     'n7hixqe5':                       {u:"https://github.com/cfms-lab/SFTF_ActiveOverprint_dev"},   // SFTF_ActiveOverprint  ← SFTF_ActiveOverprint
     'n3k56wq4':                       {p:"D:\\__VSCode_Projects\\cfmsAutoSew2026_dev"},   // AutoSew  ← cfmsAutoSew
@@ -648,7 +644,6 @@ const VAULT_PROJECT_GRADES={
   'PFTF_Mold':{mindmapId:'pftf_mold_submission',kind:'medium'},
   'PFTF_Radiotherapy':{mindmapId:'nece2i15',kind:'low'},
   'PFTF_RainNowcast':{mindmapId:'nj8l68c8',kind:'low'},
-  'PFTF_ResearchOptimize':{mindmapId:'gx_pftf_researchoptimize',kind:'none'},
   'PFTF_Solar':{mindmapId:'n9udaty3',kind:'low'},
   'PFTF_subMarine':{mindmapId:'nqov6ls1',kind:'low'},
   'PFTF_Terrain':{mindmapId:'nywj24v4',kind:'low'},
@@ -948,6 +943,32 @@ function applyEunRoomAsymTensor20260916(data){
   data.eunRoomAsymTensorVersion=EUN_ROOM_ASYMTENSOR_VERSION;
   return true;   // 버전 상승 자체도 클라우드 문서에 저장해야 재실행되지 않는다.
 }
+/* ====== ResearchOptimize 노드 걷어내기 (2026-09-18) ======
+   사용자 판단으로 이 노드가 더 필요하지 않다 — 그래프(graph.html)·포트폴리오에서도 같은 날 뺐다.
+   (제목을 온전한 프로젝트 id 로 적지 않는다 — audit-vault-projects.mjs 가 이 파일을 문자열로
+   훑어 「마인드맵에 있는가」를 보므로, 주석 한 줄이 노드가 살아 있는 것처럼 읽힌다.)
+   클라우드 문서에서는 이 노드(gx_pftf_researchoptimize)가 「PFTF 투고 경로」 밑에 있고 그 아래에
+   SFTF_DynamicTargetSearch 가지가 통째로 달려 있다. 그래서 **가지는 지우지 않는다** — 자식들을
+   이 노드가 있던 자리(부모의 같은 칸)로 끌어올린 뒤 노드만 뺀다. 관계선도 함께 걷는다.
+   applyDedup20260811 의 병합과 같은 규칙이고, 여기서 자식을 버리면 사용자가 쌓아 둔 하위 노드
+   열 몇 개가 소리 없이 사라진다. */
+const RESEARCH_OPTIMIZE_RETIRE_VERSION='2026-09-18';
+function applyResearchOptimizeRetire20260918(data){
+  if(!data||!data.root||data.researchOptimizeRetireVersion===RESEARCH_OPTIMIZE_RETIRE_VERSION) return false;
+  const root=data.root;
+  const node=findNode(root,'gx_pftf_researchoptimize');
+  const par=node?findParent(root,'gx_pftf_researchoptimize'):null;
+  if(node&&par){
+    const i=(par.children||[]).findIndex(c=>c.id===node.id);
+    if(i>=0) par.children.splice(i,1,...(node.children||[]));   // 자식을 그 자리에 올려 놓는다
+    par.collapsed=false;
+  }
+  if(node&&Array.isArray(data.links)){
+    data.links=data.links.filter(l=>l.from!=='gx_pftf_researchoptimize'&&l.to!=='gx_pftf_researchoptimize');
+  }
+  data.researchOptimizeRetireVersion=RESEARCH_OPTIMIZE_RETIRE_VERSION;
+  return true;   // 버전 상승 자체도 클라우드 문서에 저장해야 재실행되지 않는다.
+}
 //==PURE_END
 
 /* ====================== Supabase 설정/세션 (upjuk과 공유) ====================== */
@@ -1041,7 +1062,8 @@ const PROG_YELLOW='#eab308';           // 저널 손에 가 있는 단계(투고
 const PROG_RED='#dc2626';              // 보류(멈춰 세운 것). graph.html·대시보드와 같은 값이다.
 const PROGRESS={
   // 2026-09-14: 보류를 맨 앞에 둔다. 저널로 가기 전에 멈춘 것이라 투고보다 뒤에 있다.
-  // 아이콘은 빗금 한 획 — graph.html 의 drawNodePie 와 같은 모양이라 세 화면이 같은 말을 한다.
+  // 아이콘은 ⛔(2026-09-18 변경) — graph.html 의 drawNodePie·portfolio.html 의 파이() 와
+  // 같은 모양이라 세 화면이 같은 말을 한다.
   blocked:  {x:true,     color:PROG_RED,    label:'보류(blocked)'},
   submitted:{frac:0.5,   color:PROG_YELLOW, label:'투고(submitted)'},
   accepted: {frac:0.75,  color:PROG_YELLOW, label:'게재확정(accepted)'},
@@ -1070,11 +1092,11 @@ function progIcon(status, cx, cy, color, checkColor, outline){
          + `<path d="M${cx-2.9},${cy+0.2} l2.1,2.2 l3.9,-4.4" fill="none" stroke="${checkColor}"`
          + ` stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`;
   }
-  if(p.x){                             // 보류: 빈 원에 빗금 한 획 (취소의 X 와 구분된다)
-    return halo(7.4)
-         + `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" stroke="${color}" stroke-width="1.6"/>`
-         + `<path d="M${cx-3.2},${cy+3.2} L${cx+3.2},${cy-3.2}" fill="none" stroke="${color}"`
-         + ` stroke-width="1.8" stroke-linecap="round"/>`;
+  if(p.x){                             // 보류: ⛔ — 꽉 찬 원에 가로 막대 (2026-09-18, 사용자 지시)
+    return halo(6.6)                   // 채워진 아이콘이라 링은 완료형과 같은 반지름이다
+         + `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}"/>`
+         + `<path d="M${cx-3.5},${cy} L${cx+3.5},${cy}" fill="none" stroke="${checkColor}"`
+         + ` stroke-width="2.4" stroke-linecap="round"/>`;
   }
   const a=2*Math.PI*p.frac;            // 12시에서 시계방향으로 채운다
   const ex=cx+r*Math.sin(a), ey=cy-r*Math.cos(a), big=p.frac>0.5?1:0;
@@ -1092,6 +1114,7 @@ applyHipDetectSplit20260910(DATA);
 applyLeeRoomGather20260911(DATA);
 applyGFiberCTRename20260911(DATA);
 applyEunRoomAsymTensor20260916(DATA);
+applyResearchOptimizeRetire20260918(DATA);
 let sel=null, view={tx:60,ty:30,s:1}, showRel=true, LAY=null;
 
 /* ====================== 실행취소 / 다시실행 (undo/redo) ====================== */
@@ -1469,10 +1492,11 @@ async function loadDoc(){
     const leeRoomMigrated=applyLeeRoomGather20260911(DATA);
     const gfiberCtMigrated=applyGFiberCTRename20260911(DATA);
     const eunRoomMigrated=applyEunRoomAsymTensor20260916(DATA);
+    const researchOptimizeMigrated=applyResearchOptimizeRetire20260918(DATA);
     const kindsMigrated=normalizeKinds(DATA);
     showRel=DATA.showRel!==false; document.getElementById('relBtn').textContent='관계선 '+(showRel?'✓':'✕');
     sel=null; render(); renderEdit(); fitView(); setSaveState('');
-    if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||linkMigrated||statusMigrated||drapeMigrated||gradesMigrated||directionMigrated||holonomyMigrated||hipDetectMigrated||leeRoomMigrated||gfiberCtMigrated||eunRoomMigrated||kindsMigrated) await saveDoc(true);
+    if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||linkMigrated||statusMigrated||drapeMigrated||gradesMigrated||directionMigrated||holonomyMigrated||hipDetectMigrated||leeRoomMigrated||gfiberCtMigrated||eunRoomMigrated||researchOptimizeMigrated||kindsMigrated) await saveDoc(true);
   }catch(e){
     const b=document.getElementById('banner'); b.style.display='block';
     if(/relation|does not exist|42P01|PGRST205|404/i.test(e.message))
@@ -1480,7 +1504,7 @@ async function loadDoc(){
     else if(!isLoggedIn() && /401|403|PGRST301|permission denied/i.test(e.message))
       b.textContent='공개 열람 권한이 없습니다. Supabase에서 enable_rls_mindmaps.sql 을 다시 실행해 anon SELECT 정책을 적용하세요.';
     else b.textContent='데이터를 불러오지 못했습니다: '+e.message.slice(0,140);
-    applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); applyDrapeEngineLinks20260827(DATA); applyVaultGrades20260901(DATA); applyLinkDirection20260907(DATA); applyHolonomySplit20260907(DATA); applyHipDetectSplit20260910(DATA); applyLeeRoomGather20260911(DATA); applyGFiberCTRename20260911(DATA); applyEunRoomAsymTensor20260916(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
+    applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); applyDrapeEngineLinks20260827(DATA); applyVaultGrades20260901(DATA); applyLinkDirection20260907(DATA); applyHolonomySplit20260907(DATA); applyHipDetectSplit20260910(DATA); applyLeeRoomGather20260911(DATA); applyGFiberCTRename20260911(DATA); applyEunRoomAsymTensor20260916(DATA); applyResearchOptimizeRetire20260918(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
   }
 }
 async function saveDoc(silent){
@@ -1501,7 +1525,7 @@ function download(name,text,type){ const b=new Blob([text],{type:type||'applicat
 function exportJSON(){ download('mindmap_backup.json', JSON.stringify(DATA,null,2)); toast('백업 JSON을 내려받았습니다.'); }
 function importJSON(input){
   const f=input.files[0]; if(!f)return; const r=new FileReader();
-  r.onload=()=>{ try{ const d=JSON.parse(r.result); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); applyLinkFill20260820(d); applyStatusCleanup20260822(d); applyDrapeEngineLinks20260827(d); applyVaultGrades20260901(d); applyLinkDirection20260907(d); applyHolonomySplit20260907(d); applyHipDetectSplit20260910(d); applyLeeRoomGather20260911(d); applyGFiberCTRename20260911(d); applyEunRoomAsymTensor20260916(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); applyLinkFill20260820(d); applyStatusCleanup20260822(d); applyDrapeEngineLinks20260827(d); applyVaultGrades20260901(d); applyLinkDirection20260907(d); applyHolonomySplit20260907(d); applyHipDetectSplit20260910(d); applyLeeRoomGather20260911(d); applyGFiberCTRename20260911(d); applyEunRoomAsymTensor20260916(d); applyResearchOptimizeRetire20260918(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
     if(!confirm('백업으로 현재 클라우드 관계도를 덮어쓸까요?'))return;
     pushHistory();
     DATA=d; showRel=DATA.showRel!==false; sel=null; render(); renderEdit(); saveDoc(false);

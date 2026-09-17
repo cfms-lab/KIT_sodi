@@ -41,7 +41,6 @@ const expectedVaultGrades = {
   PFTF_Mold: ["pftf_mold_submission", "medium"],
   PFTF_Radiotherapy: ["nece2i15", "low"],
   PFTF_RainNowcast: ["nj8l68c8", "low"],
-  PFTF_ResearchOptimize: ["gx_pftf_researchoptimize", "none"],
   PFTF_Solar: ["n9udaty3", "low"],
   PFTF_subMarine: ["nqov6ls1", "low"],
   PFTF_Terrain: ["nywj24v4", "low"],
@@ -66,7 +65,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -310,6 +309,41 @@ if (eunRoomMovedSample.links.length !== 1) throw new Error("은종현 room: line
 const eunRoomNoNodeSample = { root: mk("root", [mk("nafefnc3"), mk("nffg4ou5")]), links: [] };
 context.__applyEunRoomAsymTensor(eunRoomNoNodeSample);
 if (eunRoomNoNodeSample.links.length) throw new Error("은종현 room: migration drew a link to a missing node");
+
+// 2026-09-18: PFTF_ResearchOptimize(gx_pftf_researchoptimize)가 빠지되, 그 밑에 달려 있던
+// 가지(SFTF_DynamicTargetSearch)는 같은 칸으로 올라오고 관계선만 걷히는지 본다.
+// 자식을 함께 버리면 사용자가 쌓아 둔 하위 노드가 소리 없이 사라진다 — 그것이 이 검사의 이유다.
+const retireSample = {
+  root: mk("root", [
+    mk("pftf_submission_lane_20260806", [
+      mk("nh2ivjs1"),
+      mk("gx_pftf_researchoptimize", [mk("nkbfa3m1", [mk("n7hixqe5")])]),
+      mk("n0llvuh1"),
+    ]),
+  ]),
+  links: [
+    { from: "n0llvuh1", to: "gx_pftf_researchoptimize", label: "투고 순서", type: "engine" },
+    { from: "nh2ivjs1", to: "n0llvuh1", label: "충돌 축약", type: "engine" },
+  ],
+};
+if (!context.__applyResearchOptimizeRetire(retireSample)) throw new Error("ResearchOptimize retire migration did not run");
+if (context.__applyResearchOptimizeRetire(retireSample)) throw new Error("ResearchOptimize retire migration is not idempotent");
+if (findIn(retireSample.root, "gx_pftf_researchoptimize")) throw new Error("PFTF_ResearchOptimize node survived the retire migration");
+if (childIds(findIn(retireSample.root, "pftf_submission_lane_20260806")) !== "nh2ivjs1,nkbfa3m1,n0llvuh1") {
+  throw new Error(`ResearchOptimize retire left [${childIds(findIn(retireSample.root, "pftf_submission_lane_20260806"))}]`);
+}
+if (!findIn(retireSample.root, "n7hixqe5")) throw new Error("ResearchOptimize retire dropped a grandchild branch");
+if (retireSample.links.length !== 1 || retireSample.links[0].from !== "nh2ivjs1") {
+  throw new Error("ResearchOptimize retire did not drop exactly the links touching the node");
+}
+const retireValidation = context.__validate(retireSample);
+if (!retireValidation.ok) throw new Error(`ResearchOptimize retire sample is invalid: ${retireValidation.errors[0]}`);
+// 노드가 없는 문서(기본 관계도)에서는 아무것도 건드리지 않는다.
+const retireNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [{ from: "n0llvuh1", to: "nh2ivjs1", label: "x", type: "engine" }] };
+context.__applyResearchOptimizeRetire(retireNoNodeSample);
+if (retireNoNodeSample.links.length !== 1 || childIds(retireNoNodeSample.root) !== "n0llvuh1") {
+  throw new Error("ResearchOptimize retire touched a document that never had the node");
+}
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);
