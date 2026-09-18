@@ -1640,6 +1640,9 @@ function pieInk(fill, border) {
 
 function drawNodePie(ctx, cx, cy, R, p, color, border) {
   const ink = pieInk(color, border);
+  // 마지막에 두르는 등급 테두리의 색. 보통은 등급 색 그대로지만, 아래 ⛔ 가지에서
+  // 원을 먹색으로 채우는 경우(ToDo)에는 흰 테두리가 먹색 원을 파고들므로 먹색으로 바꾼다.
+  let ringColor = color;
   ctx.save();
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
@@ -1664,16 +1667,22 @@ function drawNodePie(ctx, cx, cy, R, p, color, border) {
   } else if (p.x) {
     /* 보류는 ⛔ 다 (2026-09-18, 사용자 지시). 그전에는 빗금 한 획이라 취소의 X 와 한 획
        차이였고, 보류 노드는 지름이 가장 작아(frac 0) 그 한 획이 구별되지 않았다.
-       꽉 찬 원 + 가로 막대는 작은 원에서도 「멈춤」으로 읽힌다. */
+       꽉 찬 원 + 가로 막대는 작은 원에서도 「멈춤」으로 읽힌다.
+       2026-09-18: 채우는 색을 등급 색이 아니라 **먹색(pieInk)** 으로 바꿨다. 등급 색을
+       그대로 쓰면 ToDo 는 흰 원 + 먹색 막대가 되어, 같은 보류인 cfmsPINNCAD(파랑)·
+       SFTFSoft_DFSVR(주황) 의 꽉 찬 ⛔ 와 아예 다른 그림으로 보였다(사용자 보고 —
+       cfmsDrapeSCAN). pieInk 는 밝지 않은 등급 색은 그대로 돌려주므로 다른 보류 노드의
+       모양은 바뀌지 않고, 너무 밝은 등급(ToDo=흰색)만 테두리 색으로 채워진다. */
     ctx.beginPath();
     ctx.arc(cx, cy, R, 0, 2 * Math.PI);
-    ctx.fillStyle = color;
+    ctx.fillStyle = ink;
     ctx.fill();
+    ringColor = ink;
     ctx.beginPath();
     ctx.moveTo(cx - 0.583 * R, cy);
     ctx.lineTo(cx + 0.583 * R, cy);
-    // 막대는 체크와 같은 규칙이다 — 꽉 찬 원 위에서는 흰색, 원 자체가 흰색이면(ToDo) 먹색.
-    ctx.strokeStyle = ink === color ? '#ffffff' : ink;
+    // 원이 언제나 꽉 차 있으므로 막대는 언제나 흰색이다.
+    ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 0.40 * R;
     ctx.stroke();
   } else if (p.xx) {
@@ -1699,7 +1708,7 @@ function drawNodePie(ctx, cx, cy, R, p, color, border) {
   // 테두리는 언제나 등급 색이다 — 파이가 비어 있어도 노드의 등급이 읽힌다.
   ctx.beginPath();
   ctx.arc(cx, cy, R * 0.93, 0, 2 * Math.PI);
-  ctx.strokeStyle = color;
+  ctx.strokeStyle = ringColor;
   ctx.lineWidth = 0.14 * R;
   ctx.stroke();
   ctx.restore();
