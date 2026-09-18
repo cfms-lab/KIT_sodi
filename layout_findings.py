@@ -228,54 +228,54 @@ NODE_SOURCE_FILES = {
 # ----------------------------------------------------------------- 좌표 (발견 기준)
 POS = {
     # 2026-08-31: 사용자가 graph.html에서 조정한 34-node 배치를 정본으로 승격.
-    "Tomo_SFTF": (724, 168),
-    "Tomo_SFTFSoft": (487, 9),
-    "SFTF_Clustering": (211, 427),
-    "PFTF": (724, 403),
+    "Tomo_SFTF": (670, 195),
+    "Tomo_SFTFSoft": (413, 20),
+    "SFTF_Clustering": (565, 360),
+    "PFTF": (724, 478),
     "SFTF_Composite": (724, 663),
-    "SFTF_InjMold": (-295, 234),
-    "PFTF_Compression": (193, 612),
-    "Tomo_DFSVR": (83, 5),
-    "PFTF_VisCull_kDop": (-117, 428),
-    "SFTF_SewerPOC": (-176, -208),
-    "SFTFSoft_GNN": (238, 143),
-    "SFTF_DrapePrior": (-117, 612),
+    "SFTF_InjMold": (-352, 192),
+    "PFTF_Compression": (196, 553),
+    "Tomo_DFSVR": (192, 23),
+    "PFTF_VisCull_kDop": (-117, 390),
+    "SFTF_SewerPOC": (1206, 209),
+    "SFTFSoft_GNN": (193, 197),
+    "SFTF_DrapePrior": (-117, 558),
     "PFTF_AsymTensor": (527, 663),
-    "PFTF_DrapePrior_VisCull_kDop": (-366, 612),
+    "PFTF_DrapePrior_VisCull_kDop": (-360, 392),
     "PFTF_GFiberCT": (527, 923),
-    "SFTF_QEM": (487, 153),
-    "SFTF_DynamicTargetSearch": (724, -106),
-    "DFSVR_VisCull": (-117, 133),
-    "SFTFSoft_GNN_DFSVR": (-117, 305),
-    "SFTF_ActiveOverprint": (487, -234),
-    "ColdOndol": (-90, -95),
-    "ColdOndol_Positioning": (280, -289),
-    "cfmsCIPC": (-159, 853),
+    "SFTF_QEM": (414, 194),
+    "SFTF_DynamicTargetSearch": (735, -152),
+    "DFSVR_VisCull": (-116, 33),
+    "SFTFSoft_GNN_DFSVR": (-117, 197),
+    "SFTF_ActiveOverprint": (411, -151),
+    "ColdOndol": (1029, 449),
+    "ColdOndol_Positioning": (1205, 336),
+    "cfmsCIPC": (-151, 763),
     # 2026-09-11: TSE_SEM 을 논문 3편 트랙으로 나눴다.  ① 은 옛 TSE_SEM 자리를 잇고
     # ②·③ 은 SFTF_Composite → ① 방향을 따라 위쪽으로 한 칸씩 이어진다.
     "TSE_SEM1_Bezier": (914, 663),
     "TSE_SEM2_Tensor": (914, 923),
     "TSE_SEM3_AutoTune": (914, 1175),
-    "SFTF_HeatMethod": (881, -113),
-    "cfmsPINNDrape": (138, 1181),
-    "cfmsDrape": (-408, 907),
-    "cfmsMiindo": (-117, 725),
-    "cfmsPINNCAD": (363, 1188),
-    "SFTFSoft_DFSVR": (290, -129),
+    "SFTF_HeatMethod": (718, 932),
+    "cfmsPINNDrape": (190, 1212),
+    "cfmsDrape": (-358, 860),
+    "cfmsMiindo": (-211, 887),
+    "cfmsPINNCAD": (408, 1217),
+    "SFTFSoft_DFSVR": (192, -152),
     # Restored from the last pre-archive graph snapshot.
-    "SFTF_UrbanTraffic": (-256, 19),
-    "cfmsAutoSew": (156, 993),
-    "cfmsAutoPlace_IJCST": (-25, 979),
-    "cfmsAutoPlace_JCDE": (-117, 1161),
+    "SFTF_UrbanTraffic": (1021, 83),
+    "cfmsAutoSew": (195, 1026),
+    "cfmsAutoPlace_IJCST": (-25, 1005),
+    "cfmsAutoPlace_JCDE": (-66, 1209),
     # 2026-09-01: ToDo DrapeSCAN onboarding from the Obsidian project note.
-    "cfmsDrapeSCAN": (169, 856),
+    "cfmsDrapeSCAN": (193, 840),
     # 2026-09-18: 93196cb 가 graph.html 에만 넣어 둔 노드를 여기로 들여왔다. 파일 씨앗이
     # 이 노드를 몰라서 전체 재생성이 좌표를 날려 버리고 있었다.
-    "cfmsDrapeInverse": (-74, 907),
+    "cfmsDrapeInverse": (-106, 944),
     # 2026-09-07: graph.html 의 큐레이션 노드(SFTF_HOLONOMY_NODE)와 짝을 이룬다.
     "SFTF_Holonomy": (724, 1175),
     # 2026-09-10: graph.html 의 큐레이션 노드(HIPDETECT_NODE)와 짝을 이룬다.
-    "HIPDetect": (384, 973),
+    "HIPDetect": (407, 927),
     # 2026-09-14: graph.html 의 큐레이션 노드(CFMSDISPERSITY_NODE)와 짝을 이룬다.
     # 이미 나온 논문인데 그래프에 없었다. 자리는 은종현 교수님 묶음 오른쪽의 빈 곳이다.
     "cfmsDispersity": (527, 1175),
@@ -283,8 +283,8 @@ POS = {
     # 포트폴리오 표에는 두 트랙이 있는데 그래프에는 노드가 없었다(사용자 지적).
     # 자리는 이희란 교수님 묶음 왼쪽 아래의 빈 곳이다 — 파일 씨앗과 표(graph_positions)
     # 양쪽에서 가장 한산한 자리를 골랐다.
-    "TSE_TomoSh4": (428, 612),
-    "TSE_TomoSh5": (332, 760),
+    "TSE_TomoSh4": (407, 550),
+    "TSE_TomoSh5": (275, 768),
 }
 
 # 노드 id 가 노트 이름에서 규칙으로 나오지 않는 트랙 노드 → (볼트 노트 stem,
