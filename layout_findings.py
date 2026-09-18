@@ -250,13 +250,13 @@ POS = {
     "SFTF_ActiveOverprint": (487, -234),
     "ColdOndol": (-90, -95),
     "ColdOndol_Positioning": (280, -289),
-    "cfmsCIPC": (-117, 850),
+    "cfmsCIPC": (-159, 853),
     # 2026-09-11: TSE_SEM 을 논문 3편 트랙으로 나눴다.  ① 은 옛 TSE_SEM 자리를 잇고
     # ②·③ 은 SFTF_Composite → ① 방향을 따라 위쪽으로 한 칸씩 이어진다.
     "TSE_SEM1_Bezier": (914, 663),
     "TSE_SEM2_Tensor": (914, 923),
     "TSE_SEM3_AutoTune": (914, 1175),
-    "SFTF_HeatMethod": (724, 923),
+    "SFTF_HeatMethod": (881, -113),
     "cfmsPINNDrape": (138, 1181),
     "cfmsDrape": (-408, 907),
     "cfmsMiindo": (-117, 725),
@@ -269,6 +269,9 @@ POS = {
     "cfmsAutoPlace_JCDE": (-117, 1161),
     # 2026-09-01: ToDo DrapeSCAN onboarding from the Obsidian project note.
     "cfmsDrapeSCAN": (169, 856),
+    # 2026-09-18: 93196cb 가 graph.html 에만 넣어 둔 노드를 여기로 들여왔다. 파일 씨앗이
+    # 이 노드를 몰라서 전체 재생성이 좌표를 날려 버리고 있었다.
+    "cfmsDrapeInverse": (-74, 907),
     # 2026-09-07: graph.html 의 큐레이션 노드(SFTF_HOLONOMY_NODE)와 짝을 이룬다.
     "SFTF_Holonomy": (724, 1175),
     # 2026-09-10: graph.html 의 큐레이션 노드(HIPDETECT_NODE)와 짝을 이룬다.
@@ -475,6 +478,10 @@ QUALITY_ROWS = [
     ("cfmsAutoPlace_IJCST", "cfmsAutoPlace_IJCST", "중", "IJCST 패턴 논문 트랙; 대칭·골선 사례연구 원고 및 전수 분석 완료, 검증 집합 확대 잔여"),
     ("cfmsAutoPlace_JCDE", "cfmsAutoPlace_JCDE", "중", "JCDE CAD 논문 트랙; 시험 분할 100벌·본론 골격 완료, 영문 집필·투고 준비 잔여"),
     ("cfmsDrapeSCAN", "cfmsDrapeSCAN", "ToDo", "Gate 0 GO; 실 스캔 데이터·마네킹 파일럿 전, cfmsDrape/cfmsMiindo 기반 실험 모듈"),
+    # 2026-09-18: 볼트 노트가 grade: ToDo 이고 grade_note 도 「실측 회수가 닫히기 전에는
+    # quality 판정을 보류한다」다. 곧 정식 프로젝트가 되면 등급을 올리면 된다(사용자).
+    # 볼트 Rules §8 대로 grade_note 전문을 옮기지 않고 공개 가능한 한 줄만 싣는다.
+    ("cfmsDrapeInverse", "cfmsDrapeInverse", "ToDo", "정적 평형 adjoint 로 기울기를 얻는 원단 물성 역추정선; 합성 검증 완료, 실측 회수 전"),
 ]
 QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
 
@@ -522,6 +529,7 @@ INTRODUCTIONS = {
     "cfmsAutoPlace_IJCST": "IJCST 패턴 관점에서 라벨 없는 의복 패턴의 배치와 검증을 다루는 논문 트랙이다.",
     "cfmsAutoPlace_JCDE": "JCDE CAD 관점에서 패널의 신체 부위와 전역 조립·배치 가설을 다루는 논문 트랙이다.",
     "cfmsDrapeSCAN": "고정형·핸드헬드 스캔 패치를 cfmsDrape 물리와 소프트 대응으로 정합해 인체 표면을 복원하려는 실험선이다.",
+    "cfmsDrapeInverse": "드레이프한 원단 사진에서 그 원단의 인장·전단·굽힘 강성을 거꾸로 알아내는 도구다.",
     "TSE_SEM1_Bezier": "전자현미경 사진 한 장에서 섬유 한 올 한 올을 매끈한 곡선으로 따라가며 굵기와 방향을 재어내는 방법이다.",
     "TSE_SEM2_Tensor": "섬유를 하나씩 오려내지 않고 사진 전체에서 섬유가 어느 쪽으로 누워 있는지와 겹친 아래층까지 한꺼번에 재는 방법이다.",
     "TSE_SEM3_AutoTune": "정답을 모르는 실제 사진에서도 측정기의 손잡이를 스스로 안전하게 맞추는 방법을 다루는 연구다.",
@@ -1120,6 +1128,28 @@ DRAPESCAN_NODE = {
     "_project_path": PROJECT_PATHS.get("cfmsDrapeSCAN", r"D:\__VSCode_Projects\cfmsDrapeSCAN_dev"),
 }
 
+# 2026-09-18: 93196cb 가 graph.html 에만 적어 둔 노드를 여기로 들여왔다. 볼트에
+# Projects/cfmsDrapeInverse.md 가 서면서 정식 프로젝트가 될 예정이고(사용자), 그때까지는
+# 등급 ToDo 다 — 흰 바탕·검정 외곽선·community 4. 노드가 이미 RAW_NODES 에 있으면
+# _preserve_raw_nodes 가 기존 항목을 정본으로 두므로 이 사전은 그때 쓰이지 않는다.
+# 배포본이 비거나 새로 만들 때의 씨앗이다.
+DRAPEINVERSE_NODE = {
+    "id": "cfmsDrapeInverse",
+    "label": "cfmsDrapeInverse",
+    "color": {"background": "#ffffff", "border": "#000000",
+               "highlight": {"background": "#ffffff", "border": "#000000"}},
+    "size": 15.4,
+    "font": {"size": 13, "color": "#333333", "bold": False},
+    "title": "cfmsDrapeInverse — ToDo: 정적 평형 adjoint 로 기울기를 얻는 원단 물성 역추정선; 합성 검증 완료, 실측 회수 전",
+    "community": 4,
+    "community_name": "ToDo",
+    "source_file": "cfmsDrapeInverse.md",
+    "file_type": "concept",
+    "degree": 3,
+    "_intro": INTRODUCTIONS["cfmsDrapeInverse"],
+    "_project_path": PROJECT_PATHS.get("cfmsDrapeInverse", r"D:\__CFMS_Projects\cfmsDrapeInverse_dev"),
+}
+
 # 2026-07-30: mindmap Paper quality 기준 상으로 동기화. 원고 2편+설명서가 있고
 # 게이트 T·T2·G2·S·X 가 닫혔다.  라벨에 [draft] 를 병기하는 이유는 등급이
 # 상이어도 아직 미투고이기 때문이다.
@@ -1151,6 +1181,7 @@ TODO_NODES = [
     SFTFSOFT_GNN_DFSVR_NODE,
     URBAN_TRAFFIC_NODE,
     DRAPESCAN_NODE,
+    DRAPEINVERSE_NODE,
 ]
 
 TODO_EDGES = [
@@ -1507,6 +1538,15 @@ DRAPESCAN_EDGES = [
         "등록된 3D 사지·인체 형상을 후속 응용·실험 소비자로 제공",
         "확장", dashes=True,
     ),
+    # 들어오는 화살표. 2026-09-18 에 이 목록으로 옮겼다 — cfmsDrapeInverse 를 넣은
+    # 93196cb 가 이 엣지를 graph.html 에만 적어 두었는데, 위 _preserve_goal_edges 가
+    # cfmsDrapeSCAN 에 닿는 엣지를 **전부** 걷어낸 뒤 이 목록만 다시 넣기 때문에 다음
+    # 재생성에서 조용히 사라졌다. cfmsDrapeSCAN 의 엣지는 이 파일이 정본이다.
+    _drapescan_goal_edge(
+        "cfmsDrapeInverse", "cfmsDrapeSCAN", "관측 대안",
+        "같은 물성을 3D 스캔 대신 드레이프 외곽선 사진으로 얻는 경로를 연다",
+        "확장",
+    ),
 ]
 
 # SFTF_DynamicTargetSearch 는 Tomo_SFTF 에서 갈라져 나왔다. 볼트 아이디어 노트
@@ -1524,6 +1564,68 @@ DYNAMIC_TARGET_SEARCH_GOAL_EDGES = [
             "Tomo_SFTF", "SFTF_DynamicTargetSearch", "표적 탐색",
             "메시 표면의 후보 생성·평가와 support path를 시간가변 공간 그래프의 이동 표적 탐색으로 옮긴다",
             "확장",
+        ),
+        "dashes": True,
+        "_tentative": True,
+    },
+]
+
+# ------------------------------------- 김우석 교수님 훌을 본문에 붙인다 (2026-09-18)
+# 이 네 노드(SFTF_SewerPOC · SFTF_UrbanTraffic · ColdOndol · ColdOndol_Positioning)는
+# 그래프에서 화살표가 하나도 없는 섬이었다. 안쪽 ColdOndol → ColdOndol_Positioning
+# 한 줄만 있고 밖으로 나가는 선이 없어서, 3D프린팅 훌과 아무 상관없는 별개의 연구처럼
+# 보였다(사용자 보고). 볼트에는 관계가 이미 적혀 있었는데 공개 그래프에만 없었다 —
+# 2026-08-28 개발 목표 전환이 응용/계보 화살표를 걷어낼 때 같이 떨어졌고, 옛 사본은
+# TODO_EDGES 안에 남아 있지만 _preserve_goal_edges 가 그 목록을 다시 넣지 않는다.
+#
+# 근거는 전부 볼트 frontmatter 의 depends_on·related 와 노트 §개요다. 없는 관계를
+# 만들지 않으려고 두 갈래를 서로 다르게 그린다.
+#
+#   · 실선(EXTRACTED) — SFTF 골격을 그대로 옮겨 실은 이식 관계. SewerPOC 은 「빌드방향=
+#     중력, receiver=하류 노드, ground node=방류구」로 매핑했다고 노트 §개요가 적고,
+#     UrbanTraffic 은 directed-SFTF 의 가역차로 필드 인스턴스다. Tomo_SFTF.depends_on
+#     에 둘 다 있고, SFTF_Clustering.depends_on 에 SewerPOC 이 있다.
+#   · 점선·잠정 — ColdOndol 두 편의 PFTF 연결은 **아직 조건부다.** 두 노트의
+#     §SFTF/PFTF 연결 경계가 「주 해법은 표준 RC + 제약 MPC이고, PFTF 는 QP 가 실제
+#     병목임이 실측으로 확인된 뒤에만 warm-start 제안 계층으로 비교한다. 기본 QP 가
+#     수 ms 에 풀리면 넣지 않는다」로 못박았다. 실선으로 그리면 이미 쓰고 있다는
+#     뜻이 되므로 그렇게 그리지 않는다.
+#
+# PFTF 는 3D프린팅 훌 밖이지만 Tomo_SFTF 와 「이론 일반화」로 이어져 있으므로, 온돌
+# 두 편은 두 걸음 거리로 붙는다. 이것이 실제 구조다 — 온돌은 적층 연구가 아니다.
+COAUTHOR_KIM_GOAL_EDGES = [
+    _autoplace_goal_edge(
+        "Tomo_SFTF", "SFTF_SewerPOC", "관망 이식",
+        "빌드방향=중력·receiver=하류 노드·ground node=방류구로 매핑해 SFTF 지지 트리를"
+        " 자연유하 하수/우수 관망 라우팅으로 옮긴다",
+        "확장",
+    ),
+    _autoplace_goal_edge(
+        "SFTF_Clustering", "SFTF_SewerPOC", "유역 분할",
+        "메시 분할에 쓰던 flow-region k-medoids 를 관망 유역 분할로 재사용한다",
+        "통합",
+    ),
+    _autoplace_goal_edge(
+        "Tomo_SFTF", "SFTF_UrbanTraffic", "방향장 이식",
+        "출력 방향장을 가역차로 directed-SFTF 시공간 필드 인스턴스로 옮긴다",
+        "확장",
+    ),
+    {
+        **_autoplace_goal_edge(
+            "PFTF", "ColdOndol", "조건부 warm-start",
+            "제어기를 대체하지 않는다 — QP 가 실제 병목임이 실측으로 확인된 뒤에만"
+            " 후보 배분·초기해 제안 계층으로 붙는다",
+            "가속",
+        ),
+        "dashes": True,
+        "_tentative": True,
+    },
+    {
+        **_autoplace_goal_edge(
+            "PFTF", "ColdOndol_Positioning", "조건부 warm-start",
+            "축3 배분의 주 해법은 표준 RC 추정 + 제약 MPC 다. 세대·시나리오가 커져"
+            " QP 가 병목으로 확인된 뒤에만 warm-start 제안 계층으로 비교한다",
+            "가속",
         ),
         "dashes": True,
         "_tentative": True,
@@ -1830,7 +1932,8 @@ def _preserve_goal_edges(match):
     # 계보 엣지는 이 파일이 정본이다. 스냅샷에 남은 옛 사본을 걷어내고 다시 넣어야
     # 아래 pair dedup 이 파일 쪽 라벨·설명을 이긴다.
     lineage_pairs = {
-        (str(edge["from"]), str(edge["to"])) for edge in DYNAMIC_TARGET_SEARCH_GOAL_EDGES
+        (str(edge["from"]), str(edge["to"]))
+        for edge in DYNAMIC_TARGET_SEARCH_GOAL_EDGES + COAUTHOR_KIM_GOAL_EDGES
     }
     edges = [
         edge for edge in edges
@@ -1843,6 +1946,7 @@ def _preserve_goal_edges(match):
         if str(edge.get("from")) not in SEM_IDS and str(edge.get("to")) not in SEM_IDS
     ]
     edges.extend(copy.deepcopy(DYNAMIC_TARGET_SEARCH_GOAL_EDGES))
+    edges.extend(copy.deepcopy(COAUTHOR_KIM_GOAL_EDGES))
     edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
     edges.extend(copy.deepcopy(DRAPESCAN_EDGES))
     edges.extend(copy.deepcopy(SEM_GOAL_EDGES))
