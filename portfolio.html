@@ -140,7 +140,7 @@
   <label class="chk" title="논문 완성도 8 이상 — 점수를 매길 원고가 아직 없거나 초기 단계인 프로젝트입니다">
     <input type="checkbox" id="showAll"> 완성도 8+ 포함
   </label>
-  <label class="chk" title="투고 파이를 깜빡입니다. 단계가 나아갈수록 주기가 짧아집니다(미정 2.4초 → 출판 0.8초)">
+  <label class="chk" title="심사 중인 원고(투고·심사 수정·게재확정)의 파이를 깜빡입니다. 나아갈수록 주기가 짧아집니다(투고 1.6초 → 게재확정 1.2초)">
     <input type="checkbox" id="blink"> 진도 깜빡임
   </label>
   <span class="count" id="count"></span>
@@ -322,6 +322,10 @@ const PIE_MIN = 14, PIE_MAX = 28;
    graph.html·mindmap.html 도 같은 식을 쓴다 — 세 화면이 같은 박자로 뛴다. */
 const BLINK_T_SLOW = 2400, BLINK_T_FAST = 800;
 const 깜빡임주기 = frac => BLINK_T_SLOW - (BLINK_T_SLOW - BLINK_T_FAST) * (frac || 0);
+/* 깜빡이는 단계는 **저널 손에 가 있고 아직 결판이 안 난** 셋뿐이다 (2026-09-19, 사용자
+   지시 — 전부 깜빡이니 정신이 없다). 쓰는 중(초고)과 끝난 것(출판)은 가만히 둔다.
+   미정·보류·취소·아이디어도 마찬가지다. 인쇄중은 사용자가 든 목록에 없어 함께 빼 두었다. */
+const BLINK_STAGES = new Set(['submitted', 'revision', 'accepted']);
 
 function 파이(stage, color) {
   const s = META.stages && META.stages[stage];
@@ -347,11 +351,12 @@ function 파이(stage, color) {
     const ex = cx + r * Math.sin(a), ey = cy - r * Math.cos(a), big = s.frac > 0.5 ? 1 : 0;
     안 += `<path d="M${cx},${cy} L${cx},${cy - r} A${r},${r} 0 ${big} 1 ${ex},${ey} Z" fill="${c}"/>`;
   }
-  // 깜빡임은 CSS 가 한다. 여기서는 단계별 주기만 실어 준다 — 스위치가 꺼져 있으면
-  // .blink-on 이 없어 animation-name 이 붙지 않으므로 이 값은 쓰이지 않는다.
-  const 주기 = 깜빡임주기(s.done ? 1 : s.frac);
-  return `<svg class="pie-anim" style="flex:0 0 auto;animation-duration:${주기}ms"`
-       + ` viewBox="0 0 16 16" width="${크기}" height="${크기}">${안}</svg>`;
+  // 깜빡임은 CSS 가 한다. 여기서는 깜빡일 단계에만 클래스와 주기를 실어 준다 — 스위치가
+  // 꺼져 있으면 .blink-on 이 없어 animation-name 이 붙지 않으므로 이 값은 쓰이지 않는다.
+  const 깜빡 = BLINK_STAGES.has(stage)
+    ? ` class="pie-anim" style="flex:0 0 auto;animation-duration:${깜빡임주기(s.done ? 1 : s.frac)}ms"`
+    : ' style="flex:0 0 auto"';
+  return `<svg${깜빡} viewBox="0 0 16 16" width="${크기}" height="${크기}">${안}</svg>`;
 }
 
 const esc = v => String(v ?? "").replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));

@@ -105,7 +105,7 @@
     </select>
     <label style="font-size:14px;margin-left:6px;cursor:pointer" title="노드 사이의 개발 목표 화살표. 끈 상태에서 노드를 클릭하면 그 노드의 화살표만 보입니다"><input type="checkbox" id="edge-cb" checked>개발 목표</label>
     <label style="font-size:14px;margin-left:6px;cursor:pointer" title="발견·BASE·METHOD·PIPELINE 영역(hull)과 영역 간 의존 화살표"><input type="checkbox" id="hyper-cb" checked>hyperedge</label>
-    <label style="font-size:14px;margin-left:6px;cursor:pointer" title="진도 파이를 깜빡입니다. 단계가 나아갈수록 주기가 짧아집니다(미정·보류 2.4초 → 출판 0.8초)"><input type="checkbox" id="blink-cb" checked>깜빡임</label>
+    <label style="font-size:14px;margin-left:6px;cursor:pointer" title="심사 중인 원고(투고·심사 수정·게재확정)의 파이를 깜빡입니다. 나아갈수록 주기가 짧아집니다(투고 1.6초 → 게재확정 1.2초)"><input type="checkbox" id="blink-cb" checked>깜빡임</label>
     &nbsp;<select id="view-sel" style="font-size:14px;padding:2px 6px;border:1px solid #999;border-radius:4px;background:#f4f4f4">
       <option value="graph">뷰: 노드-링크</option>
       <option value="matrix">뷰: 인접행렬</option>
@@ -1872,6 +1872,11 @@ function drawNodePie(ctx, cx, cy, R, p, color, border) {
    초당 열 번 남짓이다. 그래프가 숨어 있으면(인접행렬 뷰) 그리지 않고 일정만 이어 간다. */
 const BLINK_T_SLOW = 2400, BLINK_T_FAST = 800;
 const BLINK_KEY = 'graphify_graph_blink_v1';
+/* 깜빡이는 단계는 **저널 손에 가 있고 아직 결판이 안 난** 셋뿐이다 (2026-09-19, 사용자
+   지시 — 전부 깜빡이니 정신이 없다). 쓰는 중(draft)과 끝난 것(published)은 가만히 둔다.
+   미정·보류·취소·아이디어도 마찬가지다 — 멈춰 있는 것들이고 수가 많아 소음의 대부분이었다.
+   인쇄중(inprint)은 사용자가 든 목록에 없어 함께 빼 두었다. 한 줄만 고치면 넣을 수 있다. */
+const BLINK_STAGES = new Set(['submitted', 'revision', 'accepted']);
 function blinkPeriod(stage) {
   const frac = stage ? (stage.done ? 1 : (stage.x || stage.xx ? 0 : (stage.frac || 0))) : 0;
   return BLINK_T_SLOW - (BLINK_T_SLOW - BLINK_T_FAST) * frac;
@@ -1881,8 +1886,8 @@ function blinkPeriod(stage) {
    초당 3회 기준은 제일 빠른 주기가 1.25Hz 라 넘지 않는다. */
 let blinkOn = true;
 try { if (localStorage.getItem(BLINK_KEY) === '0') blinkOn = false; } catch (e) {}
-function blinkShowing(stage) {
-  if (!blinkOn) return true;
+function blinkShowing(key, stage) {
+  if (!blinkOn || !BLINK_STAGES.has(key)) return true;
   const T = blinkPeriod(stage);
   return (Date.now() % T) < T / 2;
 }
@@ -1893,7 +1898,9 @@ function scheduleBlink() {
   const now = Date.now();
   const halves = new Set();
   nodesDS.get({ filter: (n) => !n.hidden }).forEach((n) => {
-    const st = STAGE_PIE[NODE_STAGE[n.id]] || PROG[MINDMAP_STATUS[n.id]];
+    const key = STAGE_PIE[NODE_STAGE[n.id]] ? NODE_STAGE[n.id] : MINDMAP_STATUS[n.id];
+    if (!BLINK_STAGES.has(key)) return;              // 안 깜빡이는 단계는 일정에 넣지 않는다
+    const st = STAGE_PIE[key] || PROG[key];
     if (st) halves.add(blinkPeriod(st) / 2);
   });
   if (!halves.size) return;
@@ -1922,9 +1929,10 @@ scheduleBlink();
 network.on('afterDrawing', function (ctx) {
   nodesDS.get({ filter: (n) => !n.hidden }).forEach((n) => {
     // 볼트/표의 단계가 먼저다. 옛 4단계 배지 데이터(MINDMAP_STATUS)는 그것이 없을 때만.
-    const p = STAGE_PIE[NODE_STAGE[n.id]] || PROG[MINDMAP_STATUS[n.id]];
+    const key = STAGE_PIE[NODE_STAGE[n.id]] ? NODE_STAGE[n.id] : MINDMAP_STATUS[n.id];
+    const p = STAGE_PIE[key] || PROG[key];
     if (!p) return;
-    if (!blinkShowing(p)) return;              // 깜빡임의 '꺼짐' 반주기
+    if (!blinkShowing(key, p)) return;         // 깜빡임의 '꺼짐' 반주기
     if (n.shape === 'circle') return;          // 종료 노드(×)는 라벨이 원 안에 있어 덮으면 안 된다
     const pos = network.getPositions([n.id])[n.id];
     if (!pos) return;
