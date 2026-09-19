@@ -103,10 +103,10 @@
   .chip{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
   .dot{width:10px;height:10px;border-radius:2px;border:1px solid rgba(15,23,42,.35);flex:0 0 auto}
   .journal{display:inline-flex;align-items:center;gap:5px}
-  /* 예비 저널(2·3순위) — 1순위 이름 아래 한 줄. 첫 줄과 구별되게 작고 흐리다.
-     아이콘 폭(최대 28px)+간격만큼 들여써서 저널 이름들이 세로로 줄을 맞춘다. */
-  .jplan{display:block;margin-left:33px;font-size:11px;color:var(--dim);line-height:1.4}
-  .jplan b{font-weight:600;color:#94a3b8;margin-right:2px}
+  /* 투고 사다리의 화살표만 흐리게 — 저널 약어는 본문 색·크기 그대로 둔다.
+     2026-09-20: 2·3순위를 작은 글씨 둘째 줄로 뒀더니 잘 안 보인다는 사용자 지적에
+     「약어 → 약어 → 약어」 한 줄로 바꿨다. */
+  .jarrow{color:#b6bfcc;margin:0 3px}
   .clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
   tr.open .clamp{-webkit-line-clamp:unset;overflow:visible}
   .legend{display:flex;flex-wrap:wrap;gap:10px 16px;padding:0 16px 26px;font-size:11.5px;color:var(--dim)}
@@ -365,16 +365,22 @@ function 파이(stage, color) {
 
 const esc = v => String(v ?? "").replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
 
-/* 예비 저널 사다리 (2026-09-20, 사용자 요청) — 1순위는 위에 이미 큰 글씨로 있으므로
-   여기서는 **2순위부터** 쓴다. 값은 scripts/publish-portfolio.mjs 의 예비저널() 이 볼트
-   노트의 submission 원문에서 뽑아 표에 실어 준다. 사다리 정본은 볼트
-   Papers/SFTF_3편_2차투고저널_2026-09-20.md 이고, 없는 행은 이 줄이 통째로 빠진다. */
-function 예비저널줄(row) {
-  const plan = (row.journalPlan || []).filter(p => Number(p.rank) >= 2);
-  if (!plan.length) return "";
-  const 본문 = plan.map(p => `<b>${esc(p.rank)}</b>${esc(p.name)}`).join(" · ");
-  const 툴팁 = (row.journalPlan || []).map(p => `${p.rank}순위 ${p.name}`).join(" · ");
-  return `<span class="jplan" title="${esc("예비 저널 — " + 툴팁)}">${본문}</span>`;
+/* 투고 사다리 (2026-09-20, 사용자 요청) — 「1순위 → 2순위 → 3순위」를 **저널 약어**로
+   한 줄에 쓴다. 값은 scripts/publish-portfolio.mjs 의 사다리() 가 표에 실어 주고, 약어는
+   볼트 Dashboards/프로젝트현황.md 「저널 메모」가 정본이다. 사다리가 없는 행(대부분)은
+   지금까지처럼 저널 이름 하나만 나온다. */
+function 투고사슬(row) {
+  const chain = row.journalChain || [];
+  if (chain.length < 2) return esc(row.journal);
+  return chain.map(c => esc(c.short)).join('<span class="jarrow">→</span>');
+}
+
+/* 셀 툴팁. 사다리가 있으면 약어가 무엇의 줄임인지 전체 이름으로 풀어 준다. */
+function 투고툴팁(row, stage) {
+  const 앞 = (stage ? stage.label : "") + (row.grade ? ` · 등급 ${row.grade}` : "");
+  const chain = row.journalChain || [];
+  if (chain.length < 2) return 앞;
+  return 앞 + "\n" + chain.map((c, i) => `${i + 1}순위 ${c.full}`).join(" · ");
 }
 
 function 행그리기(row) {
@@ -391,7 +397,7 @@ function 행그리기(row) {
     + `<td class="num">${esc(row.completeness)}</td>`
     + `<td><span class="chip"><span class="dot" style="background:${QUALITY_COLORS[row.grade] || "var(--q-none)"}"></span>${esc(row.grade)}</span></td>`
     + `<td class="c-co">${esc(row.coauthor)}</td>`
-    + `<td><span class="journal" title="${esc((stage ? stage.label : "") + (row.grade ? ` · 등급 ${row.grade}` : ""))}">${파이(row.stage, 파이색(row.grade))}<span>${esc(row.journal)}</span></span>${예비저널줄(row)}</td>`
+    + `<td><span class="journal" title="${esc(투고툴팁(row, stage))}">${파이(row.stage, 파이색(row.grade))}<span>${투고사슬(row)}</span></span></td>`
     + `<td><div class="clamp" title="${esc(row.gate)}">${esc(row.gate)}</div></td>`
     + `<td class="c-intro"><div class="clamp" title="${esc(row.intro)}">${esc(row.intro)}</div></td>`;
   // 긴 서술 두 열은 3줄에서 자른다. 줄을 누르면 그 행만 펼친다.

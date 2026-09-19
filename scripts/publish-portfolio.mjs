@@ -189,6 +189,64 @@ function readTableSource(vaultRoot) {
       · 2순위 CIRP JMST · 3순위 J. Manufacturing Processes — 셋 다 …"
    · 로 갈리고 — 로 끝난다. 괄호 안은 게재료·출판사 설명이라 이름에서 잘라 낸다.
    SFTF_QEM 처럼 1순위가 빠진 노트도 있다(그 값이 곧 「투고」칸이라 본문에 다시 안 적었다). */
+/* 저널 약어 — 볼트가 먼저다 (2026-09-20).
+
+   볼트 Dashboards/프로젝트현황.md 의 「저널 메모」가 `- **약어** (전체 이름, 출판사)` 꼴로
+   약어를 정본으로 들고 있다(RPJ · TDP · IJCST · C&G · IJAMT · 한국섬유공학회지). 그걸 그대로
+   읽어 쓰므로, 저널을 새로 적으면 여기를 고치지 않아도 따라온다.
+
+   메모에 아직 없는 것만 아래 보충표에 둔다. 값은 전부 **사용자 본인이 볼트 산문에서 쓴 표기**다:
+     · CIRP  ·  JMP  — Papers/SFTF_3편_2차투고저널_2026-09-20.md 「CIRP JMST · JMP」
+     · AES         — Dashboards/프로젝트현황.md 「예비는 AES → C&G 다」
+     · F&T         — Projects/SFTF_Clustering.md submission 「1순위 F&T(...)」
+     · CAD         — Computer-Aided Design. 같은 문단들이 줄여 부르는 이름이다.
+   메모에 항목이 생기면 그쪽이 이긴다(아래에서 vault 맵을 나중에 얹는다). 모르는 이름은
+   줄이지 않고 그대로 둔다 — 잘못 줄이느니 길게 두는 편이 낫다. */
+const 약어보충 = {
+  "CIRP JMST": "CIRP",
+  "J. Manufacturing Processes": "JMP",
+  "Journal of Manufacturing Processes": "JMP",
+  "Advances in Engineering Software": "AES",
+  "Fashion and Textiles": "F&T",
+  "Computer-Aided Design": "CAD",
+};
+
+function 약어표(vaultRoot) {
+  const table = { ...약어보충 };
+  /* DASHBOARD 는 볼트 안의 **상대** 경로다. 그냥 readFileSync(DASHBOARD) 하면 던지고,
+     그걸 조용히 삼키면 볼트 표가 통째로 안 실린 채 보충표만 남는다 — 2026-09-20 에
+     실제로 그래서 C&G 가 안 붙었다. 경로를 붙이고, 못 읽으면 경고를 남긴다. */
+  const memoPath = path.join(vaultRoot, DASHBOARD);
+  let memo;
+  try {
+    memo = readFileSync(memoPath, "utf8");
+  } catch (err) {
+    console.warn(`  ! 저널 메모를 못 읽었습니다(${memoPath}) — 약어는 보충표만 씁니다: ${err.message}`);
+    return table;
+  }
+  const 절 = memo.split(/^##\s*저널 메모\s*$/m)[1] ?? "";
+  const re = /^-\s*(?:~~)?\*\*([^*]+)\*\*(?:~~)?\s*\(([^,)]+)/gm;
+  let m;
+  while ((m = re.exec(절)) !== null) {
+    const short = m[1].trim();
+    const full = m[2].trim();
+    if (short && full) table[full] = short;        // 볼트가 보충표를 덮는다
+  }
+  return table;
+}
+
+/* 「투고」칸에 한 줄로 그릴 사다리. 1순위는 submission 본문에 없을 수도 있어(그 값이 곧
+   대시보드의 「투고」칸이다) 거기서 메운다. 2순위가 없으면 사다리 자체를 만들지 않는다 —
+   그런 행은 지금까지처럼 저널 이름만 보인다. */
+function 사다리(journal, plan, 약어) {
+  const 줄임 = (name) => 약어[name] ?? name;
+  const byRank = new Map(plan.map((p) => [p.rank, p.name]));
+  const first = byRank.get(1) ?? String(journal ?? "").trim();
+  if (!first || !byRank.has(2)) return null;
+  const full = [first, byRank.get(2), byRank.get(3)].filter(Boolean);
+  return full.map((name) => ({ short: 줄임(name), full: name }));
+}
+
 function 예비저널(submission) {
   const text = String(submission ?? "");
   /* 사다리 **선언부 뒤**만 훑는다. 그러지 않으면 같은 문단의 다른 문장까지 걸린다 —
@@ -233,6 +291,7 @@ export function buildRows(vaultRoot) {
   // 등급 `none` 은 볼트 publish-research-outputs.mjs 의 GRADE_OUT 과 같게 「등급 없음」으로
   // 편다. graph.html·mindmap.html 옆에 서는 페이지라 세 곳이 같은 낱말·같은 색을 써야 한다.
   const GRADE_OUT = { none: "등급 없음" };
+  const 약어 = 약어표(vaultRoot);
   const rows = out.행.map((row) => {
     const notePath = row.링크?.path ?? `Projects/${row.이름}.md`;
     const owner = byPath.get(notePath);
@@ -256,8 +315,7 @@ export function buildRows(vaultRoot) {
       coauthorKey: row.공저자키,
       stage: row.투고상태 ?? null,
       journal: row.투고,
-      // 1순위는 이미 journal 이므로, 화면에는 여기서 2순위부터 쓴다.
-      journalPlan: 예비저널(owner?.submission),
+      journalChain: 사다리(row.투고, 예비저널(owner?.submission), 약어),
       stageRank: Number.isFinite(row.투고순위) ? row.투고순위 : null,
       gate: row.게이트,
       intro: String(row.소개 ?? ""),
