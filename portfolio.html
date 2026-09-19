@@ -58,6 +58,14 @@
   .count{font-size:12px;color:var(--dim)}
   .chk{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#475569;cursor:pointer;user-select:none}
   .chk input{cursor:pointer}
+  /* 진도 깜빡임 (2026-09-19, 사용자 요청) — 단계가 나아갈수록 주기가 짧아진다.
+     주기는 파이를 만들 때 animation-duration 으로 아이콘마다 따로 박는다(아래 파이()).
+     제일 빠른 것이 800ms = 1.25Hz 다. 초당 3회를 넘기면 광과민성 발작 유발 기준
+     (WCAG 2.3.1)에 걸리므로 그 아래로 잡았다. */
+  @keyframes pie-blink{0%,49.99%{opacity:1}50%,100%{opacity:0}}
+  .blink-on .pie-anim{animation-name:pie-blink;animation-iteration-count:infinite;animation-timing-function:linear}
+  /* 기본은 켜짐이다(사용자 지시). 멈추고 싶으면 툴바의 「진도 깜빡임」 스위치를 끈다 —
+     WCAG 2.2.2 의 「멈출 수 있을 것」은 그 스위치가 만족시킨다. */
   .hint{margin-left:auto;font-size:11.5px;color:var(--dim)}
   main{padding:14px 16px 40px}
   /* 로그인 전 화면. 표·검색·범례는 통째로 숨는다 — 받아 온 데이터도 없다. */
@@ -131,6 +139,9 @@
   <input id="q" type="search" placeholder="검색 (프로젝트 · 투고 · 게이트 · 소개)" autocomplete="off">
   <label class="chk" title="논문 완성도 8 이상 — 점수를 매길 원고가 아직 없거나 초기 단계인 프로젝트입니다">
     <input type="checkbox" id="showAll"> 완성도 8+ 포함
+  </label>
+  <label class="chk" title="투고 파이를 깜빡입니다. 단계가 나아갈수록 주기가 짧아집니다(미정 2.4초 → 출판 0.8초)">
+    <input type="checkbox" id="blink"> 진도 깜빡임
   </label>
   <span class="count" id="count"></span>
   <span class="hint">읽기 전용 · 고치는 곳은 볼트의 <code>Projects/*.md</code> 와 <code>Dashboards/프로젝트현황.md</code></span>
@@ -236,6 +247,7 @@ async function loadRows(){
 /* 완성도 필터. 토글은 이 브라우저에만 기억하고(다른 사람 화면을 바꾸지 않는다),
    기본값은 꺼짐 — 투고를 눈앞에 둔 원고만 보이는 쪽이다. */
 const SHOW_ALL_KEY = "cfms_portfolio_show_all_v1";
+const BLINK_KEY = "cfms_portfolio_blink_v1";
 function 적용완성도필터(){
   ROWS = 완성도포함 ? ALL_ROWS.slice()
     : ALL_ROWS.filter(r=>!(typeof r.completeness==='number' && r.completeness>=완성도_상한));
@@ -303,6 +315,14 @@ const 파이색 = g => QUALITY_PIE[g] || "#94a3b8";
    frac 사다리는 graph.html 의 노드 지름·볼트 대시보드의 투고셀() 과 같고 픽셀 폭만 화면마다
    다르다(graph.html 은 14 → 34). viewBox 는 그대로라 안의 기하는 변하지 않는다. */
 const PIE_MIN = 14, PIE_MAX = 28;
+
+/* 깜빡임 주기 (2026-09-19, 사용자 요청 — 진도가 나아갈수록 더 빨리 깜빡인다).
+   크기와 같은 frac 사다리를 타되 **반대 방향**이다: frac 0 이 2400ms, 출판(frac 1)이
+   800ms. 제일 빠른 것이 1.25Hz 로, 초당 3회를 넘기지 않는다(WCAG 2.3.1 광과민성 기준).
+   graph.html·mindmap.html 도 같은 식을 쓴다 — 세 화면이 같은 박자로 뛴다. */
+const BLINK_T_SLOW = 2400, BLINK_T_FAST = 800;
+const 깜빡임주기 = frac => BLINK_T_SLOW - (BLINK_T_SLOW - BLINK_T_FAST) * (frac || 0);
+
 function 파이(stage, color) {
   const s = META.stages && META.stages[stage];
   if (!s) return "";
@@ -327,7 +347,11 @@ function 파이(stage, color) {
     const ex = cx + r * Math.sin(a), ey = cy - r * Math.cos(a), big = s.frac > 0.5 ? 1 : 0;
     안 += `<path d="M${cx},${cy} L${cx},${cy - r} A${r},${r} 0 ${big} 1 ${ex},${ey} Z" fill="${c}"/>`;
   }
-  return `<svg viewBox="0 0 16 16" width="${크기}" height="${크기}" style="flex:0 0 auto">${안}</svg>`;
+  // 깜빡임은 CSS 가 한다. 여기서는 단계별 주기만 실어 준다 — 스위치가 꺼져 있으면
+  // .blink-on 이 없어 animation-name 이 붙지 않으므로 이 값은 쓰이지 않는다.
+  const 주기 = 깜빡임주기(s.done ? 1 : s.frac);
+  return `<svg class="pie-anim" style="flex:0 0 auto;animation-duration:${주기}ms"`
+       + ` viewBox="0 0 16 16" width="${크기}" height="${크기}">${안}</svg>`;
 }
 
 const esc = v => String(v ?? "").replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
@@ -522,6 +546,18 @@ showAll.addEventListener('change', () => {
   lsSet(SHOW_ALL_KEY, 완성도포함 ? '1' : '0');
   적용완성도필터();
   그리기();
+});
+
+/* 진도 깜빡임 토글 — 기본은 켜짐(사용자가 요청한 기능이다). 선택은 이 브라우저에만 남는다.
+   실제 깜빡임은 CSS 가 하고, 여기서는 body 의 .blink-on 만 켰다 껐다 한다. 움직임을 줄여
+   달라고 한 이용자에게는 스위치와 무관하게 CSS 쪽에서 막는다. */
+const blinkBox = document.getElementById('blink');
+const 깜빡임켬 = lsGet(BLINK_KEY) !== '0';   // 기본 켜짐 — 끄면 그 선택만 남는다
+blinkBox.checked = 깜빡임켬;
+document.body.classList.toggle('blink-on', 깜빡임켬);
+blinkBox.addEventListener('change', () => {
+  lsSet(BLINK_KEY, blinkBox.checked ? '1' : '0');
+  document.body.classList.toggle('blink-on', blinkBox.checked);
 });
 
 if(isLoggedIn()) showTable(); else showGate();

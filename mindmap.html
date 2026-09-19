@@ -74,6 +74,14 @@
   /* 진도 아이콘. viewBox 가 20 이라(제일 큰 출판 r=9) 12px 로 두면 전부 쪼그라든다.
      16px 로 키워 제일 큰 것이 색 견본(12px)보다 조금 크고 제일 작은 보류도 읽히게 한다. */
   .lg svg{width:16px;height:16px;flex:none;display:block}
+  /* 진도 깜빡임 (2026-09-19, 사용자 요청) — 단계가 나아갈수록 주기가 짧아진다.
+     주기는 progIcon 이 아이콘마다 animation-duration 으로 박는다. 제일 빠른 것이
+     800ms = 1.25Hz 로, 초당 3회(WCAG 2.3.1 광과민성 기준)를 넘기지 않는다.
+     범례(.lg)는 깜빡이지 않는다 — 열쇠는 가만히 있어야 읽힌다. */
+  @keyframes pie-blink{0%,49.99%{opacity:1}50%,100%{opacity:0}}
+  .blink-on #viewport .pie-anim{animation-name:pie-blink;animation-iteration-count:infinite;animation-timing-function:linear}
+  /* 기본은 켜짐이다(사용자 지시). 멈추고 싶으면 툴바의 「깜빡임」 버튼을 끈다 —
+     WCAG 2.2.2 의 「멈출 수 있을 것」은 그 버튼이 만족시킨다. */
   .sec{border-top:1px solid #eef2f6;padding-top:10px}
   .links-list{display:flex;flex-direction:column;gap:4px;max-height:150px;overflow:auto;font-size:11px}
   .links-list .li{display:flex;gap:6px;align-items:center;justify-content:space-between;background:#f8fafc;border:1px solid #eef2f6;border-radius:6px;padding:3px 6px}
@@ -102,6 +110,7 @@
     <button class="btn sm" onclick="expandAll(true)">＋전체</button>
     <button class="btn sm" onclick="expandAll(false)">－접기</button>
     <button class="btn sm" id="relBtn" onclick="toggleRel()">관계선 ✓</button>
+    <button class="btn sm" id="blinkBtn" onclick="toggleBlink()" title="진도 아이콘을 깜빡입니다. 단계가 나아갈수록 주기가 짧아집니다(보류 2.4초 → 출판 0.8초)">깜빡임 ✓</button>
     <button class="btn sm" onclick="fitView()">맞춤</button>
     <button class="btn sm" id="undoBtn" data-editonly onclick="undo()" title="실행취소 (Ctrl+Z)" disabled>↶</button>
     <button class="btn sm" id="redoBtn" data-editonly onclick="redo()" title="다시실행 (Ctrl+Y)" disabled>↷</button>
@@ -1084,6 +1093,17 @@ const progColor=st=>(PROGRESS[progStatus(st)]||{}).color||PROG_GREEN;
    화면마다 다르다(graph 14→34, portfolio 14→28). */
 const PROG_R_MAX=9;                    // published
 const PROG_R_MIN=4;                    // blocked — 사다리의 바닥
+
+/* 깜빡임 주기 (2026-09-19, 사용자 요청 — 진도가 나아갈수록 더 빨리 깜빡인다).
+   크기와 같은 frac 사다리를 타되 **반대 방향**이다: 보류 2400ms, 출판 800ms.
+   제일 빠른 것이 1.25Hz 로 초당 3회(WCAG 2.3.1 광과민성 기준)를 넘기지 않는다.
+   graph.html·portfolio.html 도 같은 식이라 세 화면이 같은 박자로 뛴다. */
+const BLINK_T_SLOW=2400, BLINK_T_FAST=800;
+function progPeriod(status){
+  const p=PROGRESS[progStatus(status)]; if(!p) return BLINK_T_SLOW;
+  const frac = p.done ? 1 : (p.x ? 0 : (p.frac||0));
+  return BLINK_T_SLOW - (BLINK_T_SLOW - BLINK_T_FAST) * frac;
+}
 function progRadius(status){
   const p=PROGRESS[progStatus(status)]; if(!p) return 0;
   if(p.done) return PROG_R_MAX;
@@ -1106,23 +1126,26 @@ function progIcon(status, cx, cy, color, checkColor, outline){
   const halo=or=>outline
     ? `<circle cx="${cx}" cy="${cy}" r="${or}" fill="none" stroke="${outline}" stroke-width="${1.2*k}"/>`
     : '';
+  /* 깜빡임은 CSS 가 한다 — 여기서는 단계별 주기만 실은 <g> 로 감싼다. 스위치가 꺼져
+     있으면 .blink-on 이 없어 animation-name 이 붙지 않으므로 이 값은 쓰이지 않는다. */
+  const wrap = inner => `<g class="pie-anim" style="animation-duration:${progPeriod(status)}ms">${inner}</g>`;
   if(p.done){                          // 완료: 꽉 찬 원 + 배경색 체크
-    return halo(1.1*r)
+    return wrap(halo(1.1*r)
          + `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}"/>`
          + `<path d="M${cx-2.9*k},${cy+0.2*k} l${2.1*k},${2.2*k} l${3.9*k},${-4.4*k}" fill="none" stroke="${checkColor}"`
-         + ` stroke-width="${1.8*k}" stroke-linecap="round" stroke-linejoin="round"/>`;
+         + ` stroke-width="${1.8*k}" stroke-linecap="round" stroke-linejoin="round"/>`);
   }
   if(p.x){                             // 보류: ⛔ — 꽉 찬 원에 가로 막대 (2026-09-18, 사용자 지시)
-    return halo(1.1*r)                 // 채워진 아이콘이라 링은 완료형과 같은 반지름이다
+    return wrap(halo(1.1*r)            // 채워진 아이콘이라 링은 완료형과 같은 반지름이다
          + `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}"/>`
          + `<path d="M${cx-3.5*k},${cy} L${cx+3.5*k},${cy}" fill="none" stroke="${checkColor}"`
-         + ` stroke-width="${2.4*k}" stroke-linecap="round"/>`;
+         + ` stroke-width="${2.4*k}" stroke-linecap="round"/>`);
   }
   const a=2*Math.PI*p.frac;            // 12시에서 시계방향으로 채운다
   const ex=cx+r*Math.sin(a), ey=cy-r*Math.cos(a), big=p.frac>0.5?1:0;
-  return halo(1.2333*r)
+  return wrap(halo(1.2333*r)
        + `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${1.6*k}"/>`
-       + `<path d="M${cx},${cy} L${cx},${cy-r} A${r},${r} 0 ${big} 1 ${ex},${ey} Z" fill="${color}"/>`;
+       + `<path d="M${cx},${cy} L${cx},${cy-r} A${r},${r} 0 ${big} 1 ${ex},${ey} Z" fill="${color}"/>`);
 }
 let DATA=JSON.parse(JSON.stringify(DEFAULT_DATA));
 normalizeKinds(DATA);
@@ -1417,6 +1440,23 @@ function delLink(i){ pushHistory(); DATA.links.splice(i,1); scheduleSave(); rend
 /* ====================== 보기 ====================== */
 function expandAll(open){ walk(DATA.root, n=>{ if((n.children||[]).length) n.collapsed=!open; }); scheduleSave(); render(); }
 function toggleRel(){ showRel=!showRel; DATA.showRel=showRel; document.getElementById('relBtn').textContent='관계선 '+(showRel?'✓':'✕'); scheduleSave(); render(); }
+/* 진도 깜빡임 토글 — 기본은 켜짐(사용자가 요청한 기능이다). 선택은 이 브라우저에만 남는다
+   (DATA 가 아니라 localStorage 다 — 보기 취향이지 문서 내용이 아니므로 클라우드에 올리지
+   않는다). 실제 깜빡임은 CSS 가 하고 여기서는 .blink-on 만 켰다 껐다 한다. */
+const BLINK_KEY='cfms_mindmap_blink_v1';
+// 기본은 켜짐이다(사용자 지시). 끄면 그 선택만 이 브라우저에 남는다.
+let blinkOn = (function(){ try{ return localStorage.getItem(BLINK_KEY)!=='0'; }catch(e){ return true; } })();
+function applyBlink(){
+  document.body.classList.toggle('blink-on', blinkOn);
+  const b=document.getElementById('blinkBtn');
+  if(b) b.textContent='깜빡임 '+(blinkOn?'✓':'✕');
+}
+function toggleBlink(){
+  blinkOn=!blinkOn;
+  try{ localStorage.setItem(BLINK_KEY, blinkOn?'1':'0'); }catch(e){}
+  applyBlink();
+}
+applyBlink();
 function fitView(){
   const lay=layout(DATA.root), cv=document.getElementById('canvas');
   const sx=(cv.clientWidth-40)/lay.width, sy=(cv.clientHeight-40)/lay.height;
