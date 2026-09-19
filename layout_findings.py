@@ -285,6 +285,10 @@ POS = {
     # 양쪽에서 가장 한산한 자리를 골랐다.
     "TSE_TomoSh4": (407, 550),
     "TSE_TomoSh5": (275, 768),
+    # 2026-09-19: 전석진 교수님 후보 둘. 김우석 묶음(y<=470) 아래, 은종현 묶음(x<=914)
+    # 오른쪽의 빈 자리다. 드래그 격자(10)에 맞춰 두었다 — 웹에서 옮기면 표가 정본이 된다.
+    "Jeon_DLPOrient": (1330, 640),
+    "Jeon_DispersityProp": (1330, 820),
 }
 
 # 노드 id 가 노트 이름에서 규칙으로 나오지 않는 트랙 노드 → (볼트 노트 stem,
@@ -378,6 +382,19 @@ HYPEREDGES = [
      "nodes": ["SFTF_SewerPOC", "ColdOndol", "ColdOndol_Positioning",
                "SFTF_UrbanTraffic"],
      "color": "#65a30d", "labelColor": "#4d7c0f",
+     "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
+     "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
+    # 2026-09-19: 사용자 지시로 세운다. ⚠️ 앞의 넷과 성격이 다르다 — 두 노트가 가진 것은
+    # `coauthor_candidate` 이지 `coauthors` 가 아니다(공저 **후보**, 확정이 아니다).
+    # _load_coauthor_candidates 의 규약은 「후보는 훌에 넣지 않고 노드 정보의 한 줄로만
+    # 보인다」인데, 사용자가 이 둘만은 묶어 달라고 했으므로 예외로 둔다. 확정되면 볼트가
+    # coauthors 로 옮기고 이 예외 표시도 지우면 된다.
+    # DLPOrient 쪽은 2026-09-19 에 제안 자체가 보류됐고(단기 불가), DispersityProp 쪽은
+    # 전석진·은종현 순서를 뒤집을지 사용자 확인을 기다리는 중이다.
+    {"label": "전석진 교수님",
+     "kind": "coauthor",
+     "nodes": ["Jeon_DLPOrient", "Jeon_DispersityProp"],
+     "color": "#b45309", "labelColor": "#92400e",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
 ]
@@ -482,6 +499,10 @@ QUALITY_ROWS = [
     # quality 판정을 보류한다」다. 곧 정식 프로젝트가 되면 등급을 올리면 된다(사용자).
     # 볼트 Rules §8 대로 grade_note 전문을 옮기지 않고 공개 가능한 한 줄만 싣는다.
     ("cfmsDrapeInverse", "cfmsDrapeInverse", "ToDo", "정적 평형 adjoint 로 기울기를 얻는 원단 물성 역추정선; 합성 검증 완료, 실측 회수 전"),
+    # 2026-09-19 신설. 볼트 두 노트 모두 grade: ToDo · stage: undecided 이고, 등급은
+    # 실측 대조 전까지 보류다. 볼트 Rules §8 대로 grade_note 전문을 옮기지 않는다.
+    ("Jeon_DLPOrient", "Jeon_DLPOrient", "ToDo", "값싼 배향 순위가 실물 출력물의 물성 순위와 맞는지 재는 검증선; 착수 게이트 통과, 실측 대조 전"),
+    ("Jeon_DispersityProp", "Jeon_DispersityProp", "ToDo", "분산도 지표와 실제 물성의 상관을 기존 시편 사진으로 확인하는 검증선; 착수 게이트 통과, 실측 대조 전"),
 ]
 QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
 
@@ -530,6 +551,8 @@ INTRODUCTIONS = {
     "cfmsAutoPlace_JCDE": "JCDE CAD 관점에서 패널의 신체 부위와 전역 조립·배치 가설을 다루는 논문 트랙이다.",
     "cfmsDrapeSCAN": "고정형·핸드헬드 스캔 패치를 cfmsDrape 물리와 소프트 대응으로 정합해 인체 표면을 복원하려는 실험선이다.",
     "cfmsDrapeInverse": "드레이프한 원단 사진에서 그 원단의 인장·전단·굽힘 강성을 거꾸로 알아내는 도구다.",
+    "Jeon_DLPOrient": "값싸게 매긴 3D 프린팅 배향 순위가 실제로 찍어 본 물건의 물성 순위와 맞는지를 처음으로 실물에 대고 재는 연구다.",
+    "Jeon_DispersityProp": "현미경 사진으로 잰 입자 분산도 숫자가 실제 물성과 정말로 이어지는지를, 이미 찍혀 있는 남의 시편 사진으로 확인한다.",
     "TSE_SEM1_Bezier": "전자현미경 사진 한 장에서 섬유 한 올 한 올을 매끈한 곡선으로 따라가며 굵기와 방향을 재어내는 방법이다.",
     "TSE_SEM2_Tensor": "섬유를 하나씩 오려내지 않고 사진 전체에서 섬유가 어느 쪽으로 누워 있는지와 겹친 아래층까지 한꺼번에 재는 방법이다.",
     "TSE_SEM3_AutoTune": "정답을 모르는 실제 사진에서도 측정기의 손잡이를 스스로 안전하게 맞추는 방법을 다루는 연구다.",
@@ -1150,6 +1173,44 @@ DRAPEINVERSE_NODE = {
     "_project_path": PROJECT_PATHS.get("cfmsDrapeInverse", r"D:\__CFMS_Projects\cfmsDrapeInverse_dev"),
 }
 
+
+# 2026-09-19: 볼트에 새로 선 전석진 교수님 후보 둘. 두 노트 모두 status: todo ·
+# grade: ToDo · stage: undecided 라 흰 바탕·검정 외곽선(community 4)에 빈 원으로 그려진다.
+# 단계(undecided)는 NOTE_STAGES 가 볼트에서 자동으로 읽어 오므로 여기 적지 않는다.
+DLPORIENT_NODE = {
+    "id": "Jeon_DLPOrient",
+    "label": "Jeon_DLPOrient",
+    "color": {"background": "#ffffff", "border": "#000000",
+               "highlight": {"background": "#ffffff", "border": "#000000"}},
+    "size": 15.4,
+    "font": {"size": 13, "color": "#333333", "bold": False},
+    "title": "Jeon_DLPOrient — ToDo: 배향 순위를 실물 출력물로 검증",
+    "community": 4,
+    "community_name": "ToDo",
+    "source_file": "Jeon_DLPOrient.md",
+    "file_type": "concept",
+    "degree": 2,
+    "_intro": INTRODUCTIONS["Jeon_DLPOrient"],
+    "_project_path": PROJECT_PATHS.get("Jeon_DLPOrient", r"D:\__KIT_projects\Jeon_DLPOrient_dev"),
+}
+
+DISPERSITYPROP_NODE = {
+    "id": "Jeon_DispersityProp",
+    "label": "Jeon_DispersityProp",
+    "color": {"background": "#ffffff", "border": "#000000",
+               "highlight": {"background": "#ffffff", "border": "#000000"}},
+    "size": 15.4,
+    "font": {"size": 13, "color": "#333333", "bold": False},
+    "title": "Jeon_DispersityProp — ToDo: 분산도 지표와 물성의 상관 검증",
+    "community": 4,
+    "community_name": "ToDo",
+    "source_file": "Jeon_DispersityProp.md",
+    "file_type": "concept",
+    "degree": 1,
+    "_intro": INTRODUCTIONS["Jeon_DispersityProp"],
+    "_project_path": PROJECT_PATHS.get("Jeon_DispersityProp", r"D:\__KIT_projects\Jeon_DispersityProp_dev"),
+}
+
 # 2026-07-30: mindmap Paper quality 기준 상으로 동기화. 원고 2편+설명서가 있고
 # 게이트 T·T2·G2·S·X 가 닫혔다.  라벨에 [draft] 를 병기하는 이유는 등급이
 # 상이어도 아직 미투고이기 때문이다.
@@ -1182,6 +1243,8 @@ TODO_NODES = [
     URBAN_TRAFFIC_NODE,
     DRAPESCAN_NODE,
     DRAPEINVERSE_NODE,
+    DLPORIENT_NODE,
+    DISPERSITYPROP_NODE,
 ]
 
 TODO_EDGES = [
@@ -1632,6 +1695,43 @@ COAUTHOR_KIM_GOAL_EDGES = [
     },
 ]
 
+# ------------------------------------- 전석진 교수님 후보 둘을 본문에 잇는다 (2026-09-19)
+# 볼트 frontmatter 의 depends_on 이 근거다. 김우석 훌이 섬으로 떠 있어 별개 연구처럼 보였던
+# 일(2026-09-18)을 되풀이하지 않으려고 처음부터 같이 넣는다.
+#   Jeon_DispersityProp.depends_on = [cfmsDispersity]
+#   Jeon_DLPOrient.depends_on      = [SFTF_QEM, Tomo_SFTFSoft]
+# 둘 다 아직 ToDo·미정이고 실측 대조 전이라 점선·잠정으로 그린다 — 실선은 「이미 쓰고 있다」는
+# 뜻이 된다.
+JEON_GOAL_EDGES = [
+    {
+        **_autoplace_goal_edge(
+            "cfmsDispersity", "Jeon_DispersityProp", "상관 검증",
+            "분산도 지표가 실제 물성과 정말로 이어지는지 이미 찍혀 있는 시편 사진으로 확인한다",
+            "정확도",
+        ),
+        "dashes": True,
+        "_tentative": True,
+    },
+    {
+        **_autoplace_goal_edge(
+            "SFTF_QEM", "Jeon_DLPOrient", "순위 검증",
+            "저비용 순위가 실물 출력물의 물성 순위와 맞는지 처음으로 실물에 대고 잰다",
+            "정확도",
+        ),
+        "dashes": True,
+        "_tentative": True,
+    },
+    {
+        **_autoplace_goal_edge(
+            "Tomo_SFTFSoft", "Jeon_DLPOrient", "배향 순위",
+            "출력 방향 평가를 DLP 실물 인장·이방성 순위와 대조하는 검증선으로 넘긴다",
+            "정확도",
+        ),
+        "dashes": True,
+        "_tentative": True,
+    },
+]
+
 # ------------------------------------------------ TSE_SEM 논문 트랙 분리 (2026-09-11)
 # TSE_SEM2026_dev 한 저장소에 논문 3편이 있고(볼트 Projects/TSE_SEM.md 의 draft_keyword),
 # mindmap.html 의 클라우드 문서는 이미 세 노드로 나뉘어 있다.  graph.html 도 나눈다.
@@ -1905,6 +2005,16 @@ def _preserve_raw_nodes(match):
 s, nraw = re.subn(r"const RAW_NODES = (\[.*?\]);", _preserve_raw_nodes,
                   s, count=1, flags=re.S)
 
+# graph.html 이 **런타임에** RAW_NODES 에 밀어 넣는 큐레이션 노드들이다(파일의 RAW_NODES
+# 배열에는 없다). 아래 엣지 필터와 CURATED_POSITIONS 가 같은 목록을 봐야 한다 — 몰랐던
+# 2026-09-19 에 cfmsDispersity 로 들어가는 엣지가 조용히 걸러졌다.
+RUNTIME_CURATED_NODE_IDS = (
+    "cfmsAutoSew", "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN",
+    "SFTF_Holonomy", "HIPDetect", "cfmsDispersity",
+    "TSE_TomoSh4", "TSE_TomoSh5",
+)
+
+
 def _preserve_goal_edges(match):
     """Keep the current development-goal edge snapshot without legacy growth.
 
@@ -1934,6 +2044,7 @@ def _preserve_goal_edges(match):
     lineage_pairs = {
         (str(edge["from"]), str(edge["to"]))
         for edge in DYNAMIC_TARGET_SEARCH_GOAL_EDGES + COAUTHOR_KIM_GOAL_EDGES
+        + JEON_GOAL_EDGES
     }
     edges = [
         edge for edge in edges
@@ -1947,12 +2058,14 @@ def _preserve_goal_edges(match):
     ]
     edges.extend(copy.deepcopy(DYNAMIC_TARGET_SEARCH_GOAL_EDGES))
     edges.extend(copy.deepcopy(COAUTHOR_KIM_GOAL_EDGES))
+    edges.extend(copy.deepcopy(JEON_GOAL_EDGES))
     edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
     edges.extend(copy.deepcopy(DRAPESCAN_EDGES))
     edges.extend(copy.deepcopy(SEM_GOAL_EDGES))
     node_match = re.search(r"const RAW_NODES = (\[.*?\]);", s, flags=re.S)
     if node_match:
         node_ids = {str(node["id"]) for node in json.loads(node_match.group(1))}
+        node_ids.update(RUNTIME_CURATED_NODE_IDS)
         edges = [
             edge for edge in edges
             if str(edge.get("from")) in node_ids and str(edge.get("to")) in node_ids
@@ -2102,11 +2215,7 @@ s, n1 = re.subn(r"const POS = \{.*?\};", lambda _m: pos_js, s, count=1,
                 flags=re.S)
 # RAW_NODES 에 없고 런타임에 덧붙는 큐레이션 노드는 CURATED_POSITIONS 로도 내보내야
 # 재생성 뒤에 좌표가 사라지지 않는다.
-curated_position_ids = (
-    "cfmsAutoSew", "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN",
-    "SFTF_Holonomy", "HIPDetect", "cfmsDispersity",
-    "TSE_TomoSh4", "TSE_TomoSh5",
-)
+curated_position_ids = RUNTIME_CURATED_NODE_IDS
 curated_pos_js = "const CURATED_POSITIONS = " + json.dumps(
     {
         node_id: {"x": POS[node_id][0], "y": POS[node_id][1]}
