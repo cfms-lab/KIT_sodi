@@ -1073,14 +1073,29 @@ updateStatsLine();
 // === 드래그 위치 영속화 ===============================================
 // 드래그가 끝나면 해당 노드들의 좌표를 localStorage에 저장한다.
 // (이 브라우저에서 다시 열 때 저장 위치가 기본 배치 POS를 덮어쓴다.)
+//
+// 2026-09-19: 놓는 자리를 5의 배수로 맞춘다(사용자 요청). 눈으로 열·행을 맞추려면
+// 한두 픽셀 어긋난 값이 계속 걸리는데, 격자에 앉으면 같은 x 를 두 번 끌어도 같은
+// 값이 나오므로 정렬이 쉬워진다. **끌어 놓은 노드만** 옮긴다 — 파일 POS·표의 공유
+// 좌표에 5의 배수가 아닌 값이 있어도 손대지 않은 노드는 그 자리에 그대로 둔다.
+// 격자를 바꾸려면 이 상수만 고치면 된다.
+const DRAG_GRID = 5;
+const snapToGrid = v => Math.round(v / DRAG_GRID) * DRAG_GRID;
 network.on('dragEnd', params => {
   if (layoutMode !== 'free') return;   // 계층 배치의 임시 좌표는 저장하지 않는다
   if (!params.nodes || params.nodes.length === 0) return;
   const positions = network.getPositions(params.nodes);
+  let snapped = 0;
   params.nodes.forEach(id => {
     const p = positions[id];
-    if (p) savedPos[id] = { x: Math.round(p.x), y: Math.round(p.y) };
+    if (!p) return;
+    const x = snapToGrid(p.x), y = snapToGrid(p.y);
+    // 놓은 자리와 격자가 다르면 그 자리로 옮긴다. 훌과 엣지 캡션은 afterDrawing 이
+    // 노드 좌표를 다시 읽어 그리므로 아래 redraw 한 번으로 같이 따라온다.
+    if (x !== p.x || y !== p.y) { network.moveNode(id, x, y); snapped += 1; }
+    savedPos[id] = { x, y };
   });
+  if (snapped) network.redraw();
   try { localStorage.setItem(POS_STORE_KEY, JSON.stringify(savedPos)); } catch (e) {}
 });
 
