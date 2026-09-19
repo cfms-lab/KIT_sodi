@@ -1029,6 +1029,45 @@ function applyJeonRoom20260919(data){
   data.jeonRoomVersion=JEON_ROOM_VERSION;
   return true;   // 버전 상승 자체도 클라우드 문서에 저장해야 재실행되지 않는다.
 }
+/* ====== cfmsDispersityProp 개명 + 은종현 교수님방으로 (2026-09-19 오후) ======
+   볼트에서 Jeon_DispersityProp.md → cfmsDispersityProp.md 로 개명됐고 공저 후보가
+   전석진 → **은종현**으로 바뀌었다(노트 coauthor_candidate: 「부모 논문 TSE 63(4)
+   248-257 의 공동 교신저자」). 저장소·작업폴더 이름도 같이 바뀌었다.
+
+   앞 마이그레이션(applyJeonRoom20260919)이 이미 돌아 클라우드 문서에 저장된 뒤라
+   그 함수를 고치지 않고 **다음 마이그레이션으로 잇는다** — 옛 문서와 새 문서 어느 쪽에서
+   시작해도 같은 자리에 닿는다. 전석진 교수님방은 Jeon_DLPOrient 하나를 안고 남는다.
+
+   사용자가 이미 손으로 옮겨 두었으면 자리는 건드리지 않는다(방 안에 있으면 그대로 둔다). */
+const DISPERSITYPROP_RENAME_VERSION='2026-09-19b';
+function applyDispersityPropRename20260919(data){
+  if(!data||!data.root||data.dispersityPropRenameVersion===DISPERSITYPROP_RENAME_VERSION) return false;
+  const root=data.root;
+  const node=findNode(root,'Jeon_DispersityProp');
+  if(node){
+    node.id='cfmsDispersityProp';
+    node.title='cfmsDispersityProp';
+    if(/Jeon_DispersityProp/.test(node.projectPath||''))
+      node.projectPath=node.projectPath.replace(/Jeon_DispersityProp/g,'cfmsDispersityProp');
+    if(/Jeon_DispersityProp/.test(node.url||''))
+      node.url=node.url.replace(/Jeon_DispersityProp/g,'cfmsDispersityProp');
+    (data.links||[]).forEach(l=>{
+      if(l.from==='Jeon_DispersityProp') l.from='cfmsDispersityProp';
+      if(l.to==='Jeon_DispersityProp') l.to='cfmsDispersityProp';
+    });
+  }
+  // 은종현 교수님방(nffg4ou5) 맨 뒤로. 이미 그 안에 있으면 손대지 않는다.
+  const room=findNode(root,'nffg4ou5');
+  const moved=findNode(root,'cfmsDispersityProp');
+  if(room&&moved&&!findNode(room,moved.id)){
+    const par=findParent(root,moved.id);
+    if(par){ const i=(par.children||[]).findIndex(c=>c.id===moved.id); if(i>=0) par.children.splice(i,1); }
+    (room.children||(room.children=[])).push(moved);
+    room.collapsed=false;
+  }
+  data.dispersityPropRenameVersion=DISPERSITYPROP_RENAME_VERSION;
+  return true;   // 버전 상승 자체도 클라우드 문서에 저장해야 재실행되지 않는다.
+}
 //==PURE_END
 
 /* ====================== Supabase 설정/세션 (upjuk과 공유) ====================== */
@@ -1215,6 +1254,7 @@ applyGFiberCTRename20260911(DATA);
 applyEunRoomAsymTensor20260916(DATA);
 applyResearchOptimizeRetire20260918(DATA);
 applyJeonRoom20260919(DATA);
+applyDispersityPropRename20260919(DATA);
 let sel=null, view={tx:60,ty:30,s:1}, showRel=true, LAY=null;
 
 /* ====================== 실행취소 / 다시실행 (undo/redo) ====================== */
@@ -1611,10 +1651,11 @@ async function loadDoc(){
     const eunRoomMigrated=applyEunRoomAsymTensor20260916(DATA);
     const researchOptimizeMigrated=applyResearchOptimizeRetire20260918(DATA);
     const jeonRoomMigrated=applyJeonRoom20260919(DATA);
+    const dispersityPropMigrated=applyDispersityPropRename20260919(DATA);
     const kindsMigrated=normalizeKinds(DATA);
     showRel=DATA.showRel!==false; document.getElementById('relBtn').textContent='관계선 '+(showRel?'✓':'✕');
     sel=null; render(); renderEdit(); fitView(); setSaveState('');
-    if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||linkMigrated||statusMigrated||drapeMigrated||gradesMigrated||directionMigrated||holonomyMigrated||hipDetectMigrated||leeRoomMigrated||gfiberCtMigrated||eunRoomMigrated||researchOptimizeMigrated||jeonRoomMigrated||kindsMigrated) await saveDoc(true);
+    if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||linkMigrated||statusMigrated||drapeMigrated||gradesMigrated||directionMigrated||holonomyMigrated||hipDetectMigrated||leeRoomMigrated||gfiberCtMigrated||eunRoomMigrated||researchOptimizeMigrated||jeonRoomMigrated||dispersityPropMigrated||kindsMigrated) await saveDoc(true);
   }catch(e){
     const b=document.getElementById('banner'); b.style.display='block';
     if(/relation|does not exist|42P01|PGRST205|404/i.test(e.message))
@@ -1622,7 +1663,7 @@ async function loadDoc(){
     else if(!isLoggedIn() && /401|403|PGRST301|permission denied/i.test(e.message))
       b.textContent='공개 열람 권한이 없습니다. Supabase에서 enable_rls_mindmaps.sql 을 다시 실행해 anon SELECT 정책을 적용하세요.';
     else b.textContent='데이터를 불러오지 못했습니다: '+e.message.slice(0,140);
-    applyJeonRoom20260919(DATA); applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); applyDrapeEngineLinks20260827(DATA); applyVaultGrades20260901(DATA); applyLinkDirection20260907(DATA); applyHolonomySplit20260907(DATA); applyHipDetectSplit20260910(DATA); applyLeeRoomGather20260911(DATA); applyGFiberCTRename20260911(DATA); applyEunRoomAsymTensor20260916(DATA); applyResearchOptimizeRetire20260918(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
+    applyJeonRoom20260919(DATA); applyDispersityPropRename20260919(DATA); applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); applyDrapeEngineLinks20260827(DATA); applyVaultGrades20260901(DATA); applyLinkDirection20260907(DATA); applyHolonomySplit20260907(DATA); applyHipDetectSplit20260910(DATA); applyLeeRoomGather20260911(DATA); applyGFiberCTRename20260911(DATA); applyEunRoomAsymTensor20260916(DATA); applyResearchOptimizeRetire20260918(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
   }
 }
 async function saveDoc(silent){
@@ -1643,7 +1684,7 @@ function download(name,text,type){ const b=new Blob([text],{type:type||'applicat
 function exportJSON(){ download('mindmap_backup.json', JSON.stringify(DATA,null,2)); toast('백업 JSON을 내려받았습니다.'); }
 function importJSON(input){
   const f=input.files[0]; if(!f)return; const r=new FileReader();
-  r.onload=()=>{ try{ const d=JSON.parse(r.result); applyJeonRoom20260919(d); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); applyLinkFill20260820(d); applyStatusCleanup20260822(d); applyDrapeEngineLinks20260827(d); applyVaultGrades20260901(d); applyLinkDirection20260907(d); applyHolonomySplit20260907(d); applyHipDetectSplit20260910(d); applyLeeRoomGather20260911(d); applyGFiberCTRename20260911(d); applyEunRoomAsymTensor20260916(d); applyResearchOptimizeRetire20260918(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); applyJeonRoom20260919(d); applyDispersityPropRename20260919(d); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); applyLinkFill20260820(d); applyStatusCleanup20260822(d); applyDrapeEngineLinks20260827(d); applyVaultGrades20260901(d); applyLinkDirection20260907(d); applyHolonomySplit20260907(d); applyHipDetectSplit20260910(d); applyLeeRoomGather20260911(d); applyGFiberCTRename20260911(d); applyEunRoomAsymTensor20260916(d); applyResearchOptimizeRetire20260918(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
     if(!confirm('백업으로 현재 클라우드 관계도를 덮어쓸까요?'))return;
     pushHistory();
     DATA=d; showRel=DATA.showRel!==false; sel=null; render(); renderEdit(); saveDoc(false);

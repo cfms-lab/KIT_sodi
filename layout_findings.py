@@ -288,7 +288,10 @@ POS = {
     # 2026-09-19: 전석진 교수님 후보 둘. 김우석 묶음(y<=470) 아래, 은종현 묶음(x<=914)
     # 오른쪽의 빈 자리다. 드래그 격자(10)에 맞춰 두었다 — 웹에서 옮기면 표가 정본이 된다.
     "Jeon_DLPOrient": (1330, 640),
-    "Jeon_DispersityProp": (1330, 820),
+    # 2026-09-19: 볼트에서 Jeon_DispersityProp → cfmsDispersityProp 로 개명되고 공저
+    # 후보도 전석진 → 은종현 으로 바뀌었다. 자리도 은종현 묶음 안으로 옮긴다 —
+    # 부모 cfmsDispersity 바로 아래이고 그 묶음의 격자 간격(180)과 같은 칸이다.
+    "cfmsDispersityProp": (710, 1200),
 }
 
 # 노드 id 가 노트 이름에서 규칙으로 나오지 않는 트랙 노드 → (볼트 노트 stem,
@@ -367,11 +370,15 @@ HYPEREDGES = [
     # PFTF_AsymTensor.md coauthors, 저자 대학원생·설인환†·은종현†) — 주 결론이 부정으로 남은
     # 원고의 축을 복합재 순서 뒤집기 실측으로 갈아 끼우는 자리다.  좌표는 사용자가 이미 웹에서
     # 이 묶음 옆(669, 836)으로 끌어 두었고, 파일 씨앗은 pull-graph-positions 로 따라왔다.
+    # 2026-09-19: cfmsDispersityProp 가 들어왔다. 볼트에서 Jeon_DispersityProp 로 서 있던
+    # 것이 개명되고 공저 후보가 전석진 → **은종현**으로 바뀌었다(노트 coauthor_candidate:
+    # 「부모 논문 TSE 63(4) 248-257 의 공동 교신저자」). 그래서 전석진 훌에서 이리로 옮긴다.
     {"label": "은종현 교수님",
      "kind": "coauthor",
      "nodes": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier",
                "TSE_SEM2_Tensor", "SFTF_HeatMethod",
-               "SFTF_Holonomy", "cfmsDispersity", "PFTF_AsymTensor"],
+               "SFTF_Holonomy", "cfmsDispersity", "PFTF_AsymTensor",
+               "cfmsDispersityProp"],
      "color": "#db2777", "labelColor": "#be185d",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
@@ -389,11 +396,12 @@ HYPEREDGES = [
     # _load_coauthor_candidates 의 규약은 「후보는 훌에 넣지 않고 노드 정보의 한 줄로만
     # 보인다」인데, 사용자가 이 둘만은 묶어 달라고 했으므로 예외로 둔다. 확정되면 볼트가
     # coauthors 로 옮기고 이 예외 표시도 지우면 된다.
-    # DLPOrient 쪽은 2026-09-19 에 제안 자체가 보류됐고(단기 불가), DispersityProp 쪽은
-    # 전석진·은종현 순서를 뒤집을지 사용자 확인을 기다리는 중이다.
+    # 2026-09-19 오후: cfmsDispersityProp(옛 Jeon_DispersityProp)가 은종현 훌로 갔다.
+    # 「전석진·은종현 순서를 뒤집을지」 기다리던 건이 은종현으로 정해진 결과다. 남은 하나도
+    # 제안 자체는 보류 상태다(단기 불가) — 후보는 유지하되 지금 제안하지 않는다.
     {"label": "전석진 교수님",
      "kind": "coauthor",
-     "nodes": ["Jeon_DLPOrient", "Jeon_DispersityProp"],
+     "nodes": ["Jeon_DLPOrient"],
      "color": "#b45309", "labelColor": "#92400e",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
@@ -502,7 +510,7 @@ QUALITY_ROWS = [
     # 2026-09-19 신설. 볼트 두 노트 모두 grade: ToDo · stage: undecided 이고, 등급은
     # 실측 대조 전까지 보류다. 볼트 Rules §8 대로 grade_note 전문을 옮기지 않는다.
     ("Jeon_DLPOrient", "Jeon_DLPOrient", "ToDo", "값싼 배향 순위가 실물 출력물의 물성 순위와 맞는지 재는 검증선; 착수 게이트 통과, 실측 대조 전"),
-    ("Jeon_DispersityProp", "Jeon_DispersityProp", "ToDo", "분산도 지표와 실제 물성의 상관을 기존 시편 사진으로 확인하는 검증선; 착수 게이트 통과, 실측 대조 전"),
+    ("cfmsDispersityProp", "cfmsDispersityProp", "ToDo", "분산도 지표와 실제 물성의 상관을 기존 시편 사진으로 확인하는 검증선; 착수 게이트 통과, 실측 대조 전"),
 ]
 QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
 
@@ -552,7 +560,7 @@ INTRODUCTIONS = {
     "cfmsDrapeSCAN": "고정형·핸드헬드 스캔 패치를 cfmsDrape 물리와 소프트 대응으로 정합해 인체 표면을 복원하려는 실험선이다.",
     "cfmsDrapeInverse": "드레이프한 원단 사진에서 그 원단의 인장·전단·굽힘 강성을 거꾸로 알아내는 도구다.",
     "Jeon_DLPOrient": "값싸게 매긴 3D 프린팅 배향 순위가 실제로 찍어 본 물건의 물성 순위와 맞는지를 처음으로 실물에 대고 재는 연구다.",
-    "Jeon_DispersityProp": "현미경 사진으로 잰 입자 분산도 숫자가 실제 물성과 정말로 이어지는지를, 이미 찍혀 있는 남의 시편 사진으로 확인한다.",
+    "cfmsDispersityProp": "현미경 사진으로 잰 입자 분산도 숫자가 실제 물성과 정말로 이어지는지를, 이미 찍혀 있는 남의 시편 사진으로 확인한다.",
     "TSE_SEM1_Bezier": "전자현미경 사진 한 장에서 섬유 한 올 한 올을 매끈한 곡선으로 따라가며 굵기와 방향을 재어내는 방법이다.",
     "TSE_SEM2_Tensor": "섬유를 하나씩 오려내지 않고 사진 전체에서 섬유가 어느 쪽으로 누워 있는지와 겹친 아래층까지 한꺼번에 재는 방법이다.",
     "TSE_SEM3_AutoTune": "정답을 모르는 실제 사진에서도 측정기의 손잡이를 스스로 안전하게 맞추는 방법을 다루는 연구다.",
@@ -1195,20 +1203,20 @@ DLPORIENT_NODE = {
 }
 
 DISPERSITYPROP_NODE = {
-    "id": "Jeon_DispersityProp",
-    "label": "Jeon_DispersityProp",
+    "id": "cfmsDispersityProp",
+    "label": "cfmsDispersityProp",
     "color": {"background": "#ffffff", "border": "#000000",
                "highlight": {"background": "#ffffff", "border": "#000000"}},
     "size": 15.4,
     "font": {"size": 13, "color": "#333333", "bold": False},
-    "title": "Jeon_DispersityProp — ToDo: 분산도 지표와 물성의 상관 검증",
+    "title": "cfmsDispersityProp — ToDo: 분산도 지표와 물성의 상관 검증",
     "community": 4,
     "community_name": "ToDo",
-    "source_file": "Jeon_DispersityProp.md",
+    "source_file": "cfmsDispersityProp.md",
     "file_type": "concept",
     "degree": 1,
-    "_intro": INTRODUCTIONS["Jeon_DispersityProp"],
-    "_project_path": PROJECT_PATHS.get("Jeon_DispersityProp", r"D:\__KIT_projects\Jeon_DispersityProp_dev"),
+    "_intro": INTRODUCTIONS["cfmsDispersityProp"],
+    "_project_path": PROJECT_PATHS.get("cfmsDispersityProp", r"D:\__KIT_projects\cfmsDispersityProp_dev"),
 }
 
 # 2026-07-30: mindmap Paper quality 기준 상으로 동기화. 원고 2편+설명서가 있고
@@ -1698,14 +1706,14 @@ COAUTHOR_KIM_GOAL_EDGES = [
 # ------------------------------------- 전석진 교수님 후보 둘을 본문에 잇는다 (2026-09-19)
 # 볼트 frontmatter 의 depends_on 이 근거다. 김우석 훌이 섬으로 떠 있어 별개 연구처럼 보였던
 # 일(2026-09-18)을 되풀이하지 않으려고 처음부터 같이 넣는다.
-#   Jeon_DispersityProp.depends_on = [cfmsDispersity]
+#   cfmsDispersityProp.depends_on = [cfmsDispersity]   (개명 전 Jeon_DispersityProp)
 #   Jeon_DLPOrient.depends_on      = [SFTF_QEM, Tomo_SFTFSoft]
 # 둘 다 아직 ToDo·미정이고 실측 대조 전이라 점선·잠정으로 그린다 — 실선은 「이미 쓰고 있다」는
 # 뜻이 된다.
 JEON_GOAL_EDGES = [
     {
         **_autoplace_goal_edge(
-            "cfmsDispersity", "Jeon_DispersityProp", "상관 검증",
+            "cfmsDispersity", "cfmsDispersityProp", "상관 검증",
             "분산도 지표가 실제 물성과 정말로 이어지는지 이미 찍혀 있는 시편 사진으로 확인한다",
             "정확도",
         ),
