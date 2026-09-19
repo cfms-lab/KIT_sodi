@@ -1391,6 +1391,58 @@ Object.entries(CURATED_HYPEREDGE_MEMBERS).forEach(([label, nodeIds]) => {
     if (!hyperedge.nodes.includes(nodeId)) hyperedge.nodes.push(nodeId);
   });
 });
+
+/* 훌의 모서리를 둥글린다 (2026-09-19, 사용자 요청 — 각진 다각형이 보기 싫다).
+
+   곡률은 **제일 작은 노드의 반지름**이다(사용자 지시). vis 는 node.size 를 반지름으로
+   쓰므로 보이는 노드의 최소 size 가 곧 그 값이다. 상수를 두 벌 두지 않으려고 숫자를
+   박지 않고 노드에서 읽는다 — 진도 사다리(SIZE_MIN 14 → SIZE_MAX 34)가 바뀌면 따라온다.
+
+   꼭짓점마다 arcTo 로 돌되 반지름을 그 모서리가 감당할 만큼으로 줄인다. 좁은 각이나 짧은
+   변에서 그대로 쓰면 접점이 변 밖으로 나가 외곽선이 튄다. 멤버가 1~2 인 훌은 위에서 패딩
+   링으로 부풀려 이미 꼭짓점이 많은데, 그때는 각이 완만해 보정이 거의 없고 모양도 그대로다.
+   그래서 노드 개수와 무관하게 같은 코드가 돈다. */
+function _smallestNodeRadius() {
+  let min = Infinity;
+  nodesDS.get({filter: n => !n.hidden}).forEach(n => {
+    const s = Number(n.size);
+    if (s > 0 && s < min) min = s;
+  });
+  return Number.isFinite(min) ? min : 14;
+}
+
+function _roundedPolyPath(ctx, pts, radius) {
+  const n = pts.length;
+  if (n < 3 || !(radius > 0)) {                  // 점·선분은 둥글릴 모서리가 없다
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < n; i++) ctx.lineTo(pts[i].x, pts[i].y);
+    ctx.closePath();
+    return;
+  }
+  // 꼭짓점 P 의 접점은 모서리에서 r / tan(내각/2) 만큼 떨어진다. 그 거리가 이웃 변의
+  // 절반을 넘지 않도록 r 을 줄인다 — 그래야 옆 모서리의 호와 겹치지 않는다.
+  const radii = pts.map((p, i) => {
+    const a = pts[(i - 1 + n) % n], b = pts[(i + 1) % n];
+    const ax = a.x - p.x, ay = a.y - p.y, la = Math.hypot(ax, ay);
+    const bx = b.x - p.x, by = b.y - p.y, lb = Math.hypot(bx, by);
+    if (!la || !lb) return 0;
+    const cos = Math.max(-1, Math.min(1, (ax * bx + ay * by) / (la * lb)));
+    const tanHalf = Math.tan(Math.acos(cos) / 2);
+    if (!(tanHalf > 1e-6)) return 0;             // 되돌아가는 뾰족점은 둥글리지 않는다
+    return Math.min(radius, tanHalf * Math.min(la, lb) / 2);
+  });
+  // 변의 중점에서 시작해 꼭짓점마다 arcTo 로 돈다.
+  const mid = (a, b) => ({x: (a.x + b.x) / 2, y: (a.y + b.y) / 2});
+  const start = mid(pts[0], pts[1]);
+  ctx.moveTo(start.x, start.y);
+  for (let i = 1; i <= n; i++) {
+    const cur = pts[i % n], nxt = pts[(i + 1) % n];
+    const m = mid(cur, nxt);
+    ctx.arcTo(cur.x, cur.y, m.x, m.y, radii[i % n]);
+  }
+  ctx.closePath();
+}
+
 // HYPEREDGE_LABEL_HELPERS_BEGIN
 function _boxOverlapArea(a, b) {
   const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
@@ -1471,6 +1523,7 @@ network.on('afterDrawing', function(ctx) {
     const nodeLabelBoxes = _nodeLabelBoxes();
     const placedHyperedgeLabelBoxes = [];
     const hyperedgeViewport = _hyperedgeViewportBounds();
+    const cornerR = _smallestNodeRadius();   // 훌 모서리의 곡률 — 한 프레임에 한 번만 잰다
     // Draw the base hull first so application-region hulls remain readable
     // where the two sets overlap.  Array order is preserved for the finding
     // dependency indices below.
@@ -1530,9 +1583,7 @@ network.on('afterDrawing', function(ctx) {
             x: cx + (p.x - cx) * (degen ? 1.0 : scale),
             y: cy + (p.y - cy) * (degen ? 1.0 : scale)
         }));
-        ctx.moveTo(expanded[0].x, expanded[0].y);
-        expanded.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
-        ctx.closePath();
+        _roundedPolyPath(ctx, expanded, cornerR);
         ctx.fill();
         ctx.globalAlpha = strokeAlpha;
         ctx.stroke();
