@@ -1115,26 +1115,63 @@ network.on('dragEnd', params => {
 //
 // 라이브러리 속을 건드리는 코드라 기대는 것이 없으면 조용히 건너뛴다 — 그때는 지금까지처럼
 // 놓을 때만 스냅된다(위 dragEnd).
+// 끄는 동안 이웃과 줄이 맞으면 점선 안내선을 보인다 (2026-09-19, 사용자 요청 —
+// 파워포인트의 스마트 가이드처럼 이웃 노드와 나란한지 보고 싶다).
+//   ALIGN_GUIDES 가 그 상태이고, 실제로 그리는 곳은 아래쪽 afterDrawing 묶음이다
+//   (drawNodePie 다음). 안내선이 노드·훌 위에 오려면 그쪽에 늦게 붙어야 한다.
+// 중심끼리만 견준다 — 노드마다 지름이 다르므로(진도에 따라 14~34) 가장자리를 맞추는
+// 것은 뜻이 없다. 허용 오차는 격자(10)보다 작아야 한다. 그보다 크면 어느 자리에서나
+// 선이 떠서 「맞았다」는 신호가 아니게 된다.
+const ALIGN_TOL = 3;
+let ALIGN_GUIDES = null;
+function computeAlignGuides(ids) {
+  if (!ids || !ids.length) return null;
+  const all = network.getPositions();
+  const base = all[ids[0]];                  // 묶음 드래그는 함께 움직이므로 첫 노드가 기준이다
+  if (!base) return null;
+  const dragging = new Set(ids);
+  const guides = {vx: null, vFrom: base.y, vTo: base.y, hy: null, hFrom: base.x, hTo: base.x};
+  nodesDS.get({filter: n => !n.hidden}).forEach(n => {
+    if (dragging.has(n.id)) return;
+    const p = all[n.id];
+    if (!p) return;
+    if (Math.abs(p.x - base.x) <= ALIGN_TOL) {
+      guides.vx = base.x;
+      guides.vFrom = Math.min(guides.vFrom, p.y);
+      guides.vTo = Math.max(guides.vTo, p.y);
+    }
+    if (Math.abs(p.y - base.y) <= ALIGN_TOL) {
+      guides.hy = base.y;
+      guides.hFrom = Math.min(guides.hFrom, p.x);
+      guides.hTo = Math.max(guides.hTo, p.x);
+    }
+  });
+  return (guides.vx === null && guides.hy === null) ? null : guides;
+}
+
 (function installLiveSnap() {
   const listeners = network.body && network.body.eventListeners;
   const original = listeners && listeners.onDrag;
   if (typeof original !== 'function') return;
   let dragIds = [];
   network.on('dragStart', params => { dragIds = (params && params.nodes) || []; });
-  network.on('dragEnd', () => { dragIds = []; });
+  network.on('dragEnd', () => {
+    dragIds = [];
+    if (ALIGN_GUIDES) { ALIGN_GUIDES = null; network.redraw(); }   // 놓으면 안내선을 지운다
+  });
   listeners.onDrag = function () {
     original.apply(this, arguments);
     if (layoutMode !== 'free' || !dragIds.length) return;   // 화면을 끄는 중이면 빈 배열이다
-    let moved = false;
     dragIds.forEach(id => {
       const node = network.body.nodes[id];
       if (!node) return;
-      const x = snapToGrid(node.x), y = snapToGrid(node.y);
-      if (node.x !== x) { node.x = x; moved = true; }
-      if (node.y !== y) { node.y = y; moved = true; }
+      node.x = snapToGrid(node.x);
+      node.y = snapToGrid(node.y);
     });
+    ALIGN_GUIDES = computeAlignGuides(dragIds);
     // 원본이 건 렌더 예약에 얹는다(_requestRedraw 는 한 프레임으로 합쳐진다).
-    if (moved) network.body.emitter.emit('_requestRedraw');
+    // 노드가 안 움직인 프레임에도 안내선은 바뀔 수 있으므로 매번 부른다.
+    network.body.emitter.emit('_requestRedraw');
   };
 })();
 
@@ -1778,6 +1815,41 @@ network.on('afterDrawing', function (ctx) {
     if (!pos) return;
     drawNodePie(ctx, pos.x, pos.y, n.size || 12, p, nodeFillColor(n), nodeStrokeColor(n));
   });
+});
+
+/* 정렬 안내선 — 끄는 노드가 이웃과 줄이 맞으면 상하·좌우로 점선을 긋는다
+   (2026-09-19, 사용자 요청). 상태를 만드는 곳은 위쪽 installLiveSnap 옆의
+   computeAlignGuides 이고, 여기는 그리기만 한다. 훌·엣지·노드 파이 **뒤에** 등록해야
+   그 위로 올라온다 — vis 는 afterDrawing 을 붙인 순서대로 부른다.
+
+   ctx 는 이미 캔버스 좌표로 변환돼 있으므로 선 두께와 점선 간격을 배율로 나눠야
+   확대·축소와 무관하게 화면에서 같은 굵기로 보인다.
+
+   색은 파워포인트의 스마트 가이드처럼 주황빨강이다. 끄는 동안만 잠깐 보이는 가는
+   점선이라 등급 색(상 #e02020 · 중 #f28e2b)과 헷갈리지 않는다. */
+network.on('afterDrawing', function (ctx) {
+  const g = ALIGN_GUIDES;
+  if (!g) return;
+  const scale = network.getScale() || 1;
+  const PAD = 26 / scale;                      // 맞은 노드 바깥으로 조금 더 뻗는다
+  ctx.save();
+  ctx.strokeStyle = '#e8590c';
+  ctx.lineWidth = 1.2 / scale;
+  ctx.setLineDash([7 / scale, 5 / scale]);
+  if (g.vx !== null) {
+    ctx.beginPath();
+    ctx.moveTo(g.vx, g.vFrom - PAD);
+    ctx.lineTo(g.vx, g.vTo + PAD);
+    ctx.stroke();
+  }
+  if (g.hy !== null) {
+    ctx.beginPath();
+    ctx.moveTo(g.hFrom - PAD, g.hy);
+    ctx.lineTo(g.hTo + PAD, g.hy);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  ctx.restore();
 });
 
 /* 범례: Paper quality 아래에 한 줄. 아이콘은 위 drawProgBadge 를 그대로 써서
