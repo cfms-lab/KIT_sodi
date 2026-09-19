@@ -175,6 +175,44 @@ function readTableSource(vaultRoot) {
   return code.slice(0, draw);
 }
 
+/* 예비 저널 사다리 — 노트 frontmatter 의 `submission:` 원문에서 「N순위 이름」을 뽑는다
+   (2026-09-20, 사용자 요청: portfolio 의 「투고」칸에 1·2·3 투고 예정 저널을 보이게).
+
+   ⚠️ 이건 **행을 만드는 규칙이 아니다.** 행은 여전히 볼트 대시보드의 dataviewjs 가 만들고,
+   그쪽 「투고」칸은 설계대로 1순위 이름만 담는다(노트: 「아이콘 뒤에는 게재지 이름만
+   남긴다」). 여기서는 같은 원문에서 **표시용 곁가지**를 하나 더 뽑을 뿐이라 두 벌이 되지
+   않는다. 사다리의 정본은 볼트 Papers/SFTF_3편_2차투고저널_2026-09-20.md 이고, 각 노트의
+   submission 이 그 스냅샷이다.
+
+   원문 생김새(2026-09-20 세 노트):
+     "… **2026-09-20 예비 저널 확정**: 1순위 IJAMT(Springer 하이브리드, 게재료 0원)
+      · 2순위 CIRP JMST · 3순위 J. Manufacturing Processes — 셋 다 …"
+   · 로 갈리고 — 로 끝난다. 괄호 안은 게재료·출판사 설명이라 이름에서 잘라 낸다.
+   SFTF_QEM 처럼 1순위가 빠진 노트도 있다(그 값이 곧 「투고」칸이라 본문에 다시 안 적었다). */
+function 예비저널(submission) {
+  const text = String(submission ?? "");
+  /* 사다리 **선언부 뒤**만 훑는다. 그러지 않으면 같은 문단의 다른 문장까지 걸린다 —
+     SFTF_QEM 의 「Tomo_DFSVR 1순위와 겹쳐 제외」와 Tomo_DFSVR 의 「JCDE 1순위, AES 대안」이
+     실제로 걸렸다. 이름 앞에 **공백을 요구**하는 것도 같은 이유다(「1순위와」·「1순위,」 배제). */
+  const marker = /예비\s*저널\s*확정/.exec(text);
+  if (!marker) return [];
+  const found = new Map();
+  const re = /([123])\s*순위[ \t]+([^·—\n]+)/g;
+  re.lastIndex = marker.index;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    let name = m[2];
+    const paren = name.search(/[(（]/);          // 괄호부터는 설명이다
+    if (paren >= 0) name = name.slice(0, paren);
+    name = name.replace(/\*\*/g, "").replace(/[\s.,·—-]+$/u, "").trim();
+    const rank = Number(m[1]);
+    if (name && !found.has(rank)) found.set(rank, name);   // 같은 순위는 처음 것만
+  }
+  return [...found.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([rank, name]) => ({ rank, name }));
+}
+
 export function buildRows(vaultRoot) {
   const { pages, byPath } = loadPages(vaultRoot);
   const dv = {
@@ -218,6 +256,8 @@ export function buildRows(vaultRoot) {
       coauthorKey: row.공저자키,
       stage: row.투고상태 ?? null,
       journal: row.투고,
+      // 1순위는 이미 journal 이므로, 화면에는 여기서 2순위부터 쓴다.
+      journalPlan: 예비저널(owner?.submission),
       stageRank: Number.isFinite(row.투고순위) ? row.투고순위 : null,
       gate: row.게이트,
       intro: String(row.소개 ?? ""),
