@@ -359,9 +359,13 @@ HYPEREDGES = [
      "color": "#0f766e", "labelColor": "#115e59",
      "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95,
      "lineWidth": 3, "dash": [12, 6], "scale": 1.14},
+    # 2026-09-20: SFTF_Clustering 을 뺐다(사용자 지시). 이희란 교수는 여전히 공저자지만
+    # (볼트 coauthors: [이희란, 강지언]), 그 노드는 3D프린팅 훌의 구성원이기도 해서
+    # 두 훌에 동시에 들어 있었다 — 유일한 겹침이었고 이희란 훌이 그 노드를 잡으려고
+    # 위로 길게 뻗어 모양을 버렸다. 공저 관계는 노드 정보의 공저자 줄에 그대로 남는다.
     {"label": "이희란 교수님",
      "kind": "coauthor",
-     "nodes": ["SFTF_Clustering", "PFTF_Compression", "cfmsAutoSew",
+     "nodes": ["PFTF_Compression", "cfmsAutoSew",
                "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN",
                "HIPDetect", "TSE_TomoSh4", "TSE_TomoSh5"],
      "color": "#7c3aed", "labelColor": "#6d28d9",

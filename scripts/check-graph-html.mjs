@@ -161,7 +161,9 @@ const expectedHulls = {
   "3D프린팅": ["Tomo_SFTF", "Tomo_SFTFSoft", "Tomo_DFSVR", "SFTF_Clustering",
     "SFTFSoft_GNN", "SFTFSoft_DFSVR", "SFTFSoft_GNN_DFSVR", "DFSVR_VisCull",
     "SFTF_QEM", "SFTF_ActiveOverprint"],
-  "이희란 교수님": ["SFTF_Clustering", "PFTF_Compression", "cfmsAutoSew",
+  // 2026-09-20: SFTF_Clustering 을 뺐다 — 유일하게 두 훌에 동시에 들던 노드다.
+  // 이희란 교수 공저 관계 자체는 그대로이고 노드 정보의 공저자 줄에 남는다.
+  "이희란 교수님": ["PFTF_Compression", "cfmsAutoSew",
     "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN", "HIPDetect",
     "TSE_TomoSh4", "TSE_TomoSh5"],
   // 2026-09-14: TSE_SEM3_AutoTune 이 빠졌다 — ③ 만 설인환 단독 저자로 바뀌었다.
