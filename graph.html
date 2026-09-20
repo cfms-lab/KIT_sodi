@@ -66,6 +66,9 @@
   #select-all-cb:indeterminate::after { content: ''; position: absolute; left: 2px; top: 5px; width: 8px; height: 2px; background: #fff; border: none; transform: none; }
 
 
+  /* 노드를 끄는 동안에는 툴팁을 감춘다 — 놓을 자리를 가리기 때문이다.
+     vis 가 툴팁 div 를 컨테이너 밖에 붙일 수도 있어 body 기준으로 건다. */
+  body.node-dragging .vis-tooltip { display: none !important; }
 
 /* GRAPH3D_NAV_BEGIN */
   #open-3d-btn { position: fixed; top: 12px; left: 12px; z-index: 50; padding: 7px 11px; border: 1px solid #9aa8bd; border-radius: 7px; background: rgba(255,255,255,0.94); color: #243047; font: 600 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; box-shadow: 0 5px 16px rgba(32,48,76,0.14); cursor: pointer; }
@@ -1231,6 +1234,31 @@ function computeAlignGuides(ids) {
     // 노드가 안 움직인 프레임에도 안내선은 바뀔 수 있으므로 매번 부른다.
     network.body.emitter.emit('_requestRedraw');
   };
+})();
+
+/* 노드를 끌 때 툴팁 감추기.
+   화면을 통째로 미는 것(pan)은 params.nodes 가 비므로 건드리지 않는다 —
+   가려서 곤란한 것은 끌고 있는 노드의 자리다.
+   보장은 위의 CSS 가 하고, 여기서는 vis 가 예약해 둔 팝업까지 걷어
+   놓는 순간 툴팁이 튀어나오지 않게 한다. 내부 필드를 만지므로 전부
+   typeof 로 막아 둔다 — vis 를 올려도 페이지가 죽지 않아야 한다. */
+(function hideTooltipWhileDragging() {
+  const clearPending = () => {
+    const ih = network.interactionHandler;
+    if (!ih) return;
+    if (ih.popupTimer) { clearTimeout(ih.popupTimer); ih.popupTimer = undefined; }
+    if (ih.popup && typeof ih.popup.hide === 'function') ih.popup.hide();
+    ih.popupObj = undefined;
+  };
+  network.on('dragStart', params => {
+    if (!params || !params.nodes || !params.nodes.length) return;
+    document.body.classList.add('node-dragging');
+    clearPending();
+  });
+  network.on('dragEnd', () => {
+    clearPending();          // 끄는 동안 예약된 팝업을 버린 뒤에 클래스를 뗀다
+    document.body.classList.remove('node-dragging');
+  });
 })();
 
 // "위치 초기화": 저장본을 지우고 파일에 내장된 기본 배치(POS)로 복귀.
