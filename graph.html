@@ -744,8 +744,11 @@ const FAN_ROUNDNESS = [0.2, 0.35, 0.5];
      들어오는 엣지와 나가는 엣지는 같은 이름이라도 화면에서 반대쪽으로 휜다. 아래
      둘이 어색했던 까닭이 그것이다. */
 const FAN_FLIP_PAIRS = [
-  ['cfmsDrape', 'cfmsAutoPlace_JCDE'],
   ['cfmsDrape', 'cfmsDrapeInverse'],
+  // 2026-09-20 두 번째 조정: AutoPlace 두 갈래를 맞바꿨다. JCDE 는 첫 조정에서
+  // 뒤집어 두었던 것을 도로 기본값으로 돌리는 것이라 목록에서 **뺐고**, IJCST 를
+  // 대신 넣는다(이 목록은 「기본 배정에서 뒤집을 것」만 담는다).
+  ['cfmsDrape', 'cfmsAutoPlace_IJCST'],
 ];
 const FAN_SMOOTH = (() => {
   const byEdgeIndex = {};
