@@ -411,10 +411,10 @@ HYPEREDGES = [
      "color": "#b45309", "labelColor": "#92400e",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
-    # 2026-09-20: 사용자 지시로 세운다. 전석진 훌과 같은 예외다 — 두 노트가 가진 것은
-    # `coauthor_candidate` 이지 `coauthors` 가 아니다(PFTF_Mold「조범곤 · 방대석 · 윤관한」,
-    # SFTF_InjMold「방대석 · 조범곤」, 둘 다 2026-09-16 · 근거 Dashboards/cfms_cowork_KIT.md).
-    # 확정되면 볼트가 coauthors 로 옮기고 이 표시도 지우면 된다.
+    # 2026-09-20: 사용자 지시로 세운다. 처음에는 전석진 훌과 같은 「후보」 예외였는데,
+    # 같은 날 볼트가 두 노트를 coauthors: [방대석] 으로 **확정**해서 예외가 아니게 됐다
+    # (Rules/논문생성규칙.md 의 C 그룹 — 저자 「대학원생(방대석 교수 지도학생) · 설인환 ·
+    # 방대석†」). 이제 앞의 넷과 성격이 같다.
     # 둘을 묶는 실질 축은 **금형**이다 — 사출 성형 설계(SFTF_InjMold)와 수축 보정(PFTF_Mold).
     # 그래서 SFTF_InjMold 를 3D프린팅 훌에서 뺀 사유(적층이 아니다)와 어긋나지 않는다.
     {"label": "방대석 교수님",

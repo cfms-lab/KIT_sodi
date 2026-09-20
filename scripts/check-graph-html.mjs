@@ -175,8 +175,8 @@ const expectedHulls = {
   // 2026-09-19: 사용자 지시로 세웠다. 두 노트가 가진 것은 coauthor_candidate(공저 후보)라
   // 「후보는 훌에 넣지 않는다」는 규약의 예외다 — layout_findings.py 의 HYPEREDGES 주석 참고.
   "전석진 교수님": ["Jeon_DLPOrient"],
-  // 2026-09-20: 같은 예외다 — PFTF_Mold·SFTF_InjMold 도 coauthor_candidate 뿐이다.
-  // 둘을 묶는 실질 축은 금형(사출 성형 설계 · 수축 보정)이다.
+  // 2026-09-20: 세울 때는 후보 예외였으나 같은 날 볼트가 coauthors: [방대석] 으로
+  // 확정했다. 둘을 묶는 실질 축은 금형(사출 성형 설계 · 수축 보정)이다.
   "방대석 교수님": ["PFTF_Mold", "SFTF_InjMold"],
 };
 
