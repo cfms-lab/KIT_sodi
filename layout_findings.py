@@ -230,66 +230,70 @@ NODE_SOURCE_FILES = {
 # ----------------------------------------------------------------- 좌표 (발견 기준)
 POS = {
     # 2026-08-31: 사용자가 graph.html에서 조정한 34-node 배치를 정본으로 승격.
-    "Tomo_SFTF": (670, 195),
-    "Tomo_SFTFSoft": (413, 20),
-    "SFTF_Clustering": (565, 360),
-    "PFTF": (724, 478),
-    "SFTF_Composite": (724, 663),
-    "SFTF_InjMold": (-352, 192),
-    "PFTF_Compression": (196, 553),
-    "Tomo_DFSVR": (192, 23),
-    "PFTF_VisCull_kDop": (-117, 390),
-    "SFTF_SewerPOC": (1206, 209),
-    "SFTFSoft_GNN": (193, 197),
-    "SFTF_DrapePrior": (-117, 558),
-    "PFTF_AsymTensor": (527, 663),
-    "PFTF_DrapePrior_VisCull_kDop": (-360, 392),
-    "PFTF_GFiberCT": (527, 923),
-    "SFTF_QEM": (414, 194),
-    "SFTF_DynamicTargetSearch": (735, -152),
-    "DFSVR_VisCull": (-116, 33),
-    "SFTFSoft_GNN_DFSVR": (-117, 197),
-    "SFTF_ActiveOverprint": (411, -151),
-    "ColdOndol": (1029, 449),
-    "ColdOndol_Positioning": (1205, 336),
-    "cfmsCIPC": (-151, 763),
+    "Tomo_SFTF": (710, 190),
+    "Tomo_SFTFSoft": (450, 20),
+    "SFTF_Clustering": (450, 400),
+    "PFTF": (710, 390),
+    "SFTF_Composite": (940, 620),
+    "SFTF_InjMold": (-360, 390),
+    # 2026-09-20: 방대석 교수님 훌을 세우면서 PFTF_Mold 가 그래프에 처음 들어왔다.
+    # SFTF_InjMold 와 같은 왼쪽 끝 열(x=-360), 한 칸 위인 y=190 행이다 — 그 행은
+    # SFTFSoft_GNN_DFSVR·SFTF_QEM·Tomo_SFTF 가 쓰는 줄이라 격자에 맞는다.
+    "PFTF_Mold": (-360, 190),
+    "PFTF_Compression": (200, 660),
+    "Tomo_DFSVR": (210, 20),
+    "PFTF_VisCull_kDop": (210, 390),
+    "SFTF_SewerPOC": (1150, 190),
+    "SFTFSoft_GNN": (210, 190),
+    "SFTF_DrapePrior": (-30, 570),
+    "PFTF_AsymTensor": (710, 620),
+    "PFTF_DrapePrior_VisCull_kDop": (-30, 390),
+    "PFTF_GFiberCT": (710, 800),
+    "SFTF_QEM": (450, 190),
+    "SFTF_DynamicTargetSearch": (930, -150),
+    "DFSVR_VisCull": (-30, 20),
+    "SFTFSoft_GNN_DFSVR": (-30, 190),
+    "SFTF_ActiveOverprint": (450, -150),
+    "ColdOndol": (940, 390),
+    "ColdOndol_Positioning": (1150, 390),
+    "cfmsCIPC": (-100, 760),
     # 2026-09-11: TSE_SEM 을 논문 3편 트랙으로 나눴다.  ① 은 옛 TSE_SEM 자리를 잇고
     # ②·③ 은 SFTF_Composite → ① 방향을 따라 위쪽으로 한 칸씩 이어진다.
-    "TSE_SEM1_Bezier": (914, 663),
-    "TSE_SEM2_Tensor": (914, 923),
-    "TSE_SEM3_AutoTune": (914, 1175),
-    "SFTF_HeatMethod": (718, 932),
-    "cfmsPINNDrape": (190, 1212),
+    "TSE_SEM1_Bezier": (1150, 620),
+    "TSE_SEM2_Tensor": (1150, 800),
+    "TSE_SEM3_AutoTune": (1150, 1020),
+    "SFTF_HeatMethod": (940, 800),
+    "cfmsPINNDrape": (450, 1190),
     "cfmsDrape": (-358, 860),
-    "cfmsMiindo": (-211, 887),
-    "cfmsPINNCAD": (408, 1217),
-    "SFTFSoft_DFSVR": (192, -152),
+    "cfmsMiindo": (-160, 880),
+    "cfmsPINNCAD": (200, 1020),
+    "SFTFSoft_DFSVR": (210, -150),
     # Restored from the last pre-archive graph snapshot.
-    "SFTF_UrbanTraffic": (1021, 83),
-    "cfmsAutoSew": (195, 1026),
-    "cfmsAutoPlace_IJCST": (-25, 1005),
-    "cfmsAutoPlace_JCDE": (-66, 1209),
+    "SFTF_UrbanTraffic": (940, 20),
+    "cfmsAutoSew": (200, 1190),
+    "cfmsAutoPlace_IJCST": (-30, 1020),
+    "cfmsAutoPlace_JCDE": (-30, 1190),
     # 2026-09-01: ToDo DrapeSCAN onboarding from the Obsidian project note.
-    "cfmsDrapeSCAN": (193, 840),
+    "cfmsDrapeSCAN": (200, 840),
     # 2026-09-18: 93196cb 가 graph.html 에만 넣어 둔 노드를 여기로 들여왔다. 파일 씨앗이
     # 이 노드를 몰라서 전체 재생성이 좌표를 날려 버리고 있었다.
-    "cfmsDrapeInverse": (-106, 944),
+    "cfmsDrapeInverse": (-70, 950),
     # 2026-09-07: graph.html 의 큐레이션 노드(SFTF_HOLONOMY_NODE)와 짝을 이룬다.
-    "SFTF_Holonomy": (724, 1175),
+    "SFTF_Holonomy": (940, 1020),
     # 2026-09-10: graph.html 의 큐레이션 노드(HIPDETECT_NODE)와 짝을 이룬다.
-    "HIPDetect": (407, 927),
+    "HIPDetect": (450, 1020),
     # 2026-09-14: graph.html 의 큐레이션 노드(CFMSDISPERSITY_NODE)와 짝을 이룬다.
     # 이미 나온 논문인데 그래프에 없었다. 자리는 은종현 교수님 묶음 오른쪽의 빈 곳이다.
-    "cfmsDispersity": (527, 1175),
+    "cfmsDispersity": (710, 1020),
     # 2026-09-14: graph.html 의 큐레이션 노드(TOMO_SHELL_NODES)와 짝을 이룬다.
     # 포트폴리오 표에는 두 트랙이 있는데 그래프에는 노드가 없었다(사용자 지적).
     # 자리는 이희란 교수님 묶음 왼쪽 아래의 빈 곳이다 — 파일 씨앗과 표(graph_positions)
     # 양쪽에서 가장 한산한 자리를 골랐다.
-    "TSE_TomoSh4": (407, 550),
-    "TSE_TomoSh5": (275, 768),
+    "TSE_TomoSh4": (450, 650),
+    "TSE_TomoSh5": (450, 840),
     # 2026-09-19: 전석진 교수님 후보 둘. 김우석 묶음(y<=470) 아래, 은종현 묶음(x<=914)
     # 오른쪽의 빈 자리다. 드래그 격자(10)에 맞춰 두었다 — 웹에서 옮기면 표가 정본이 된다.
-    "Jeon_DLPOrient": (1330, 640),
+    "Jeon_DLPOrient": (710, 20),
     # 2026-09-19: 볼트에서 Jeon_DispersityProp → cfmsDispersityProp 로 개명되고 공저
     # 후보도 전석진 → 은종현 으로 바뀌었다. 자리도 은종현 묶음 안으로 옮긴다 —
     # 부모 cfmsDispersity 바로 아래이고 그 묶음의 격자 간격(180)과 같은 칸이다.
@@ -407,6 +411,18 @@ HYPEREDGES = [
      "color": "#b45309", "labelColor": "#92400e",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
+    # 2026-09-20: 사용자 지시로 세운다. 전석진 훌과 같은 예외다 — 두 노트가 가진 것은
+    # `coauthor_candidate` 이지 `coauthors` 가 아니다(PFTF_Mold「조범곤 · 방대석 · 윤관한」,
+    # SFTF_InjMold「방대석 · 조범곤」, 둘 다 2026-09-16 · 근거 Dashboards/cfms_cowork_KIT.md).
+    # 확정되면 볼트가 coauthors 로 옮기고 이 표시도 지우면 된다.
+    # 둘을 묶는 실질 축은 **금형**이다 — 사출 성형 설계(SFTF_InjMold)와 수축 보정(PFTF_Mold).
+    # 그래서 SFTF_InjMold 를 3D프린팅 훌에서 뺀 사유(적층이 아니다)와 어긋나지 않는다.
+    {"label": "방대석 교수님",
+     "kind": "coauthor",
+     "nodes": ["PFTF_Mold", "SFTF_InjMold"],
+     "color": "#0284c7", "labelColor": "#0369a1",
+     "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
+     "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
 ]
 HYPEREDGES = [
     {**h, "nodes": [node_id for node_id in h["nodes"] if node_id not in HIDDEN_NODE_IDS]}
@@ -434,7 +450,7 @@ QUALITY_ROWS = [
     ("Tomo_DiffSupport", "Tomo_DiffSupport", "중", "claim–evidence matrix·JAX gradient·fail-closed; utility/print gate 미실행"),
     ("PFTF_AsymTensor", "PFTF_AsymTensor", "중", "사전 동료심사 2라운드(2026-09-13)로 인증·성분 귀속 철회, 주 결론이 부정만 남아 ⛔ 주 기여 축 교체 전 투고 보류(RPJ). 축 교체 후보는 복합재 순서 뒤집기(은종현 교수 실측, 09-15 보완안). **2026-09-16 은종현 교수 공저 확정** — 저자 대학원생·설인환†·은종현†"),
     ("PFTF_Compression", "PFTF_Compression", "중", "역설계·orthotropic contact·friction·held-out 원고; 임상 cohort 잔여"),
-    ("PFTF_Mold", "PFTF_Mold", "중", "IBOF gate·영문 원고; held-out 일반화 0%"),
+    ("PFTF_Mold", "PFTF_Mold", "중", "IBOF 통일·사독 1차 대응 완료. melt-front 완화를 구현해 수반 경사를 1.0e-8 로 검증. held-out 은 사독 지적에 따라 '크기 전이 시험'으로 축소했다(옛 '일반화 0%' 는 철회). 투고 저널 미정"),
     ("PFTF_FXShock", "PFTF_FXShock", "중", "frozen/event holdout/falsification; n=8·실제 시장/인과 근거 제한"),
     ("PFTF_VisCull_kDop", "PFTF_VisCull_kDop", "중", "G1–G22 검증선·원고 2편(en/kr); 음성 timing 결과가 2번째 CPU 모델에서 복제(사전등록 R0–R3 통과); GPU contact 미구현"),
     ("SFTF_ThermalChip", "SFTF_ThermalChip", "중", "재현 가능한 PoC 한·영 원고·그림; 외부 칩/열해석 검증 부족"),
@@ -1228,6 +1244,30 @@ DISPERSITYPROP_NODE = {
     "_project_path": PROJECT_PATHS.get("cfmsDispersityProp", r"D:\__KIT_projects\cfmsDispersityProp_dev"),
 }
 
+
+# 2026-09-20: 사용자 지시로 그래프에 올린다. 볼트 Projects/PFTF_Mold.md 는 오래 있었지만
+# 노드가 없어서 화면에 안 보였다(QUALITY_ROWS·INTRODUCTIONS 에만 있었다). 등급 중 ·
+# stage draft 는 둘 다 볼트 값이고, 색·community 는 quality_lookup 이 QUALITY_ROWS 의
+# 「중」으로 덮어쓰므로 여기 적은 값은 씨앗일 뿐이다. 단계(draft)는 NOTE_STAGES 가 볼트에서
+# 읽어 온다. 볼트 status 는 archived 지만 원고는 살아 있다(사독 2차 대응까지 끝났다).
+PFTF_MOLD_NODE = {
+    "id": "PFTF_Mold",
+    "label": "PFTF_Mold",
+    "color": {"background": "#f28e2b", "border": "#f28e2b",
+               "highlight": {"background": "#f28e2b", "border": "#f28e2b"}},
+    "size": 13.7,
+    "font": {"size": 13, "color": "#333333", "bold": False},
+    "title": "PFTF_Mold — 중: 비등방 수축 보정과 금형 조건 탐색. IBOF 통일·사독 1차 대응 완료, 투고 저널 미정",
+    "community": 2,
+    "community_name": "중",
+    "source_file": "PFTF_Mold.md",
+    "file_type": "concept",
+    "degree": 0,
+    "_intro": INTRODUCTIONS["PFTF_Mold"],
+    "_project_path": PROJECT_PATHS.get(
+        "PFTF_Mold", r"D:\__PFTF_Projects(2026)\_PFTF_applications\projects\PFTF_Mold_dev"),
+}
+
 # 2026-07-30: mindmap Paper quality 기준 상으로 동기화. 원고 2편+설명서가 있고
 # 게이트 T·T2·G2·S·X 가 닫혔다.  라벨에 [draft] 를 병기하는 이유는 등급이
 # 상이어도 아직 미투고이기 때문이다.
@@ -1262,6 +1302,7 @@ TODO_NODES = [
     DRAPEINVERSE_NODE,
     DLPORIENT_NODE,
     DISPERSITYPROP_NODE,
+    PFTF_MOLD_NODE,
 ]
 
 TODO_EDGES = [
