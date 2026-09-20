@@ -196,8 +196,10 @@ CAPTION_SUFFIXES = {
 # (SFTF_QEM 이 상으로 올라간 뒤에도 이전 등급이 표시될 수 있는 것이 그 사례다.)
 # 여기에 적어 두면 매 실행마다 덮어쓴다.
 NODE_TITLES = {
-    "SFTF_QEM": "SFTF_QEM [draft] — 상: 여각 규약 오류 정정 후 전 게이트 재검증, "
-                "Cura 교차검증(두 신뢰 기준의 천장 ρ=+0.754), 코퍼스 50메쉬. 미투고.",
+    # 2026-09-20 볼트 동기화. 옛 문구(여각 규약 오류 정정·천장 ρ=+0.754·코퍼스 50메쉬)는
+    # 2026-08-21 에 주 기여가 양성 2건으로 교체되기 전의 것이었다.
+    "SFTF_QEM": "SFTF_QEM [draft] — 상: 주 기여 양성 2건(슬라이서 대비 ρ=+0.905, "
+                "배향당 1/103 비용), v3.0 개정 완료. Tomo_SFTF accept 대기.",
     "SFTF_DynamicTargetSearch": "SFTF_DynamicTargetSearch — ToDo: "
                                 "Net1 G0 topology·provenance와 15개 테스트 완료; "
                                 "LeakDB scenario localization·baseline 전",
@@ -453,7 +455,9 @@ QUALITY_ROWS = [
     ("PFTF_AssetShock", "PFTF_AssetShock", "하", "38 benchmark/provider rehearsal; draft 원고와 실제 provider outcome 없음"),
     ("PFTF_DrapePrior_VisCull_kDop", "PFTF_DrapePrior_VisCull_kDop", "등급 없음", "통합 evidence 저장소; 독립 논문 등급 미적용"),
     ("PFTF_GFiberCT", "PFTF_GFiberCT", "중", "합성 144건·NCF 유리섬유 복합재 X선 CT 17쌍(원저자 분할) 사전등록 검증, B5/M1 대비 사례별 144/144·17/17 승, 위상 오차 0; **한국복합재료학회지**(2026-09-16 변경, 그전 한국섬유공학회지) 국문 투고본 초고; PFTF/local-SPD 우월성 제외"),
-    ("SFTF_QEM", "SFTF_QEM", "상", "여각 규약 오류 정정·Cura 교차검증(천장 ρ=+0.754)·코퍼스 50메쉬·원고 2편+설명서; 성능 우월 주장 없는 평가방법론 트랙, 미투고"),
+    # 2026-09-20 볼트 동기화(grade_note). 2026-08-21 에 주 기여가 양성 2건으로 바뀌면서
+    # ⛔ 긍정 효과 규칙 위반이 해소됐고 원고 개정도 같은 날 끝났다.
+    ("SFTF_QEM", "SFTF_QEM", "상", "주 기여를 양성 2건으로 교체 완료 — 슬라이서 대비 ρ=+0.905(천장 +0.754 초과)·배향당 1/103 비용, ε-정지가 형상별 손튜닝 대체. v3.0 원고 개정 완료, CuraEngine 28메쉬×62방향 외부 교차검증, 테스트 151개. SFTF 텐서 구조는 무기여라 신규성 주장 없음"),
     ("SFTF_DynamicTargetSearch", "SFTF_DynamicTargetSearch", "ToDo",
      "Net1 G0 topology·provenance, 11 nodes·12 candidate pipes, 총 15 tests; LeakDB scenario localization·baseline 전"),
     ("SFTF_ActiveOverprint", "SFTF_ActiveOverprint", "ToDo",
@@ -550,7 +554,8 @@ INTRODUCTIONS = {
     "PFTF_AsymTensor": "방향에 따라 다르게 반응하는 재료나 문제를 표현하기 위한 비대칭 텐서 이론이다.",
     "PFTF_DrapePrior_VisCull_kDop": "옷감의 좋은 시작 상태와 안전한 충돌 필터를 결합해 천 계산을 빠르게 하려는 새 연구선이다.",
     "PFTF_GFiberCT": "서로 떨어진 두 표면을 먼저 구분해 각 층을 따로 복원함으로써 alpha 방법의 잘못된 연결과 위상 오류를 줄이는 연구다.",
-    "SFTF_QEM": "메쉬를 줄여 방향 탐색을 빠르게 하려다 그 가설이 기각되었고, 대신 지지비용 계산의 검증 방법 자체를 다루게 된 연구다. 각도 규약 오류를 스스로 찾아 정정한 기록과, 서로 다른 두 슬라이서조차 완전히 일치하지 않는다는 측정이 주 내용이다.",
+    # 2026-09-20 볼트 동기화(intro). 배포본 RAW_NODES 는 이미 이 값이고 씨앗만 낡아 있었다.
+    "SFTF_QEM": "3D 프린팅 배향 순위를 값싸게 매기는 대리모델이, 정답 역할을 하는 두 방법(복셀 solver·프로덕션 슬라이서)이 서로 일치하는 정도보다 더 정확하게 순위를 맞히면서 배향당 100배 싸다는 것을 보인 연구다. 여기에 메쉬를 중앙값 6%만 남겨도 같은 배향을 고르는 자동 정지 규칙이 붙는데, 선행 방법이 형상마다 손으로 맞추던 상수가 필요 없어진다. 여각 규약 오류 정정과 자기 철회 기록은 보충자료로 내렸다.",
     "SFTF_DynamicTargetSearch": "여러 이동 센서의 불완전한 보고를 합쳐 구조가 바뀌는 공간에서 목표물과 다음 탐색 경로를 찾으려는 연구다.",
     "SFTF_ActiveOverprint": "카메라로 기존 물체나 로봇이 고정한 의복의 출력 가능 표면과 다음 관측 위치를 찾고 그 위에 안전하게 작은 형상을 덧출력하려는 연구다.",
     "DFSVR_VisCull": "정확한 지지 구조 계산 전에 안전하게 불필요한 교차 후보를 줄여 DFSVR을 빠르게 하려는 연구선이다.",
@@ -1007,6 +1012,10 @@ if preserve_extended_quality:
             "PFTF_DrapePrior_VisCull_kDop": "독립 논문 등급 미적용 — 통합 evidence 저장소",
             "DFSVR_VisCull": "값·gradient parity·거짓음성 0 및 실제 end-to-end utility 검증",
             "SFTFSoft_GNN_DFSVR": "frozen budget-matched A–E baseline, held-out slicer 전이 및 latency/quality 동시 검증",
+            # 2026-09-20 볼트 동기화. 분량 병목(본문 산문 10,810 → 2,564단어)이 해소되면서
+            # 남은 것이 「규정이 요구하는데 프로젝트에 없는 산출물 셋」으로 바뀌었다.
+            # 표(research_outputs)가 살아 있으면 표 값이 이기므로 볼트에서도 다시 발행해야 한다.
+            "SFTF_QEM": "⛔ Tomo_SFTF accept 대기(2026-09-20) — 원고 자체는 투고 가능하다. 그전에 닫을 것 셋: COI 선언 **별도 Word 파일**이 없음(특허·연구비가 있어 체크박스 대체 불가), Vitae 를 표제지 뒤에 병합(새 포털에 올릴 파일 유형이 없고 build_draft.py 가 아직 그렇게 안 만든다), 본문에서 사라진 재현 패키지 주소(4open.science) 복원. 선행연구 인용 보강과 성능 우월 주장 불가는 그대로다"
         },
         remove=("TSE_SEM", "TSE_SEM_Bezier", "TSE_SEM_Tensor", "TSE_SEM_AutoTune",
                 "PFTF_ResearchOptimize"),
