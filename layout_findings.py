@@ -235,12 +235,12 @@ POS = {
     "SFTF_Clustering": (450, 400),
     "PFTF": (710, 390),
     "SFTF_Composite": (940, 620),
-    "SFTF_InjMold": (-360, 390),
+    "SFTF_InjMold": (860, -150),
     # 2026-09-20: 방대석 교수님 훌을 세우면서 PFTF_Mold 가 그래프에 처음 들어왔다.
     # SFTF_InjMold 와 같은 왼쪽 끝 열(x=-360), 한 칸 위인 y=190 행이다 — 그 행은
     # SFTFSoft_GNN_DFSVR·SFTF_QEM·Tomo_SFTF 가 쓰는 줄이라 격자에 맞는다.
-    "PFTF_Mold": (-360, 190),
-    "PFTF_Compression": (200, 660),
+    "PFTF_Mold": (980, -150),
+    "PFTF_Compression": (210, 620),
     "Tomo_DFSVR": (210, 20),
     "PFTF_VisCull_kDop": (210, 390),
     "SFTF_SewerPOC": (1150, 190),
@@ -250,34 +250,34 @@ POS = {
     "PFTF_DrapePrior_VisCull_kDop": (-30, 390),
     "PFTF_GFiberCT": (710, 800),
     "SFTF_QEM": (450, 190),
-    "SFTF_DynamicTargetSearch": (930, -150),
+    "SFTF_DynamicTargetSearch": (620, -300),
     "DFSVR_VisCull": (-30, 20),
     "SFTFSoft_GNN_DFSVR": (-30, 190),
     "SFTF_ActiveOverprint": (450, -150),
     "ColdOndol": (940, 390),
     "ColdOndol_Positioning": (1150, 390),
-    "cfmsCIPC": (-100, 760),
+    "cfmsCIPC": (-30, 1050),
     # 2026-09-11: TSE_SEM 을 논문 3편 트랙으로 나눴다.  ① 은 옛 TSE_SEM 자리를 잇고
     # ②·③ 은 SFTF_Composite → ① 방향을 따라 위쪽으로 한 칸씩 이어진다.
     "TSE_SEM1_Bezier": (1150, 620),
     "TSE_SEM2_Tensor": (1150, 800),
     "TSE_SEM3_AutoTune": (1150, 1020),
     "SFTF_HeatMethod": (940, 800),
-    "cfmsPINNDrape": (450, 1190),
-    "cfmsDrape": (-358, 860),
-    "cfmsMiindo": (-160, 880),
-    "cfmsPINNCAD": (200, 1020),
+    "cfmsPINNDrape": (-30, 900),
+    "cfmsDrape": (-360, 1020),
+    "cfmsMiindo": (-170, 770),
+    "cfmsPINNCAD": (210, 1020),
     "SFTFSoft_DFSVR": (210, -150),
     # Restored from the last pre-archive graph snapshot.
-    "SFTF_UrbanTraffic": (940, 20),
-    "cfmsAutoSew": (200, 1190),
-    "cfmsAutoPlace_IJCST": (-30, 1020),
+    "SFTF_UrbanTraffic": (940, 100),
+    "cfmsAutoSew": (210, 1200),
+    "cfmsAutoPlace_IJCST": (-30, 1330),
     "cfmsAutoPlace_JCDE": (-30, 1190),
     # 2026-09-01: ToDo DrapeSCAN onboarding from the Obsidian project note.
-    "cfmsDrapeSCAN": (200, 840),
+    "cfmsDrapeSCAN": (210, 840),
     # 2026-09-18: 93196cb 가 graph.html 에만 넣어 둔 노드를 여기로 들여왔다. 파일 씨앗이
     # 이 노드를 몰라서 전체 재생성이 좌표를 날려 버리고 있었다.
-    "cfmsDrapeInverse": (-70, 950),
+    "cfmsDrapeInverse": (-30, 720),
     # 2026-09-07: graph.html 의 큐레이션 노드(SFTF_HOLONOMY_NODE)와 짝을 이룬다.
     "SFTF_Holonomy": (940, 1020),
     # 2026-09-10: graph.html 의 큐레이션 노드(HIPDETECT_NODE)와 짝을 이룬다.
@@ -289,11 +289,11 @@ POS = {
     # 포트폴리오 표에는 두 트랙이 있는데 그래프에는 노드가 없었다(사용자 지적).
     # 자리는 이희란 교수님 묶음 왼쪽 아래의 빈 곳이다 — 파일 씨앗과 표(graph_positions)
     # 양쪽에서 가장 한산한 자리를 골랐다.
-    "TSE_TomoSh4": (450, 650),
+    "TSE_TomoSh4": (450, 620),
     "TSE_TomoSh5": (450, 840),
     # 2026-09-19: 전석진 교수님 후보 둘. 김우석 묶음(y<=470) 아래, 은종현 묶음(x<=914)
     # 오른쪽의 빈 자리다. 드래그 격자(10)에 맞춰 두었다 — 웹에서 옮기면 표가 정본이 된다.
-    "Jeon_DLPOrient": (710, 20),
+    "Jeon_DLPOrient": (720, -60),
     # 2026-09-19: 볼트에서 Jeon_DispersityProp → cfmsDispersityProp 로 개명되고 공저
     # 후보도 전석진 → 은종현 으로 바뀌었다. 자리도 은종현 묶음 안으로 옮긴다 —
     # 부모 cfmsDispersity 바로 아래이고 그 묶음의 격자 간격(180)과 같은 칸이다.
