@@ -44,7 +44,10 @@ try {
     $counts = (git rev-list --left-right --count HEAD...origin/main) -split "\s+"
     if ([int]$counts[1] -ne 0) { throw "origin/main is ahead; merge or rebase it before publishing" }
 
-    $allowed = @("graph.html", "graph3d.html", "graph_계층형.html", "mindmap.html", "portfolio.html")
+    # 2026-09-20: graph_계층형.html 을 뺐다 — 파일을 지웠다(옛 계층형 지도, 사용자 판단).
+    # 아래 quotepath 설정은 그대로 둔다. 지금은 비ASCII 이름이 없지만 다시 생겼을 때
+    # 조용히 어긋나지 않게 하는 것이 목적이다.
+    $allowed = @("graph.html", "graph3d.html", "mindmap.html", "portfolio.html")
     # core.quotepath 기본값은 비ASCII 이름을 "graph_ê³..." 로 이스케이프해
     # 돌려주므로 $allowed 와 비교가 어긋난다. 꺼서 실제 이름을 받는다.
     $changed = @(
