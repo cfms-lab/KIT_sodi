@@ -502,7 +502,7 @@ EDGE_DIRECTION_FIXES.forEach(([from, to]) => {
 
 const CURATED_POSITIONS = {"cfmsAutoSew": {"x": 200, "y": 1190}, "cfmsAutoPlace_IJCST": {"x": -30, "y": 1020}, "cfmsAutoPlace_JCDE": {"x": -30, "y": 1190}, "cfmsDrapeSCAN": {"x": 200, "y": 840}, "SFTF_Holonomy": {"x": 940, "y": 1020}, "HIPDetect": {"x": 450, "y": 1020}, "cfmsDispersity": {"x": 710, "y": 1020}, "TSE_TomoSh4": {"x": 450, "y": 650}, "TSE_TomoSh5": {"x": 450, "y": 840}};
 const PAPER_COMPLETENESS = {"ColdOndol": 3, "ColdOndol_Materials": 4, "ColdOndol_Positioning": 3, "HipDetect": 2, "PFTF": 5, "PFTF_AsymTensor": 3, "PFTF_Compression": 6, "PFTF_FXShock": 8, "PFTF_GFiberCT": 2, "PFTF_Mold": 4, "PFTF_VisCull_kDop": 4, "SFTFSoft_DFSVR": 5, "SFTFSoft_GNN": 4, "SFTF_Clustering": 2, "SFTF_Composite": 3, "SFTF_DrapePrior": 1, "SFTF_HeatMethod": 1, "SFTF_Holonomy": 2, "SFTF_QEM": 1, "SFTF_SewerPOC": 5, "SFTF_ThermalChip": 5, "SFTF_UrbanTraffic": 1, "TSE_SEM1_Bezier": 2, "TSE_SEM2_Tensor": 2, "TSE_SEM3_AutoTune": 1, "TSE_TomoSh4": 2, "TSE_TomoSh5": 2, "Tomo_DFSVR": 3, "Tomo_SFTF": 1, "Tomo_SFTFSoft": 2, "cfmsAutoPlace_IJCST": 3, "cfmsAutoPlace_JCDE": 3, "cfmsAutoSew": 4, "cfmsCIPC": 1, "cfmsDispersity": 1, "cfmsDrapeSCAN": 10, "cfmsPINNCAD": 10, "cfmsPINNDrape": 5};
-const VAULT_STAGES = {"ColdOndol": "undecided", "ColdOndol_Positioning": "draft", "DFSVR_VisCull": "draft", "HIPDetect": "draft", "Jeon_DLPOrient": "undecided", "PFTF": "blocked", "PFTF_AsymTensor": "draft", "PFTF_Compression": "draft", "PFTF_DrapePrior_VisCull_kDop": "draft", "PFTF_GFiberCT": "draft", "PFTF_Mold": "draft", "PFTF_VisCull_kDop": "draft", "SFTFSoft_DFSVR": "blocked", "SFTFSoft_GNN": "draft", "SFTFSoft_GNN_DFSVR": "draft", "SFTF_ActiveOverprint": "draft", "SFTF_Clustering": "draft", "SFTF_Composite": "draft", "SFTF_DrapePrior": "accepted", "SFTF_DynamicTargetSearch": "draft", "SFTF_HeatMethod": "draft", "SFTF_Holonomy": "draft", "SFTF_InjMold": "draft", "SFTF_QEM": "draft", "SFTF_SewerPOC": "undecided", "SFTF_UrbanTraffic": "submitted", "TSE_SEM1_Bezier": "draft", "TSE_SEM2_Tensor": "draft", "TSE_SEM3_AutoTune": "blocked", "TSE_TomoSh4": "draft", "TSE_TomoSh5": "submitted", "Tomo_DFSVR": "draft", "Tomo_SFTF": "revision", "Tomo_SFTFSoft": "draft", "cfmsAutoPlace_IJCST": "draft", "cfmsAutoPlace_JCDE": "draft", "cfmsAutoSew": "draft", "cfmsCIPC": "submitted", "cfmsDispersity": "published", "cfmsDispersityProp": "undecided", "cfmsDrape": "draft", "cfmsDrapeSCAN": "blocked", "cfmsPINNCAD": "blocked", "cfmsPINNDrape": "undecided"};
+const VAULT_STAGES = {"ColdOndol": "undecided", "ColdOndol_Positioning": "draft", "DFSVR_VisCull": "draft", "HIPDetect": "draft", "Jeon_DLPOrient": "draft", "PFTF": "blocked", "PFTF_AsymTensor": "draft", "PFTF_Compression": "draft", "PFTF_DrapePrior_VisCull_kDop": "draft", "PFTF_GFiberCT": "draft", "PFTF_Mold": "draft", "PFTF_VisCull_kDop": "draft", "SFTFSoft_DFSVR": "blocked", "SFTFSoft_GNN": "draft", "SFTFSoft_GNN_DFSVR": "draft", "SFTF_ActiveOverprint": "draft", "SFTF_Clustering": "draft", "SFTF_Composite": "draft", "SFTF_DrapePrior": "accepted", "SFTF_DynamicTargetSearch": "draft", "SFTF_HeatMethod": "draft", "SFTF_Holonomy": "draft", "SFTF_InjMold": "draft", "SFTF_QEM": "draft", "SFTF_SewerPOC": "undecided", "SFTF_UrbanTraffic": "submitted", "TSE_SEM1_Bezier": "draft", "TSE_SEM2_Tensor": "draft", "TSE_SEM3_AutoTune": "blocked", "TSE_TomoSh4": "draft", "TSE_TomoSh5": "submitted", "Tomo_DFSVR": "draft", "Tomo_SFTF": "revision", "Tomo_SFTFSoft": "draft", "cfmsAutoPlace_IJCST": "draft", "cfmsAutoPlace_JCDE": "draft", "cfmsAutoSew": "draft", "cfmsCIPC": "submitted", "cfmsDispersity": "published", "cfmsDispersityProp": "undecided", "cfmsDrape": "draft", "cfmsDrapeSCAN": "blocked", "cfmsPINNCAD": "blocked", "cfmsPINNDrape": "undecided"};
 const COAUTHOR_CANDIDATES = {"Jeon_DLPOrient": "전석진", "PFTF_Mold": "조범곤 · 방대석 · 윤관한", "SFTF_InjMold": "방대석 · 조범곤", "SFTF_QEM": "전석진", "Tomo_SFTFSoft": "전석진", "cfmsDispersityProp": "은종현"};
 Object.assign(POS, CURATED_POSITIONS);
 
@@ -726,10 +726,46 @@ function dimmedEdgeColor(e) {
 }
 // 엣지 라벨은 '개발 목표'다 — 출발 노드에서 도착 노드를 만든 이유를 한두 단어로 적는다.
 // (2026-08-28: 활용 분야별로 갈라 놓았던 62개 엣지를 개발 목표 33개로 정리했다.)
+/* 엣지가 한 노드로 몰리면 기본값(continuous · roundness 0.2)으로는 선들이 거의
+   겹쳐 화살표도 라벨도 뭉친다 — cfmsDrape 가 그렇다(드나드는 엣지 9개). 그 노드에
+   닿는 엣지만 부채꼴 곡선으로 벌린다.
+
+   허브에서 본 반대편 끝의 각도로 줄을 세운 뒤, 각도상 이웃끼리 「휘는 방향」과
+   「곡률」이 동시에 겹치지 않도록 방향은 번갈아, 곡률은 사다리로 돌린다. 좌표는 파일
+   씨앗 POS 를 쓴다 — 표에서 받은 배치가 조금 달라도 부채꼴 자체는 유지된다.
+   허브를 늘리려면 FAN_EDGE_HUBS 에 노드 id 를 더하면 된다. */
+const DEFAULT_EDGE_SMOOTH = { type: 'continuous', roundness: 0.2 };
+const FAN_EDGE_HUBS = ['cfmsDrape'];
+const FAN_ROUNDNESS = [0.2, 0.35, 0.5];
+const FAN_SMOOTH = (() => {
+  const byEdgeIndex = {};
+  FAN_EDGE_HUBS.forEach(hub => {
+    const hubPos = POS[hub];
+    if (!hubPos) return;
+    const incident = [];
+    RAW_EDGES.forEach((e, i) => {
+      if (e.from !== hub && e.to !== hub) return;
+      const p = POS[e.from === hub ? e.to : e.from] || hubPos;
+      incident.push({ i, angle: Math.atan2(p.y - hubPos.y, p.x - hubPos.x) });
+    });
+    if (incident.length < 3) return;   // 둘 이하는 겹칠 일이 없다
+    incident.sort((a, b) => a.angle - b.angle);
+    incident.forEach((item, k) => {
+      byEdgeIndex[item.i] = {
+        type: (k % 2) ? 'curvedCCW' : 'curvedCW',
+        roundness: FAN_ROUNDNESS[Math.floor(k / 2) % FAN_ROUNDNESS.length],
+      };
+    });
+  });
+  return byEdgeIndex;
+})();
+const edgeSmooth = i => FAN_SMOOTH[i] || DEFAULT_EDGE_SMOOTH;
+
 const edgesDS = new vis.DataSet(RAW_EDGES.map((e, i) => ({
   id: i, from: e.from, to: e.to,
   hidden: false,
   label: '',
+  smooth: edgeSmooth(i),
   title: e.title,
   dashes: e.dashes,
   width: e.width,
@@ -800,14 +836,17 @@ function applyLayout(mode) {
   if (mode === 'free') {
     network.setOptions({
       layout: { hierarchical: { enabled: false } },
-      edges: { smooth: { type: 'continuous', roundness: 0.2 } },
+      edges: { smooth: DEFAULT_EDGE_SMOOTH },
     });
+    edgesDS.update(RAW_EDGES.map((e, i) => ({ id: i, smooth: edgeSmooth(i) })));
     RAW_NODES.forEach(n => {
       const p = savedPos[n.id] || POS[n.id];
       if (p) network.moveNode(n.id, p.x, p.y);
     });
   } else {
     // 계층 배치에서는 각 노드의 level을 명시해 vis의 추정에 맡기지 않는다.
+    const hierSmooth = { type: 'cubicBezier',
+      forceDirection: mode === 'LR' ? 'horizontal' : 'vertical', roundness: 0.55 };
     nodesDS.update(RAW_NODES.map(n => ({ id: n.id, level: LEVEL[n.id] })));
     network.setOptions({
       layout: {
@@ -824,14 +863,12 @@ function applyLayout(mode) {
           parentCentralization: true,
         },
       },
-      edges: {
-        smooth: {
-          type: 'cubicBezier',
-          forceDirection: mode === 'LR' ? 'horizontal' : 'vertical',
-          roundness: 0.55,
-        },
-      },
+      edges: { smooth: hierSmooth },
     });
+    // 엣지별 smooth 는 전역 설정을 이긴다. 비우는 대신 같은 값을 덮어써야
+    // cfmsDrape 부채꼴만 계층 배치에서 혼자 남는 일이 없다 (DataSet.update 는
+    // undefined 를 「지우라」가 아니라 「건드리지 말라」로 읽는다).
+    edgesDS.update(RAW_EDGES.map((e, i) => ({ id: i, smooth: hierSmooth })));
   }
   network.fit({ animation: { duration: 400 } });
 }
