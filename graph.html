@@ -737,6 +737,16 @@ function dimmedEdgeColor(e) {
 const DEFAULT_EDGE_SMOOTH = { type: 'continuous', roundness: 0.2 };
 const FAN_EDGE_HUBS = ['cfmsDrape'];
 const FAN_ROUNDNESS = [0.2, 0.35, 0.5];
+/* 각도순 배정이 화면에서 어색하게 나온 것만 방향을 뒤집는다 (사용자 지정 2026-09-20).
+   쌍은 화살표 방향을 가리지 않는다 — 두 끝 노드 id 로 찾는다. 곡률 크기는 그대로 두고
+   휘는 쪽만 바꾼다.
+   ※ vis 의 curvedCW/CCW 는 **엣지 자신의 from→to 를 기준**으로 한 쪽이라, 허브로
+     들어오는 엣지와 나가는 엣지는 같은 이름이라도 화면에서 반대쪽으로 휜다. 아래
+     둘이 어색했던 까닭이 그것이다. */
+const FAN_FLIP_PAIRS = [
+  ['cfmsDrape', 'cfmsAutoPlace_JCDE'],
+  ['cfmsDrape', 'cfmsDrapeInverse'],
+];
 const FAN_SMOOTH = (() => {
   const byEdgeIndex = {};
   FAN_EDGE_HUBS.forEach(hub => {
@@ -756,6 +766,13 @@ const FAN_SMOOTH = (() => {
         roundness: FAN_ROUNDNESS[Math.floor(k / 2) % FAN_ROUNDNESS.length],
       };
     });
+  });
+  RAW_EDGES.forEach((e, i) => {
+    const s = byEdgeIndex[i];
+    if (!s) return;
+    const flip = FAN_FLIP_PAIRS.some(([a, b]) =>
+      (e.from === a && e.to === b) || (e.from === b && e.to === a));
+    if (flip) s.type = (s.type === 'curvedCW') ? 'curvedCCW' : 'curvedCW';
   });
   return byEdgeIndex;
 })();
