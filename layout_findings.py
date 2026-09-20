@@ -1790,6 +1790,28 @@ JEON_GOAL_EDGES = [
     },
 ]
 
+
+# ------------------------------------------------ 금형 두 갈래의 부모 (2026-09-20)
+# 방대석 교수님 훌을 세울 때 두 노드가 화살표 없이 떠 있었다(사용자). 부모는 고르는
+# 것이 아니라 볼트 노트가 「개요」에서 이미 지목하고 있다 —
+#   · PFTF_Mold      「[[PFTF]] 의 **사출 금형 이방성 수축 보정(치수 보정)** 인스턴스」
+#   · SFTF_InjMold   「SFTF 의 **사출성형** 적용」, 관련 프로젝트 [[Tomo_SFTF]]
+# 둘 다 확정된 계보라 실선이다(dashes False). PFTF_Mold 의 관련 프로젝트에는
+# SFTF_InjMold·SFTF_Composite 도 있지만, 한 노드에 부모 하나씩만 긋는다.
+MOLD_GOAL_EDGES = [
+    _autoplace_goal_edge(
+        "PFTF", "PFTF_Mold", "수축 보정",
+        "방향 텐서의 Rayleigh 축약으로 이방성 수축을 통일하고, cavity 를 사전 변형하는 "
+        "역문제로 물리 cut-and-try 반복을 계산 반복으로 대체한다",
+        "확장",
+    ),
+    _autoplace_goal_edge(
+        "Tomo_SFTF", "SFTF_InjMold", "사출 이식",
+        "방향 판정을 사출 금형의 재료 흐름 방향으로 옮겨 결함이 적은 설계를 고른다",
+        "확장",
+    ),
+]
+
 # ------------------------------------------------ TSE_SEM 논문 트랙 분리 (2026-09-11)
 # TSE_SEM2026_dev 한 저장소에 논문 3편이 있고(볼트 Projects/TSE_SEM.md 의 draft_keyword),
 # mindmap.html 의 클라우드 문서는 이미 세 노드로 나뉘어 있다.  graph.html 도 나눈다.
@@ -2102,7 +2124,7 @@ def _preserve_goal_edges(match):
     lineage_pairs = {
         (str(edge["from"]), str(edge["to"]))
         for edge in DYNAMIC_TARGET_SEARCH_GOAL_EDGES + COAUTHOR_KIM_GOAL_EDGES
-        + JEON_GOAL_EDGES
+        + JEON_GOAL_EDGES + MOLD_GOAL_EDGES
     }
     edges = [
         edge for edge in edges
@@ -2117,6 +2139,7 @@ def _preserve_goal_edges(match):
     edges.extend(copy.deepcopy(DYNAMIC_TARGET_SEARCH_GOAL_EDGES))
     edges.extend(copy.deepcopy(COAUTHOR_KIM_GOAL_EDGES))
     edges.extend(copy.deepcopy(JEON_GOAL_EDGES))
+    edges.extend(copy.deepcopy(MOLD_GOAL_EDGES))
     edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
     edges.extend(copy.deepcopy(DRAPESCAN_EDGES))
     edges.extend(copy.deepcopy(SEM_GOAL_EDGES))
