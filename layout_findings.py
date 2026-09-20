@@ -1035,10 +1035,16 @@ if preserve_extended_quality:
             # 2026-09-20 볼트 동기화. 분량 병목(본문 산문 10,810 → 2,564단어)이 해소되면서
             # 남은 것이 「규정이 요구하는데 프로젝트에 없는 산출물 셋」으로 바뀌었다.
             # 표(research_outputs)가 살아 있으면 표 값이 이기므로 볼트에서도 다시 발행해야 한다.
-            "SFTF_QEM": "⛔ Tomo_SFTF accept 대기(2026-09-20) — 원고 자체는 투고 가능하다. 그전에 닫을 것 셋: COI 선언 **별도 Word 파일**이 없음(특허·연구비가 있어 체크박스 대체 불가), Vitae 를 표제지 뒤에 병합(새 포털에 올릴 파일 유형이 없고 build_draft.py 가 아직 그렇게 안 만든다), 본문에서 사라진 재현 패키지 주소(4open.science) 복원. 선행연구 인용 보강과 성능 우월 주장 불가는 그대로다"
+            "SFTF_QEM": "⛔ Tomo_SFTF accept 대기(2026-09-20) — 원고 자체는 투고 가능하다. 그전에 닫을 것 셋: COI 선언 **별도 Word 파일**이 없음(특허·연구비가 있어 체크박스 대체 불가), Vitae 를 표제지 뒤에 병합(새 포털에 올릴 파일 유형이 없고 build_draft.py 가 아직 그렇게 안 만든다), 본문에서 사라진 재현 패키지 주소(4open.science) 복원. 선행연구 인용 보강과 성능 우월 주장 불가는 그대로다",
+            # 2026-09-21 볼트 동기화. 분량·형식·인용이 닫히면서 병목이 「행정 둘」로 바뀌었다.
+            "SFTF_InjMold": "행정 두 가지뿐이다 — 교신저자 ORCID 와 1저자 실명. 분량·형식·인용은 닫혔다",
         },
+        # 2026-09-21: PFTF_Mold 를 걷는다. 파일에 구워져 있던 「solids4foam 사슬 IBOF
+        # 재채점·외부 물리 검증」은 볼트가 이미 닫은 일이고(grade_note — 선언한 아홉 관문
+        # 전부 충족), 볼트 노트에는 bottleneck 필드 자체가 없다. 없는 것을 없다고 두는 편이
+        # 끝난 일을 막힌 일로 보이게 두는 것보다 낫다.
         remove=("TSE_SEM", "TSE_SEM_Bezier", "TSE_SEM_Tensor", "TSE_SEM_AutoTune",
-                "PFTF_ResearchOptimize"),
+                "PFTF_ResearchOptimize", "PFTF_Mold"),
     )
     s = _update_json_object_constant(
         s,
