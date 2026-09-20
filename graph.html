@@ -701,7 +701,11 @@ const INDUSTRIAL_EFFECTS = {"Tomo_SFTF": "복셀·광선 계산의 안정화로 
 const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
   ...((savedPos[n.id] || POS[n.id]) ? { x: (savedPos[n.id] || POS[n.id]).x, y: (savedPos[n.id] || POS[n.id]).y } : {}),
   id: n.id, label: n.label, shape: n.shape || 'dot', color: n.color, size: n.size, borderWidth: n.borderWidth || 1,
-  font: { ...(n.font || {}), size: Math.max(18.7, (n.font && n.font.size) || 0), bold: false }, title: n.title,
+  font: { ...(n.font || {}), size: Math.max(18.7, (n.font && n.font.size) || 0), bold: false },
+  // title 을 넘기지 않는다 = 노드 hover 툴팁 없음 (2026-09-20 사용자 지시).
+  // 같은 내용이 오른쪽 NODE INFO 패널과 mindmap.html 에 있어서 필요가 없어졌다.
+  // RAW_NODES 의 n.title 자체는 남긴다 — 생성기가 차수 줄을 그 안에 쓰고
+  // graph3d.html 이 graph.html 을 직접 읽는다. 엣지 툴팁은 그대로 둔다.
   _community: n.community, _community_name: n.community_name,
   _source_file: n.source_file, _file_type: n.file_type, _project_role: n._project_role, _display_label: n._display_label || n.label, _graph_role: n._graph_role, _finding_candidate: n._finding_candidate, _closed: n._closed, _degree: n.degree, _project_path: n._project_path, _intro: INDUSTRIAL_EFFECTS[n.id] || n._intro, _quality: n._quality, _quality_note: n._quality_note, _bottleneck: n._bottleneck,
 })));
@@ -729,66 +733,174 @@ function dimmedEdgeColor(e) {
 }
 // 엣지 라벨은 '개발 목표'다 — 출발 노드에서 도착 노드를 만든 이유를 한두 단어로 적는다.
 // (2026-08-28: 활용 분야별로 갈라 놓았던 62개 엣지를 개발 목표 33개로 정리했다.)
-/* 엣지가 한 노드로 몰리면 기본값(continuous · roundness 0.2)으로는 선들이 거의
-   겹쳐 화살표도 라벨도 뭉친다 — cfmsDrape 가 그렇다(드나드는 엣지 9개). 그 노드에
-   닿는 엣지만 부채꼴 곡선으로 벌린다.
+/* 한 노드에 엣지가 몰리면 기본값(continuous · roundness 0.2)으로는 선이 거의 겹쳐
+   화살표도 라벨도 뭉친다 — cfmsDrape 가 그렇다(드나드는 엣지 9개가 두 개의 좁은 각도
+   띠에 몰려 있고 이웃 간격이 5°~8° 인 자리가 여럿이다).
 
-   허브에서 본 반대편 끝의 각도로 줄을 세운 뒤, 각도상 이웃끼리 「휘는 방향」과
-   「곡률」이 동시에 겹치지 않도록 방향은 번갈아, 곡률은 사다리로 돌린다. 좌표는 파일
-   씨앗 POS 를 쓴다 — 표에서 받은 배치가 조금 달라도 부채꼴 자체는 유지된다.
-   허브를 늘리려면 FAN_EDGE_HUBS 에 노드 id 를 더하면 된다. */
+   ⚠️ 각도만 보고 곡률을 나눠 주는 「규칙」으로 두 번 시도했다가 두 번 다 더 겹쳤다.
+   겹침은 각도만으로 정해지지 않는다 — 엣지 길이(roundness 는 길이에 비례해 부푼다),
+   부풀어 나간 곡선이 이웃 묶음으로 파고드는 정도, 사이에 낀 노드가 함께 정한다.
+   그래서 규칙 대신 **재서 고른다**.
+
+   방법: 각 엣지마다 후보(휘는 방향 × 곡률)를 놓고, vis 가 실제로 그릴 곡선을 그대로
+   떠서(edgeType.getPoint) 표본을 만든 뒤, 「엣지끼리 너무 가까운 정도 + 남의 노드를
+   지나가는 정도 + 쓸데없이 센 곡률」을 벌점으로 합산해 가장 작은 조합을 좌표하강으로
+   찾는다. 허브 바로 옆은 어차피 한 점에서 만나므로 FAN_SKIP_R 안쪽 표본은 벌점에서
+   뺀다.
+
+   후보를 재는 동안 화면은 건드리지 않는다 — DataSet 대신 edgeType 을 직접 세워
+   좌표만 읽는다(같은 값을 준다는 것을 실측으로 확인했다). 다 고른 뒤 한 번만
+   DataSet 에 넣는다.
+
+   살아 있는 좌표로 계산하고, 배치가 바뀔 때마다(표에서 받은 뒤·노드를 놓은 뒤·자유
+   배치로 돌아올 때) 다시 고른다. 허브를 늘리려면 FAN_EDGE_HUBS 에 id 를 더한다. */
 const DEFAULT_EDGE_SMOOTH = { type: 'continuous', roundness: 0.2 };
 const FAN_EDGE_HUBS = ['cfmsDrape'];
-const FAN_ROUNDNESS = [0.2, 0.35, 0.5];
-/* 각도순 배정이 화면에서 어색하게 나온 것만 방향을 뒤집는다 (사용자 지정 2026-09-20).
-   쌍은 화살표 방향을 가리지 않는다 — 두 끝 노드 id 로 찾는다. 곡률 크기는 그대로 두고
-   휘는 쪽만 바꾼다.
-   ※ vis 의 curvedCW/CCW 는 **엣지 자신의 from→to 를 기준**으로 한 쪽이라, 허브로
-     들어오는 엣지와 나가는 엣지는 같은 이름이라도 화면에서 반대쪽으로 휜다. 아래
-     둘이 어색했던 까닭이 그것이다. */
-const FAN_FLIP_PAIRS = [
-  ['cfmsDrape', 'cfmsDrapeInverse'],
-  // 2026-09-20 두 번째 조정: AutoPlace 두 갈래를 맞바꿨다. JCDE 는 첫 조정에서
-  // 뒤집어 두었던 것을 도로 기본값으로 돌리는 것이라 목록에서 **뺐고**, IJCST 를
-  // 대신 넣는다(이 목록은 「기본 배정에서 뒤집을 것」만 담는다).
-  ['cfmsDrape', 'cfmsAutoPlace_IJCST'],
-];
-const FAN_SMOOTH = (() => {
-  const byEdgeIndex = {};
-  FAN_EDGE_HUBS.forEach(hub => {
-    const hubPos = POS[hub];
-    if (!hubPos) return;
-    const incident = [];
-    RAW_EDGES.forEach((e, i) => {
-      if (e.from !== hub && e.to !== hub) return;
-      const p = POS[e.from === hub ? e.to : e.from] || hubPos;
-      incident.push({ i, angle: Math.atan2(p.y - hubPos.y, p.x - hubPos.x) });
-    });
-    if (incident.length < 3) return;   // 둘 이하는 겹칠 일이 없다
-    incident.sort((a, b) => a.angle - b.angle);
-    incident.forEach((item, k) => {
-      byEdgeIndex[item.i] = {
-        type: (k % 2) ? 'curvedCCW' : 'curvedCW',
-        roundness: FAN_ROUNDNESS[Math.floor(k / 2) % FAN_ROUNDNESS.length],
-      };
-    });
+const FAN_SKIP_R = 45;        // 허브에서 이만큼 안쪽 표본은 벌점에서 뺀다
+const FAN_NEAR = 26;          // 엣지끼리 이보다 가까우면 벌점
+const FAN_NODE_R = 30;        // 남의 노드 중심에서 이보다 가까이 지나가면 벌점
+const FAN_NODE_W = 1.5;       // 노드를 지나가는 쪽을 조금 더 싫어한다
+const FAN_BEND_W = 40;        // 같은 값이면 덜 휜 쪽을 고른다
+const FAN_SAMPLES = 32;
+const FAN_PASSES = 4;
+const FAN_CANDIDATES = (() => {
+  const list = [{ type: 'continuous', roundness: 0.2 }];
+  [0.1, 0.2, 0.3, 0.45, 0.6].forEach(r => {
+    list.push({ type: 'curvedCW', roundness: r });
+    list.push({ type: 'curvedCCW', roundness: r });
   });
-  RAW_EDGES.forEach((e, i) => {
-    const s = byEdgeIndex[i];
-    if (!s) return;
-    const flip = FAN_FLIP_PAIRS.some(([a, b]) =>
-      (e.from === a && e.to === b) || (e.from === b && e.to === a));
-    if (flip) s.type = (s.type === 'curvedCW') ? 'curvedCCW' : 'curvedCW';
-  });
-  return byEdgeIndex;
+  return list;
 })();
+
+/* 엣지 하나를 주어진 smooth 로 세우고 곡선 위 점을 뜬다. DataSet 을 거치지 않으므로
+   화면이 다시 그려지지 않는다. */
+function _fanSamplePoints(edgeId, smooth) {
+  const ve = network.body.edges[edgeId];
+  if (!ve || !ve.edgeType || typeof ve.edgeType.getPoint !== 'function') return null;
+  ve.options.smooth = { enabled: true, forceDirection: false,
+                        type: smooth.type, roundness: smooth.roundness };
+  if (ve.edgeType.options !== ve.options) ve.edgeType.options = ve.options;
+  ve.edgeType.via = undefined;
+  const pts = [];
+  for (let j = 0; j <= FAN_SAMPLES; j++) {
+    const p = ve.edgeType.getPoint(j / FAN_SAMPLES);
+    if (p && Number.isFinite(p.x)) pts.push(p);
+  }
+  return pts;
+}
+
+function computeFanSmooth() {
+  const chosen = {};
+  FAN_EDGE_HUBS.forEach(hub => {
+    const hubPos = network.getPositions([hub])[hub];
+    if (!hubPos) return;
+    const ids = [];
+    RAW_EDGES.forEach((e, i) => {
+      if ((e.from === hub || e.to === hub) && e.from !== e.to && network.body.edges[i]) ids.push(i);
+    });
+    if (ids.length < 2) return;
+
+    // 사이에 끼면 곤란한 노드들 — 이 묶음의 양 끝은 뺀다.
+    const endpoints = new Set([hub]);
+    ids.forEach(i => { endpoints.add(RAW_EDGES[i].from); endpoints.add(RAW_EDGES[i].to); });
+    const allPos = network.getPositions();
+    const obstacles = Object.keys(allPos)
+      .filter(id => !endpoints.has(id))
+      .map(id => allPos[id]);
+
+    // 후보마다 표본과 「노드 지나감」 벌점을 미리 구해 둔다.
+    const sampled = ids.map(i => FAN_CANDIDATES.map(c => {
+      const pts = _fanSamplePoints(i, c);
+      if (!pts) return null;
+      const far = pts.filter(p => Math.hypot(p.x - hubPos.x, p.y - hubPos.y) >= FAN_SKIP_R);
+      let nodePen = 0;
+      for (const p of far) for (const o of obstacles) {
+        const d = Math.hypot(p.x - o.x, p.y - o.y);
+        if (d < FAN_NODE_R) nodePen += (FAN_NODE_R - d) * (FAN_NODE_R - d) * FAN_NODE_W;
+      }
+      return { pts: far, nodePen, bend: c.roundness * (c.type === 'continuous' ? 0 : 1) };
+    }));
+
+    const pairPen = (a, b) => {
+      if (!a || !b) return 0;
+      let pen = 0, min = Infinity;
+      for (const p of a.pts) for (const q of b.pts) {
+        const d = Math.hypot(p.x - q.x, p.y - q.y);
+        if (d < min) min = d;
+      }
+      if (min < FAN_NEAR) pen = (FAN_NEAR - min) * (FAN_NEAR - min);
+      return pen;
+    };
+
+    // 좌표하강: 기본값에서 시작해 한 엣지씩 가장 좋은 후보로 바꾼다.
+    const pick = ids.map(() => 0);
+    const costOf = (k, c) => {
+      const me = sampled[k][c];
+      if (!me) return Infinity;
+      let sum = me.nodePen + me.bend * FAN_BEND_W;
+      for (let j = 0; j < ids.length; j++) if (j !== k) sum += pairPen(me, sampled[j][pick[j]]);
+      return sum;
+    };
+    for (let pass = 0; pass < FAN_PASSES; pass++) {
+      let moved = false;
+      for (let k = 0; k < ids.length; k++) {
+        let best = pick[k], bestCost = costOf(k, pick[k]);
+        for (let c = 0; c < FAN_CANDIDATES.length; c++) {
+          if (c === pick[k]) continue;
+          const cost = costOf(k, c);
+          if (cost < bestCost - 1e-9) { bestCost = cost; best = c; }
+        }
+        if (best !== pick[k]) { pick[k] = best; moved = true; }
+      }
+      if (!moved) break;
+    }
+    ids.forEach((i, k) => { chosen[i] = FAN_CANDIDATES[pick[k]]; });
+  });
+  return chosen;
+}
+
+let FAN_SMOOTH = {};
 const edgeSmooth = i => FAN_SMOOTH[i] || DEFAULT_EDGE_SMOOTH;
+
+/* 부채꼴을 지금 좌표로 다시 고르고 화면에 반영한다. 계층 배치에서는 전역 cubicBezier 가
+   맞으므로 아무것도 하지 않는다 — 자유 배치로 돌아올 때 applyLayout 이 다시 부른다. */
+let _fanKey = '';
+let _fanBusy = false;
+
+/* 부채꼴이 보는 좌표들을 한 줄로 요약한다 — 허브와 거기 닿는 노드뿐이다. */
+function _fanPositionKey() {
+  const ids = new Set();
+  FAN_EDGE_HUBS.forEach(hub => {
+    ids.add(hub);
+    RAW_EDGES.forEach(e => {
+      if (e.from === hub) ids.add(e.to);
+      else if (e.to === hub) ids.add(e.from);
+    });
+  });
+  const list = [...ids].sort();
+  const pos = network.getPositions(list);
+  return list.map(id => {
+    const p = pos[id];
+    return p ? id + ':' + Math.round(p.x) + ',' + Math.round(p.y) : id + ':?';
+  }).join('|');
+}
+
+/* 부채꼴을 지금 좌표로 다시 고르고 화면에 반영한다. 계층 배치에서는 전역
+   cubicBezier 가 맞으므로 아무것도 하지 않는다 — 자유 배치로 돌아올 때
+   applyLayout 이 다시 부른다. */
+function refreshFanSmooth() {
+  if (layoutMode !== 'free') return;
+  _fanKey = _fanPositionKey();
+  FAN_SMOOTH = computeFanSmooth();
+  edgesDS.update(RAW_EDGES.map((e, i) => ({ id: i, smooth: edgeSmooth(i) })));
+}
+
 
 const edgesDS = new vis.DataSet(RAW_EDGES.map((e, i) => ({
   id: i, from: e.from, to: e.to,
   hidden: false,
   label: '',
-  smooth: edgeSmooth(i),
+  smooth: DEFAULT_EDGE_SMOOTH,   // 아래 refreshFanSmooth() 가 곧 다시 잰다
   title: e.title,
   dashes: e.dashes,
   width: e.width,
@@ -850,6 +962,24 @@ RAW_NODES.forEach(n => levelOf(n.id));
 
 let layoutMode = 'free';
 
+/* 부채꼴 첫 계산. ⚠️ 여기보다 위에서 부르면 안 된다 — refreshFanSmooth 가 보는
+   layoutMode 가 아직 TDZ 라서 typeof 조차 던지고, 그 자리에서 스크립트 전체가
+   멈춘다(2026-09-20 에 실제로 그랬다: showHyper 부터 아래가 통째로 안 섰다). */
+refreshFanSmooth();
+
+/* 좌표가 바뀌면 스스로 다시 고른다.
+   노드를 옮기는 길이 여럿이고(드래그 · 표에서 받은 공유 배치 · 「위치 초기화」)
+   그중 일부는 **생성기가 소유한 코드** 안에 있어 호출부를 심으면 재생성이
+   지운다. 그래서 호출부 대신 좌표를 본다. 허브에 닿는 노드 열 개 남짓만
+   보므로 프레임당 비용은 무시할 만하다. 다시 고른 뒤 한 프레임 더 그려지고,
+   그때는 키가 같아 아무 일도 하지 않는다(무한 되먹임 없음). */
+network.on('afterDrawing', () => {
+  if (_fanBusy || layoutMode !== 'free') return;
+  if (_fanPositionKey() === _fanKey) return;
+  _fanBusy = true;
+  try { refreshFanSmooth(); } finally { _fanBusy = false; }
+});
+
 function applyLayout(mode) {
   layoutMode = mode;
   const posBtnsOn = (mode === 'free');
@@ -861,7 +991,7 @@ function applyLayout(mode) {
       layout: { hierarchical: { enabled: false } },
       edges: { smooth: DEFAULT_EDGE_SMOOTH },
     });
-    edgesDS.update(RAW_EDGES.map((e, i) => ({ id: i, smooth: edgeSmooth(i) })));
+    refreshFanSmooth();
     RAW_NODES.forEach(n => {
       const p = savedPos[n.id] || POS[n.id];
       if (p) network.moveNode(n.id, p.x, p.y);
@@ -1237,8 +1367,10 @@ function computeAlignGuides(ids) {
 })();
 
 /* 노드를 끌 때 툴팁 감추기.
-   화면을 통째로 미는 것(pan)은 params.nodes 가 비므로 건드리지 않는다 —
-   가려서 곤란한 것은 끌고 있는 노드의 자리다.
+   2026-09-20 에 노드 툴팁을 없앴으므로 이제 이 코드가 막는 것은 **엣지** 툴팁이다
+   — 끄는 도중 화살표 위를 지나가면 그것이 뜬다. 노드 쪽이 사라졌다고 지우면
+   그 경우가 되살아난다.
+   화면을 통째로 미는 것(pan)은 params.nodes 가 비므로 건드리지 않는다.
    보장은 위의 CSS 가 하고, 여기서는 vis 가 예약해 둔 팝업까지 걷어
    놓는 순간 툴팁이 튀어나오지 않게 한다. 내부 필드를 만지므로 전부
    typeof 로 막아 둔다 — vis 를 올려도 페이지가 죽지 않아야 한다. */
@@ -1258,6 +1390,7 @@ function computeAlignGuides(ids) {
   network.on('dragEnd', () => {
     clearPending();          // 끄는 동안 예약된 팝업을 버린 뒤에 클래스를 뗀다
     document.body.classList.remove('node-dragging');
+    refreshFanSmooth();      // 옮긴 자리에 맞춰 부채꼴을 다시 편다
   });
 })();
 
@@ -2283,7 +2416,8 @@ const STAGE_TO_PROG = {
       id: n.id, label: n.label, shape: n.shape || 'dot', color: n.color,
       borderWidth: n.borderWidth || 1,
       font: { ...(n.font || {}), size: Math.max(18.7, (n.font && n.font.size) || 0), bold: false },
-      title: n.title,
+      // title 은 일부러 뺀다 — 위 nodesDS 와 같은 이유다. 여기서 넘기면
+      // 등급 필터를 건드릴 때마다 툴팁이 되살아난다.
       _community: n.community, _community_name: n.community_name,
       _quality: n._quality, _quality_note: n._quality_note,
       _bottleneck: n._bottleneck, _project_path: n._project_path,
