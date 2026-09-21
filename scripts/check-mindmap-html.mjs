@@ -65,7 +65,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoSh4Submitted=applyTomoSh4Submitted20260921;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -344,6 +344,28 @@ context.__applyResearchOptimizeRetire(retireNoNodeSample);
 if (retireNoNodeSample.links.length !== 1 || childIds(retireNoNodeSample.root) !== "n0llvuh1") {
   throw new Error("ResearchOptimize retire touched a document that never had the node");
 }
+
+// 2026-09-21: TomoSh4 투고. nowmyrt1 의 draft 만 submitted 로 올리고, 사람이 더 올려 둔 값은
+// 되감지 않으며, 노드가 없는 문서에서도 버전만 올리고 조용히 지나간다.
+const tomoSh4Sample = {
+  root: mk("root", [
+    { id: "nowmyrt1", title: "TomoSh4", kind: "low", status: "draft", children: [] },
+    { id: "n8t2x7d2", title: "InjectionMold", kind: "medium", status: "draft", children: [] },
+  ]),
+  links: [],
+};
+if (!context.__applyTomoSh4Submitted(tomoSh4Sample)) throw new Error("TomoSh4 submitted migration did not run");
+if (context.__applyTomoSh4Submitted(tomoSh4Sample)) throw new Error("TomoSh4 submitted migration is not idempotent");
+if (findIn(tomoSh4Sample.root, "nowmyrt1").status !== "submitted") throw new Error("TomoSh4 node did not become submitted");
+if (findIn(tomoSh4Sample.root, "n8t2x7d2").status !== "draft") throw new Error("TomoSh4 migration touched a neighbouring node");
+const tomoSh4Validation = context.__validate(tomoSh4Sample);
+if (!tomoSh4Validation.ok) throw new Error(`TomoSh4 sample is invalid: ${tomoSh4Validation.errors[0]}`);
+const tomoSh4AheadSample = { root: mk("root", [{ id: "nowmyrt1", title: "TomoSh4", kind: "low", status: "accepted", children: [] }]), links: [] };
+context.__applyTomoSh4Submitted(tomoSh4AheadSample);
+if (findIn(tomoSh4AheadSample.root, "nowmyrt1").status !== "accepted") throw new Error("TomoSh4 migration demoted a hand-advanced status");
+const tomoSh4NoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyTomoSh4Submitted(tomoSh4NoNodeSample)) throw new Error("TomoSh4 migration must still stamp its version on a document without the node");
+if (childIds(tomoSh4NoNodeSample.root) !== "n0llvuh1") throw new Error("TomoSh4 migration touched a document that never had the node");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);
