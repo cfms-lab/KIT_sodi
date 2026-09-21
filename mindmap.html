@@ -634,16 +634,24 @@ function applyDrapeEngineLinks20260827(data){
    Dashboards/프로젝트현황.md가 읽는 Projects/*.md frontmatter의 최신 등급만 공개
    마인드맵에 옮긴다. grade_note·next_gate 같은 내부 판단은 복사하지 않는다.
    ``none``은 ToDo가 아니라 논문 등급 판정 대상이 아닌 프로젝트다. */
+/* ⚠️ 2026-09-22: 이 버전은 **올리지 않는다.** PFTF_GFiberCT 등급이 내려가 아래 표가 바뀌었으니
+   올려서 다시 돌릴 뻔했는데, 라이브 문서로 재실행을 재 보니 등급 말고 둘을 더 건드렸다 —
+   ① cfmsDrapeSCAN 관계선 일곱을 되살린다(문서 15 → 22). 사용자가 지운 것들이다.
+   ② cfmsDrapeSCAN 노드(ngi2vmc1) 필드를 구운 spec 으로 덮어쓴다.
+   이 마이그레이션은 등급만이 아니라 노드 삭제·id 개명·노드/관계선 보장을 함께 하므로,
+   2026-09-01 이후에 사람이 고친 것을 되감는다. 등급 한 칸을 고치려고 그걸 치를 수 없다.
+   대신 좁은 마이그레이션(applyVaultStages20260922)이 그 노드의 kind 만 옮긴다.
+   아래 표는 정본이므로 값은 맞춰 둔다 — 다음에 이 버전을 올릴 사람이 옳은 값을 쓰게. */
 const VAULT_GRADES_VERSION='2026-09-01c';
 const VAULT_PROJECT_GRADES={
   'cfmsAutoPlace_IJCST':{mindmapId:'cfmsAutoPlace_IJCST',kind:'medium'},
   'cfmsAutoPlace_JCDE':{mindmapId:'cfmsAutoPlace_JCDE',kind:'medium'},
-  'cfmsCIPC':{mindmapId:'n2dzarb3',kind:'medium'},
+  'cfmsCIPC':{mindmapId:'n2dzarb3',kind:'low'},   // 2026-09-14 中 → 下(투고한 저널의 급, 국내지). 표만 낡아 있었다 — 클라우드 문서는 이미 low 다
   'cfmsDrape':{mindmapId:'nptj5211',kind:'none'},
   'cfmsMiindo':{mindmapId:'cfmsdrape',kind:'none'},
   'cfmsPINNCAD':{mindmapId:'npp8yov2',kind:'low'},
   'cfmsPINNDrape':{mindmapId:'nf18t2n5',kind:'low'},
-  'PFTF_GFiberCT':{mindmapId:'nzyk4gd6',kind:'medium'},
+  'PFTF_GFiberCT':{mindmapId:'nzyk4gd6',kind:'low'},   // 2026-09-22 medium → low: 투고 뒤에는 투고한 저널의 급(국내지)
   'PFTF_Assembly':{mindmapId:'n1krev41',kind:'low'},
   'PFTF_AssetShock':{mindmapId:'gx_pftf_assetshock',kind:'low'},
   'PFTF_AsymTensor':{mindmapId:'nongkxm5',kind:'medium'},
@@ -1104,6 +1112,11 @@ const VAULT_STAGES_VERSION='2026-09-22';
       `투고상태: "blocked"`, graph 의 TRACK_STAGES 도 같은 값). 이 지도만 draft 로 남아
       세 화면이 갈려 있었다. 사용자 지시로 ⛔ 를 붙인다(2026-09-22).
 
+   ③ PFTF_GFiberCT 의 **등급**도 같이 내려간다 — 中 → 下. 투고한 뒤에는 투고한 저널의 급이
+      등급이고(2026-09-14 확정 규칙) 한국복합재료학회지는 국내지다. 등급은 본래
+      applyVaultGrades20260901 의 몫이지만 그것을 다시 돌릴 수 없다 — 위 주석 참고. 그래서
+      그 한 칸만 여기서 옮긴다. 옛 값 medium 일 때만 — 사람이 달리 정한 값은 두고.
+
    ②Tensor(n9ccnpv1)는 손대지 않는다 — ① 의 접수번호를 기다리는 초고가 맞다.
    draft(또는 값 없음)일 때만 바꾼다 — 사람이 더 올려 둔 값은 되감지 않는다. */
 function applyVaultStages20260922(data){
@@ -1113,6 +1126,8 @@ function applyVaultStages20260922(data){
     const n=findNode(data.root,id);
     if(n&&(!n.status||n.status==='draft')) n.status=want;
   });
+  const gfiber=findNode(data.root,'nzyk4gd6');
+  if(gfiber&&gfiber.kind==='medium') gfiber.kind='low';
   delete data.kcrSubmittedVersion;   // 한 시간 전 판의 이름. 그 사이에 열린 탭이 찍었으면 걷는다
   data.vaultStagesVersion=VAULT_STAGES_VERSION;
   return true;   // 버전 상승 자체도 클라우드 문서에 저장해야 재실행되지 않는다.

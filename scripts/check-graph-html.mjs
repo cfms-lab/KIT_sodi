@@ -72,7 +72,7 @@ const expectedVaultGrades = {
   cfmsPINNCAD: "하",
   cfmsPINNDrape: "하",
   HIPDetect: "중",
-  PFTF_GFiberCT: "중",
+  PFTF_GFiberCT: "하",   // 2026-09-22 中 → 下: 투고 뒤에는 투고한 저널의 급(국내지)
   PFTF_AsymTensor: "중",
   PFTF_Compression: "중",
   PFTF_DrapePrior_VisCull_kDop: "등급 없음",

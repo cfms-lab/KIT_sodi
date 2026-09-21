@@ -21,7 +21,7 @@ for (const [index, script] of scripts.entries()) {
 const expectedVaultGrades = {
   cfmsAutoPlace_IJCST: ["cfmsAutoPlace_IJCST", "medium"],
   cfmsAutoPlace_JCDE: ["cfmsAutoPlace_JCDE", "medium"],
-  cfmsCIPC: ["n2dzarb3", "medium"],
+  cfmsCIPC: ["n2dzarb3", "low"],   // 2026-09-14 中 → 下(투고한 저널의 급, 국내지)
   cfmsDrape: ["nptj5211", "none"],
   SFTF_DrapePrior: ["njkskwe4", "low"],
   SFTF_Holonomy: ["SFTF_Holonomy", "high"],
@@ -29,7 +29,7 @@ const expectedVaultGrades = {
   cfmsMiindo: ["cfmsdrape", "none"],
   cfmsPINNCAD: ["npp8yov2", "low"],
   cfmsPINNDrape: ["nf18t2n5", "low"],
-  PFTF_GFiberCT: ["nzyk4gd6", "medium"],
+  PFTF_GFiberCT: ["nzyk4gd6", "low"],   // 2026-09-22 medium → low: 투고 뒤에는 투고한 저널의 급(국내지)
   PFTF_Assembly: ["n1krev41", "low"],
   PFTF_AssetShock: ["gx_pftf_assetshock", "low"],
   PFTF_AsymTensor: ["nongkxm5", "medium"],
@@ -401,15 +401,19 @@ for (const [id, want] of [["nzyk4gd6", "submitted"], ["nuzx6yz7", "submitted"], 
   if (got !== want) throw new Error(`vault stage migration left ${id} at ${got}, wanted ${want}`);
 }
 if (findIn(vaultStagesSample.root, "n9ccnpv1").status !== "draft") throw new Error("vault stage migration advanced TSE_SEM2_Tensor, which has not been submitted");
+// 등급 한 칸도 같이 옮긴다 — applyVaultGrades 를 다시 돌릴 수 없어서다(그 주석 참고).
+if (findIn(vaultStagesSample.root, "nzyk4gd6").kind !== "low") throw new Error("vault stage migration did not lower PFTF_GFiberCT to low");
+if (findIn(vaultStagesSample.root, "nuzx6yz7").kind !== "low") throw new Error("vault stage migration changed a kind it should not touch");
 if ("kcrSubmittedVersion" in vaultStagesSample) throw new Error("vault stage migration left the superseded version stamp behind");
 const vaultStagesValidation = context.__validate(vaultStagesSample);
 if (!vaultStagesValidation.ok) throw new Error(`vault stage sample is invalid: ${vaultStagesValidation.errors[0]}`);
 const vaultStagesAheadSample = { root: mk("root", [
-  { id: "nzyk4gd6", title: "PFTF_GFiberCT", kind: "medium", status: "accepted", children: [] },
+  { id: "nzyk4gd6", title: "PFTF_GFiberCT", kind: "high", status: "accepted", children: [] },
   { id: "nggbas52", title: "TSE_SEM3_AutoTune", kind: "low", status: "submitted", children: [] },
 ]), links: [] };
 context.__applyVaultStages(vaultStagesAheadSample);
 if (findIn(vaultStagesAheadSample.root, "nzyk4gd6").status !== "accepted") throw new Error("vault stage migration demoted a hand-advanced status");
+if (findIn(vaultStagesAheadSample.root, "nzyk4gd6").kind !== "high") throw new Error("vault stage migration overrode a hand-set kind");
 if (findIn(vaultStagesAheadSample.root, "nggbas52").status !== "submitted") throw new Error("vault stage migration overrode a hand-set AutoTune status");
 const vaultStagesNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyVaultStages(vaultStagesNoNodeSample)) throw new Error("vault stage migration must still stamp its version on a document without the nodes");
