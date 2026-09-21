@@ -158,9 +158,19 @@ const urbanNode = nodes.find((node) => node.id === "SFTF_UrbanTraffic");
 // 구성원 정본은 볼트의 coauthors/coauthor 이고, layout_findings.py 의 HYPEREDGES 가 그
 // 스냅샷이다. 여기서는 그 스냅샷이 배포본에 그대로 나갔는지만 본다.
 const expectedHulls = {
-  "3D프린팅": ["Tomo_SFTF", "Tomo_SFTFSoft", "Tomo_DFSVR", "SFTF_Clustering",
-    "SFTFSoft_GNN", "SFTFSoft_DFSVR", "SFTFSoft_GNN_DFSVR", "DFSVR_VisCull",
-    "SFTF_QEM", "SFTF_ActiveOverprint"],
+  // 2026-09-21: DFSVR 넷이 Rendering 훌로 옮겨 가 열에서 여섯이 됐다(한 노드는 한 훌).
+  "3D프린팅": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering",
+    "SFTFSoft_GNN", "SFTF_QEM", "SFTF_ActiveOverprint"],
+  // 2026-09-21: 세 번째 주제 훌. 축은 렌더링 — DFSVR 이 곧
+  // Differentiable First-Hit Support-Volume Rendering 이고(볼트 Tomo_DFSVR.md),
+  // PFTF_VisCull_kDop 은 그 판정을 실제 엔진에서 하는 쪽이다(bvh · d3d12 · embree).
+  "Rendering": ["Tomo_DFSVR", "SFTFSoft_DFSVR", "SFTFSoft_GNN_DFSVR",
+    "DFSVR_VisCull", "PFTF_VisCull_kDop"],
+  // 2026-09-21: 두 번째 주제 훌. cfmsDrape 엔진을 공유하는 여덟을 모았다.
+  // cfmsDrapeSCAN 은 이름이 드레이프여도 이희란 교수님 훌 구성원이라 넣지 않는다(겹침 금지).
+  // PFTF_VisCull_kDop 도 뺐다 — 넣으면 훌이 PFTF_Compression·cfmsDrapeSCAN 을 삼킨다.
+  "Drape": ["cfmsMiindo", "cfmsDrape", "cfmsCIPC", "cfmsPINNDrape", "cfmsPINNCAD",
+    "cfmsDrapeInverse", "SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop"],
   // 2026-09-20: SFTF_Clustering 을 뺐다 — 유일하게 두 훌에 동시에 들던 노드다.
   // 이희란 교수 공저 관계 자체는 그대로이고 노드 정보의 공저자 줄에 남는다.
   "이희란 교수님": ["PFTF_Compression", "cfmsAutoSew",

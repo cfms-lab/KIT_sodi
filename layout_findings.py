@@ -351,14 +351,69 @@ HYPEREDGES = [
     # 구성원은 「출력·지지대·슬라이서·빌드 방향」이 연구 주장의 축인 노드들이다. 판단이
     # 갈리는 둘은 빼 두었다: SFTF_InjMold(사출 성형이라 적층이 아니다),
     # SFTF_Composite·PFTF_GFiberCT(복합재 적층·CT 계측 쪽이고 이미 은종현 교수님 훌이다).
+    #
+    # 2026-09-21: DFSVR 넷(Tomo_DFSVR · SFTFSoft_DFSVR · SFTFSoft_GNN_DFSVR · DFSVR_VisCull)이
+    # 아래 Rendering 훌로 옮겨 갔다. 열이던 것이 여섯이 됐다. 「한 노드는 한 훌」 규약을
+    # 지킨 결과다 — 2026-09-20 에 SFTF_Clustering 을 이희란 훌에서 뺀 것과 같은 판단이다.
+    # 셋이 여전히 3D 프린팅 연구인 것은 맞지만, 훌 둘을 겹쳐 그리면 둘 다 안 읽힌다.
     {"label": "3D프린팅",
      "kind": "topic",
-     "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "Tomo_DFSVR", "SFTF_Clustering",
-               "SFTFSoft_GNN", "SFTFSoft_DFSVR", "SFTFSoft_GNN_DFSVR",
-               "DFSVR_VisCull", "SFTF_QEM", "SFTF_ActiveOverprint"],
+     "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering",
+               "SFTFSoft_GNN", "SFTF_QEM", "SFTF_ActiveOverprint"],
      "color": "#0f766e", "labelColor": "#115e59",
      "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95,
      "lineWidth": 3, "dash": [12, 6], "scale": 1.14},
+    # 2026-09-21: 세 번째 주제 훌(사용자 지시). 묶는 축은 **렌더링**이다.
+    # 근거는 방법 이름 자체다 — 볼트 Tomo_DFSVR.md 의 정의가
+    # 「DFSVR (Differentiable First-Hit Support-Volume **Rendering**)」이다. 넷은 그
+    # first-hit 가시성 판정을 공유하고, PFTF_VisCull_kDop 은 그 판정을 실제 렌더링
+    # 엔진에서 하는 쪽이다(stack: bvh · d3d12 · embree, 본문에 ray occlusion·Embree 대조).
+    #
+    # 넷은 3D프린팅 훌에서 옮겨 왔다(위 주석). 그래서 두 훌은 겹치지 않는다.
+    #
+    # ⚠️ 이 훌은 지금 좌표에서 **SFTFSoft_GNN 과 SFTF_DynamicTargetSearch 를 13px 씩
+    # 삼킨다**. 둘이 PFTF_VisCull_kDop(240, 480)과 Tomo_DFSVR(240, 20)을 잇는 x=240 선
+    # **위에** 앉아 있어서, scale 을 1.05 까지 줄여도 안 빠진다(위치 문제이지 크기 문제가
+    # 아니다). 고치는 길은 웹에서 PFTF_VisCull_kDop 을 DFSVR 넷 쪽으로 끌어 올리는 것이다
+    # — (460, -150) · (-260, 20) · (240, -320) 은 재 보니 아무도 안 삼킨다.
+    # 좌표 정본은 Supabase graph_positions 표이므로 여기서 고칠 수 없다(CLAUDE.md).
+    #
+    # 색은 이웃을 피해 남색이다 — 위·오른쪽이 청록(3D프린팅), 아래가 주황(Drape)이다.
+    {"label": "Rendering",
+     "kind": "topic",
+     "nodes": ["Tomo_DFSVR", "SFTFSoft_DFSVR", "SFTFSoft_GNN_DFSVR",
+               "DFSVR_VisCull", "PFTF_VisCull_kDop"],
+     "color": "#4338ca", "labelColor": "#3730a3",
+     "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95,
+     "lineWidth": 3, "dash": [12, 6], "scale": 1.10},
+    # 2026-09-21: 두 번째 주제 훌. 사용자 지시로 드레이프(옷감 늘어뜨림) 시뮬레이션을
+    # 한 묶음으로 모은다. 그전까지 이 여덟은 어느 훌에도 안 들어 화면에서 흩어져 있었는데,
+    # 실제로는 cfmsDrape 엔진 하나를 공유하는 한 덩어리다(RAW_EDGES 를 보면 cfmsMiindo →
+    # cfmsDrape → {cfmsCIPC, SFTF_DrapePrior, cfmsPINNDrape, cfmsPINNCAD} 사슬이 그대로 있다).
+    #
+    # 규약은 「이미 다른 훌에 든 노드는 건드리지 않는다」(사용자)다. 그래서 이름이
+    # 드레이프인데도 **cfmsDrapeSCAN 은 빼 둔다** — 이희란 교수님 훌 구성원이다.
+    # SFTF_Clustering 건(2026-09-20)에서 겹침 훌이 모양을 버린다는 걸 이미 봤다.
+    #
+    # PFTF_DrapePrior_VisCull_kDop 은 사용자 목록에 없었지만 넣는다. 볼트 태그에 drape 가
+    # 있고 brief 가 「드레이프 예측과 충돌 필터 결합 가속」이며, 안 넣으면 두 훌 사이에
+    # 훌 없는 노드로 홀로 남는다(엣지는 SFTF_DrapePrior · PFTF_VisCull_kDop 둘뿐이다).
+    #
+    # ⚠️ 짝인 **PFTF_VisCull_kDop 은 여기 못 넣는다**. 넣어서 재 보면 훌이 PFTF_Compression
+    # 과 cfmsDrapeSCAN 을 각각 21px 씩 삼킨다 — 둘 다 이희란 교수님 훌 구성원이다. 성격도
+    # 그쪽이 맞다: 그 노트의 주장은 드레이프가 아니라 보수적 가시성·충돌 게이트(IJCST)이고
+    # PFTF 의 자식이다. (2026-09-21 오후: 그래서 아래 Rendering 훌로 갔다.)
+    #
+    # scale 은 다른 주제 훌(3D프린팅)의 1.14 가 아니라 1.10 이다. 1.14 로 부풀리면 위쪽
+    # 3D프린팅 훌과 3px 까지 붙어 테두리가 한 덩어리로 읽힌다(1.10 이면 20px 떨어진다).
+    # 색은 이웃과 겹치지 않게 골랐다 — 위가 청록(3D프린팅), 오른쪽이 보라(이희란)라서 주황.
+    {"label": "Drape",
+     "kind": "topic",
+     "nodes": ["cfmsMiindo", "cfmsDrape", "cfmsCIPC", "cfmsPINNDrape", "cfmsPINNCAD",
+               "cfmsDrapeInverse", "SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop"],
+     "color": "#ea580c", "labelColor": "#c2410c",
+     "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95,
+     "lineWidth": 3, "dash": [12, 6], "scale": 1.10},
     # 2026-09-20: SFTF_Clustering 을 뺐다(사용자 지시). 이희란 교수는 여전히 공저자지만
     # (볼트 coauthors: [이희란, 강지언]), 그 노드는 3D프린팅 훌의 구성원이기도 해서
     # 두 훌에 동시에 들어 있었다 — 유일한 겹침이었고 이희란 훌이 그 노드를 잡으려고
