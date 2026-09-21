@@ -65,7 +65,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyKCRSubmitted=applyKCRSubmitted20260922;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -379,9 +379,9 @@ const tomoShNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyTomoShTracks(tomoShNoNodeSample)) throw new Error("TomoSh migration must still stamp its version on a document without the nodes");
 if (childIds(tomoShNoNodeSample.root) !== "n0llvuh1") throw new Error("TomoSh migration touched a document that never had the nodes");
 
-// 2026-09-22: 한국복합재료학회지 투고 둘. 두 노드의 draft 만 submitted 로 올리고, 같은 방의
-// AutoTune(nggbas52)은 이번 건과 무관하므로 건드리지 않으며, 손으로 더 올린 값은 되감지 않는다.
-const kcrSample = {
+// 2026-09-22: 세 노드를 볼트 단계로. 투고 둘은 submitted, AutoTune 은 blocked(일정 보류, ⛔).
+// ②Tensor 는 ① 의 접수번호를 기다리는 초고라 그대로여야 하고, 손으로 더 올린 값은 되감지 않는다.
+const vaultStagesSample = {
   root: mk("root", [
     mk("nffg4ou5", [
       { id: "nzyk4gd6", title: "PFTF_GFiberCT", kind: "medium", status: "draft", children: [] },
@@ -392,22 +392,28 @@ const kcrSample = {
     { id: "nggbas52", title: "TSE_SEM3_AutoTune", kind: "low", status: "draft", children: [] },
   ]),
   links: [],
+  kcrSubmittedVersion: "2026-09-22",
 };
-if (!context.__applyKCRSubmitted(kcrSample)) throw new Error("KCR submitted migration did not run");
-if (context.__applyKCRSubmitted(kcrSample)) throw new Error("KCR submitted migration is not idempotent");
-for (const id of ["nzyk4gd6", "nuzx6yz7"]) {
-  if (findIn(kcrSample.root, id).status !== "submitted") throw new Error(`KCR migration left ${id} at ${findIn(kcrSample.root, id).status}`);
+if (!context.__applyVaultStages(vaultStagesSample)) throw new Error("vault stage migration did not run");
+if (context.__applyVaultStages(vaultStagesSample)) throw new Error("vault stage migration is not idempotent");
+for (const [id, want] of [["nzyk4gd6", "submitted"], ["nuzx6yz7", "submitted"], ["nggbas52", "blocked"]]) {
+  const got = findIn(vaultStagesSample.root, id).status;
+  if (got !== want) throw new Error(`vault stage migration left ${id} at ${got}, wanted ${want}`);
 }
-if (findIn(kcrSample.root, "n9ccnpv1").status !== "draft") throw new Error("KCR migration advanced TSE_SEM2_Tensor, which has not been submitted");
-if (findIn(kcrSample.root, "nggbas52").status !== "draft") throw new Error("KCR migration touched TSE_SEM3_AutoTune");
-const kcrValidation = context.__validate(kcrSample);
-if (!kcrValidation.ok) throw new Error(`KCR sample is invalid: ${kcrValidation.errors[0]}`);
-const kcrAheadSample = { root: mk("root", [{ id: "nzyk4gd6", title: "PFTF_GFiberCT", kind: "medium", status: "accepted", children: [] }]), links: [] };
-context.__applyKCRSubmitted(kcrAheadSample);
-if (findIn(kcrAheadSample.root, "nzyk4gd6").status !== "accepted") throw new Error("KCR migration demoted a hand-advanced status");
-const kcrNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
-if (!context.__applyKCRSubmitted(kcrNoNodeSample)) throw new Error("KCR migration must still stamp its version on a document without the nodes");
-if (childIds(kcrNoNodeSample.root) !== "n0llvuh1") throw new Error("KCR migration touched a document that never had the nodes");
+if (findIn(vaultStagesSample.root, "n9ccnpv1").status !== "draft") throw new Error("vault stage migration advanced TSE_SEM2_Tensor, which has not been submitted");
+if ("kcrSubmittedVersion" in vaultStagesSample) throw new Error("vault stage migration left the superseded version stamp behind");
+const vaultStagesValidation = context.__validate(vaultStagesSample);
+if (!vaultStagesValidation.ok) throw new Error(`vault stage sample is invalid: ${vaultStagesValidation.errors[0]}`);
+const vaultStagesAheadSample = { root: mk("root", [
+  { id: "nzyk4gd6", title: "PFTF_GFiberCT", kind: "medium", status: "accepted", children: [] },
+  { id: "nggbas52", title: "TSE_SEM3_AutoTune", kind: "low", status: "submitted", children: [] },
+]), links: [] };
+context.__applyVaultStages(vaultStagesAheadSample);
+if (findIn(vaultStagesAheadSample.root, "nzyk4gd6").status !== "accepted") throw new Error("vault stage migration demoted a hand-advanced status");
+if (findIn(vaultStagesAheadSample.root, "nggbas52").status !== "submitted") throw new Error("vault stage migration overrode a hand-set AutoTune status");
+const vaultStagesNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyVaultStages(vaultStagesNoNodeSample)) throw new Error("vault stage migration must still stamp its version on a document without the nodes");
+if (childIds(vaultStagesNoNodeSample.root) !== "n0llvuh1") throw new Error("vault stage migration touched a document that never had the nodes");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);

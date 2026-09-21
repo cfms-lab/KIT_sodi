@@ -1093,22 +1093,28 @@ function applyTomoShTracks20260921(data){
   data.tomoShTracksVersion=TOMOSH_TRACKS_VERSION;
   return true;   // 버전 상승 자체도 클라우드 문서에 저장해야 재실행되지 않는다.
 }
-const KCR_SUBMITTED_VERSION='2026-09-22';
-/* 2026-09-22: 한국복합재료학회지(Composites Research)에 두 편이 나갔다 — 은종현 교수 측 투고,
-   둘 다 원고번호 미확인(볼트 PFTF_GFiberCT.md stage: submitted, TSE_SEM.md ①Bezier 투고 완료).
-   지도에서 둘은 은종현 교수님방(nffg4ou5)의 nzyk4gd6·nuzx6yz7 이고 아직 draft 로 서 있다.
-   파이는 status 하나로 그려지므로 submitted 로 올린다.
-   ⚠️ 같은 방의 TSE_SEM3_AutoTune(nggbas52)은 **일부러 건드리지 않는다.** 볼트는 그것을
-   blocked(2027-03-01 까지 일정 보류)로 적고 graph·portfolio 도 그렇게 서 있지만, 이번 투고와
-   무관한 따로 난 어긋남이라 사용자가 보고 정할 일이다.
-   draft(또는 값 없음)일 때만 올린다 — 사람이 더 올려 둔 값은 되감지 않는다. */
-function applyKCRSubmitted20260922(data){
-  if(!data||!data.root||data.kcrSubmittedVersion===KCR_SUBMITTED_VERSION) return false;
-  ['nzyk4gd6','nuzx6yz7'].forEach(id=>{
+const VAULT_STAGES_VERSION='2026-09-22';
+/* 2026-09-22: 세 노드의 단계를 볼트에 맞춘다. 파이는 status 하나로 그려지므로 그 값만 손댄다.
+
+   ① 한국복합재료학회지(Composites Research)에 두 편이 나갔다 — 은종현 교수 측 투고, 둘 다
+      원고번호 미확인(볼트 PFTF_GFiberCT.md stage: submitted, TSE_SEM.md ①Bezier 투고 완료).
+      지도에서는 은종현 교수님방(nffg4ou5)의 nzyk4gd6·nuzx6yz7 이고 draft 로 서 있었다.
+   ② TSE_SEM3_AutoTune(nggbas52, sftf 밑)은 **보류**다 — 투고 시점이 2027-03-01 이후로 정해진
+      **일정** 사유이고 게이트도 게재지도 아니다(볼트 Dashboards/프로젝트현황.md 분리트랙
+      `투고상태: "blocked"`, graph 의 TRACK_STAGES 도 같은 값). 이 지도만 draft 로 남아
+      세 화면이 갈려 있었다. 사용자 지시로 ⛔ 를 붙인다(2026-09-22).
+
+   ②Tensor(n9ccnpv1)는 손대지 않는다 — ① 의 접수번호를 기다리는 초고가 맞다.
+   draft(또는 값 없음)일 때만 바꾼다 — 사람이 더 올려 둔 값은 되감지 않는다. */
+function applyVaultStages20260922(data){
+  if(!data||!data.root||data.vaultStagesVersion===VAULT_STAGES_VERSION) return false;
+  const WANT={nzyk4gd6:'submitted',nuzx6yz7:'submitted',nggbas52:'blocked'};
+  Object.entries(WANT).forEach(([id,want])=>{
     const n=findNode(data.root,id);
-    if(n&&(!n.status||n.status==='draft')) n.status='submitted';
+    if(n&&(!n.status||n.status==='draft')) n.status=want;
   });
-  data.kcrSubmittedVersion=KCR_SUBMITTED_VERSION;
+  delete data.kcrSubmittedVersion;   // 한 시간 전 판의 이름. 그 사이에 열린 탭이 찍었으면 걷는다
+  data.vaultStagesVersion=VAULT_STAGES_VERSION;
   return true;   // 버전 상승 자체도 클라우드 문서에 저장해야 재실행되지 않는다.
 }
 //==PURE_END
@@ -1299,7 +1305,7 @@ applyResearchOptimizeRetire20260918(DATA);
 applyJeonRoom20260919(DATA);
 applyDispersityPropRename20260919(DATA);
 applyTomoShTracks20260921(DATA);
-applyKCRSubmitted20260922(DATA);
+applyVaultStages20260922(DATA);
 let sel=null, view={tx:60,ty:30,s:1}, showRel=true, LAY=null;
 
 /* ====================== 실행취소 / 다시실행 (undo/redo) ====================== */
@@ -1698,11 +1704,11 @@ async function loadDoc(){
     const jeonRoomMigrated=applyJeonRoom20260919(DATA);
     const dispersityPropMigrated=applyDispersityPropRename20260919(DATA);
     const tomoShMigrated=applyTomoShTracks20260921(DATA);
-    const kcrMigrated=applyKCRSubmitted20260922(DATA);
+    const vaultStagesMigrated=applyVaultStages20260922(DATA);
     const kindsMigrated=normalizeKinds(DATA);
     showRel=DATA.showRel!==false; document.getElementById('relBtn').textContent='관계선 '+(showRel?'✓':'✕');
     sel=null; render(); renderEdit(); fitView(); setSaveState('');
-    if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||linkMigrated||statusMigrated||drapeMigrated||gradesMigrated||directionMigrated||holonomyMigrated||hipDetectMigrated||leeRoomMigrated||gfiberCtMigrated||eunRoomMigrated||researchOptimizeMigrated||jeonRoomMigrated||dispersityPropMigrated||tomoShMigrated||kcrMigrated||kindsMigrated) await saveDoc(true);
+    if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||linkMigrated||statusMigrated||drapeMigrated||gradesMigrated||directionMigrated||holonomyMigrated||hipDetectMigrated||leeRoomMigrated||gfiberCtMigrated||eunRoomMigrated||researchOptimizeMigrated||jeonRoomMigrated||dispersityPropMigrated||tomoShMigrated||vaultStagesMigrated||kindsMigrated) await saveDoc(true);
   }catch(e){
     const b=document.getElementById('banner'); b.style.display='block';
     if(/relation|does not exist|42P01|PGRST205|404/i.test(e.message))
@@ -1710,7 +1716,7 @@ async function loadDoc(){
     else if(!isLoggedIn() && /401|403|PGRST301|permission denied/i.test(e.message))
       b.textContent='공개 열람 권한이 없습니다. Supabase에서 enable_rls_mindmaps.sql 을 다시 실행해 anon SELECT 정책을 적용하세요.';
     else b.textContent='데이터를 불러오지 못했습니다: '+e.message.slice(0,140);
-    applyJeonRoom20260919(DATA); applyDispersityPropRename20260919(DATA); applyTomoShTracks20260921(DATA); applyKCRSubmitted20260922(DATA); applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); applyDrapeEngineLinks20260827(DATA); applyVaultGrades20260901(DATA); applyLinkDirection20260907(DATA); applyHolonomySplit20260907(DATA); applyHipDetectSplit20260910(DATA); applyLeeRoomGather20260911(DATA); applyGFiberCTRename20260911(DATA); applyEunRoomAsymTensor20260916(DATA); applyResearchOptimizeRetire20260918(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
+    applyJeonRoom20260919(DATA); applyDispersityPropRename20260919(DATA); applyTomoShTracks20260921(DATA); applyVaultStages20260922(DATA); applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); applyDrapeEngineLinks20260827(DATA); applyVaultGrades20260901(DATA); applyLinkDirection20260907(DATA); applyHolonomySplit20260907(DATA); applyHipDetectSplit20260910(DATA); applyLeeRoomGather20260911(DATA); applyGFiberCTRename20260911(DATA); applyEunRoomAsymTensor20260916(DATA); applyResearchOptimizeRetire20260918(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
   }
 }
 async function saveDoc(silent){
@@ -1731,7 +1737,7 @@ function download(name,text,type){ const b=new Blob([text],{type:type||'applicat
 function exportJSON(){ download('mindmap_backup.json', JSON.stringify(DATA,null,2)); toast('백업 JSON을 내려받았습니다.'); }
 function importJSON(input){
   const f=input.files[0]; if(!f)return; const r=new FileReader();
-  r.onload=()=>{ try{ const d=JSON.parse(r.result); applyJeonRoom20260919(d); applyDispersityPropRename20260919(d); applyTomoShTracks20260921(d); applyKCRSubmitted20260922(d); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); applyLinkFill20260820(d); applyStatusCleanup20260822(d); applyDrapeEngineLinks20260827(d); applyVaultGrades20260901(d); applyLinkDirection20260907(d); applyHolonomySplit20260907(d); applyHipDetectSplit20260910(d); applyLeeRoomGather20260911(d); applyGFiberCTRename20260911(d); applyEunRoomAsymTensor20260916(d); applyResearchOptimizeRetire20260918(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); applyJeonRoom20260919(d); applyDispersityPropRename20260919(d); applyTomoShTracks20260921(d); applyVaultStages20260922(d); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); applyLinkFill20260820(d); applyStatusCleanup20260822(d); applyDrapeEngineLinks20260827(d); applyVaultGrades20260901(d); applyLinkDirection20260907(d); applyHolonomySplit20260907(d); applyHipDetectSplit20260910(d); applyLeeRoomGather20260911(d); applyGFiberCTRename20260911(d); applyEunRoomAsymTensor20260916(d); applyResearchOptimizeRetire20260918(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
     if(!confirm('백업으로 현재 클라우드 관계도를 덮어쓸까요?'))return;
     pushHistory();
     DATA=d; showRel=DATA.showRel!==false; sel=null; render(); renderEdit(); saveDoc(false);
