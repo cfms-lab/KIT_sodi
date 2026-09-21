@@ -76,6 +76,8 @@
   #open-3d-btn:focus-visible { outline: 2px solid rgba(78,121,167,0.38); outline-offset: 2px; }
 /* GRAPH3D_NAV_END */
 </style>
+<!-- 저자 관점의 ToDo 한 줄. 이 파일이 DB 값보다 먼저다 (2026-09-21). -->
+<script src="todo.js"></script>
 </head>
 <body>
 <button id="open-3d-btn" type="button" title="WebGL 3D 그래프로 전환" onclick="window.location.href='./graph3d.html'">3D WebGL 보기</button>
@@ -633,7 +635,7 @@ RAW_NODES.forEach(n => {
   let c = QUALITY_COLORS[q.grade] || '#999999';
   let border = QUALITY_BORDERS[q.grade] || c;
   if (isDraftStatus(n.id)) { c = withAlpha(c, 0.5); border = withAlpha(border, 0.5); }
- n._quality = q.grade; n._quality_note = q.note; n._bottleneck = REMAINING_BOTTLENECKS[n.id] || ''; n._project_role = PROJECT_ROLES[n.id] || '';
+ n._quality = q.grade; n._quality_note = q.note; /* ToDo 는 저자 관점이 먼저다 — todo.js 에 있으면 볼트·DB 문장을 덮는다.  빈 줄도 값이라 null(=모름)일 때만 옛 문장으로 떨어진다 (2026-09-21). */ const _todo = window.cfmsTodo ? window.cfmsTodo(n.id, n.label) : null; n._bottleneck = _todo === null ? (REMAINING_BOTTLENECKS[n.id] || '') : _todo; n._project_role = PROJECT_ROLES[n.id] || '';
   if (n.id === 'PFTF_subMarine') n._project_path = 'D:\\__PFTF_Projects(2026)\\PFTF_subMarine_dev';
   n._closed = CLOSED_IDS.has(n.id) || q.grade === 'Closed';
   n._display_label = n.label;
@@ -1437,7 +1439,7 @@ function showInfo(nodeId) {
   document.getElementById('info-content').innerHTML = `
     <div class="field"><b>${esc(n._display_label || n.label)}</b> ${n._project_path ? `<button type="button" class="vscode-btn" style="margin-left:8px;padding:2px 6px;border:1px solid #888;border-radius:3px;background:#fff;color:#333;font-size:13px;cursor:pointer;vertical-align:middle" data-vscode-path="${esc(n._project_path)}" title="Open project in a new VS Code window">VSCODE</button>` : ""}</div>
     <div class="field">Type: ${esc(n._project_role || n._file_type || 'unknown')}</div>
-   <div class="field">남은 병목: ${esc(n._bottleneck || '—')}</div>
+   <div class="field">ToDo: ${esc(n._bottleneck || '')}</div>
     ${(typeof COAUTHOR_CANDIDATES === 'object' && COAUTHOR_CANDIDATES[nodeId]) ? `<div class="field">공저 후보: <b>${esc(COAUTHOR_CANDIDATES[nodeId])}</b> <span style="color:#999;font-size:13px">교내 · 미확정 (맨 앞이 1순위, 볼트 coauthor_candidate)</span></div>` : ''}
     ${n._intro ? `<div class="field"><b>소개:</b> ${esc(n._intro)}</div>` : ''}
     ${n._graph_role ? `<div class="field">Graph role: <b>${esc(n._graph_role)}</b></div>` : ''}

@@ -124,12 +124,14 @@
     .hint{display:none}
   }
 </style>
+<!-- 저자 관점의 ToDo 한 줄. 이 파일이 DB 값보다 먼저다 (2026-09-21). -->
+<script src="todo.js"></script>
 </head>
 <body>
 <header>
   <a class="home" href="index.html">← 홈</a>
   <h1>포트폴리오 한눈에</h1>
-  <span class="sub">등급 순 · 투고 · 다음 게이트</span>
+  <span class="sub">등급 순 · 투고 · ToDo</span>
   <span class="stamp" id="stamp" title="이 표를 볼트에서 발행한 날짜"></span>
   <nav class="links">
     <a href="mindmap.html" title="프로젝트 관계도">관계도</a>
@@ -140,7 +142,7 @@
 </header>
 
 <div class="toolbar" id="toolbar" hidden>
-  <input id="q" type="search" placeholder="검색 (프로젝트 · 투고 · 게이트 · 소개)" autocomplete="off">
+  <input id="q" type="search" placeholder="검색 (프로젝트 · 투고 · ToDo · 소개)" autocomplete="off">
   <label class="chk" title="논문 완성도 8 이상 — 점수를 매길 원고가 아직 없거나 초기 단계인 프로젝트입니다">
     <input type="checkbox" id="showAll"> 완성도 8+ 포함
   </label>
@@ -206,7 +208,7 @@ let 완성도포함=false;
    원고만 남기려는 것이다. 게재 완료 행은 완성도가 숫자가 아니라 「—」 라 그대로 남는다.
    숨긴 수는 화면에 적는다. 표가 통째로 다 보이는 줄 알면 없는 프로젝트를 없다고 읽는다. */
 const 완성도_상한 = 8;
-let META={columns:["프로젝트","투고순서","논문 완성도","등급","공저자","투고","다음 게이트","소개"],
+let META={columns:["프로젝트","투고순서","논문 완성도","등급","공저자","투고","ToDo","소개"],
           blankColumns:{},stages:{},rank:{}};
 
 let tT;
@@ -244,6 +246,8 @@ async function loadRows(){
     {headers:{apikey:CFG.key,Authorization:"Bearer "+SESSION.access_token}}) || [];
   const meta=data.find(r=>r.kind==='meta');
   if(meta&&meta.data) META=Object.assign({},META,meta.data);
+  /* 볼트는 아직 이 열을 「다음 게이트」로 발행한다. 화면 이름은 ToDo 로 통일한다 (2026-09-21). */
+  META.columns=(META.columns||[]).map(c=>c==="다음 게이트"?"ToDo":c);
   ALL_ROWS=data.filter(r=>r.kind==='row').map(r=>r.data);
   적용완성도필터();
 }
@@ -383,6 +387,14 @@ function 투고툴팁(row, stage) {
   return 앞 + "\n" + chain.map((c, i) => `${i + 1}순위 ${c.full}`).join(" · ");
 }
 
+/* 저자 관점의 ToDo 한 줄 (todo.js). 없으면 볼트가 발행한 옛 「다음 게이트」 문장으로 떨어진다. */
+const 할일 = row => {
+  /* null 은 「todo.js 에 없다」는 뜻이라 볼트 문장으로 떨어지고, 빈 문자열은
+     「할 일 없음」이라는 뜻이라 그대로 빈 칸이 된다. */
+  const t = window.cfmsTodo ? window.cfmsTodo(row.id, row.name) : null;
+  return t === null || t === undefined ? row.gate : t;
+};
+
 function 행그리기(row) {
   const tr = document.createElement("tr");
   const stage = META.stages && META.stages[row.stage];
@@ -398,7 +410,7 @@ function 행그리기(row) {
     + `<td><span class="chip"><span class="dot" style="background:${QUALITY_COLORS[row.grade] || "var(--q-none)"}"></span>${esc(row.grade)}</span></td>`
     + `<td class="c-co">${esc(row.coauthor)}</td>`
     + `<td><span class="journal" title="${esc(투고툴팁(row, stage))}">${파이(row.stage, 파이색(row.grade))}<span>${투고사슬(row)}</span></span></td>`
-    + `<td><div class="clamp" title="${esc(row.gate)}">${esc(row.gate)}</div></td>`
+    + `<td><div class="clamp" title="${esc(할일(row))}">${esc(할일(row))}</div></td>`
     + `<td class="c-intro"><div class="clamp" title="${esc(row.intro)}">${esc(row.intro)}</div></td>`;
   // 긴 서술 두 열은 3줄에서 자른다. 줄을 누르면 그 행만 펼친다.
   // ↗·VS 는 여기서 걸러 낸다 — 이 핸들러가 tbody 의 위임 핸들러보다 먼저 버블을 받으므로
@@ -438,7 +450,7 @@ function 머리그리기() {
 function 걸러내기() {
   const q = document.getElementById("q").value.trim().toLowerCase();
   if (!q) return ROWS;
-  return ROWS.filter(r => [r.name, r.grade, r.coauthor, r.journal, r.gate, r.intro, r.workspace]
+  return ROWS.filter(r => [r.name, r.grade, r.coauthor, r.journal, 할일(r), r.intro, r.workspace]
     .join(" ").toLowerCase().includes(q));
 }
 
