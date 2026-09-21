@@ -65,7 +65,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyKCRSubmitted=applyKCRSubmitted20260922;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -378,6 +378,36 @@ if (hand.status !== "accepted") throw new Error("TomoSh migration demoted a hand
 const tomoShNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyTomoShTracks(tomoShNoNodeSample)) throw new Error("TomoSh migration must still stamp its version on a document without the nodes");
 if (childIds(tomoShNoNodeSample.root) !== "n0llvuh1") throw new Error("TomoSh migration touched a document that never had the nodes");
+
+// 2026-09-22: 한국복합재료학회지 투고 둘. 두 노드의 draft 만 submitted 로 올리고, 같은 방의
+// AutoTune(nggbas52)은 이번 건과 무관하므로 건드리지 않으며, 손으로 더 올린 값은 되감지 않는다.
+const kcrSample = {
+  root: mk("root", [
+    mk("nffg4ou5", [
+      { id: "nzyk4gd6", title: "PFTF_GFiberCT", kind: "medium", status: "draft", children: [] },
+      { id: "nuzx6yz7", title: "TSE_SEM1_Bezier", kind: "low", status: "draft", children: [
+        { id: "n9ccnpv1", title: "TSE_SEM2_Tensor", kind: "low", status: "draft", children: [] },
+      ] },
+    ]),
+    { id: "nggbas52", title: "TSE_SEM3_AutoTune", kind: "low", status: "draft", children: [] },
+  ]),
+  links: [],
+};
+if (!context.__applyKCRSubmitted(kcrSample)) throw new Error("KCR submitted migration did not run");
+if (context.__applyKCRSubmitted(kcrSample)) throw new Error("KCR submitted migration is not idempotent");
+for (const id of ["nzyk4gd6", "nuzx6yz7"]) {
+  if (findIn(kcrSample.root, id).status !== "submitted") throw new Error(`KCR migration left ${id} at ${findIn(kcrSample.root, id).status}`);
+}
+if (findIn(kcrSample.root, "n9ccnpv1").status !== "draft") throw new Error("KCR migration advanced TSE_SEM2_Tensor, which has not been submitted");
+if (findIn(kcrSample.root, "nggbas52").status !== "draft") throw new Error("KCR migration touched TSE_SEM3_AutoTune");
+const kcrValidation = context.__validate(kcrSample);
+if (!kcrValidation.ok) throw new Error(`KCR sample is invalid: ${kcrValidation.errors[0]}`);
+const kcrAheadSample = { root: mk("root", [{ id: "nzyk4gd6", title: "PFTF_GFiberCT", kind: "medium", status: "accepted", children: [] }]), links: [] };
+context.__applyKCRSubmitted(kcrAheadSample);
+if (findIn(kcrAheadSample.root, "nzyk4gd6").status !== "accepted") throw new Error("KCR migration demoted a hand-advanced status");
+const kcrNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyKCRSubmitted(kcrNoNodeSample)) throw new Error("KCR migration must still stamp its version on a document without the nodes");
+if (childIds(kcrNoNodeSample.root) !== "n0llvuh1") throw new Error("KCR migration touched a document that never had the nodes");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);
