@@ -24,11 +24,13 @@
     "SFTF_DrapePrior":      "게재확정 — 교정쇄 확인",  /* TSE 는 게재료가 없다 (2026-09-21) */
     "cfmsDispersity":       "",  /* 게재 완료 — 빈 칸으로 둔다 */
 
-    /* ── Tomo_SFTF accept 가 열어 주는 것 ─────────────────── */
-    "Tomo_SFTFSoft":        "SFTF Accept 대기",
-    "SFTF_QEM":             "SFTF Accept 대기",
-    "SFTF_Clustering":      "SFTF Accept 대기",
-    "SFTFSoft_GNN":         "SFTF Accept 대기",
+    /* ── Tomo_SFTF accept 가 열어 주는 것 ───────────────────
+       순서 정본은 볼트 Papers/SFTF_4편_투고순서_2026-09-22.md — SFTFSoft 를 먼저
+       내고 preprint 를 같이 올려야 QEM 의 자매 인용과 GNN 의 게이트가 풀린다. */
+    "Tomo_SFTFSoft":        "SFTF Accept 대기 — 넷 중 먼저, preprint 같이",
+    "SFTF_QEM":             "SFTF Accept 대기 — SFTFSoft 며칠 뒤",
+    "SFTF_Clustering":      "SFTF Accept 대기 — APC 유보·공저자 동의 먼저",
+    "SFTFSoft_GNN":         "SFTFSoft preprint DOI 뒤",
 
     /* ── 공저자 손에 가 있는 것 ───────────────────────────── */
     "SFTF_InjMold":         "공저자 작업 중",
