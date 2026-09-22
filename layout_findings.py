@@ -298,6 +298,10 @@ POS = {
     # 후보도 전석진 → 은종현 으로 바뀌었다. 자리도 은종현 묶음 안으로 옮긴다 —
     # 부모 cfmsDispersity 바로 아래이고 그 묶음의 격자 간격(180)과 같은 칸이다.
     "cfmsDispersityProp": (600, 1250),
+    # 2026-09-22: 볼트에 Cho_MoldWarpDIC 가 섰다(조범곤 교수 공저 **후보**, ToDo·undecided). 자리는
+    # 방대석 훌(SFTF_InjMold 860 · PFTF_Mold 980, y −150) 바로 오른쪽 빈 칸 — 부모가 PFTF_Mold 라
+    # 같은 줄에 둔다. 후보라 훌에는 넣지 않는다(노드 정보의 「공저 후보」 줄로만 보인다).
+    "Cho_MoldWarpDIC": (1100, -150),
 }
 
 # 노드 id 가 노트 이름에서 규칙으로 나오지 않는 트랙 노드 → (볼트 노트 stem,
@@ -620,6 +624,9 @@ QUALITY_ROWS = [
     # 실측 대조 전까지 보류다. 볼트 Rules §8 대로 grade_note 전문을 옮기지 않는다.
     ("Jeon_DLPOrient", "Jeon_DLPOrient", "ToDo", "값싼 배향 순위가 실물 출력물의 물성 순위와 맞는지 재는 검증선; 착수 게이트 통과, 실측 대조 전"),
     ("cfmsDispersityProp", "cfmsDispersityProp", "ToDo", "분산도 지표와 실제 물성의 상관을 기존 시편 사진으로 확인하는 검증선; 착수 게이트 통과, 실측 대조 전"),
+    # 2026-09-22 신설. 볼트 grade: ToDo · stage: undecided. 착수 게이트(§1) 전이라 등급 보류.
+    # 볼트 Rules §8 대로 grade_note 전문을 옮기지 않고 공개 가능한 한 줄만 싣는다.
+    ("Cho_MoldWarpDIC", "Cho_MoldWarpDIC", "ToDo", "금형 온도별 휨 예측(자작 사슬·Moldflow)을 DIC 실측에 대조하는 검증선; 착수 게이트 전, 조범곤 교수 공저 후보"),
 ]
 QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
 
@@ -671,6 +678,7 @@ INTRODUCTIONS = {
     "cfmsDrapeInverse": "드레이프한 원단 사진에서 그 원단의 인장·전단·굽힘 강성을 거꾸로 알아내는 도구다.",
     "Jeon_DLPOrient": "값싸게 매긴 3D 프린팅 배향 순위가 실제로 찍어 본 물건의 물성 순위와 맞는지를 처음으로 실물에 대고 재는 연구다.",
     "cfmsDispersityProp": "현미경 사진으로 잰 입자 분산도 숫자가 실제 물성과 정말로 이어지는지를, 이미 찍혀 있는 남의 시편 사진으로 확인한다.",
+    "Cho_MoldWarpDIC": "금형 온도를 바꿔 가며 찍은 사출 부품의 휨과 변형을 상용 해석과 자작 해석이 얼마나 맞히는지, 실제로 찍어서 잰 변형 사진에 대고 재는 연구다.",
     "TSE_SEM1_Bezier": "전자현미경 사진 한 장에서 섬유 한 올 한 올을 매끈한 곡선으로 따라가며 굵기와 방향을 재어내는 방법이다.",
     "TSE_SEM2_Tensor": "섬유를 하나씩 오려내지 않고 사진 전체에서 섬유가 어느 쪽으로 누워 있는지와 겹친 아래층까지 한꺼번에 재는 방법이다.",
     "TSE_SEM3_AutoTune": "정답을 모르는 실제 사진에서도 측정기의 손잡이를 스스로 안전하게 맞추는 방법을 다루는 연구다.",
@@ -1352,6 +1360,27 @@ DISPERSITYPROP_NODE = {
 }
 
 
+# 2026-09-22: 볼트에 새로 선 조범곤 교수 공저 후보. status: todo · grade: ToDo · stage: undecided 라
+# 흰 바탕·검정 외곽선(community 4)에 빈 원으로 그려진다. 단계는 NOTE_STAGES 가 볼트에서 읽어 온다.
+# 부모는 볼트 depends_on 의 PFTF_Mold 다(CHO_GOAL_EDGES). 후보라 훌에는 넣지 않는다.
+CHO_MOLDWARPDIC_NODE = {
+    "id": "Cho_MoldWarpDIC",
+    "label": "Cho_MoldWarpDIC",
+    "color": {"background": "#ffffff", "border": "#000000",
+               "highlight": {"background": "#ffffff", "border": "#000000"}},
+    "size": 15.4,
+    "font": {"size": 13, "color": "#333333", "bold": False},
+    "title": "Cho_MoldWarpDIC — ToDo: 금형 온도별 휨 예측을 DIC 실측에 대조",
+    "community": 4,
+    "community_name": "ToDo",
+    "source_file": "Cho_MoldWarpDIC.md",
+    "file_type": "concept",
+    "degree": 1,
+    "_intro": INTRODUCTIONS["Cho_MoldWarpDIC"],
+    "_project_path": PROJECT_PATHS.get("Cho_MoldWarpDIC", r"D:\__KIT_projects\Cho_MoldWarpDIC_dev"),
+}
+
+
 # 2026-09-20: 사용자 지시로 그래프에 올린다. 볼트 Projects/PFTF_Mold.md 는 오래 있었지만
 # 노드가 없어서 화면에 안 보였다(QUALITY_ROWS·INTRODUCTIONS 에만 있었다). 등급 중 ·
 # stage draft 는 둘 다 볼트 값이고, 색·community 는 quality_lookup 이 QUALITY_ROWS 의
@@ -1410,6 +1439,7 @@ TODO_NODES = [
     DLPORIENT_NODE,
     DISPERSITYPROP_NODE,
     PFTF_MOLD_NODE,
+    CHO_MOLDWARPDIC_NODE,
 ]
 
 TODO_EDGES = [
@@ -1919,6 +1949,22 @@ MOLD_GOAL_EDGES = [
     ),
 ]
 
+# ------------------------------------------------ Cho_MoldWarpDIC 의 부모 (2026-09-22)
+# 볼트 frontmatter 의 depends_on = [PFTF_Mold] 가 근거다. PFTF_Mold 의 자작 사슬과 Moldflow 대조를
+# 금형 온도 사다리로 돌려 조범곤 교수의 DIC 실측에 견주는 검증선이라, 전석진 후보 둘과 같은 이유로
+# 실측 대조 전에는 점선·잠정이다.
+CHO_GOAL_EDGES = [
+    {
+        **_autoplace_goal_edge(
+            "PFTF_Mold", "Cho_MoldWarpDIC", "휨 실측 대조",
+            "금형 온도별 휨 예측(자작 사슬·Moldflow)을 DIC 로 잰 실물 변형장에 처음으로 대고 잰다",
+            "정확도",
+        ),
+        "dashes": True,
+        "_tentative": True,
+    },
+]
+
 # ------------------------------------------------ TSE_SEM 논문 트랙 분리 (2026-09-11)
 # TSE_SEM2026_dev 한 저장소에 논문 3편이 있고(볼트 Projects/TSE_SEM.md 의 draft_keyword),
 # mindmap.html 의 클라우드 문서는 이미 세 노드로 나뉘어 있다.  graph.html 도 나눈다.
@@ -2231,7 +2277,7 @@ def _preserve_goal_edges(match):
     lineage_pairs = {
         (str(edge["from"]), str(edge["to"]))
         for edge in DYNAMIC_TARGET_SEARCH_GOAL_EDGES + COAUTHOR_KIM_GOAL_EDGES
-        + JEON_GOAL_EDGES + MOLD_GOAL_EDGES
+        + JEON_GOAL_EDGES + MOLD_GOAL_EDGES + CHO_GOAL_EDGES
     }
     edges = [
         edge for edge in edges
@@ -2247,6 +2293,7 @@ def _preserve_goal_edges(match):
     edges.extend(copy.deepcopy(COAUTHOR_KIM_GOAL_EDGES))
     edges.extend(copy.deepcopy(JEON_GOAL_EDGES))
     edges.extend(copy.deepcopy(MOLD_GOAL_EDGES))
+    edges.extend(copy.deepcopy(CHO_GOAL_EDGES))
     edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
     edges.extend(copy.deepcopy(DRAPESCAN_EDGES))
     edges.extend(copy.deepcopy(SEM_GOAL_EDGES))

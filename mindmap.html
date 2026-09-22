@@ -1132,6 +1132,31 @@ function applyVaultStages20260922(data){
   data.vaultStagesVersion=VAULT_STAGES_VERSION;
   return true;   // 버전 상승 자체도 클라우드 문서에 저장해야 재실행되지 않는다.
 }
+const CHO_MOLDWARPDIC_VERSION='2026-09-22';
+/* ====== Cho_MoldWarpDIC 신설 (2026-09-22) ======
+   볼트에 Projects/Cho_MoldWarpDIC.md 가 섰다(status: todo · grade: ToDo · stage: undecided,
+   coauthor_candidate: 조범곤). 금형 온도별 휨 예측(PFTF_Mold 자작 사슬 · Moldflow)을 조범곤 교수의
+   DIC 실측에 대조하는 검증선이다. graph.html 은 같은 날 PFTF_Mold → Cho_MoldWarpDIC 점선을 넣었다.
+
+   공저 **후보**라 방을 새로 세우지 않는다 — 부모 PFTF_Mold(pftf_mold_submission) 아래에 둔다.
+   InjectionMold(n8t2x7d2)가 그 자리에 있는 것과 같은 꼴이다. 확정되면 그때 방을 세운다.
+   단계 undecided 는 이 지도에 칸이 없어 STAGE_TO_NODE 규약대로 draft(점선 테두리)로 박는다 —
+   research_outputs 에 행이 서면 overlayFromTable 이 같은 값으로 덮는다.
+   노드가 이미 있으면(사용자가 손으로 만들었거나 이 함수가 돈 뒤) 아무것도 하지 않는다. */
+function applyChoMoldWarpDIC20260922(data){
+  if(!data||!data.root||data.choMoldWarpDICVersion===CHO_MOLDWARPDIC_VERSION) return false;
+  const root=data.root;
+  if(!findNode(root,'Cho_MoldWarpDIC')){
+    const par=findNode(root,'pftf_mold_submission')||findNode(root,'n1078rc1')||root;
+    (par.children||(par.children=[])).push({id:'Cho_MoldWarpDIC',title:'Cho_MoldWarpDIC',kind:'todo',status:'draft',
+      brief:'금형 온도별 휨 예측을 DIC 실측에 대조',
+      note:'금형 온도별 휨 예측(자작 사슬·Moldflow)을 조범곤 교수의 DIC 실측에 대조하는 검증선. 착수 게이트 전, 공저 후보(조범곤).',
+      projectPath:'D:\\__KIT_projects\\Cho_MoldWarpDIC_dev'});
+    par.collapsed=false;
+  }
+  data.choMoldWarpDICVersion=CHO_MOLDWARPDIC_VERSION;
+  return true;   // 버전 상승 자체도 클라우드 문서에 저장해야 재실행되지 않는다.
+}
 //==PURE_END
 
 /* ====================== Supabase 설정/세션 (upjuk과 공유) ====================== */
@@ -1321,6 +1346,7 @@ applyJeonRoom20260919(DATA);
 applyDispersityPropRename20260919(DATA);
 applyTomoShTracks20260921(DATA);
 applyVaultStages20260922(DATA);
+applyChoMoldWarpDIC20260922(DATA);
 let sel=null, view={tx:60,ty:30,s:1}, showRel=true, LAY=null;
 
 /* ====================== 실행취소 / 다시실행 (undo/redo) ====================== */
@@ -1720,10 +1746,11 @@ async function loadDoc(){
     const dispersityPropMigrated=applyDispersityPropRename20260919(DATA);
     const tomoShMigrated=applyTomoShTracks20260921(DATA);
     const vaultStagesMigrated=applyVaultStages20260922(DATA);
+    const choMoldWarpMigrated=applyChoMoldWarpDIC20260922(DATA);
     const kindsMigrated=normalizeKinds(DATA);
     showRel=DATA.showRel!==false; document.getElementById('relBtn').textContent='관계선 '+(showRel?'✓':'✕');
     sel=null; render(); renderEdit(); fitView(); setSaveState('');
-    if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||linkMigrated||statusMigrated||drapeMigrated||gradesMigrated||directionMigrated||holonomyMigrated||hipDetectMigrated||leeRoomMigrated||gfiberCtMigrated||eunRoomMigrated||researchOptimizeMigrated||jeonRoomMigrated||dispersityPropMigrated||tomoShMigrated||vaultStagesMigrated||kindsMigrated) await saveDoc(true);
+    if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||linkMigrated||statusMigrated||drapeMigrated||gradesMigrated||directionMigrated||holonomyMigrated||hipDetectMigrated||leeRoomMigrated||gfiberCtMigrated||eunRoomMigrated||researchOptimizeMigrated||jeonRoomMigrated||dispersityPropMigrated||tomoShMigrated||vaultStagesMigrated||choMoldWarpMigrated||kindsMigrated) await saveDoc(true);
   }catch(e){
     const b=document.getElementById('banner'); b.style.display='block';
     if(/relation|does not exist|42P01|PGRST205|404/i.test(e.message))
@@ -1731,7 +1758,7 @@ async function loadDoc(){
     else if(!isLoggedIn() && /401|403|PGRST301|permission denied/i.test(e.message))
       b.textContent='공개 열람 권한이 없습니다. Supabase에서 enable_rls_mindmaps.sql 을 다시 실행해 anon SELECT 정책을 적용하세요.';
     else b.textContent='데이터를 불러오지 못했습니다: '+e.message.slice(0,140);
-    applyJeonRoom20260919(DATA); applyDispersityPropRename20260919(DATA); applyTomoShTracks20260921(DATA); applyVaultStages20260922(DATA); applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); applyDrapeEngineLinks20260827(DATA); applyVaultGrades20260901(DATA); applyLinkDirection20260907(DATA); applyHolonomySplit20260907(DATA); applyHipDetectSplit20260910(DATA); applyLeeRoomGather20260911(DATA); applyGFiberCTRename20260911(DATA); applyEunRoomAsymTensor20260916(DATA); applyResearchOptimizeRetire20260918(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
+    applyJeonRoom20260919(DATA); applyDispersityPropRename20260919(DATA); applyTomoShTracks20260921(DATA); applyVaultStages20260922(DATA); applyChoMoldWarpDIC20260922(DATA); applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); applyDrapeEngineLinks20260827(DATA); applyVaultGrades20260901(DATA); applyLinkDirection20260907(DATA); applyHolonomySplit20260907(DATA); applyHipDetectSplit20260910(DATA); applyLeeRoomGather20260911(DATA); applyGFiberCTRename20260911(DATA); applyEunRoomAsymTensor20260916(DATA); applyResearchOptimizeRetire20260918(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
   }
 }
 async function saveDoc(silent){
@@ -1752,7 +1779,7 @@ function download(name,text,type){ const b=new Blob([text],{type:type||'applicat
 function exportJSON(){ download('mindmap_backup.json', JSON.stringify(DATA,null,2)); toast('백업 JSON을 내려받았습니다.'); }
 function importJSON(input){
   const f=input.files[0]; if(!f)return; const r=new FileReader();
-  r.onload=()=>{ try{ const d=JSON.parse(r.result); applyJeonRoom20260919(d); applyDispersityPropRename20260919(d); applyTomoShTracks20260921(d); applyVaultStages20260922(d); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); applyLinkFill20260820(d); applyStatusCleanup20260822(d); applyDrapeEngineLinks20260827(d); applyVaultGrades20260901(d); applyLinkDirection20260907(d); applyHolonomySplit20260907(d); applyHipDetectSplit20260910(d); applyLeeRoomGather20260911(d); applyGFiberCTRename20260911(d); applyEunRoomAsymTensor20260916(d); applyResearchOptimizeRetire20260918(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); applyJeonRoom20260919(d); applyDispersityPropRename20260919(d); applyTomoShTracks20260921(d); applyVaultStages20260922(d); applyChoMoldWarpDIC20260922(d); applySubmissionPlan20260806(d); applyGraphNodes20260811(d); applyDedup20260811(d); applyGraphMeta20260811(d); applyLinkFill20260820(d); applyStatusCleanup20260822(d); applyDrapeEngineLinks20260827(d); applyVaultGrades20260901(d); applyLinkDirection20260907(d); applyHolonomySplit20260907(d); applyHipDetectSplit20260910(d); applyLeeRoomGather20260911(d); applyGFiberCTRename20260911(d); applyEunRoomAsymTensor20260916(d); applyResearchOptimizeRetire20260918(d); normalizeKinds(d); const v=validate(d); if(!v.ok){toast('복원 실패: '+v.errors[0]);return;}
     if(!confirm('백업으로 현재 클라우드 관계도를 덮어쓸까요?'))return;
     pushHistory();
     DATA=d; showRel=DATA.showRel!==false; sel=null; render(); renderEdit(); saveDoc(false);
