@@ -183,8 +183,8 @@ const expectedHulls = {
   // 2026-09-16: PFTF_AsymTensor 가 들어왔다 — 은종현 교수 공저 확정.
   // 2026-09-19: cfmsDispersityProp 이 들어왔다 — 볼트에서 Jeon_DispersityProp 로 서 있던
   // 것이 개명되고 공저 후보가 전석진 → 은종현 으로 바뀌어 전석진 훌에서 옮겨 왔다.
-  // 2026-09-22: TSE_SEM3_AutoTune 을 다시 넣었다(사용자 지시) — 저자는 단독 그대로이고
-  // ①②③ 을 한 묶음으로 보이게 한다. 규약(공저자 확정만)의 예외.
+  // 2026-09-22: TSE_SEM3_AutoTune 을 다시 넣었다(사용자 지시). 같은 날 ③ 의 저자가 다시
+  // 공저(대학원생·은종현·설인환*)로 정해져 규약(공저자 확정만)대로다.
   "은종현 교수님": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier",
     "TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "SFTF_HeatMethod", "SFTF_Holonomy",
     "cfmsDispersity", "PFTF_AsymTensor", "cfmsDispersityProp"],
