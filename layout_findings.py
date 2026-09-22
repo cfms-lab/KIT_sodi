@@ -597,8 +597,9 @@ QUALITY_ROWS = [
     # 2026-09-10: cfmsPINNCAD 의 계측기 쪽 결과가 독립 논문 HIPDetect 로 갈라졌다.
     # graph.html 의 큐레이션 노드는 RAW_NODES 밖에 있어도 등급 행은 여기서 나가야 한다.
     # 2026-09-22: IJCST 투고 완료(사용자). 등급은 그대로 중 — 볼트 grade 와 같다.
+    # 2026-09-22 저녁: 편집부 접수 확인 메일 — 원고번호 IJCST-09-2026-0266 (볼트 HipDetect.md submission·badge).
     ("HIPDetect", "HIPDetect", "중",
-     "엉덩이높이 기준점 논문 트랙; 평탄 구간 중앙 추정량이 LOSO 잔차 RMS 1.285 → 0.358 cm (9명 중 8명, 부호검정 p 0.0195), **2026-09-22 IJCST 투고 완료**. held-out 0건·N=10 한 조사가 남은 심사 위험"),
+     "엉덩이높이 기준점 논문 트랙; 평탄 구간 중앙 추정량이 LOSO 잔차 RMS 1.285 → 0.358 cm (9명 중 8명, 부호검정 p 0.0195), **2026-09-22 IJCST 투고 완료(원고번호 IJCST-09-2026-0266)**. held-out 0건·N=10 한 조사가 남은 심사 위험"),
     # 2026-09-14: 이미 게재된 논문(TSE 63(4) 248-257). 그래프에 노드가 없어 새로 넣었다.
     ("cfmsDispersity", "cfmsDispersity", "하",
      "게재 완료 — Textile Science and Engineering 63(4), 248-257 (2026), DOI 10.12772/TSE.2026.63.248; 정적 kNN 반발에너지 분산도 지표"),
@@ -626,7 +627,8 @@ QUALITY_ROWS = [
     ("cfmsDispersityProp", "cfmsDispersityProp", "ToDo", "분산도 지표와 실제 물성의 상관을 기존 시편 사진으로 확인하는 검증선; 착수 게이트 통과, 실측 대조 전"),
     # 2026-09-22 신설. 볼트 grade: ToDo · stage: undecided. 착수 게이트(§1) 전이라 등급 보류.
     # 볼트 Rules §8 대로 grade_note 전문을 옮기지 않고 공개 가능한 한 줄만 싣는다.
-    ("Cho_MoldWarpDIC", "Cho_MoldWarpDIC", "ToDo", "금형 온도별 휨 예측(자작 사슬·Moldflow)을 DIC 실측에 대조하는 검증선; 착수 게이트 전, 조범곤 교수 공저 후보"),
+    # 2026-09-22 저녁: §1 착수 게이트 실행 — CONDITIONAL(사슬 물리로 0.53→0.27 pp, 결정화 항이 상쇄 가능).
+    ("Cho_MoldWarpDIC", "Cho_MoldWarpDIC", "ToDo", "금형 온도별 휨 예측(자작 사슬·Moldflow)을 DIC 실측에 대조하는 검증선; 착수 게이트 조건부 통과(2026-09-22), 물성 확정 전, 조범곤 교수 공저 후보"),
 ]
 QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
 
