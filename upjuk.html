@@ -72,7 +72,17 @@
   .authors{font-weight:700}.title{color:#0d47a1;cursor:pointer}.title:hover{text-decoration:underline}
   .journal{font-style:italic;font-weight:600}.vol{text-decoration:underline}
   .badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;color:#fff;margin-right:6px}
-  .b1{background:#2e7d32}.b2{background:#00838f}.b3{background:#0277bd}.b4{background:#f9a825}.b5{background:#8d6e63}
+  /* 투고 진도 파이 (2026-09-22, 사용자 지시) — 저자 앞에 있던 Pub/Submit/Draft 배지를 대신한다.
+     그 글자는 저널 뒤 「(Submitted)」로 이미 한 번 더 나오므로 배지는 중복이었다.
+     graph.html·portfolio.html 과 같은 그림이다: 채운 정도 = 투고 진도, 색 = 연결된
+     프로젝트의 논문 등급(연결이 없으면 회색). 기하는 portfolio.html 의 파이() 그대로다. */
+  .pie{display:inline-flex;align-items:center;vertical-align:middle;margin-right:6px}
+  .pie svg{display:block}
+  .toolbar label.chk{flex-direction:row;align-items:center;gap:5px;font-size:12px;color:#475569;cursor:pointer;user-select:none;padding-bottom:7px}
+  /* 진도 깜빡임 — portfolio.html 과 같은 CSS 다. 주기는 파이마다 animation-duration 으로 박힌다.
+     제일 빠른 것이 800ms = 1.25Hz 로 WCAG 2.3.1(초당 3회) 아래이고, 툴바 스위치로 멈출 수 있다. */
+  @keyframes pie-blink{0%,49.99%{opacity:1}50%,100%{opacity:0}}
+  .blink-on .pie-anim{animation-name:pie-blink;animation-iteration-count:infinite;animation-timing-function:linear}
   .funding{color:#2e7d32;font-weight:700;font-size:12px}
   .doi{color:#1565c0;font-weight:700;font-size:11px;text-decoration:none;border:1px solid #1565c0;border-radius:4px;padding:0 5px;margin-left:6px}
   .pdf{color:#c62828;background:#fff;font-weight:700;font-size:11px;text-decoration:none;border:1px solid #c62828;border-radius:4px;padding:1px 6px;margin-left:6px;cursor:pointer}
@@ -117,6 +127,7 @@
   <label>평가연도 To<input type="number" id="fTo"></label>
   <button class="btn" onclick="doSearch()">검색</button>
   <button class="btn secondary sm" onclick="reload()">새로고침</button>
+  <label class="chk" title="심사 중인 원고(투고·심사 수정·게재확정)의 파이를 깜빡입니다. 나아갈수록 주기가 짧아집니다(투고 1.6초 → 게재확정 1.2초)"><input type="checkbox" id="blink"> 진도 깜빡임</label>
   <span class="hint" style="margin-left:auto">읽기 전용 · 고치는 곳은 옵시디언 볼트</span>
 </div>
 
@@ -212,6 +223,74 @@ const CATEG_ORDER=["IJ","DJ","IC","DC","IL","PT","AW","PB","ETC","TODO"];
 const CATEG_KOR={IJ:"SCIE",DJ:"국내논문",IC:"해외학회",DC:"국내학회",IL:"초청강연",PT:"특허",AW:"수상",PB:"저서",ETC:"기타",TODO:"할일"};
 const CATEG_HEADER={IJ:"SC<br>IE",DJ:"국내<br>논문",IC:"해외<br>학회",DC:"국내<br>학회",IL:"초청<br>강연"};
 const PRINT_SUFFIX={2:"(In Print)",3:"(Accepted)",4:"(Submitted)",5:"(draft)"};
+
+/* ===== 투고 진도 파이 · 깜빡임 (2026-09-22, 사용자 지시) =====
+   graph.html 의 STAGE_PIE, portfolio.html 의 파이()·깜빡임과 같은 규칙이다 — 세 화면이 같은
+   그림·같은 박자를 쓴다. 단계 어휘는 research_outputs.stage(볼트의 통합 단계 어휘)다. */
+const STAGE_PIE={
+  published:{frac:1,done:true,label:'출판(published)'},
+  inprint:{frac:0.875,label:'인쇄중(in print)'},
+  accepted:{frac:0.75,label:'게재확정(accepted)'},
+  revision:{frac:0.625,label:'심사 수정(revision)'},
+  submitted:{frac:0.5,label:'투고(submitted)'},
+  draft:{frac:0.25,label:'초고(draft)'},
+  undecided:{frac:0,label:'미정(undecided)'},
+  blocked:{frac:0,x:true,label:'보류(blocked)'},
+  cancelled:{frac:0,xx:true,label:'취소(cancelled)'},
+  idea:{frac:0,label:'아이디어(idea)'},
+};
+/* 색 = 논문 등급. graph.html QUALITY_COLORS · portfolio.html QUALITY_PIE 와 같은 원색이다
+   (행 배경의 --q-* 는 이것을 흰색에 50% 섞은 값). 연결된 프로젝트가 없으면 회색이다. */
+const QUALITY_PIE={"상":"#e02020","중":"#f28e2b","하":"#2a78d6","ToDo":"#9ca3af","Closed":"#6b7280","그룹":"#c8c8c8","등급 없음":"#94a3b8"};
+const 파이색=g=>QUALITY_PIE[g]||"#94a3b8";
+/* 크기 사다리는 frac 을 그대로 탄다(portfolio 14~28, graph 14~34). 여기는 글줄 안에 놓이므로
+   12~20 으로 줄였다 — 비율은 같고 픽셀만 다르다. */
+const PIE_MIN=12,PIE_MAX=20;
+const BLINK_T_SLOW=2400,BLINK_T_FAST=800;
+const 깜빡임주기=frac=>BLINK_T_SLOW-(BLINK_T_SLOW-BLINK_T_FAST)*(frac||0);
+const BLINK_STAGES=new Set(['submitted','revision','accepted']);   // 저널 손에 가 있고 결판이 안 난 셋만 깜빡인다
+function 파이(stage,color){
+  const s=STAGE_PIE[stage];
+  if(!s)return "";
+  const r=6,cx=8,cy=8,c=color||"#94a3b8";
+  const 크기=PIE_MIN+(PIE_MAX-PIE_MIN)*(s.frac||0);
+  let 안=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c}" stroke-width="1.6"/>`;
+  if(s.done){
+    안=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>`
+      +`<path d="M${cx-2.9},${cy+0.2} l2.1,2.2 l3.9,-4.4" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }else if(s.xx){
+    안+=`<path d="M${cx-3.2},${cy+3.2} L${cx+3.2},${cy-3.2}" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`
+      +`<path d="M${cx-3.2},${cy-3.2} L${cx+3.2},${cy+3.2}" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`;
+  }else if(s.x){
+    // 보류는 ⛔ — 꽉 찬 원에 흰 가로 막대 (graph·portfolio 와 같다)
+    안=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>`
+      +`<path d="M${cx-3.5},${cy} L${cx+3.5},${cy}" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>`;
+  }else if(s.frac>0){
+    const a=2*Math.PI*s.frac;
+    const ex=cx+r*Math.sin(a),ey=cy-r*Math.cos(a),big=s.frac>0.5?1:0;
+    안+=`<path d="M${cx},${cy} L${cx},${cy-r} A${r},${r} 0 ${big} 1 ${ex},${ey} Z" fill="${c}"/>`;
+  }
+  // 깜빡임은 CSS 가 한다. 깜빡일 단계에만 클래스와 주기를 실어 주고, 스위치가 꺼져 있으면
+  // body 에 .blink-on 이 없어 animation-name 이 붙지 않는다.
+  const 깜빡=BLINK_STAGES.has(stage)?` class="pie-anim" style="animation-duration:${깜빡임주기(s.frac)}ms"`:"";
+  return `<svg${깜빡} viewBox="0 0 16 16" width="${크기}" height="${크기}">${안}</svg>`;
+}
+/* 논문 한 줄의 파이. 단계는 research_outputs.stage(없으면 출판), 색은 연결된 프로젝트 노드의 등급. */
+function stagePie(p){
+  const stage=p.STAGE||'published';
+  const s=STAGE_PIE[stage]; if(!s)return "";
+  const n=nodeById(p.PROJECT_ID);
+  const tip=s.label+(n&&n.grade?` · 등급 ${n.grade}`:"");
+  return `<span class="pie" title="${esc(tip)}">${파이(stage,n?파이색(n.grade):"#94a3b8")}</span>`;
+}
+/* 깜빡임 스위치 — 기본 켜짐, 선택은 이 브라우저에만 남는다(portfolio·graph 와 같은 방식). */
+const BLINK_KEY="cfms_upjuk_blink_v1";
+(function(){
+  const cb=document.getElementById("blink"); if(!cb)return;
+  let on=true; try{ if(localStorage.getItem(BLINK_KEY)==='0') on=false; }catch(e){}
+  cb.checked=on; document.body.classList.toggle("blink-on",on);
+  cb.addEventListener("change",()=>{ try{localStorage.setItem(BLINK_KEY,cb.checked?'1':'0');}catch(e){} document.body.classList.toggle("blink-on",cb.checked); });
+})();
 
 /* ===== 저자(드물게 변경 → 내장) ===== */
 const PEOPLE=[
@@ -442,7 +521,8 @@ function rowClass(p){
 }
 function renderPaper(p,i){const st=p.PrintStatus;let x=[];
   if(p.FUNDING)x.push(`<span class="funding">[${esc(p.FUNDING)}]</span>`);
-  x.push(`<span class="badge b${st}">${["","Pub","InPrint","Accept","Submit","Draft"][st]||""}</span>`);
+  // 2026-09-22: Pub/Submit/Draft 배지 → 진도 파이. 글자 상태는 저널 뒤 PRINT_SUFFIX 가 이미 보여 준다.
+  x.push(stagePie(p));
   x.push(`<span class="authors">${esc(p.AUTHORS)}</span>, `);
   x.push(`<span class="title" onclick="openEdit(${jsArg(p.ID)})">"${esc(p.TITLE)}"</span>`);
   x.push(`, <span class="journal">${esc(p.JOURNAL_NAME)+(PRINT_SUFFIX[st]||"")}</span>, `);
