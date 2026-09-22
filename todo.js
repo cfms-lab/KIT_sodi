@@ -71,7 +71,7 @@
 
     /* ── 순서를 기다리는 것 ───────────────────────────────── */
     "SFTF_Holonomy":        "HeatMethod 투고 후 진행",
-    "TSE_SEM3_AutoTune":    "2027-03 투고 대기",
+    "TSE_SEM3_AutoTune":    "2027-3월투고/교내과제 단독사사",
     "DFSVR_VisCull":        "착수 전 — DFSVR 뒤",
     "SFTFSoft_GNN_DFSVR":   "착수 전 — GNN 뒤",
     "SFTF_DynamicTargetSearch": "상수관망 현장 확보 전까지 보류",

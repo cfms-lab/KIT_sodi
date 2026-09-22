@@ -452,10 +452,14 @@ HYPEREDGES = [
     # 2026-09-19: cfmsDispersityProp 가 들어왔다. 볼트에서 Jeon_DispersityProp 로 서 있던
     # 것이 개명되고 공저 후보가 전석진 → **은종현**으로 바뀌었다(노트 coauthor_candidate:
     # 「부모 논문 TSE 63(4) 248-257 의 공동 교신저자」). 그래서 전석진 훌에서 이리로 옮긴다.
+    # 2026-09-22: 사용자 지시로 TSE_SEM3_AutoTune 을 다시 넣는다. 저자·사사(설인환 단독,
+    # 금오공대 교내 과제)는 그대로라 「공저자 확정만 훌에 넣는다」는 규약의 예외다 — ①②③ 을
+    # 한 묶음으로 보이게 하는 것이 목적이고, 단독·교내 사사라는 사정은 todo.js 의 ToDo 한 줄
+    # (「2027-3월투고/교내과제 단독사사」)이 두 화면에서 같이 보여 준다.
     {"label": "은종현 교수님",
      "kind": "coauthor",
      "nodes": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier",
-               "TSE_SEM2_Tensor", "SFTF_HeatMethod",
+               "TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "SFTF_HeatMethod",
                "SFTF_Holonomy", "cfmsDispersity", "PFTF_AsymTensor",
                "cfmsDispersityProp"],
      "color": "#db2777", "labelColor": "#be185d",
