@@ -169,12 +169,15 @@ const expectedHulls = {
   // 2026-09-21: 두 번째 주제 훌. cfmsDrape 엔진을 공유하는 여덟을 모았다.
   // cfmsDrapeSCAN 은 이름이 드레이프여도 이희란 교수님 훌 구성원이라 넣지 않는다(겹침 금지).
   // PFTF_VisCull_kDop 도 뺐다 — 넣으면 훌이 PFTF_Compression·cfmsDrapeSCAN 을 삼킨다.
+  // 2026-09-22: 사용자 지시로 cfmsDrapeInverse ↔ cfmsAutoPlace_JCDE 를 이희란 훌과
+  // 맞교환했다.
   "Drape": ["cfmsMiindo", "cfmsDrape", "cfmsCIPC", "cfmsPINNDrape", "cfmsPINNCAD",
-    "cfmsDrapeInverse", "SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop"],
+    "cfmsAutoPlace_JCDE", "SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop"],
   // 2026-09-20: SFTF_Clustering 을 뺐다 — 유일하게 두 훌에 동시에 들던 노드다.
   // 이희란 교수 공저 관계 자체는 그대로이고 노드 정보의 공저자 줄에 남는다.
+  // 2026-09-22: cfmsAutoPlace_JCDE ↔ cfmsDrapeInverse 맞교환(사용자 지시).
   "이희란 교수님": ["PFTF_Compression", "cfmsAutoSew",
-    "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN", "HIPDetect",
+    "cfmsAutoPlace_IJCST", "cfmsDrapeInverse", "cfmsDrapeSCAN", "HIPDetect",
     "TSE_TomoSh4", "TSE_TomoSh5"],
   // 2026-09-14: TSE_SEM3_AutoTune 이 빠졌다 — ③ 만 설인환 단독 저자로 바뀌었다.
   // 2026-09-16: PFTF_AsymTensor 가 들어왔다 — 은종현 교수 공저 확정.

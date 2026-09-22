@@ -416,10 +416,13 @@ HYPEREDGES = [
     # scale 은 다른 주제 훌(3D프린팅)의 1.14 가 아니라 1.10 이다. 1.14 로 부풀리면 위쪽
     # 3D프린팅 훌과 3px 까지 붙어 테두리가 한 덩어리로 읽힌다(1.10 이면 20px 떨어진다).
     # 색은 이웃과 겹치지 않게 골랐다 — 위가 청록(3D프린팅), 오른쪽이 보라(이희란)라서 주황.
+    # 2026-09-22: 사용자 지시로 cfmsDrapeInverse 를 이희란 훌로 보내고, 대신
+    # cfmsAutoPlace_JCDE 를 반대로 이희란 훌에서 이리로 받는다(맞교환, 한 노드는 한 훌
+    # 규약 유지).
     {"label": "Drape",
      "kind": "topic",
      "nodes": ["cfmsMiindo", "cfmsDrape", "cfmsCIPC", "cfmsPINNDrape", "cfmsPINNCAD",
-               "cfmsDrapeInverse", "SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop"],
+               "cfmsAutoPlace_JCDE", "SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop"],
      "color": "#ea580c", "labelColor": "#c2410c",
      "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95,
      "lineWidth": 3, "dash": [12, 6], "scale": 1.10},
@@ -427,10 +430,12 @@ HYPEREDGES = [
     # (볼트 coauthors: [이희란, 강지언]), 그 노드는 3D프린팅 훌의 구성원이기도 해서
     # 두 훌에 동시에 들어 있었다 — 유일한 겹침이었고 이희란 훌이 그 노드를 잡으려고
     # 위로 길게 뻗어 모양을 버렸다. 공저 관계는 노드 정보의 공저자 줄에 그대로 남는다.
+    # 2026-09-22: 사용자 지시로 cfmsAutoPlace_JCDE 를 Drape 훌로 보내고, 대신
+    # cfmsDrapeInverse 를 Drape 훌에서 받는다(맞교환).
     {"label": "이희란 교수님",
      "kind": "coauthor",
      "nodes": ["PFTF_Compression", "cfmsAutoSew",
-               "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN",
+               "cfmsAutoPlace_IJCST", "cfmsDrapeInverse", "cfmsDrapeSCAN",
                "HIPDetect", "TSE_TomoSh4", "TSE_TomoSh5"],
      "color": "#7c3aed", "labelColor": "#6d28d9",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
@@ -583,8 +588,9 @@ QUALITY_ROWS = [
     ("cfmsPINNCAD", "cfmsPINNCAD", "하", "PINN 기반 의복 CAD 연구선"),
     # 2026-09-10: cfmsPINNCAD 의 계측기 쪽 결과가 독립 논문 HIPDetect 로 갈라졌다.
     # graph.html 의 큐레이션 노드는 RAW_NODES 밖에 있어도 등급 행은 여기서 나가야 한다.
+    # 2026-09-22: IJCST 투고 완료(사용자). 등급은 그대로 중 — 볼트 grade 와 같다.
     ("HIPDetect", "HIPDetect", "중",
-     "엉덩이높이 기준점 논문 트랙; 평탄 구간 중앙 추정량이 LOSO 잔차 RMS 1.285 → 0.358 cm (9명 중 8명, 부호검정 p 0.0195), IJCST 원고 3종·그림 5개·커버레터 완비, 미투고. held-out 0건·N=10 한 조사가 남은 심사 위험"),
+     "엉덩이높이 기준점 논문 트랙; 평탄 구간 중앙 추정량이 LOSO 잔차 RMS 1.285 → 0.358 cm (9명 중 8명, 부호검정 p 0.0195), **2026-09-22 IJCST 투고 완료**. held-out 0건·N=10 한 조사가 남은 심사 위험"),
     # 2026-09-14: 이미 게재된 논문(TSE 63(4) 248-257). 그래프에 노드가 없어 새로 넣었다.
     ("cfmsDispersity", "cfmsDispersity", "하",
      "게재 완료 — Textile Science and Engineering 63(4), 248-257 (2026), DOI 10.12772/TSE.2026.63.248; 정적 kNN 반발에너지 분산도 지표"),
