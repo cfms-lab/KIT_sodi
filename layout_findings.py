@@ -302,7 +302,7 @@ POS = {
     # 방대석 훌(SFTF_InjMold 860 · PFTF_Mold 980, y −150) 바로 오른쪽 빈 칸 — 부모가 PFTF_Mold 라
     # 같은 줄에 둔다. 후보라 훌에는 넣지 않는다(노드 정보의 「공저 후보」 줄로만 보인다).
     "Cho_MoldWarpDIC": (1100, -150),
-    # 2026-09-23: 볼트에 cfmsHMDispersity 가 섰다(ToDo·undecided, 공저 미정). 부모는
+    # 2026-09-23: 볼트에 cfmsHMDispersity 가 섰다(ToDo·undecided, 공저 은종현). 부모는
     # cfmsDispersity 이고 cfmsDispersityProp 과는 형제지만 「별도 보존 연구선」이라 둘 사이엔
     # 선을 긋지 않는다(사용자: 4촌처럼). 자리는 Prop 와 같은 줄. 같은 날 사용자 지시로 은종현 훌에
     # 넣었으므로 이제 훌 안쪽 오른쪽 아래 모서리가 된다.
@@ -465,8 +465,8 @@ HYPEREDGES = [
     # 예외였으나 같은 날 저녁 ③ 의 저자가 다시 공저(대학원생 · 은종현 · 설인환*)로 정해져
     # (볼트 TSE_SEM.md 09-22 이력) 이제는 규약대로다. 사사(금오공대 교내 과제)는 그대로이고,
     # todo.js 의 ToDo 한 줄(「2027-3월투고/교내과제 단독사사」)의 「단독」은 사사 이야기다.
-    # 2026-09-23: cfmsHMDispersity 를 넣었다(사용자 지시). 볼트 노트에는 공저자가 아직 미정이라
-    # 규약(공저자 확정만)의 예외다 — 부모 cfmsDispersity·형제 cfmsDispersityProp 와 같은 묶음에 둔다.
+    # 2026-09-23: cfmsHMDispersity 를 넣었다(사용자 지시). 같은 날 볼트가 coauthors: [은종현] 으로
+    # 확정해 규약(공저자 확정만)대로다 — 부모 cfmsDispersity·형제 cfmsDispersityProp 와 같은 묶음이다.
     {"label": "은종현 교수님",
      "kind": "coauthor",
      "nodes": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier",
@@ -1394,8 +1394,8 @@ CHO_MOLDWARPDIC_NODE = {
 
 
 # 2026-09-23: 볼트에 새로 선 HMD(Harmonic Multiscale Dispersity). status: todo · grade: ToDo ·
-# stage: undecided 라 흰 바탕·검정 외곽선(community 4). 볼트에는 공저자·투고지가 아직 미정이지만
-# 사용자 지시로 은종현 훌에 넣는다(2026-09-23).
+# stage: undecided 라 흰 바탕·검정 외곽선(community 4). 공저자는 볼트 coauthors: [은종현](2026-09-23 확정)이라
+# 은종현 훌에 넣는다. 투고지는 미정.
 # 부모는 볼트 depends_on 의 cfmsDispersity 다(HMD_GOAL_EDGES).
 HMD_DISPERSITY_NODE = {
     "id": "cfmsHMDispersity",
