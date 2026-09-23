@@ -302,6 +302,11 @@ POS = {
     # 방대석 훌(SFTF_InjMold 860 · PFTF_Mold 980, y −150) 바로 오른쪽 빈 칸 — 부모가 PFTF_Mold 라
     # 같은 줄에 둔다. 후보라 훌에는 넣지 않는다(노드 정보의 「공저 후보」 줄로만 보인다).
     "Cho_MoldWarpDIC": (1100, -150),
+    # 2026-09-23: 볼트에 cfmsHMDispersity 가 섰다(ToDo·undecided, 공저 미정). 부모는
+    # cfmsDispersity 이고 cfmsDispersityProp 과는 형제지만 「별도 보존 연구선」이라 둘 사이엔
+    # 선을 긋지 않는다(사용자: 4촌처럼). 자리는 은종현 훌 아래 바깥 — 공저가 정해지지 않아
+    # 훌 안에 들어가 보이면 안 된다.
+    "cfmsHMDispersity": (860, 1240),
 }
 
 # 노드 id 가 노트 이름에서 규칙으로 나오지 않는 트랙 노드 → (볼트 노트 stem,
@@ -628,6 +633,8 @@ QUALITY_ROWS = [
     # 2026-09-22 신설. 볼트 grade: ToDo · stage: undecided. 착수 게이트(§1) 전이라 등급 보류.
     # 볼트 Rules §8 대로 grade_note 전문을 옮기지 않고 공개 가능한 한 줄만 싣는다.
     # 2026-09-22 저녁: §1 착수 게이트 실행 — CONDITIONAL(사슬 물리로 0.53→0.27 pp, 결정화 항이 상쇄 가능).
+    # 2026-09-23 신설. 볼트 grade: ToDo · stage: undecided. Mathematica 최소 모델만 GO_MODEL_ONLY.
+    ("cfmsHMDispersity", "cfmsHMDispersity", "ToDo", "조화함수 기반 다중척도 분산도(HMD); 좌표 기반 v0.4 구현·기준선 검증까지, 실제 위치 시료·물성 검증 전"),
     ("Cho_MoldWarpDIC", "Cho_MoldWarpDIC", "ToDo", "금형 온도별 휨 예측(자작 사슬·Moldflow)을 DIC 실측에 대조하는 검증선; 착수 게이트 조건부 통과(2026-09-22), 물성 확정 전, 조범곤 교수 공저 후보"),
 ]
 QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
@@ -680,6 +687,7 @@ INTRODUCTIONS = {
     "cfmsDrapeInverse": "드레이프한 원단 사진에서 그 원단의 인장·전단·굽힘 강성을 거꾸로 알아내는 도구다.",
     "Jeon_DLPOrient": "값싸게 매긴 3D 프린팅 배향 순위가 실제로 찍어 본 물건의 물성 순위와 맞는지를 처음으로 실물에 대고 재는 연구다.",
     "cfmsDispersityProp": "현미경 사진으로 잰 입자 분산도 숫자가 실제 물성과 정말로 이어지는지를, 이미 찍혀 있는 남의 시편 사진으로 확인한다.",
+    "cfmsHMDispersity": "입자 주변의 거리와 방향 구조를 조화함수로 표현하고, 국소 배열과 거시적 반복·상쇄를 여러 척도에서 함께 측정한다.",
     "Cho_MoldWarpDIC": "금형 온도를 바꿔 가며 찍은 사출 부품의 휨과 변형을 상용 해석과 자작 해석이 얼마나 맞히는지, 실제로 찍어서 잰 변형 사진에 대고 재는 연구다.",
     "TSE_SEM1_Bezier": "전자현미경 사진 한 장에서 섬유 한 올 한 올을 매끈한 곡선으로 따라가며 굵기와 방향을 재어내는 방법이다.",
     "TSE_SEM2_Tensor": "섬유를 하나씩 오려내지 않고 사진 전체에서 섬유가 어느 쪽으로 누워 있는지와 겹친 아래층까지 한꺼번에 재는 방법이다.",
@@ -1383,6 +1391,27 @@ CHO_MOLDWARPDIC_NODE = {
 }
 
 
+# 2026-09-23: 볼트에 새로 선 HMD(Harmonic Multiscale Dispersity). status: todo · grade: ToDo ·
+# stage: undecided 라 흰 바탕·검정 외곽선(community 4). 공저자·투고지 미정이라 훌에는 넣지 않는다.
+# 부모는 볼트 depends_on 의 cfmsDispersity 다(HMD_GOAL_EDGES).
+HMD_DISPERSITY_NODE = {
+    "id": "cfmsHMDispersity",
+    "label": "cfmsHMDispersity",
+    "color": {"background": "#ffffff", "border": "#000000",
+               "highlight": {"background": "#ffffff", "border": "#000000"}},
+    "size": 15.4,
+    "font": {"size": 13, "color": "#333333", "bold": False},
+    "title": "cfmsHMDispersity — ToDo: 조화함수 기반 다중척도 분산도",
+    "community": 4,
+    "community_name": "ToDo",
+    "source_file": "cfmsHMDispersity.md",
+    "file_type": "concept",
+    "degree": 1,
+    "_intro": INTRODUCTIONS["cfmsHMDispersity"],
+    "_project_path": PROJECT_PATHS.get("cfmsHMDispersity", r"D:\__KIT_projects\cfmsHMDispersity_dev"),
+}
+
+
 # 2026-09-20: 사용자 지시로 그래프에 올린다. 볼트 Projects/PFTF_Mold.md 는 오래 있었지만
 # 노드가 없어서 화면에 안 보였다(QUALITY_ROWS·INTRODUCTIONS 에만 있었다). 등급 중 ·
 # stage draft 는 둘 다 볼트 값이고, 색·community 는 quality_lookup 이 QUALITY_ROWS 의
@@ -1442,6 +1471,7 @@ TODO_NODES = [
     DISPERSITYPROP_NODE,
     PFTF_MOLD_NODE,
     CHO_MOLDWARPDIC_NODE,
+    HMD_DISPERSITY_NODE,
 ]
 
 TODO_EDGES = [
@@ -1967,6 +1997,22 @@ CHO_GOAL_EDGES = [
     },
 ]
 
+# ------------------------------------------------ cfmsHMDispersity 의 부모 (2026-09-23)
+# 볼트 frontmatter 의 depends_on = [cfmsDispersity] 가 근거다. related: [cfmsDispersityProp] 는
+# 선으로 긋지 않는다 — 사용자 지시로 두 과제는 부모를 거쳐서만 이어지는 별도 연구선이다.
+# 최소 모델 게이트뿐이라 점선·잠정이다.
+HMD_GOAL_EDGES = [
+    {
+        **_autoplace_goal_edge(
+            "cfmsDispersity", "cfmsHMDispersity", "다중척도 구조",
+            "kNN 한 값 대신 조화함수 계수로 국소 배열과 거시적 반복·상쇄를 여러 척도에서 따로 잰다",
+            "확장",
+        ),
+        "dashes": True,
+        "_tentative": True,
+    },
+]
+
 # ------------------------------------------------ TSE_SEM 논문 트랙 분리 (2026-09-11)
 # TSE_SEM2026_dev 한 저장소에 논문 3편이 있고(볼트 Projects/TSE_SEM.md 의 draft_keyword),
 # mindmap.html 의 클라우드 문서는 이미 세 노드로 나뉘어 있다.  graph.html 도 나눈다.
@@ -2279,7 +2325,7 @@ def _preserve_goal_edges(match):
     lineage_pairs = {
         (str(edge["from"]), str(edge["to"]))
         for edge in DYNAMIC_TARGET_SEARCH_GOAL_EDGES + COAUTHOR_KIM_GOAL_EDGES
-        + JEON_GOAL_EDGES + MOLD_GOAL_EDGES + CHO_GOAL_EDGES
+        + JEON_GOAL_EDGES + MOLD_GOAL_EDGES + CHO_GOAL_EDGES + HMD_GOAL_EDGES
     }
     edges = [
         edge for edge in edges
@@ -2296,6 +2342,7 @@ def _preserve_goal_edges(match):
     edges.extend(copy.deepcopy(JEON_GOAL_EDGES))
     edges.extend(copy.deepcopy(MOLD_GOAL_EDGES))
     edges.extend(copy.deepcopy(CHO_GOAL_EDGES))
+    edges.extend(copy.deepcopy(HMD_GOAL_EDGES))
     edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
     edges.extend(copy.deepcopy(DRAPESCAN_EDGES))
     edges.extend(copy.deepcopy(SEM_GOAL_EDGES))
