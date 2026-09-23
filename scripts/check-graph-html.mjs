@@ -185,9 +185,10 @@ const expectedHulls = {
   // 것이 개명되고 공저 후보가 전석진 → 은종현 으로 바뀌어 전석진 훌에서 옮겨 왔다.
   // 2026-09-22: TSE_SEM3_AutoTune 을 다시 넣었다(사용자 지시). 같은 날 ③ 의 저자가 다시
   // 공저(대학원생·은종현·설인환*)로 정해져 규약(공저자 확정만)대로다.
+  // 2026-09-23: cfmsHMDispersity 를 넣었다(사용자 지시) — 볼트 공저자 미정이라 규약의 예외.
   "은종현 교수님": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier",
     "TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "SFTF_HeatMethod", "SFTF_Holonomy",
-    "cfmsDispersity", "PFTF_AsymTensor", "cfmsDispersityProp"],
+    "cfmsDispersity", "PFTF_AsymTensor", "cfmsDispersityProp", "cfmsHMDispersity"],
   "김우석 교수님": ["SFTF_SewerPOC", "ColdOndol", "ColdOndol_Positioning", "SFTF_UrbanTraffic"],
   // 2026-09-19: 사용자 지시로 세웠다. 두 노트가 가진 것은 coauthor_candidate(공저 후보)라
   // 「후보는 훌에 넣지 않는다」는 규약의 예외다 — layout_findings.py 의 HYPEREDGES 주석 참고.
