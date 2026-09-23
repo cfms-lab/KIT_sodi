@@ -636,7 +636,7 @@ QUALITY_ROWS = [
     # 볼트 Rules §8 대로 grade_note 전문을 옮기지 않고 공개 가능한 한 줄만 싣는다.
     # 2026-09-22 저녁: §1 착수 게이트 실행 — CONDITIONAL(사슬 물리로 0.53→0.27 pp, 결정화 항이 상쇄 가능).
     # 2026-09-23 신설. 볼트 grade: ToDo · stage: undecided. Mathematica 최소 모델만 GO_MODEL_ONLY.
-    ("cfmsHMDispersity", "cfmsHMDispersity", "ToDo", "조화함수 기반 다중척도 분산도(HMD); 좌표 기반 v0.4 구현·기준선 검증까지, 실제 위치 시료·물성 검증 전"),
+    ("cfmsHMDispersity", "cfmsHMDispersity", "ToDo", "조화함수 기반 다중척도 분산도(HMD); v0.5 로 Fig.5 replica 10장에 위치 기준선 적용, 물성·큰 척도 plateau 검증 전"),
     ("Cho_MoldWarpDIC", "Cho_MoldWarpDIC", "ToDo", "금형 온도별 휨 예측(자작 사슬·Moldflow)을 DIC 실측에 대조하는 검증선; 착수 게이트 조건부 통과(2026-09-22), 물성 확정 전, 조범곤 교수 공저 후보"),
 ]
 QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
