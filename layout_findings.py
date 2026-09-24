@@ -1427,6 +1427,10 @@ CHO_MOLDWARPDIC_NODE = {
 # 씨앗으로 들고 있다. 완성도는 게재 완료라 따로 두지 않는다.
 # 색·community 는 quality_lookup 이 QUALITY_ROWS 의 「상」으로 덮어쓰므로 씨앗일 뿐이다.
 # ⚠️ 어느 훌에도 넣지 않는다 — 저자가 설인환·Young Seok Song 이라 은종현 훌의 근거가 없다(사용자 지시).
+# ⚠️ **mindmap 과 portfolio 에는 넣지 않는다**(2026-09-24 사용자 확인). 세 화면이 어긋난 게 아니다
+# — 이 노드는 계보를 눈에 보이게 하려고 graph 에만 세운 것이다. 2013 년에 끝난 논문이라
+# 진행 관리(포트폴리오)에도, 프로젝트 관계도(mindmap)에도 걸 일이 없다. 동기화 점검에서
+# 「빠졌다」고 채워 넣지 말 것.
 DYNAMIC_DISPERSITY_NODE = {
     "id": "dynamicDispersity",
     "label": "dynamicDispersity",
