@@ -11,4 +11,4 @@ create index if not exists papers_project_idx on public.papers ("PROJECT_ID");
 update public.papers set "PROJECT_ID"='Tomo_SFTF'       where "ID"=101 and coalesce("PROJECT_ID",'')='';  -- (sftf) The Support Flow Tensor Field ...
 update public.papers set "PROJECT_ID"='SFTF_DrapePrior' where "ID"=253 and coalesce("PROJECT_ID",'')='';  -- (drapePrior) 의복 드레이프 시뮬레이션 품질 평가의 재현성
 update public.papers set "PROJECT_ID"='cfmsCIPC'        where "ID"=256 and coalesce("PROJECT_ID",'')='';  -- (cfmsCIPC) 충돌 강건성 검증 프로토콜
-update public.papers set "PROJECT_ID"='cfmsDispersity'  where "ID"=73  and coalesce("PROJECT_ID",'')='';  -- (dispersity) 입자 분산도 정적 kNN 에너지 지표
+update public.papers set "PROJECT_ID"='cfmsDispersityKNN'  where "ID"=73  and coalesce("PROJECT_ID",'')='';  -- (dispersity) 입자 분산도 정적 kNN 에너지 지표

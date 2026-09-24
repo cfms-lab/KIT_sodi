@@ -33,7 +33,9 @@ DSTS = [HERE / "graph.html"]
 # 2026-09-18: PFTF_ResearchOptimize 를 걷어냈다(사용자 판단 — 더 필요하지 않다).
 # graph.html 의 RAW_NODES 는 보존되는 스냅샷이라 정의를 지우는 것만으로는 노드가
 # 남으므로, 여기에 적어야 재생성이 노드와 그 엣지를 함께 걷어낸다.
-HIDDEN_NODE_IDS = {"PFTF_subMarine", "PFTF_Terrain", "PFTF_ResearchOptimize"}
+# 2026-09-24: cfmsDispersity → cfmsDispersityKNN 개명. 옛 id 가 스냅샷에서 되살아나면 같은 논문이
+# 두 번 서므로 옛 id 를 여기 적어 재생성이 걷어내게 한다(런북 「노드 id 를 바꾸면」 2번).
+HIDDEN_NODE_IDS = {"PFTF_subMarine", "PFTF_Terrain", "PFTF_ResearchOptimize", "cfmsDispersity"}
 
 # Project notes are the single source of truth for local VS Code paths.  The
 # graph node id normally matches the Obsidian project-note stem, so the button
@@ -284,7 +286,7 @@ POS = {
     "HIPDetect": (420, 1020),
     # 2026-09-14: graph.html 의 큐레이션 노드(CFMSDISPERSITY_NODE)와 짝을 이룬다.
     # 이미 나온 논문인데 그래프에 없었다. 자리는 은종현 교수님 묶음 오른쪽의 빈 곳이다.
-    "cfmsDispersity": (600, 1020),
+    "cfmsDispersityKNN": (600, 1020),
     # 2026-09-14: graph.html 의 큐레이션 노드(TOMO_SHELL_NODES)와 짝을 이룬다.
     # 포트폴리오 표에는 두 트랙이 있는데 그래프에는 노드가 없었다(사용자 지적).
     # 자리는 이희란 교수님 묶음 왼쪽 아래의 빈 곳이다 — 파일 씨앗과 표(graph_positions)
@@ -296,14 +298,14 @@ POS = {
     "Jeon_DLPOrient": (690, -150),
     # 2026-09-19: 볼트에서 Jeon_DispersityProp → cfmsDispersityProp 로 개명되고 공저
     # 후보도 전석진 → 은종현 으로 바뀌었다. 자리도 은종현 묶음 안으로 옮긴다 —
-    # 부모 cfmsDispersity 바로 아래이고 그 묶음의 격자 간격(180)과 같은 칸이다.
+    # 부모 cfmsDispersityKNN 바로 아래이고 그 묶음의 격자 간격(180)과 같은 칸이다.
     "cfmsDispersityProp": (600, 1250),
     # 2026-09-22: 볼트에 Cho_MoldWarpDIC 가 섰다(조범곤 교수 공저 **후보**, ToDo·undecided). 자리는
     # 방대석 훌(SFTF_InjMold 860 · PFTF_Mold 980, y −150) 바로 오른쪽 빈 칸 — 부모가 PFTF_Mold 라
     # 같은 줄에 둔다. 후보라 훌에는 넣지 않는다(노드 정보의 「공저 후보」 줄로만 보인다).
     "Cho_MoldWarpDIC": (1100, -150),
     # 2026-09-23: 볼트에 cfmsHMDispersity 가 섰다(ToDo·undecided, 공저 은종현). 부모는
-    # cfmsDispersity 이고 cfmsDispersityProp 과는 형제지만 「별도 보존 연구선」이라 둘 사이엔
+    # cfmsDispersityKNN 이고 cfmsDispersityProp 과는 형제지만 「별도 보존 연구선」이라 둘 사이엔
     # 선을 긋지 않는다(사용자: 4촌처럼). 자리는 Prop 와 같은 줄. 같은 날 사용자 지시로 은종현 훌에
     # 넣었으므로 이제 훌 안쪽 오른쪽 아래 모서리가 된다.
     "cfmsHMDispersity": (860, 1240),
@@ -466,12 +468,12 @@ HYPEREDGES = [
     # (볼트 TSE_SEM.md 09-22 이력) 이제는 규약대로다. 사사(금오공대 교내 과제)는 그대로이고,
     # todo.js 의 ToDo 한 줄(「2027-3월투고/교내과제 단독사사」)의 「단독」은 사사 이야기다.
     # 2026-09-23: cfmsHMDispersity 를 넣었다(사용자 지시). 같은 날 볼트가 coauthors: [은종현] 으로
-    # 확정해 규약(공저자 확정만)대로다 — 부모 cfmsDispersity·형제 cfmsDispersityProp 와 같은 묶음이다.
+    # 확정해 규약(공저자 확정만)대로다 — 부모 cfmsDispersityKNN·형제 cfmsDispersityProp 와 같은 묶음이다.
     {"label": "은종현 교수님",
      "kind": "coauthor",
      "nodes": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier",
                "TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "SFTF_HeatMethod",
-               "SFTF_Holonomy", "cfmsDispersity", "PFTF_AsymTensor",
+               "SFTF_Holonomy", "cfmsDispersityKNN", "PFTF_AsymTensor",
                "cfmsDispersityProp", "cfmsHMDispersity"],
      "color": "#db2777", "labelColor": "#be185d",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
@@ -608,7 +610,7 @@ QUALITY_ROWS = [
     ("HIPDetect", "HIPDetect", "중",
      "엉덩이높이 기준점 논문 트랙; 평탄 구간 중앙 추정량이 LOSO 잔차 RMS 1.285 → 0.358 cm (9명 중 8명, 부호검정 p 0.0195), **2026-09-22 IJCST 투고 완료(원고번호 IJCST-09-2026-0266)**. held-out 0건·N=10 한 조사가 남은 심사 위험"),
     # 2026-09-14: 이미 게재된 논문(TSE 63(4) 248-257). 그래프에 노드가 없어 새로 넣었다.
-    ("cfmsDispersity", "cfmsDispersity", "하",
+    ("cfmsDispersityKNN", "cfmsDispersityKNN", "하",
      "게재 완료 — Textile Science and Engineering 63(4), 248-257 (2026), DOI 10.12772/TSE.2026.63.248; 정적 kNN 반발에너지 분산도 지표"),
     # 2026-09-14: 한 저장소(Tomo_Shell2026)의 미발표 두 편. 발표본 TomoSh1~3(한국섬유
     # 공학회지 2025, 62권)은 그래프 밖에 있고, 이 둘이 그 사슬을 잇는다.
@@ -1396,7 +1398,7 @@ CHO_MOLDWARPDIC_NODE = {
 # 2026-09-23: 볼트에 새로 선 HMD(Harmonic Multiscale Dispersity). status: todo · grade: ToDo ·
 # stage: undecided 라 흰 바탕·검정 외곽선(community 4). 공저자는 볼트 coauthors: [은종현](2026-09-23 확정)이라
 # 은종현 훌에 넣는다. 투고지는 미정.
-# 부모는 볼트 depends_on 의 cfmsDispersity 다(HMD_GOAL_EDGES).
+# 부모는 볼트 depends_on 의 cfmsDispersityKNN 다(HMD_GOAL_EDGES).
 HMD_DISPERSITY_NODE = {
     "id": "cfmsHMDispersity",
     "label": "cfmsHMDispersity",
@@ -1928,14 +1930,14 @@ COAUTHOR_KIM_GOAL_EDGES = [
 # ------------------------------------- 전석진 교수님 후보 둘을 본문에 잇는다 (2026-09-19)
 # 볼트 frontmatter 의 depends_on 이 근거다. 김우석 훌이 섬으로 떠 있어 별개 연구처럼 보였던
 # 일(2026-09-18)을 되풀이하지 않으려고 처음부터 같이 넣는다.
-#   cfmsDispersityProp.depends_on = [cfmsDispersity]   (개명 전 Jeon_DispersityProp)
+#   cfmsDispersityProp.depends_on = [cfmsDispersityKNN]   (개명 전 Jeon_DispersityProp)
 #   Jeon_DLPOrient.depends_on      = [SFTF_QEM, Tomo_SFTFSoft]
 # 둘 다 아직 ToDo·미정이고 실측 대조 전이라 점선·잠정으로 그린다 — 실선은 「이미 쓰고 있다」는
 # 뜻이 된다.
 JEON_GOAL_EDGES = [
     {
         **_autoplace_goal_edge(
-            "cfmsDispersity", "cfmsDispersityProp", "상관 검증",
+            "cfmsDispersityKNN", "cfmsDispersityProp", "상관 검증",
             "분산도 지표가 실제 물성과 정말로 이어지는지 이미 찍혀 있는 시편 사진으로 확인한다",
             "정확도",
         ),
@@ -2001,13 +2003,13 @@ CHO_GOAL_EDGES = [
 ]
 
 # ------------------------------------------------ cfmsHMDispersity 의 부모 (2026-09-23)
-# 볼트 frontmatter 의 depends_on = [cfmsDispersity] 가 근거다. related: [cfmsDispersityProp] 는
+# 볼트 frontmatter 의 depends_on = [cfmsDispersityKNN] 가 근거다. related: [cfmsDispersityProp] 는
 # 선으로 긋지 않는다 — 사용자 지시로 두 과제는 부모를 거쳐서만 이어지는 별도 연구선이다.
 # 최소 모델 게이트뿐이라 점선·잠정이다.
 HMD_GOAL_EDGES = [
     {
         **_autoplace_goal_edge(
-            "cfmsDispersity", "cfmsHMDispersity", "다중척도 구조",
+            "cfmsDispersityKNN", "cfmsHMDispersity", "다중척도 구조",
             "kNN 한 값 대신 조화함수 계수로 국소 배열과 거시적 반복·상쇄를 여러 척도에서 따로 잰다",
             "확장",
         ),
@@ -2291,10 +2293,10 @@ s, nraw = re.subn(r"const RAW_NODES = (\[.*?\]);", _preserve_raw_nodes,
 
 # graph.html 이 **런타임에** RAW_NODES 에 밀어 넣는 큐레이션 노드들이다(파일의 RAW_NODES
 # 배열에는 없다). 아래 엣지 필터와 CURATED_POSITIONS 가 같은 목록을 봐야 한다 — 몰랐던
-# 2026-09-19 에 cfmsDispersity 로 들어가는 엣지가 조용히 걸러졌다.
+# 2026-09-19 에 cfmsDispersityKNN 로 들어가는 엣지가 조용히 걸러졌다.
 RUNTIME_CURATED_NODE_IDS = (
     "cfmsAutoSew", "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN",
-    "SFTF_Holonomy", "HIPDetect", "cfmsDispersity",
+    "SFTF_Holonomy", "HIPDetect", "cfmsDispersityKNN",
     "TSE_TomoSh4", "TSE_TomoSh5",
 )
 

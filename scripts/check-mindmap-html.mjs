@@ -65,7 +65,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -418,6 +418,32 @@ if (findIn(vaultStagesAheadSample.root, "nggbas52").status !== "submitted") thro
 const vaultStagesNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyVaultStages(vaultStagesNoNodeSample)) throw new Error("vault stage migration must still stamp its version on a document without the nodes");
 if (childIds(vaultStagesNoNodeSample.root) !== "n0llvuh1") throw new Error("vault stage migration touched a document that never had the nodes");
+
+// 2026-09-24: cfmsDispersity 노드(nc593kj6)의 제목·저장소 주소·폴더가 cfmsDispersityKNN 으로 바뀌고,
+// 노드 id·자식(Prop·HMD)은 그대로이며, 손으로 붙인 다른 제목은 건드리지 않는지 본다.
+const knnSample = {
+  root: mk("root", [mk("nffg4ou5", [Object.assign(mk("nc593kj6", [mk("cfmsDispersityProp"), mk("cfmsHMDispersity")]), {
+    title: "Dispersity",
+    url: "https://github.com/cfms-lab/cfmsDispersity2026_Dev",
+    projectPath: "D:\\__VSCode_Projects\\cfmsDispersity2026_Dev",
+  })])]),
+  links: [],
+};
+if (!context.__applyDispersityKNNRename(knnSample)) throw new Error("cfmsDispersityKNN rename migration did not run");
+if (context.__applyDispersityKNNRename(knnSample)) throw new Error("cfmsDispersityKNN rename migration is not idempotent");
+const knn = findIn(knnSample.root, "nc593kj6");
+if (!knn) throw new Error("cfmsDispersityKNN rename changed the node id");
+if (knn.title !== "cfmsDispersityKNN") throw new Error(`cfmsDispersityKNN rename left title [${knn.title}]`);
+if (knn.url !== "https://github.com/cfms-lab/cfmsDispersityKNN_Dev") throw new Error(`cfmsDispersityKNN rename left url [${knn.url}]`);
+if (knn.projectPath !== "D:\\__KIT_projects\\cfmsDispersityKNN_Dev") throw new Error(`cfmsDispersityKNN rename left projectPath [${knn.projectPath}]`);
+if (childIds(knn) !== "cfmsDispersityProp,cfmsHMDispersity") throw new Error(`cfmsDispersityKNN rename moved children [${childIds(knn)}]`);
+const knnCustom = { root: mk("root", [Object.assign(mk("nc593kj6"), { title: "분산도 (손으로 붙인 제목)" })]), links: [] };
+context.__applyDispersityKNNRename(knnCustom);
+if (findIn(knnCustom.root, "nc593kj6").title !== "분산도 (손으로 붙인 제목)") {
+  throw new Error("cfmsDispersityKNN rename overwrote a user-chosen title");
+}
+const knnValidation = context.__validate(knnSample);
+if (!knnValidation.ok) throw new Error(`cfmsDispersityKNN rename sample is invalid: ${knnValidation.errors[0]}`);
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);

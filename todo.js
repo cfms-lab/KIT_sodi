@@ -22,7 +22,7 @@
     "TSE_TomoSh4":          "심사 대기",
     "TSE_TomoSh5":          "심사 대기",
     "SFTF_DrapePrior":      "게재확정 — 교정쇄 확인",  /* TSE 는 게재료가 없다 (2026-09-21) */
-    "cfmsDispersity":       "",  /* 게재 완료 — 빈 칸으로 둔다 */
+    "cfmsDispersityKNN":       "",  /* 게재 완료 — 빈 칸으로 둔다 */
 
     /* ── Tomo_SFTF accept 가 열어 주는 것 ───────────────────
        순서 정본은 볼트 Papers/SFTF_4편_투고순서_2026-09-22.md — SFTFSoft 를 먼저

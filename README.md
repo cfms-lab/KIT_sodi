@@ -41,6 +41,7 @@
 8. `schema_research_outputs.sql`: `papers` + `project_nodes` 를 합친 단일 표 (2026-09-12)
 9. `schema_portfolio_rows.sql`: `portfolio.html` 이 읽는 표. **anon 권한 없음 — 로그인 사용자만** (2026-09-13)
 10. `schema_graph_positions.sql`: `graph.html` 의 노드 좌표. 열람 공개 · 저장은 로그인 사용자만 (2026-09-13)
+11. `rename_cfmsdispersity_to_knn.sql`: `cfmsDispersity` → `cfmsDispersityKNN` 개명 — project_nodes · graph_positions · research_outputs · papers · portfolio_rows 의 행 id 를 옮긴다 (2026-09-24, 재실행 안전)
 
 기본 내장 연결 정보는 각 HTML의 `BAKED_URL`, `BAKED_KEY`에 있습니다. 공개 저장소에 들어간 키는 Supabase `anon` 키이며, 실제 보안은 RLS와 storage 정책이 담당합니다.
 
