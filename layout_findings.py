@@ -154,6 +154,12 @@ def _load_note_stages():
 
 NOTE_STAGES = _load_note_stages()
 
+# 2026-09-24: dynamicDispersity 의 정본 노트는 Projects/ 가 아니라 Papers/UPJUK/IJ/ 에 있다
+# (「IJ-2013-780 Characterization of silica PET anti-glare films …」, type: paper · stage: published).
+# 위 로더들은 전부 Projects/*.md 만 훑으므로 그 노트의 stage 를 못 본다 — 여기서 직접 적는다.
+# 볼트 노트를 Projects/ 로 옮기거나 로더가 Papers/ 도 보게 되면 이 줄은 지운다.
+NOTE_STAGES["dynamicDispersity"] = "published"
+
 
 def _load_coauthor_candidates():
     """볼트 frontmatter 의 `coauthor_candidate:` 를 노트 이름 기준으로 모은다.
@@ -232,70 +238,70 @@ NODE_SOURCE_FILES = {
 # ----------------------------------------------------------------- 좌표 (발견 기준)
 POS = {
     # 2026-08-31: 사용자가 graph.html에서 조정한 34-node 배치를 정본으로 승격.
-    "Tomo_SFTF": (720, 190),
-    "Tomo_SFTFSoft": (460, 20),
-    "SFTF_Clustering": (460, 340),
-    "PFTF": (720, 400),
-    "SFTF_Composite": (790, 650),
-    "SFTF_InjMold": (860, -150),
+    "Tomo_SFTF": (760, 190),
+    "Tomo_SFTFSoft": (500, 60),
+    "SFTF_Clustering": (460, 300),
+    "PFTF": (760, 400),
+    "SFTF_Composite": (760, 650),
+    "SFTF_InjMold": (940, -50),
     # 2026-09-20: 방대석 교수님 훌을 세우면서 PFTF_Mold 가 그래프에 처음 들어왔다.
     # SFTF_InjMold 와 같은 왼쪽 끝 열(x=-360), 한 칸 위인 y=190 행이다 — 그 행은
     # SFTFSoft_GNN_DFSVR·SFTF_QEM·Tomo_SFTF 가 쓰는 줄이라 격자에 맞는다.
-    "PFTF_Mold": (980, -150),
-    "PFTF_Compression": (240, 650),
-    "Tomo_DFSVR": (240, 20),
-    "PFTF_VisCull_kDop": (240, 480),
-    "SFTF_SewerPOC": (1130, 260),
-    "SFTFSoft_GNN": (240, 190),
-    "SFTF_DrapePrior": (20, 500),
+    "PFTF_Mold": (1040, 40),
+    "PFTF_Compression": (210, 570),
+    "Tomo_DFSVR": (170, 20),
+    "PFTF_VisCull_kDop": (90, 220),
+    "SFTF_SewerPOC": (1130, 430),
+    "SFTFSoft_GNN": (260, 190),
+    "SFTF_DrapePrior": (-20, 560),
     "PFTF_AsymTensor": (600, 650),
-    "PFTF_DrapePrior_VisCull_kDop": (-20, 310),
-    "PFTF_GFiberCT": (600, 840),
-    "SFTF_QEM": (460, 190),
-    "SFTF_DynamicTargetSearch": (240, 340),
+    "PFTF_DrapePrior_VisCull_kDop": (-20, 360),
+    "PFTF_GFiberCT": (600, 850),
+    "SFTF_QEM": (470, 190),
+    "SFTF_DynamicTargetSearch": (560, 420),
     "DFSVR_VisCull": (-20, -150),
-    "SFTFSoft_GNN_DFSVR": (-20, 20),
-    "SFTF_ActiveOverprint": (-20, 190),
-    "ColdOndol": (980, 400),
-    "ColdOndol_Positioning": (1130, 540),
-    "cfmsCIPC": (20, 960),
+    "SFTFSoft_GNN_DFSVR": (-20, 30),
+    "SFTF_ActiveOverprint": (250, 420),
+    "ColdOndol": (1050, 490),
+    "ColdOndol_Positioning": (1050, 640),
+    "cfmsCIPC": (-20, 900),
     # 2026-09-11: TSE_SEM 을 논문 3편 트랙으로 나눴다.  ① 은 옛 TSE_SEM 자리를 잇고
     # ②·③ 은 SFTF_Composite → ① 방향을 따라 위쪽으로 한 칸씩 이어진다.
-    "TSE_SEM1_Bezier": (980, 650),
-    "TSE_SEM2_Tensor": (980, 840),
-    "TSE_SEM3_AutoTune": (980, 1090),
-    "SFTF_HeatMethod": (790, 840),
-    "cfmsPINNDrape": (20, 1310),
-    "cfmsDrape": (-190, 1010),
-    "cfmsMiindo": (20, 780),
-    "cfmsPINNCAD": (100, 1020),
-    "SFTFSoft_DFSVR": (240, -150),
+    "TSE_SEM1_Bezier": (940, 650),
+    "TSE_SEM2_Tensor": (940, 850),
+    "TSE_SEM3_AutoTune": (930, 1080),
+    "SFTF_HeatMethod": (760, 850),
+    "cfmsPINNDrape": (-20, 1130),
+    "cfmsDrape": (-220, 990),
+    "cfmsMiindo": (-20, 720),
+    "cfmsPINNCAD": (110, 1070),
+    "SFTFSoft_DFSVR": (180, -150),
     # Restored from the last pre-archive graph snapshot.
-    "SFTF_UrbanTraffic": (980, 100),
-    "cfmsAutoSew": (460, 1260),
+    "SFTF_UrbanTraffic": (1130, 310),
+    "cfmsAutoSew": (460, 1280),
     "cfmsAutoPlace_IJCST": (190, 1310),
-    "cfmsAutoPlace_JCDE": (210, 1130),
+    "cfmsAutoPlace_JCDE": (-20, 1320),
     # 2026-09-01: ToDo DrapeSCAN onboarding from the Obsidian project note.
-    "cfmsDrapeSCAN": (310, 840),
+    "cfmsDrapeSCAN": (360, 930),
     # 2026-09-18: 93196cb 가 graph.html 에만 넣어 둔 노드를 여기로 들여왔다. 파일 씨앗이
     # 이 노드를 몰라서 전체 재생성이 좌표를 날려 버리고 있었다.
-    "cfmsDrapeInverse": (20, 620),
+    "cfmsDrapeInverse": (230, 830),
     # 2026-09-07: graph.html 의 큐레이션 노드(SFTF_HOLONOMY_NODE)와 짝을 이룬다.
-    "SFTF_Holonomy": (790, 1090),
+    "SFTF_Holonomy": (760, 1090),
     # 2026-09-10: graph.html 의 큐레이션 노드(HIPDETECT_NODE)와 짝을 이룬다.
-    "HIPDetect": (420, 1020),
+    "HIPDetect": (440, 1090),
     # 2026-09-14: graph.html 의 큐레이션 노드(CFMSDISPERSITY_NODE)와 짝을 이룬다.
     # 이미 나온 논문인데 그래프에 없었다. 자리는 은종현 교수님 묶음 오른쪽의 빈 곳이다.
-    "cfmsDispersityKNN": (600, 1020),
+    "cfmsDispersityKNN": (600, 1100),
     # 2026-09-14: graph.html 의 큐레이션 노드(TOMO_SHELL_NODES)와 짝을 이룬다.
     # 포트폴리오 표에는 두 트랙이 있는데 그래프에는 노드가 없었다(사용자 지적).
     # 자리는 이희란 교수님 묶음 왼쪽 아래의 빈 곳이다 — 파일 씨앗과 표(graph_positions)
     # 양쪽에서 가장 한산한 자리를 골랐다.
     "TSE_TomoSh4": (470, 650),
-    "TSE_TomoSh5": (430, 900),
+    "TSE_TomoSh5": (400, 800),
     # 2026-09-19: 전석진 교수님 후보 둘. 김우석 묶음(y<=470) 아래, 은종현 묶음(x<=914)
     # 오른쪽의 빈 자리다. 드래그 격자(10)에 맞춰 두었다 — 웹에서 옮기면 표가 정본이 된다.
-    "Jeon_DLPOrient": (690, -150),
+    "Jeon_DLPOrient": (730, -50),
     # 2026-09-19: 볼트에서 Jeon_DispersityProp → cfmsDispersityProp 로 개명되고 공저
     # 후보도 전석진 → 은종현 으로 바뀌었다. 자리도 은종현 묶음 안으로 옮긴다 —
     # 부모 cfmsDispersityKNN 바로 아래이고 그 묶음의 격자 간격(180)과 같은 칸이다.
@@ -303,12 +309,19 @@ POS = {
     # 2026-09-22: 볼트에 Cho_MoldWarpDIC 가 섰다(조범곤 교수 공저 **후보**, ToDo·undecided). 자리는
     # 방대석 훌(SFTF_InjMold 860 · PFTF_Mold 980, y −150) 바로 오른쪽 빈 칸 — 부모가 PFTF_Mold 라
     # 같은 줄에 둔다. 후보라 훌에는 넣지 않는다(노드 정보의 「공저 후보」 줄로만 보인다).
-    "Cho_MoldWarpDIC": (1100, -150),
+    "Cho_MoldWarpDIC": (1130, 140),
     # 2026-09-23: 볼트에 cfmsHMDispersity 가 섰다(ToDo·undecided, 공저 은종현). 부모는
     # cfmsDispersityKNN 이고 cfmsDispersityProp 과는 형제지만 「별도 보존 연구선」이라 둘 사이엔
     # 선을 긋지 않는다(사용자: 4촌처럼). 자리는 Prop 와 같은 줄. 같은 날 사용자 지시로 은종현 훌에
     # 넣었으므로 이제 훌 안쪽 오른쪽 아래 모서리가 된다.
-    "cfmsHMDispersity": (860, 1240),
+    "cfmsHMDispersity": (690, 1220),
+    # 2026-09-24: 분산도 사슬의 맨 앞(2013 JAPS). 자식 cfmsDispersityKNN 은 은종현 훌 안인데
+    # 이 노드는 **훌 밖이어야 한다**(사용자 지시 — 공저자가 Young Seok Song 이지 은종현이 아니다).
+    # 훌을 피하면서 자식과 가장 가까운 칸을 재서 골랐다: 은종현 훌 밖 57px · 최근접 노드
+    # (cfmsHMDispersity) 150px · 자식으로 가는 엣지가 어떤 노드도 45px 안으로 스치지 않는다.
+    # 자식 위쪽은 은종현 훌이 통째로 덮고 있어 「조상은 위」 배치가 안 됐다 — 훌 밖에서 가장
+    # 가까운 위쪽 자리는 460px 떨어진 (1040, 970) 인데 그 엣지가 SFTF_Holonomy 를 스친다.
+    "dynamicDispersity": (840, 1220),
 }
 
 # 노드 id 가 노트 이름에서 규칙으로 나오지 않는 트랙 노드 → (볼트 노트 stem,
@@ -609,6 +622,11 @@ QUALITY_ROWS = [
     # 2026-09-22 저녁: 편집부 접수 확인 메일 — 원고번호 IJCST-09-2026-0266 (볼트 HipDetect.md submission·badge).
     ("HIPDetect", "HIPDetect", "중",
      "엉덩이높이 기준점 논문 트랙; 평탄 구간 중앙 추정량이 LOSO 잔차 RMS 1.285 → 0.358 cm (9명 중 8명, 부호검정 p 0.0195), **2026-09-22 IJCST 투고 완료(원고번호 IJCST-09-2026-0266)**. held-out 0건·N=10 한 조사가 남은 심사 위험"),
+    # 2026-09-24: 분산도 네 편의 첫 편(2013). 사용자 지시로 그래프에 올린다. 등급은 **상** —
+    # 투고 뒤에는 투고한 저널의 급이 등급인데(2026-09-14 규칙) Journal of Applied Polymer
+    # Science 는 SCIE 다. 같은 규칙이 cfmsDispersityKNN 을 국내지라 「하」로 둔 것과 짝이다.
+    ("dynamicDispersity", "dynamicDispersity", "상",
+     "게재 완료 — Journal of Applied Polymer Science 129(6), 3518-3526 (2013), DOI 10.1002/app.39116, IF 1.289; 영상 분석과 **동적** 분산도 지수로 실리카/PET 눈부심 방지 필름을 정량화한 분산도 네 편의 첫 편. 저자 설인환·Young Seok Song"),
     # 2026-09-14: 이미 게재된 논문(TSE 63(4) 248-257). 그래프에 노드가 없어 새로 넣었다.
     ("cfmsDispersityKNN", "cfmsDispersityKNN", "하",
      "게재 완료 — Textile Science and Engineering 63(4), 248-257 (2026), DOI 10.12772/TSE.2026.63.248; 정적 kNN 반발에너지 분산도 지표"),
@@ -692,6 +710,7 @@ INTRODUCTIONS = {
     "Jeon_DLPOrient": "값싸게 매긴 3D 프린팅 배향 순위가 실제로 찍어 본 물건의 물성 순위와 맞는지를 처음으로 실물에 대고 재는 연구다.",
     "cfmsDispersityProp": "현미경 사진으로 잰 입자 분산도 숫자가 실제 물성과 정말로 이어지는지를, 이미 찍혀 있는 남의 시편 사진으로 확인한다.",
     "cfmsHMDispersity": "입자 주변의 거리와 방향 구조를 조화함수로 표현하고, 국소 배열과 거시적 반복·상쇄를 여러 척도에서 함께 측정한다.",
+    "dynamicDispersity": "눈부심 방지 필름 속 실리카 입자가 고르게 퍼져 있는지를 사진으로 재되, 입자를 흔들어 보며 움직임까지 본 2013년 논문이다. 분산도 네 편의 첫 편이다.",
     "Cho_MoldWarpDIC": "금형 온도를 바꿔 가며 찍은 사출 부품의 휨과 변형을 상용 해석과 자작 해석이 얼마나 맞히는지, 실제로 찍어서 잰 변형 사진에 대고 재는 연구다.",
     "TSE_SEM1_Bezier": "전자현미경 사진 한 장에서 섬유 한 올 한 올을 매끈한 곡선으로 따라가며 굵기와 방향을 재어내는 방법이다.",
     "TSE_SEM2_Tensor": "섬유를 하나씩 오려내지 않고 사진 전체에서 섬유가 어느 쪽으로 누워 있는지와 겹친 아래층까지 한꺼번에 재는 방법이다.",
@@ -1398,7 +1417,36 @@ CHO_MOLDWARPDIC_NODE = {
 # 2026-09-23: 볼트에 새로 선 HMD(Harmonic Multiscale Dispersity). status: todo · grade: ToDo ·
 # stage: undecided 라 흰 바탕·검정 외곽선(community 4). 공저자는 볼트 coauthors: [은종현](2026-09-23 확정)이라
 # 은종현 훌에 넣는다. 투고지는 미정.
-# 부모는 볼트 depends_on 의 cfmsDispersityKNN 다(HMD_GOAL_EDGES).
+# 부모는 2026-09-24 사용자 지시로 cfmsDispersityProp 다(DISPERSITY_GOAL_EDGES).
+# 같은 날 볼트 depends_on 도 [cfmsDispersityProp] 로 함께 고쳐 둘이 어긋나지 않는다.
+# 2026-09-24: 분산도 사슬의 맨 앞(사용자 지시). 볼트 정본은 Projects/ 가 아니라
+# Papers/UPJUK/IJ/「IJ-2013-780 Characterization of silica PET anti-glare films …」다 —
+# type: paper · stage: published · JAPS 129(6) 3518-3526 (2013) · DOI 10.1002/app.39116.
+# **이 그래프에서 논문 보관 노트가 정본인 첫 노드다.** 그래서 Projects/*.md 만 훑는 로더들이
+# 이 노드를 못 본다: 단계는 위에서 NOTE_STAGES 에 직접 적었고, 소개·등급은 아래·QUALITY_ROWS 가
+# 씨앗으로 들고 있다. 완성도는 게재 완료라 따로 두지 않는다.
+# 색·community 는 quality_lookup 이 QUALITY_ROWS 의 「상」으로 덮어쓰므로 씨앗일 뿐이다.
+# ⚠️ 어느 훌에도 넣지 않는다 — 저자가 설인환·Young Seok Song 이라 은종현 훌의 근거가 없다(사용자 지시).
+DYNAMIC_DISPERSITY_NODE = {
+    "id": "dynamicDispersity",
+    "label": "dynamicDispersity",
+    "color": {"background": "#ffffff", "border": "#000000",
+               "highlight": {"background": "#ffffff", "border": "#000000"}},
+    "size": 15.4,
+    "font": {"size": 13, "color": "#333333", "bold": False},
+    "title": "dynamicDispersity — 상: 게재 완료 (JAPS 129(6) 3518-3526, 2013)",
+    "community": 4,
+    "community_name": "published",
+    "source_file": "IJ-2013-780 Characterization of silica PET anti-glare films using image analysis and dyn….md",
+    "file_type": "concept",
+    "degree": 1,
+    "_intro": INTRODUCTIONS["dynamicDispersity"],
+    # 코드는 따로 없다 — 이 논문의 동적 분산도는 2026-09-24 에 만든 공통 공개 리포
+    # cfms-lab/cfmsDispersity 에 cfmsDispersityKNN_Dev 의 재구성본으로 들어간다(볼트 노트).
+    "_project_path": r"D:\__VSCode_Projects\cfmsDispersity",
+}
+
+
 HMD_DISPERSITY_NODE = {
     "id": "cfmsHMDispersity",
     "label": "cfmsHMDispersity",
@@ -1477,6 +1525,7 @@ TODO_NODES = [
     PFTF_MOLD_NODE,
     CHO_MOLDWARPDIC_NODE,
     HMD_DISPERSITY_NODE,
+    DYNAMIC_DISPERSITY_NODE,
 ]
 
 TODO_EDGES = [
@@ -2002,15 +2051,27 @@ CHO_GOAL_EDGES = [
     },
 ]
 
-# ------------------------------------------------ cfmsHMDispersity 의 부모 (2026-09-23)
-# 볼트 frontmatter 의 depends_on = [cfmsDispersityKNN] 가 근거다. related: [cfmsDispersityProp] 는
-# 선으로 긋지 않는다 — 사용자 지시로 두 과제는 부모를 거쳐서만 이어지는 별도 연구선이다.
-# 최소 모델 게이트뿐이라 점선·잠정이다.
-HMD_GOAL_EDGES = [
+# ------------------------------------------------------ 분산도 사슬 (2026-09-24 사용자 지시)
+#   dynamicDispersity → cfmsDispersityKNN → cfmsDispersityProp → cfmsHMDispersity
+# 가운데 한 칸(KNN → Prop, 「상관 검증」)은 위 JEON_GOAL_EDGES 에 이미 있다. 여기는 양 끝이다.
+#
+# 2026-09-23 에는 사용자가 「두 과제는 부모를 거쳐서만 이어지는 별도 연구선」이라고 해서
+# KNN → HMD 로 그렸다. 09-24 지시가 그것을 뒤집어 Prop → HMD 한 줄짜리 사슬로 바꾼다.
+# 볼트도 같은 날 함께 고쳤다 — cfmsHMDispersity.md 의 `depends_on: [cfmsDispersityProp]` ·
+# `related: [cfmsDispersityKNN]`(할아버지로 물러났다). 두 정본이 어긋나지 않는다.
+DISPERSITY_GOAL_EDGES = [
+    # 2013 JAPS 가 이 계보의 출발점이다(논문 노트: 「분산도 네 편의 첫 번째」). 둘 다 이미
+    # 나온 논문이고 실제로 이어진 계보라 점선·잠정이 아니다 — 점선은 「아직 안 한 일」 표시다.
+    _autoplace_goal_edge(
+        "dynamicDispersity", "cfmsDispersityKNN", "정적 지표",
+        "흔들어 보며 재던 동적 분산도를 한 장의 사진에서 kNN 반발에너지로 재는 정적 지표로 옮긴다",
+        "확장",
+    ),
+    # Prop 도 HMD 도 아직 ToDo·미정이라 점선·잠정이다.
     {
         **_autoplace_goal_edge(
-            "cfmsDispersityKNN", "cfmsHMDispersity", "다중척도 구조",
-            "kNN 한 값 대신 조화함수 계수로 국소 배열과 거시적 반복·상쇄를 여러 척도에서 따로 잰다",
+            "cfmsDispersityProp", "cfmsHMDispersity", "다중척도 구조",
+            "물성과의 상관을 확인한 뒤, kNN 한 값 대신 조화함수 계수로 국소 배열과 거시적 반복·상쇄를 여러 척도에서 따로 잰다",
             "확장",
         ),
         "dashes": True,
@@ -2330,8 +2391,12 @@ def _preserve_goal_edges(match):
     lineage_pairs = {
         (str(edge["from"]), str(edge["to"]))
         for edge in DYNAMIC_TARGET_SEARCH_GOAL_EDGES + COAUTHOR_KIM_GOAL_EDGES
-        + JEON_GOAL_EDGES + MOLD_GOAL_EDGES + CHO_GOAL_EDGES + HMD_GOAL_EDGES
+        + JEON_GOAL_EDGES + MOLD_GOAL_EDGES + CHO_GOAL_EDGES + DISPERSITY_GOAL_EDGES
     }
+    # 2026-09-24: 사슬이 바뀌면서 cfmsDispersityKNN → cfmsHMDispersity 가 없어졌다. 위 목록에서
+    # 빼기만 하면 스냅샷에 남은 옛 사본이 살아남아 사슬이 둘로 갈려 보인다 — 그 짝도 지운다.
+    # 이 줄은 스냅샷에서 그 엣지가 사라진 게 확인되면 걷어도 된다.
+    lineage_pairs |= {("cfmsDispersityKNN", "cfmsHMDispersity")}
     edges = [
         edge for edge in edges
         if (str(edge.get("from")), str(edge.get("to"))) not in lineage_pairs
@@ -2347,7 +2412,7 @@ def _preserve_goal_edges(match):
     edges.extend(copy.deepcopy(JEON_GOAL_EDGES))
     edges.extend(copy.deepcopy(MOLD_GOAL_EDGES))
     edges.extend(copy.deepcopy(CHO_GOAL_EDGES))
-    edges.extend(copy.deepcopy(HMD_GOAL_EDGES))
+    edges.extend(copy.deepcopy(DISPERSITY_GOAL_EDGES))
     edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
     edges.extend(copy.deepcopy(DRAPESCAN_EDGES))
     edges.extend(copy.deepcopy(SEM_GOAL_EDGES))
