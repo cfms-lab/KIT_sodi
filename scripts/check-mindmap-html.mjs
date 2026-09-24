@@ -52,6 +52,10 @@ const expectedVaultGrades = {
   SFTF_WarehouseAGV: ["no1b3vw4", "low"],
   SFTFSoft_DFSVR: ["n6odcyc1", "medium"],
   cfmsDrapeSCAN: ["ngi2vmc1", "todo"],
+  // 2026-09-25 ToDo → 中. 표는 지금 안 돌고(VAULT_GRADES_VERSION 고정) 실제 반영은
+  // applyDispersityGrades20260925 이 한다 — 아래 테스트가 그쪽을 본다.
+  cfmsDispersityProp: ["cfmsDispersityProp", "medium"],
+  cfmsHMDispersity: ["cfmsHMDispersity", "medium"],
 };
 for (const [projectId, [mindmapId, kind]] of Object.entries(expectedVaultGrades)) {
   const literal = `'${projectId}':{mindmapId:'${mindmapId}',kind:'${kind}'}`;
@@ -65,7 +69,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -444,6 +448,35 @@ if (findIn(knnCustom.root, "nc593kj6").title !== "분산도 (손으로 붙인 �
 }
 const knnValidation = context.__validate(knnSample);
 if (!knnValidation.ok) throw new Error(`cfmsDispersityKNN rename sample is invalid: ${knnValidation.errors[0]}`);
+
+// 2026-09-25: 분산도 둘의 등급 ToDo → 中. 단계는 이미 draft 라 손대지 않고, 사람이 달리 정한
+// 등급은 되감지 않으며, 이웃 노드와 노드 없는 문서는 건드리지 않는다.
+const dispGradeSample = {
+  root: mk("root", [
+    { id: "cfmsDispersityProp", title: "cfmsDispersityProp", kind: "todo", status: "draft", children: [] },
+    { id: "cfmsHMDispersity", title: "cfmsHMDispersity", kind: "todo", status: "draft", children: [] },
+    { id: "ngi2vmc1", title: "cfmsDrapeSCAN", kind: "todo", status: "blocked", children: [] },
+  ]),
+  links: [],
+};
+if (!context.__applyDispersityGrades(dispGradeSample)) throw new Error("dispersity grade migration did not run");
+if (context.__applyDispersityGrades(dispGradeSample)) throw new Error("dispersity grade migration is not idempotent");
+for (const id of ["cfmsDispersityProp", "cfmsHMDispersity"]) {
+  const n = findIn(dispGradeSample.root, id);
+  if (n.kind !== "medium") throw new Error(`dispersity grade migration left ${id} at kind ${n.kind}`);
+  if (n.status !== "draft") throw new Error(`dispersity grade migration touched ${id} status`);
+}
+if (findIn(dispGradeSample.root, "ngi2vmc1").kind !== "todo") throw new Error("dispersity grade migration touched cfmsDrapeSCAN");
+const dispGradeValidation = context.__validate(dispGradeSample);
+if (!dispGradeValidation.ok) throw new Error(`dispersity grade sample is invalid: ${dispGradeValidation.errors[0]}`);
+const dispGradeHandSample = { root: mk("root", [
+  { id: "cfmsDispersityProp", title: "cfmsDispersityProp", kind: "high", status: "draft", children: [] },
+]), links: [] };
+context.__applyDispersityGrades(dispGradeHandSample);
+if (findIn(dispGradeHandSample.root, "cfmsDispersityProp").kind !== "high") throw new Error("dispersity grade migration overrode a hand-set kind");
+const dispGradeNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyDispersityGrades(dispGradeNoNodeSample)) throw new Error("dispersity grade migration must still stamp its version without the nodes");
+if (childIds(dispGradeNoNodeSample.root) !== "n0llvuh1") throw new Error("dispersity grade migration touched a document that never had the nodes");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);

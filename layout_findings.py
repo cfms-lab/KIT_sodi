@@ -651,12 +651,16 @@ QUALITY_ROWS = [
     # 2026-09-19 신설. 볼트 두 노트 모두 grade: ToDo · stage: undecided 이고, 등급은
     # 실측 대조 전까지 보류다. 볼트 Rules §8 대로 grade_note 전문을 옮기지 않는다.
     ("Jeon_DLPOrient", "Jeon_DLPOrient", "ToDo", "값싼 배향 순위가 실물 출력물의 물성 순위와 맞는지 재는 검증선; 착수 게이트 통과, 실측 대조 전"),
-    ("cfmsDispersityProp", "cfmsDispersityProp", "ToDo", "분산도 지표와 실제 물성의 상관을 기존 시편 사진으로 확인하는 검증선; 착수 게이트 통과, 실측 대조 전"),
+    # 2026-09-25 ToDo → 中 · undecided → draft (사용자 지시, 볼트 정본도 같은 날 고쳤다).
+    # 09-24 에 게재지가 Fibers and Polymers 로 정해지면서 「등급 보류」가 끝났다.
+    ("cfmsDispersityProp", "cfmsDispersityProp", "중", "분산도 지표와 실제 물성의 상관을 기존 시편 사진으로 확인하는 검증선; 착수 게이트 통과, **2026-09-24 게재지 Fibers and Polymers(SCIE) 확정**. 공개 E116 체류 시간 계열 S14–S17 을 시료별 질량 지도로 비교 중 — S14 만 확실히 뭉친다"),
     # 2026-09-22 신설. 볼트 grade: ToDo · stage: undecided. 착수 게이트(§1) 전이라 등급 보류.
     # 볼트 Rules §8 대로 grade_note 전문을 옮기지 않고 공개 가능한 한 줄만 싣는다.
     # 2026-09-22 저녁: §1 착수 게이트 실행 — CONDITIONAL(사슬 물리로 0.53→0.27 pp, 결정화 항이 상쇄 가능).
     # 2026-09-23 신설. 볼트 grade: ToDo · stage: undecided. Mathematica 최소 모델만 GO_MODEL_ONLY.
-    ("cfmsHMDispersity", "cfmsHMDispersity", "ToDo", "조화함수 기반 다중척도 분산도(HMD); v0.5 로 Fig.5 replica 10장에 위치 기준선 적용, 물성·큰 척도 plateau 검증 전"),
+    # 2026-09-25 ToDo → 中 · undecided → draft (사용자 지시, 볼트 정본도 같은 날 고쳤다).
+    # v87 국문 원고가 있고 publication_target 이 SCIE 로 정해져 「등급 보류」가 끝났다.
+    ("cfmsHMDispersity", "cfmsHMDispersity", "중", "조화함수 기반 다중척도 분산도(HMD); v87 국문 원고와 v88 재료 독자 검토까지 왔고 **목표는 SCIE**(저널 미정, 2026-09-25). 기존법 대비 추가 가치·입력 반복성·독립 자료 검증이 남았다"),
     ("Cho_MoldWarpDIC", "Cho_MoldWarpDIC", "ToDo", "금형 온도별 휨 예측(자작 사슬·Moldflow)을 DIC 실측에 대조하는 검증선; 착수 게이트 조건부 통과(2026-09-22), 물성 확정 전, 조범곤 교수 공저 후보"),
 ]
 QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
