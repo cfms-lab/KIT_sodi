@@ -660,7 +660,7 @@ QUALITY_ROWS = [
     # 2026-09-23 신설. 볼트 grade: ToDo · stage: undecided. Mathematica 최소 모델만 GO_MODEL_ONLY.
     # 2026-09-25 ToDo → 中 · undecided → draft (사용자 지시, 볼트 정본도 같은 날 고쳤다).
     # v87 국문 원고가 있고 publication_target 이 SCIE 로 정해져 「등급 보류」가 끝났다.
-    ("cfmsHMDispersity", "cfmsHMDispersity", "중", "조화함수 기반 다중척도 분산도(HMD); v87 국문 원고와 v88 재료 독자 검토까지 왔고 **목표는 SCIE**(저널 미정, 2026-09-25). 기존법 대비 추가 가치·입력 반복성·독립 자료 검증이 남았다"),
+    ("cfmsHMDispersity", "cfmsHMDispersity", "중", "조화함수 기반 다중척도 분산도(HMD); **2026-09-25 게재지 Powder Technology(Elsevier SCIE) 확정** — 영문 Maintext v114·보충자료·Highlights 까지 왔다. 앞 편 cfmsDispersityProp 이 먼저 나가야 하고(companion 인용 방향), 기존법 대비 추가 가치·입력 반복성·독립 자료 검증이 남았다"),
     ("Cho_MoldWarpDIC", "Cho_MoldWarpDIC", "ToDo", "금형 온도별 휨 예측(자작 사슬·Moldflow)을 DIC 실측에 대조하는 검증선; 착수 게이트 조건부 통과(2026-09-22), 물성 확정 전, 조범곤 교수 공저 후보"),
 ]
 QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
