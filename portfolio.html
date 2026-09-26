@@ -281,7 +281,9 @@ const 정렬기 = {
   2: (a, b) => 수(a.completenessKey) - 수(b.completenessKey) || 한글순(a.name, b.name),
   3: (a, b) => a.bucket - b.bucket || 한글순(a.workspace, b.workspace) || 한글순(a.name, b.name),
   4: (a, b) => 한글순(a.coauthorKey, b.coauthorKey) || 한글순(a.name, b.name),
-  5: (a, b) => 수(a.stageRank) - 수(b.stageRank) || 한글순(a.journal, b.journal) || 한글순(a.name, b.name),
+  // 같은 단계 안에서는 **보이는 이름**(약어)의 가나다순이다 — 긴 이름으로 줄을 세우면
+  // 화면에 TSE·CR 이 보이는데 순서는 한국섬유공학회지·한국복합재료학회지 기준이 된다.
+  5: (a, b) => 수(a.stageRank) - 수(b.stageRank) || 한글순(투고이름(a), 투고이름(b)) || 한글순(a.name, b.name),
 };
 
 const SORT_KEY = "cfms_portfolio_sort_v1";
@@ -371,20 +373,26 @@ const esc = v => String(v ?? "").replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt
 
 /* 투고 사다리 (2026-09-20, 사용자 요청) — 「1순위 → 2순위 → 3순위」를 **저널 약어**로
    한 줄에 쓴다. 값은 scripts/publish-portfolio.mjs 의 사다리() 가 표에 실어 주고, 약어는
-   볼트 Dashboards/프로젝트현황.md 「저널 메모」가 정본이다. 사다리가 없는 행(대부분)은
-   지금까지처럼 저널 이름 하나만 나온다. */
+   볼트 Dashboards/프로젝트현황.md 「저널 메모」가 정본이다.
+
+   2026-09-26 (사용자 지시): 사다리가 없는 행도 **약어로 쓴다.** 그전에는 저널 이름이
+   통째로 들어가서 같은 저널이 행마다 다른 얼굴이었다 — cfmsCIPC 「TSE」 · TSE_TomoSh4
+   「한국섬유공학회지」 · cfmsDispersityKNN 「Textile Science and Engin…」(26자에서 잘린 것).
+   journalShort 가 그 줄임이고, 저널 메모에 없는 이름은 줄이지 않고 그대로 온다. */
+function 투고이름(row) { return row.journalShort || row.journal; }
+
 function 투고사슬(row) {
   const chain = row.journalChain || [];
-  if (chain.length < 2) return esc(row.journal);
+  if (chain.length < 2) return esc(투고이름(row));
   return chain.map(c => esc(c.short)).join('<span class="jarrow">→</span>');
 }
 
-/* 셀 툴팁. 사다리가 있으면 약어가 무엇의 줄임인지 전체 이름으로 풀어 준다. */
+/* 셀 툴팁. 약어가 무엇의 줄임인지 전체 이름으로 풀어 준다 — 사다리면 순위별로, 아니면 한 줄로. */
 function 투고툴팁(row, stage) {
   const 앞 = (stage ? stage.label : "") + (row.grade ? ` · 등급 ${row.grade}` : "");
   const chain = row.journalChain || [];
-  if (chain.length < 2) return 앞;
-  return 앞 + "\n" + chain.map((c, i) => `${i + 1}순위 ${c.full}`).join(" · ");
+  if (chain.length >= 2) return 앞 + "\n" + chain.map((c, i) => `${i + 1}순위 ${c.full}`).join(" · ");
+  return row.journalFull ? `${앞}\n${row.journalFull}` : 앞;
 }
 
 /* 저자 관점의 ToDo 한 줄 (todo.js). 없으면 볼트가 발행한 옛 「다음 게이트」 문장으로 떨어진다. */
@@ -450,7 +458,10 @@ function 머리그리기() {
 function 걸러내기() {
   const q = document.getElementById("q").value.trim().toLowerCase();
   if (!q) return ROWS;
-  return ROWS.filter(r => [r.name, r.grade, r.coauthor, r.journal, 할일(r), r.intro, r.workspace]
+  // 약어와 긴 이름을 둘 다 넣는다 — 「CR」로 찾는 사람과 「한국복합재료학회지」로 찾는 사람이
+  // 둘 다 있다. 사다리 행은 2·3순위 약어로도 걸린다.
+  return ROWS.filter(r => [r.name, r.grade, r.coauthor, r.journal, r.journalShort,
+      ...(r.journalChain || []).flatMap(c => [c.short, c.full]), 할일(r), r.intro, r.workspace]
     .join(" ").toLowerCase().includes(q));
 }
 

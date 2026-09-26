@@ -229,22 +229,57 @@ function 약어표(vaultRoot) {
   let m;
   while ((m = re.exec(절)) !== null) {
     const short = m[1].trim();
-    const full = m[2].trim();
-    if (short && full) table[full] = short;        // 볼트가 보충표를 덮는다
+    /* 한 저널을 두 이름으로 부르는 줄은 첫 칸에 `/` 로 나란히 적는다 (2026-09-26) —
+       TSE 의 「(Textile Science and Engineering / 한국섬유공학회지, 한국섬유공학회, KCI)」.
+       submission 이 국문 이름으로 적힌 노트와 영문 이름으로 적힌 노트가 섞여 있어서
+       (TSE_TomoSh4 는 「한국섬유공학회지」, cfmsDispersityKNN 은 「Textile Science…」)
+       한쪽만 등록하면 나머지가 안 줄여진다. */
+    for (const alias of m[2].split("/")) {
+      const full = alias.trim();
+      if (short && full) table[full] = short;      // 볼트가 보충표를 덮는다
+    }
   }
   return table;
+}
+
+/* 이름 하나를 약어로 줄인다 (2026-09-26, 사용자 지시: 「투고」칸 이름을 전부 약어로).
+   그전에는 사다리가 있는 행만 약어를 써서 같은 저널이 행마다 다른 얼굴이었다 —
+   cfmsCIPC 「TSE」 · TSE_TomoSh4 「한국섬유공학회지」 · cfmsDispersityKNN 「Textile Science and Engin…」.
+
+   대시보드 게재지() 를 지난 값을 받으므로 온전한 이름만 오지 않는다. 두 가지 변형을 견딘다 —
+     · 뒤에 꼬리가 붙은 값  「한국복합재료학회지(Composites Rese…」  이름이 **앞**에 온다
+     · 26자에서 잘린 값     「Textile Science and Engin…」          이름의 **앞토막**만 남았다
+   그래서 ① 그대로 맞는 것 ② 이름으로 시작하는 것 ③ (잘린 값이면) 이름의 앞토막인 것 순으로
+   본다. ②에서 이름 뒤에 남는 것은 **구두점으로 시작**해야 한다 — 빈칸까지 허용하면
+   「Fibers and Polymers Letters」가 FnP 로 줄어 다른 저널이 된다. 겹치는 이름은 긴 쪽이
+   이긴다. 모르는 이름은 그대로 둔다 — 잘못 줄이느니 길게 두는 편이 낫다. */
+const 꼬리시작 = /^[([（〔,，:;·—–]/;
+function 줄임(name, 약어) {
+  const raw = String(name ?? "").trim();
+  if (!raw) return raw;
+  if (약어[raw]) return 약어[raw];
+  const 잘림 = raw.endsWith("…");
+  const 몸통 = (잘림 ? raw.slice(0, -1) : raw).trim();
+  if (약어[몸통]) return 약어[몸통];
+  for (const full of Object.keys(약어).sort((a, b) => b.length - a.length)) {
+    if (몸통.length > full.length && 몸통.startsWith(full)) {
+      const 꼬리 = 몸통.slice(full.length).trimStart();
+      if (꼬리 === "" || 꼬리시작.test(꼬리)) return 약어[full];
+    }
+    if (잘림 && full.length > 몸통.length && full.startsWith(몸통)) return 약어[full];
+  }
+  return raw;
 }
 
 /* 「투고」칸에 한 줄로 그릴 사다리. 1순위는 submission 본문에 없을 수도 있어(그 값이 곧
    대시보드의 「투고」칸이다) 거기서 메운다. 2순위가 없으면 사다리 자체를 만들지 않는다 —
    그런 행은 지금까지처럼 저널 이름만 보인다. */
 function 사다리(journal, plan, 약어) {
-  const 줄임 = (name) => 약어[name] ?? name;
   const byRank = new Map(plan.map((p) => [p.rank, p.name]));
   const first = byRank.get(1) ?? String(journal ?? "").trim();
   if (!first || !byRank.has(2)) return null;
   const full = [first, byRank.get(2), byRank.get(3)].filter(Boolean);
-  return full.map((name) => ({ short: 줄임(name), full: name }));
+  return full.map((name) => ({ short: 줄임(name, 약어), full: name }));
 }
 
 function 예비저널(submission) {
@@ -292,7 +327,12 @@ export function buildRows(vaultRoot) {
   // 편다. graph.html·mindmap.html 옆에 서는 페이지라 세 곳이 같은 낱말·같은 색을 써야 한다.
   const GRADE_OUT = { none: "등급 없음" };
   const 약어 = 약어표(vaultRoot);
+  /* 약어 → 대표 이름. 툴팁이 「CR」이 무엇의 줄임인지 풀어 줄 때 쓴다. 한 저널이 두 이름을
+     가지면(TSE·CR) 저널 메모 줄에 **먼저 적힌 쪽**이 대표다 — 삽입 순서가 곧 그 순서다. */
+  const 대표 = {};
+  for (const [full, short] of Object.entries(약어)) if (!(short in 대표)) 대표[short] = full;
   const rows = out.행.map((row) => {
+    const short = 줄임(row.투고, 약어);
     const notePath = row.링크?.path ?? `Projects/${row.이름}.md`;
     const owner = byPath.get(notePath);
     const repo = String(owner?.repository ?? "");
@@ -315,6 +355,14 @@ export function buildRows(vaultRoot) {
       coauthorKey: row.공저자키,
       stage: row.투고상태 ?? null,
       journal: row.투고,
+      // 화면에 나가는 이름은 journalShort 다. journal 은 정렬·검색이 긴 이름으로도 걸리게
+      // 남겨 둔다 — 「한국복합재료학회지」로 찾는 사람과 「CR」로 찾는 사람이 둘 다 있다.
+      // journalFull 은 툴팁용 대표 이름이다. journal 을 그대로 쓰지 않는 이유는 그 값이
+      // 26자에서 잘려 있을 수 있어서다(「한국복합재료학회지(Composites Rese…」).
+      // 노트가 이미 약어로 적어 둔 행(cfmsCIPC 의 「TSE」)에도 붙는다 — 화면이 줄인 것이
+      // 아니어도 읽는 사람에게는 똑같이 약어다.
+      journalShort: short,
+      journalFull: 대표[short] ?? (short === row.투고 ? null : row.투고),
       journalChain: 사다리(row.투고, 예비저널(owner?.submission), 약어),
       stageRank: Number.isFinite(row.투고순위) ? row.투고순위 : null,
       gate: row.게이트,
