@@ -322,6 +322,10 @@ POS = {
     # 자식 위쪽은 은종현 훌이 통째로 덮고 있어 「조상은 위」 배치가 안 됐다 — 훌 밖에서 가장
     # 가까운 위쪽 자리는 460px 떨어진 (1040, 970) 인데 그 엣지가 SFTF_Holonomy 를 스친다.
     "dynamicDispersity": (840, 1220),
+    # 2026-09-28: 볼트에 cfmsAnatomy 가 섰다(ToDo·undecided, 이희란 교수 공저 **후보**). 부모는
+    # cfmsMiindo 다(볼트 depends_on 의 mhcore 가 그 모노레포 안에 있다). 후보라 훌에 넣지 않으므로
+    # Drape 훌 왼쪽 바깥의 빈 칸, 부모와 같은 줄(y 720)에 둔다.
+    "cfmsAnatomy": (-300, 720),
 }
 
 # 노드 id 가 노트 이름에서 규칙으로 나오지 않는 트랙 노드 → (볼트 노트 stem,
@@ -661,6 +665,9 @@ QUALITY_ROWS = [
     # 2026-09-25 ToDo → 中 · undecided → draft (사용자 지시, 볼트 정본도 같은 날 고쳤다).
     # v87 국문 원고가 있고 publication_target 이 SCIE 로 정해져 「등급 보류」가 끝났다.
     ("cfmsHMDispersity", "cfmsHMDispersity", "중", "조화함수 기반 다중척도 분산도(HMD); **2026-09-25 저널 사다리 확정 — 1순위 Powder Technology · 2순위 Advanced Powder Technology**(둘 다 Elsevier SCIE, 이름만 비슷한 다른 저널이다). 영문 Maintext v114·보충자료·Highlights 가 1순위 규정에 맞춰 나와 있다. 앞 편 cfmsDispersityProp 이 먼저 나가야 하고(companion 인용 방향), 기존법 대비 추가 가치·입력 반복성·독립 자료 검증이 남았다"),
+    # 2026-09-28 신설. 볼트 grade: ToDo · stage: undecided. 착수 게이트(§1) 통과, 실측 전이라 등급 보류.
+    # 볼트 Rules §8 대로 grade_note 전문을 옮기지 않고 공개 가능한 한 줄만 싣는다.
+    ("cfmsAnatomy", "cfmsAnatomy", "ToDo", "MakeHuman 아바타에 뼈점·연부조직 두께·장기 위치를 붙여 보호 장비를 착용자에 맞추는 설계선; 착수 게이트 통과(2026-09-28), 실측 전, 이희란 교수 공저 후보"),
     ("Cho_MoldWarpDIC", "Cho_MoldWarpDIC", "ToDo", "금형 온도별 휨 예측(자작 사슬·Moldflow)을 DIC 실측에 대조하는 검증선; 착수 게이트 조건부 통과(2026-09-22), 물성 확정 전, 조범곤 교수 공저 후보"),
 ]
 QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
@@ -715,6 +722,7 @@ INTRODUCTIONS = {
     "cfmsDispersityProp": "현미경 사진으로 잰 입자 분산도 숫자가 실제 물성과 정말로 이어지는지를, 이미 찍혀 있는 남의 시편 사진으로 확인한다.",
     "cfmsHMDispersity": "입자 주변의 거리와 방향 구조를 조화함수로 표현하고, 국소 배열과 거시적 반복·상쇄를 여러 척도에서 함께 측정한다.",
     "dynamicDispersity": "눈부심 방지 필름 속 실리카 입자가 고르게 퍼져 있는지를 사진으로 재되, 입자를 흔들어 보며 움직임까지 본 2013년 논문이다. 분산도 네 편의 첫 편이다.",
+    "cfmsAnatomy": "MakeHuman 아바타에 뼈점·연부조직 두께·장기 위치를 붙여, 보호 장비의 두께와 위치를 입는 사람의 체형에 맞추는 도구다.",
     "Cho_MoldWarpDIC": "금형 온도를 바꿔 가며 찍은 사출 부품의 휨과 변형을 상용 해석과 자작 해석이 얼마나 맞히는지, 실제로 찍어서 잰 변형 사진에 대고 재는 연구다.",
     "TSE_SEM1_Bezier": "전자현미경 사진 한 장에서 섬유 한 올 한 올을 매끈한 곡선으로 따라가며 굵기와 방향을 재어내는 방법이다.",
     "TSE_SEM2_Tensor": "섬유를 하나씩 오려내지 않고 사진 전체에서 섬유가 어느 쪽으로 누워 있는지와 겹친 아래층까지 한꺼번에 재는 방법이다.",
@@ -1418,6 +1426,27 @@ CHO_MOLDWARPDIC_NODE = {
 }
 
 
+# 2026-09-28: 볼트에 새로 선 cfmsAnatomy. status: active · grade: ToDo · stage: undecided 라
+# 흰 바탕·검정 외곽선(community 4). 이희란 교수는 coauthor_candidate(후보)라 훌에는 넣지 않는다 —
+# 노드 정보의 「공저 후보」 줄로만 보인다. 부모는 cfmsMiindo 다(ANATOMY_GOAL_EDGES).
+CFMS_ANATOMY_NODE = {
+    "id": "cfmsAnatomy",
+    "label": "cfmsAnatomy",
+    "color": {"background": "#ffffff", "border": "#000000",
+               "highlight": {"background": "#ffffff", "border": "#000000"}},
+    "size": 15.4,
+    "font": {"size": 13, "color": "#333333", "bold": False},
+    "title": "cfmsAnatomy — ToDo: 아바타에 내부 해부를 붙여 보호 장비를 착용자에 맞춘다",
+    "community": 4,
+    "community_name": "ToDo",
+    "source_file": "cfmsAnatomy.md",
+    "file_type": "concept",
+    "degree": 1,
+    "_intro": INTRODUCTIONS["cfmsAnatomy"],
+    "_project_path": PROJECT_PATHS.get("cfmsAnatomy", r"D:\__CFMS_Projects\cfmsAnatomy_dev"),
+}
+
+
 # 2026-09-23: 볼트에 새로 선 HMD(Harmonic Multiscale Dispersity). status: todo · grade: ToDo ·
 # stage: undecided 라 흰 바탕·검정 외곽선(community 4). 공저자는 볼트 coauthors: [은종현](2026-09-23 확정)이라
 # 은종현 훌에 넣는다. 투고지는 미정.
@@ -1532,6 +1561,7 @@ TODO_NODES = [
     DISPERSITYPROP_NODE,
     PFTF_MOLD_NODE,
     CHO_MOLDWARPDIC_NODE,
+    CFMS_ANATOMY_NODE,
     HMD_DISPERSITY_NODE,
     DYNAMIC_DISPERSITY_NODE,
 ]
@@ -2059,6 +2089,21 @@ CHO_GOAL_EDGES = [
     },
 ]
 
+# ------------------------------------------------ cfmsAnatomy 의 부모 (2026-09-28)
+# 볼트 depends_on = [mhcore] 가 근거다. mhcore 는 cfmsMiindo 모노레포 안의 표준 바디 엔진이라
+# 그래프에서는 cfmsMiindo 가 부모다. 실측 대조 전이라 Cho 와 같은 이유로 점선·잠정이다.
+ANATOMY_GOAL_EDGES = [
+    {
+        **_autoplace_goal_edge(
+            "cfmsMiindo", "cfmsAnatomy", "내부 해부 층",
+            "표준 바디(MakeHuman)에 뼈점·연부조직 두께·장기 위치를 붙여 보호 장비 설계로 넓힌다",
+            "확장",
+        ),
+        "dashes": True,
+        "_tentative": True,
+    },
+]
+
 # ------------------------------------------------------ 분산도 사슬 (2026-09-24 사용자 지시)
 #   dynamicDispersity → cfmsDispersityKNN → cfmsDispersityProp → cfmsHMDispersity
 # 가운데 한 칸(KNN → Prop, 「상관 검증」)은 위 JEON_GOAL_EDGES 에 이미 있다. 여기는 양 끝이다.
@@ -2400,6 +2445,7 @@ def _preserve_goal_edges(match):
         (str(edge["from"]), str(edge["to"]))
         for edge in DYNAMIC_TARGET_SEARCH_GOAL_EDGES + COAUTHOR_KIM_GOAL_EDGES
         + JEON_GOAL_EDGES + MOLD_GOAL_EDGES + CHO_GOAL_EDGES + DISPERSITY_GOAL_EDGES
+        + ANATOMY_GOAL_EDGES
     }
     # 2026-09-24: 사슬이 바뀌면서 cfmsDispersityKNN → cfmsHMDispersity 가 없어졌다. 위 목록에서
     # 빼기만 하면 스냅샷에 남은 옛 사본이 살아남아 사슬이 둘로 갈려 보인다 — 그 짝도 지운다.
@@ -2420,6 +2466,7 @@ def _preserve_goal_edges(match):
     edges.extend(copy.deepcopy(JEON_GOAL_EDGES))
     edges.extend(copy.deepcopy(MOLD_GOAL_EDGES))
     edges.extend(copy.deepcopy(CHO_GOAL_EDGES))
+    edges.extend(copy.deepcopy(ANATOMY_GOAL_EDGES))
     edges.extend(copy.deepcopy(DISPERSITY_GOAL_EDGES))
     edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
     edges.extend(copy.deepcopy(DRAPESCAN_EDGES))
