@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>반도체 공정 실험실</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a short header with the class QR code beside it, then the six simulations as an ordered list in teaching order. */
+:root {
+  --bg: #eef1f5; --panel: #ffffff; --panel-2: #f5f7fa; --ink: #141a22; --muted: #5a6474; --line: #d5dbe3; --line-strong: #b7c0cc;
+  --accent: #f2b705; --on-accent: #1a1400;
+  --font-display: "Black Han Sans", "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1116; --panel: #161b22; --panel-2: #1c222b; --ink: #e8ecf2; --muted: #9aa4b2; --line: #29313c; --line-strong: #3a4452;
+    --accent: #f5c518; --on-accent: #161200;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1116; --panel: #161b22; --panel-2: #1c222b; --ink: #e8ecf2; --muted: #9aa4b2; --line: #29313c; --line-strong: #3a4452;
+  --accent: #f5c518; --on-accent: #161200;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { background: var(--bg); }
+body { margin: 0; color: var(--ink); font: 400 15px/1.6 var(--font-body); -webkit-font-smoothing: antialiased; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.app { max-width: 980px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 48px; display: grid; gap: 22px; }
+.top { display: grid; gap: 18px; align-items: start; }
+@media (min-width: 720px) { .top { grid-template-columns: minmax(0, 1fr) auto; } }
+.eyebrow { margin: 0; font-size: 12.5px; font-weight: 600; letter-spacing: .04em; color: var(--muted); }
+h1 { margin: 2px 0 6px; font: 400 clamp(34px, 7vw, 52px)/1.05 var(--font-display); letter-spacing: -.01em; text-wrap: balance; }
+.lede { margin: 0; max-width: 58ch; color: var(--muted); }
+.qr { display: grid; justify-items: center; gap: 6px; padding: 12px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); }
+.qr #qrcode { width: 168px; height: 168px; padding: 8px; background: #ffffff; border-radius: 8px; }
+.qr #qrcode img, .qr #qrcode canvas { width: 152px !important; height: 152px !important; }
+.qr p { margin: 0; font-size: 12px; color: var(--muted); max-width: 168px; text-align: center; overflow-wrap: anywhere; }
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: lab; }
+.list li { counter-increment: lab; }
+.list a { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); color: inherit; text-decoration: none; transition: border-color .15s, transform .1s; }
+.list a::before { content: counter(lab); display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--panel-2); border: 1px solid var(--line-strong); font-weight: 700; font-variant-numeric: tabular-nums; }
+.list a:hover { border-color: var(--accent); }
+.list a:active { transform: translateY(1px); }
+.list b { display: block; font: 400 22px/1.2 var(--font-display); }
+.list span { display: block; font-size: 13.5px; color: var(--muted); }
+.list em { font-style: normal; font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 99px; background: var(--panel-2); border: 1px solid var(--line-strong); white-space: nowrap; }
+@media (max-width: 480px) { .list a { grid-template-columns: auto minmax(0, 1fr); } .list em { grid-column: 2; justify-self: start; } }
+.foot { margin: 0; font-size: 12px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .list a { transition: none; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <header>
+      <p class="eyebrow">IT융합소재 · 반도체 제조공정</p>
+      <h1>반도체 공정 실험실</h1>
+      <p class="lede">강의에서 쓰는 시뮬레이션 여섯 개입니다. 휴대폰으로도 열 수 있습니다. 번호는 수업에서 다루는 순서입니다.</p>
+    </header>
+    <aside class="qr" aria-label="이 페이지 주소의 QR 코드">
+      <div id="qrcode" role="img" aria-label="이 페이지로 가는 QR 코드"></div>
+      <p id="qr-note">휴대폰 카메라로 찍어 접속하세요</p>
+    </aside>
+  </div>
+
+  <ol class="list">
+    <li><a href="chip-fab.html"><span><b>내 이름 칩 공장</b><span>반도체 8대 공정을 순서대로 눌러 이름을 새긴 칩을 만듭니다. 웨이퍼에 칩 하나.</span></span><em>설명용</em></a></li>
+    <li><a href="chip-fab-multi-die.html"><span><b>내 이름 칩 공장 · 멀티 다이</b><span>웨이퍼 한 장에 칩 여러 개. EDS 웨이퍼 맵과 수율까지 확인합니다.</span></span><em>학생 실습용</em></a></li>
+    <li><a href="etch-lab.html"><span><b>습식·건식 식각 실험실</b><span>용액과 플라즈마로 같은 막을 깎으며 등방성, 선택비, 식각 속도를 비교합니다.</span></span><em>식각</em></a></li>
+    <li><a href="deposition-shooter.html"><span><b>증착 버블 슈터</b><span>PVD·CVD·ALD로 같은 트렌치를 덮으며 단차피복성, 속도, 불순물을 비교합니다.</span></span><em>박막</em></a></li>
+    <li><a href="transistor-evolution.html"><span><b>MOSFET에서 MBCFET까지</b><span>게이트 길이를 줄이며 평면 → FinFET → GAA 구조가 왜 필요한지 전자의 흐름으로 봅니다.</span></span><em>미세 공정</em></a></li>
+    <li><a href="cpu-gpu-memory.html"><span><b>CPU와 GPU, DRAM과 HBM</b><span>순차·병렬 계산, 캐시와 DRAM, HBM과 PCIe, 게임 로딩 속도를 데이터 입자로 비교합니다.</span></span><em>컴퓨터 속 반도체</em></a></li>
+  </ol>
+
+  <p class="foot">IT융합소재 (HA1012) · 2026. 수치는 수업을 위한 단순 모델의 예시 값입니다.</p>
+</div>
+<script src="lib/qrcode.min.js"></script>
+<script>
+(() => {
+  const box = document.getElementById('qrcode'), note = document.getElementById('qr-note');
+  const url = location.href.split('#')[0].replace(/index\.html$/, '');
+  if (!/^https?:/.test(location.protocol) || typeof QRCode === 'undefined') {
+    box.hidden = true;
+    note.textContent = '웹서버에 올리면 이 자리에 이 페이지 주소의 QR 코드가 나타납니다.';
+    return;
+  }
+  new QRCode(box, { text: url, width: 152, height: 152, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+  note.textContent = url;
+})();
+</script>
+</body>
+</html>

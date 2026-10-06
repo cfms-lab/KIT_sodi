@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CPU와 GPU, DRAM과 HBM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: three stacked experiments (parallel race, cache/DRAM latency, HBM bandwidth), each a control row over dark "inside the computer" canvases with read-outs; the CPU/DRAM side is blue/orange, the GPU/HBM side aqua/magenta throughout. */
+:root {
+  --bg: #eef1f5; --panel: #ffffff; --panel-2: #f5f7fa; --ink: #141a22; --ink-2: #52514e; --muted: #6a7280; --line: #d5dbe3; --line-strong: #b7c0cc;
+  --accent: #f2b705; --on-accent: #1a1400;
+  --cpu: #2a78d6; --dram: #eb6834; --gpu: #1baf7a; --hbm: #e87ba4;
+  --good: #0ca30c; --critical: #d03b3b;
+  --font-display: "Black Han Sans", "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1116; --panel: #161b22; --panel-2: #1c222b; --ink: #e8ecf2; --ink-2: #c3c2b7; --muted: #98a2b0; --line: #29313c; --line-strong: #3a4452;
+    --accent: #f5c518; --on-accent: #161200;
+    --cpu: #3987e5; --dram: #d95926; --gpu: #199e70; --hbm: #d55181;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1116; --panel: #161b22; --panel-2: #1c222b; --ink: #e8ecf2; --ink-2: #c3c2b7; --muted: #98a2b0; --line: #29313c; --line-strong: #3a4452;
+  --accent: #f5c518; --on-accent: #161200;
+  --cpu: #3987e5; --dram: #d95926; --gpu: #199e70; --hbm: #d55181;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { background: var(--bg); }
+body { margin: 0; color: var(--ink); font: 400 15px/1.6 var(--font-body); -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+a { color: inherit; }
+
+.app { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 18px 48px; display: grid; gap: 22px; }
+.masthead { display: grid; gap: 6px; }
+.eyebrow { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--muted); }
+h1 { margin: 0; font: 400 clamp(30px, 6vw, 46px)/1.08 var(--font-display); letter-spacing: -.01em; text-wrap: balance; }
+h1 .c { color: var(--cpu); } h1 .g { color: var(--gpu); }
+.claims { margin: 4px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; max-width: 76ch; }
+.claims li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: baseline; font-size: 15px; }
+.claims li a { font-size: 12px; font-weight: 700; color: var(--muted); text-decoration: none; padding: 1px 8px; border: 1px solid var(--line-strong); border-radius: 99px; white-space: nowrap; }
+.claims li a:hover { color: var(--ink); }
+
+.exp { display: grid; gap: 12px; padding: 18px 18px 20px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; scroll-margin-top: 12px; }
+.exp-head { display: grid; gap: 2px; }
+.kicker { margin: 0; font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .04em; }
+.exp h2 { margin: 0; font: 400 26px/1.2 var(--font-display); text-wrap: balance; }
+.exp .sub { margin: 2px 0 0; font-size: 14px; color: var(--ink-2); max-width: 74ch; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.btn { appearance: none; cursor: pointer; min-height: 42px; padding: 7px 14px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--panel); font-size: 14px; font-weight: 600; text-align: left; line-height: 1.3; }
+.btn small { display: block; font-size: 11.5px; font-weight: 500; color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.btn[aria-pressed="true"] small { color: var(--bg); opacity: .75; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.lanes { display: grid; gap: 12px; }
+@media (min-width: 820px) { .lanes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.lane { display: grid; gap: 6px; min-width: 0; padding: 10px 10px 12px; border-radius: 12px; background: var(--panel-2); border-top: 4px solid var(--c); }
+.lane.cpu { --c: var(--cpu); } .lane.gpu { --c: var(--gpu); }
+.lane header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.lane h3 { margin: 0; font: 400 22px/1.1 var(--font-display); }
+.lane header span { font-size: 12.5px; color: var(--muted); }
+.lane canvas, .figure canvas { display: block; width: 100%; border-radius: 9px; }
+.time { margin: 0; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 10px; font-size: 14px; }
+.time b { font-size: 18px; font-variant-numeric: tabular-nums; }
+.chip { padding: 1px 9px; border-radius: 99px; font-size: 12px; font-weight: 700; background: var(--panel); border: 1px solid var(--line-strong); }
+.chip.win { background: var(--c); border-color: var(--c); color: #fff; }
+.verdict { margin: 0; padding: 11px 14px; border-radius: 10px; background: var(--panel-2); font-size: 14.5px; }
+
+.levels { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+@media (max-width: 560px) { .levels { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.levels button { appearance: none; cursor: pointer; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--panel); text-align: left; min-width: 0; }
+.levels button b { display: block; font-size: 15px; }
+.levels button span { display: block; font-size: 12px; color: var(--muted); line-height: 1.35; }
+.levels button em { font-style: normal; font-weight: 700; color: var(--ink); }
+.levels button:disabled { opacity: .45; cursor: not-allowed; }
+.readout { display: grid; gap: 8px; }
+@media (min-width: 820px) { .readout { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); } }
+.box { padding: 10px 12px; border-radius: 10px; background: var(--panel-2); min-width: 0; font-size: 14px; }
+.box h3 { margin: 0 0 4px; font-size: 12.5px; color: var(--muted); font-weight: 600; }
+.box .big { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.wbar { display: grid; gap: 6px; margin-top: 6px; }
+.wrow { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) auto; align-items: center; gap: 8px; font-size: 12.5px; }
+.wtrack { height: 14px; border-radius: 4px; background: var(--line); overflow: hidden; display: flex; gap: 2px; }
+.wtrack i { display: block; height: 100%; }
+.wtrack .work { background: var(--good); border-radius: 4px 0 0 4px; }
+.wtrack .wait { background: var(--critical); opacity: .75; border-radius: 0 4px 4px 0; }
+.wkey { display: flex; gap: 14px; font-size: 12px; color: var(--muted); }
+.wkey span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; background: var(--k); }
+
+.figs { display: grid; gap: 12px; }
+@media (min-width: 900px) { .figs { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); } }
+.figure { margin: 0; display: grid; gap: 4px; min-width: 0; }
+.figure figcaption { font-size: 12.5px; color: var(--muted); }
+.race { display: grid; gap: 8px; }
+.rrow { display: grid; grid-template-columns: 12em minmax(0, 1fr) 7em; align-items: center; gap: 10px; font-size: 13.5px; }
+@media (max-width: 560px) { .rrow { grid-template-columns: 1fr; gap: 2px; } }
+.rrow b { font-weight: 700; }
+.rtrack { height: 16px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.rtrack i { display: block; height: 100%; width: 0; border-radius: 4px; background: var(--c); }
+.rrow output { font-variant-numeric: tabular-nums; font-weight: 700; text-align: right; }
+.lbl { font-size: 12.5px; font-weight: 700; color: var(--muted); }
+.formula { display: grid; gap: 8px; }
+@media (min-width: 820px) { .formula { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.formula div { padding: 10px 12px; border-radius: 10px; background: var(--panel-2); font-size: 13.5px; border-left: 4px solid var(--c); }
+.formula b { display: block; font-size: 14.5px; }
+
+.card { padding: 16px 18px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; min-width: 0; }
+.card h2 { margin: 0 0 8px; font: 400 22px/1.2 var(--font-display); }
+.tbl { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+thead th { font: 400 18px/1.2 var(--font-display); }
+tbody th { font-weight: 600; white-space: nowrap; }
+.foot { margin: 0; font-size: 12px; color: var(--muted); max-width: 80ch; }
+</style>
+
+</head>
+<body>
+<div class="app">
+  <nav style="margin-bottom:10px;font-size:13px"><a href="index.html" style="color:var(--muted);text-decoration:none;font-weight:600">← 실험 목록</a></nav>
+  <header class="masthead">
+    <p class="eyebrow">IT융합소재 · 반도체 · 컴퓨터 속 반도체</p>
+    <h1><span class="c">CPU</span>와 <span class="g">GPU</span>, DRAM과 HBM</h1>
+    <ul class="claims">
+      <li><a href="#exp1">실험 1</a><span>한 가지 일을 순서대로 할 때는 <b>CPU</b>가 빠르고, 같은 일을 잘게 나눠 한꺼번에 할 때는 <b>GPU</b>가 빠릅니다.</span></li>
+      <li><a href="#exp2">실험 2</a><span>CPU는 빠르지만 <b>DRAM</b>에서 데이터를 가져오는 데 오래 걸립니다. 그래서 CPU 안에 <b>캐시</b>를 층층이 둡니다.</span></li>
+      <li><a href="#exp3">실험 3</a><span><b>HBM</b>은 DRAM 칩을 수직으로 쌓아 GPU 바로 옆에 붙이고 데이터 길을 크게 넓혀, 한 번에 훨씬 많은 데이터를 보냅니다.</span></li>
+      <li><a href="#exp4">실험 4</a><span>게임 로딩이 오래 걸리는 것은 데이터가 <b>저장장치</b>와 <b>PCIe</b> 같은 좁은 길을 지나 그래픽 메모리까지 옮겨져야 하기 때문입니다.</span></li>
+    </ul>
+  </header>
+
+  <!-- ===== Experiment 1 ===== -->
+  <section class="exp" id="exp1">
+    <div class="exp-head">
+      <p class="kicker">실험 1</p>
+      <h2>혼자 빨리, 여럿이 함께</h2>
+      <p class="sub">CPU는 크고 빠른 코어 8개, GPU는 작고 단순한 코어 약 1만 개를 가졌습니다(그림에는 288개만 그렸습니다). 일의 종류를 고르고 경주를 시작해 보세요.</p>
+    </div>
+    <div class="row">
+      <button class="btn" type="button" data-task="serial" aria-pressed="true">순서대로 하는 일<small>앞 결과가 있어야 다음을 계산 · 1,000단계</small></button>
+      <button class="btn" type="button" data-task="parallel" aria-pressed="false">나눠서 하는 일<small>흑백 사진 10만 픽셀에 색 입히기</small></button>
+      <button class="btn primary" type="button" id="race1">▶ 경주 시작</button>
+    </div>
+    <div class="lanes">
+      <article class="lane cpu"><header><h3>CPU</h3><span>코어 8개 · 약 5 GHz · 코어 하나가 똑똑하고 빠름</span></header><canvas id="cv-cpu" role="img" aria-label="CPU 코어와 작업 진행"></canvas><p class="time"><span>걸린 시간 <b id="t-cpu">—</b></span><span class="chip" id="c-cpu">대기</span></p></article>
+      <article class="lane gpu"><header><h3>GPU</h3><span>코어 약 1만 개 · 약 1.8 GHz · 코어 하나는 단순하고 느림</span></header><canvas id="cv-gpu" role="img" aria-label="GPU 코어와 작업 진행"></canvas><p class="time"><span>걸린 시간 <b id="t-gpu">—</b></span><span class="chip" id="c-gpu">대기</span></p></article>
+    </div>
+    <p class="verdict" id="v1">일의 종류를 고르고 ▶ 경주 시작을 눌러 보세요.</p>
+  </section>
+
+  <!-- ===== Experiment 2 ===== -->
+  <section class="exp" id="exp2">
+    <div class="exp-head">
+      <p class="kicker">실험 2</p>
+      <h2>데이터는 어디에 있나</h2>
+      <p class="sub">CPU는 1초에 수십억 번 계산하지만, 메인보드에 꽂힌 DRAM에서 데이터를 받아 오려면 약 90 ns(1억분의 9초)를 기다려야 합니다. 그동안 CPU는 450번 계산할 수 있습니다. 그래서 자주 쓰는 데이터를 CPU 안의 작고 빠른 기억 장소, 캐시에 둡니다. 책을 찾는 일에 빗대어 보세요.</p>
+    </div>
+    <div class="levels" role="group" aria-label="데이터 한 번 가져오기">
+      <button type="button" data-lv="0"><b>L1 캐시</b><span>책상 위 · 48 KB<br>약 <em>1 ns</em></span></button>
+      <button type="button" data-lv="1"><b>L2 캐시</b><span>서랍 · 2 MB<br>약 <em>4 ns</em></span></button>
+      <button type="button" data-lv="2"><b>L3 캐시</b><span>책장 · 36 MB<br>약 <em>15 ns</em></span></button>
+      <button type="button" data-lv="3"><b>DRAM</b><span>동네 도서관 · 32 GB<br>약 <em>90 ns</em></span></button>
+    </div>
+    <figure class="figure"><canvas id="cv-mem" role="img" aria-label="CPU 코어, 캐시, DRAM 사이를 오가는 데이터"></canvas><figcaption>버튼을 누르면 코어(왼쪽)가 그 위치로 데이터를 가지러 갑니다. 이동 시간은 실제 시간에 비례합니다.</figcaption></figure>
+    <figure class="figure"><canvas id="cv-speed" role="img" aria-label="L1, L2, L3, DRAM에서 데이터가 오는 속도 비교"></canvas><figcaption>속도 트랙. 네 곳에서 같은 거리를 데이터가 날아옵니다. 하나가 도착해야 다음을 요청하는, 순서대로 읽는 프로그램이라고 생각해 보세요. 오른쪽 숫자는 지금까지 도착한 데이터 수입니다.</figcaption></figure>
+    <div class="row"><button class="btn" type="button" id="speed-reset">속도 트랙 다시 세기</button></div>
+    <div class="row">
+      <button class="btn" type="button" id="batch-on">캐시와 함께 100번 읽기<small>실제 프로그램처럼 · 대부분 L1에서 찾음</small></button>
+      <button class="btn" type="button" id="batch-off">캐시 없이 100번 읽기<small>매번 DRAM까지</small></button>
+    </div>
+    <div class="readout">
+      <div class="box"><h3>방금 가져온 데이터</h3><div class="big" id="last">—</div><div id="last-sub">버튼을 눌러 보세요.</div></div>
+      <div class="box"><h3>100번 읽고 1번씩 계산하기 (계산 1번 = 1 ns)</h3>
+        <div class="wbar">
+          <div class="wrow"><span>캐시와 함께</span><span class="wtrack" id="w-on"><i class="work"></i><i class="wait"></i></span><output id="o-on">—</output></div>
+          <div class="wrow"><span>캐시 없이</span><span class="wtrack" id="w-off"><i class="work"></i><i class="wait"></i></span><output id="o-off">—</output></div>
+          <div class="wkey"><span style="--k: var(--good)">계산한 시간</span><span style="--k: var(--critical)">데이터를 기다린 시간</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Experiment 3 ===== -->
+  <section class="exp" id="exp3">
+    <div class="exp-head">
+      <p class="kicker">실험 3</p>
+      <h2>넓은 길, HBM</h2>
+      <p class="sub">GPU의 코어 1만 개가 쉬지 않으려면 데이터가 엄청나게 많이 필요합니다. HBM(High Bandwidth Memory)은 DRAM 칩을 8~12층으로 쌓고, 실리콘을 위아래로 뚫은 전극(TSV)으로 층을 이어, GPU 바로 옆에 붙인 메모리입니다. 데이터가 지나가는 길(핀)이 일반 DRAM보다 훨씬 많습니다.</p>
+    </div>
+    <div class="figs">
+      <figure class="figure"><canvas id="cv-bus" role="img" aria-label="DDR5 DRAM과 HBM의 데이터 길 비교"></canvas><figcaption>위에서 본 모습. 점 하나하나가 데이터 묶음입니다. 왼쪽은 메인보드의 DDR5, 오른쪽은 GPU 옆 HBM.</figcaption></figure>
+      <figure class="figure"><canvas id="cv-stack" role="img" aria-label="HBM을 옆에서 자른 단면"></canvas><figcaption>HBM을 옆에서 자른 모습. 쌓은 DRAM 층이 TSV로 이어지고, 인터포저 위 짧은 배선으로 GPU와 연결됩니다.</figcaption></figure>
+    </div>
+    <div class="row"><button class="btn primary" type="button" id="race3">▶ 1 GB 옮기기</button></div>
+    <div class="race">
+      <div class="rrow" style="--c: var(--dram)"><b>DDR5 · 2채널<br><small style="font-weight:500;color:var(--muted)">89.6 GB/s</small></b><span class="rtrack"><i id="b-ddr"></i></span><output id="r-ddr">—</output></div>
+      <div class="rrow" style="--c: var(--hbm)"><b>HBM3 · 4스택<br><small style="font-weight:500;color:var(--muted)">약 3,277 GB/s</small></b><span class="rtrack"><i id="b-hbm"></i></span><output id="r-hbm">—</output></div>
+    </div>
+    <p class="verdict" id="v3">▶ 1 GB 옮기기를 눌러 보세요.</p>
+    <div class="formula">
+      <div style="--c: var(--dram)"><b>DDR5 · 대역폭 = 길의 수 × 길 하나의 속도</b>64비트 × 2채널 × 5.6 Gb/s ÷ 8 = 89.6 GB/s<br>메인보드 위 수 cm 거리, 칩을 옆으로 나란히 배치</div>
+      <div style="--c: var(--hbm)"><b>HBM3 · 대역폭 = 길의 수 × 길 하나의 속도</b>1,024비트 × 6.4 Gb/s ÷ 8 = 819 GB/s (스택 하나)<br>스택 4개면 약 3.3 TB/s · GPU 옆 수 mm 거리</div>
+    </div>
+    <p class="sub" style="margin:0">핀 하나의 속도는 DDR5와 HBM3가 비슷합니다. HBM이 빠른 것은 길의 수가 스택 하나에 1,024개로 많기 때문입니다. 칩을 쌓고 TSV로 이어야 이렇게 많은 길을 좁은 면적에 낼 수 있습니다. 한 번에 보내는 양(대역폭)이 큰 것이지, 첫 데이터가 도착하는 시간(지연)이 짧아지는 것은 아닙니다.</p>
+  </section>
+
+  <!-- ===== Experiment 4 ===== -->
+  <section class="exp" id="exp4">
+    <div class="exp-head">
+      <p class="kicker">실험 4</p>
+      <h2>게임 로딩은 왜 오래 걸릴까</h2>
+      <p class="sub">게임을 시작하면 지형, 텍스처, 3D 모델 같은 데이터가 저장장치에서 출발해 DDR5를 거치고, 그래픽카드가 꽂힌 PCIe 슬롯을 지나 그래픽 메모리로 옮겨집니다. GPU는 그래픽 메모리에 있는 데이터만 빠르게 쓸 수 있으므로, 화면을 그리기 전에 필요한 데이터를 미리 옮겨 두는 시간이 로딩입니다. 이 길에서 가장 좁은 곳이 전체 시간을 정합니다.</p>
+    </div>
+    <div class="row">
+      <span class="lbl">저장장치</span>
+      <button class="btn" type="button" data-store="hdd" aria-pressed="false">HDD<small>약 0.2 GB/s</small></button>
+      <button class="btn" type="button" data-store="sata" aria-pressed="false">SATA SSD<small>약 0.55 GB/s</small></button>
+      <button class="btn" type="button" data-store="nvme" aria-pressed="true">NVMe SSD<small>약 7 GB/s</small></button>
+      <span class="lbl">옮길 양</span>
+      <button class="btn" type="button" data-size="1" aria-pressed="true">1 GB</button>
+      <button class="btn" type="button" data-size="20" aria-pressed="false">20 GB<small>큰 게임의 한 지역 정도</small></button>
+      <button class="btn primary" type="button" id="race4">▶ 데이터 옮기기</button>
+    </div>
+    <figure class="figure"><canvas id="cv-load" role="img" aria-label="저장장치에서 DDR5, PCIe를 거쳐 그래픽 메모리와 GPU까지 가는 데이터"></canvas><figcaption>점이 데이터 묶음입니다. 길이 넓을수록 점이 촘촘히 지나갑니다(개수는 보기 쉽게 줄였습니다).</figcaption></figure>
+    <div class="race">
+      <div class="rrow" style="--c: var(--muted)"><b>저장장치 → DDR5<br><small style="font-weight:500;color:var(--muted)" id="l-store">NVMe SSD · 약 7 GB/s</small></b><span class="rtrack"><i id="b-s1"></i></span><output id="r-s1">—</output></div>
+      <div class="rrow" style="--c: var(--dram)"><b>DDR5 → 그래픽카드<br><small style="font-weight:500;color:var(--muted)">PCIe 4.0 ×16 · 약 32 GB/s</small></b><span class="rtrack"><i id="b-s2"></i></span><output id="r-s2">—</output></div>
+      <div class="rrow" style="--c: var(--gpu)"><b>그래픽 메모리 → GPU<br><small style="font-weight:500;color:var(--muted)">GDDR6X · 약 1,008 GB/s</small></b><span class="rtrack"><i id="b-s3"></i></span><output id="r-s3">—</output></div>
+    </div>
+    <p class="verdict" id="v4">저장장치와 옮길 양을 고르고 ▶ 데이터 옮기기를 눌러 보세요. 막대 세 개는 같은 양을 각 구간이 혼자 옮길 때 걸리는 시간입니다.</p>
+    <p class="sub" style="margin:0">게임용 그래픽카드는 보통 HBM 대신 GDDR 메모리를 씁니다(약 1 TB/s). AI용 GPU의 HBM(약 3.3 TB/s)은 이보다 더 넓습니다. 어느 쪽이든 그래픽카드 안쪽 길은 PCIe보다 30~100배 넓습니다. 그래서 한번 그래픽 메모리에 올린 데이터는 빠르게 쓰지만, 올리는 과정이 느립니다.</p>
+  </section>
+
+  <section class="card">
+    <h2>한눈에 보기</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th scope="col"></th><th scope="col" style="color:var(--cpu)">CPU + DRAM</th><th scope="col" style="color:var(--gpu)">GPU + HBM</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">코어</th><td>수~수십 개의 크고 똑똑한 코어</td><td>수천~1만여 개의 작고 단순한 코어</td></tr>
+          <tr><th scope="row">잘하는 일</th><td>순서대로 해야 하는 일, 복잡한 판단 (운영체제, 일반 프로그램)</td><td>같은 계산을 대량으로 (그래픽, AI 학습·추론)</td></tr>
+          <tr><th scope="row">곁에 둔 메모리</th><td>메인보드의 DRAM(DDR5) + CPU 안의 큰 캐시</td><td>GPU 옆에 쌓아 붙인 HBM</td></tr>
+          <tr><th scope="row">데이터 길</th><td>채널당 64비트</td><td>스택당 1,024비트</td></tr>
+          <tr><th scope="row">대역폭 예</th><td>약 90 GB/s (DDR5 2채널)</td><td>약 3.3 TB/s (HBM3 4스택)</td></tr>
+          <tr><th scope="row">구조</th><td>칩을 기판에 옆으로 나란히</td><td>8~12층 수직 적층 + TSV + 인터포저</td></tr>
+          <tr><th scope="row">둘 사이 연결</th><td colspan="2">PCIe 4.0 ×16 약 32 GB/s (5.0은 약 64 GB/s) · DDR5나 HBM보다 훨씬 좁은 길</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="foot">수치는 대표적인 예시입니다. CPU 코어 수, 캐시 크기와 지연 시간, GPU 코어 수는 제품마다 다릅니다. GPU 경주의 시간은 "코어 하나가 한 단계를 하는 데 CPU 0.2 ns, GPU 2 ns"로 단순화해 계산했습니다. HBM3 4스택 대역폭은 1,024비트 × 6.4 Gb/s 기준이며, HBM3E는 핀 하나가 9 Gb/s 이상으로 더 빠릅니다. 실험 4의 속도는 한 방향 최대값(PCIe 4.0 ×16 약 32 GB/s, NVMe SSD 약 7 GB/s, SATA SSD 약 0.55 GB/s, HDD 약 0.2 GB/s)이며, 실제 게임 로딩에는 압축 풀기 같은 CPU 작업 시간이 더해집니다.</p>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+let dpr = 1;
+const C = {                                         // the inside of the computer keeps one dark look in both themes
+  bg: '#0f1520', pcb: '#0f2a20', die: '#25324a', pkg: '#2b313b', text: '#d6dee9', dim: '#7d8899',
+  cpu: '#3987e5', cpuHi: '#8cc0ff', gpu: '#1fc28a', gpuHi: '#8af0c9', dram: '#eb6834', hbm: '#e87ba4', data: '#ffe27a',
+  l1: '#9fd0ff', l2: '#5ea6f0', l3: '#3a78c9', inter: '#4f5b6e', sub: '#363d49', tsv: '#ffd36e'
+};
+function fitCanvas(c, ratio) { const w = Math.round(c.clientWidth * dpr) || 600; c.width = w; c.height = Math.round(w / ratio); }
+function rect(g, W, H, x0, y0, x1, y1, fill) { g.fillStyle = fill; g.fillRect(x0 * W, y0 * H, (x1 - x0) * W, (y1 - y0) * H); }
+function text(g, W, s, x, y, color, align, size, weight) {
+  g.font = `${weight || 600} ${size || Math.max(10 * dpr, W * 0.022)}px "IBM Plex Sans KR", "Malgun Gothic", sans-serif`;
+  g.fillStyle = color || C.text; g.textAlign = align || 'center'; g.textBaseline = 'middle'; g.fillText(s, x, y);
+}
+function fmtNs(ns) { return ns >= 1000 ? `${(ns / 1000).toFixed(ns >= 10000 ? 0 : 1)} µs` : `${ns >= 10 ? Math.round(ns) : ns.toFixed(1)} ns`; }
+
+/* =========================================================
+   Experiment 1: serial vs parallel
+   ========================================================= */
+const E1 = { task: 'serial', t: 0, running: false, done: { cpu: 0, gpu: 0 }, parts: { cpu: [], gpu: [] } };
+const D1 = { cpu: { cores: 8, stepNs: 0.2 }, gpu: { cores: 10000, stepNs: 2.0 } };
+const realNs = k => E1.task === 'serial' ? 1000 * D1[k].stepNs : Math.ceil(100000 / D1[k].cores) * 20 * D1[k].stepNs;
+const visDur = k => Math.max(0.6, 7 * realNs(k) / Math.max(realNs('cpu'), realNs('gpu')));
+const prog = k => Math.min(1, E1.t / visDur(k));
+const GW = 80, GH = 40, BEADS = 40;
+function pixel(u, v) {                               // a simple sunset photo: sky, sun, two ridges, sea
+  let r, g, b;
+  const sky = v / 0.55;
+  r = 255; g = 120 + 110 * sky; b = 90 + 70 * sky;
+  if (v < 0.55) { r = 70 + 185 * sky; g = 90 + 110 * sky; b = 170 - 40 * sky; }
+  const dx = u - 0.62, dy = v - 0.42; if (dx * dx + dy * dy < 0.012) { r = 255; g = 214; b = 120; }
+  const ridge1 = 0.52 + 0.06 * Math.sin(u * 9) + 0.03 * Math.sin(u * 23), ridge2 = 0.6 + 0.05 * Math.sin(u * 6 + 1.2);
+  if (v > ridge1) { r = 72; g = 60; b = 110; }
+  if (v > ridge2) { r = 40; g = 44; b = 78; }
+  if (v > 0.78) { const w = (v - 0.78) / 0.22; r = 30 + 40 * (1 - w); g = 70 + 50 * (1 - w); b = 110 + 40 * (1 - w); }
+  return [r, g, b];
+}
+const PIX = []; for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++) PIX.push(pixel((i + 0.5) / GW, (j + 0.5) / GH));
+function cellDone(k, idx, p) {
+  if (k === 'cpu') { const band = Math.floor(Math.floor(idx / GW) / (GH / 8)), within = idx - band * (GH / 8) * GW; return within < p * (GH / 8) * GW; }
+  const waves = Math.ceil((GW * GH) / 288); return Math.floor(idx / 288) < p * waves;
+}
+// where a core sits on the lane canvas, and where a finished piece of work sits
+function coreXY(k, n) {
+  if (k === 'cpu') return [0.03 + (n % 8) * 0.12 + 0.05, 0.18];
+  const cols = 36, rows = 8, cw = 0.94 / cols, ch = 0.24 / rows, m = n % (cols * rows);
+  return [0.03 + (m % cols + 0.4) * cw, 0.06 + (Math.floor(m / cols) + 0.4) * ch];
+}
+function workXY(idx) {
+  if (E1.task === 'parallel') { const cw = 0.94 / GW, ch = 0.56 / GH; return [0.03 + (idx % GW + 0.5) * cw, 0.4 + (Math.floor(idx / GW) + 0.5) * ch]; }
+  const perRow = 20, row = Math.floor(idx / perRow), col = row % 2 ? perRow - 1 - (idx % perRow) : idx % perRow;
+  return [0.06 + col * 0.0465, 0.52 + row * 0.26];
+}
+function spawnWork(k) {
+  const p = prog(k), list = E1.parts[k];
+  if (E1.task === 'serial') {
+    const d = Math.floor(p * BEADS);
+    for (let n = E1.done[k]; n < d; n++) list.push({ a: coreXY(k, 0), b: workXY(n), f: 0 });
+    E1.done[k] = d; return;
+  }
+  if (k === 'cpu') {                                  // eight cores, each colouring its own band
+    const perBand = (GH / 8) * GW, d = Math.floor(p * perBand);
+    for (let n = E1.done.cpu; n < d; n++) for (let band = 0; band < 8; band++) if (list.length < 500) list.push({ a: coreXY('cpu', band), b: workXY(band * perBand + n), f: 0 });
+    E1.done.cpu = d; return;
+  }
+  const waves = Math.ceil((GW * GH) / 288), d = Math.floor(p * waves);  // hundreds of cores, each taking one pixel per wave
+  for (let w = E1.done.gpu; w < d; w++) for (let m = 0; m < 288; m += 2) { const idx = w * 288 + m; if (idx < GW * GH && list.length < 900) list.push({ a: coreXY('gpu', m), b: workXY(idx), f: 0 }); }
+  E1.done.gpu = d;
+}
+function stepWork(dt) {
+  for (const k of ['cpu', 'gpu']) {
+    if (E1.running) spawnWork(k);
+    const list = E1.parts[k];
+    for (let i = list.length - 1; i >= 0; i--) { list[i].f += dt / 0.35; if (list[i].f >= 1) list.splice(i, 1); }
+  }
+}
+function drawLane(k) {
+  const c = $('#cv-' + k), g = c.getContext('2d'), W = c.width, H = c.height, p = prog(k), active = E1.running && p < 1;
+  g.fillStyle = C.bg; g.fillRect(0, 0, W, H);
+  // cores
+  const top = 0.06, bot = 0.3, hi = k === 'cpu' ? C.cpuHi : C.gpuHi, base = k === 'cpu' ? C.cpu : C.gpu;
+  if (k === 'cpu') {
+    for (let n = 0; n < 8; n++) {
+      const x0 = 0.03 + n * 0.12, on = active && (E1.task === 'parallel' || n === 0);
+      rect(g, W, H, x0, top, x0 + 0.1, bot, on ? hi : base); g.globalAlpha = on ? 1 : 0.45;
+      text(g, W, `코어${n + 1}`, (x0 + 0.05) * W, ((top + bot) / 2) * H, '#0b1220', 'center', Math.max(9 * dpr, W * 0.02));
+      g.globalAlpha = 1;
+    }
+  } else {
+    const cols = 36, rows = 8, cw = 0.94 / cols, ch = (bot - top) / rows;
+    for (let r = 0; r < rows; r++) for (let n = 0; n < cols; n++) {
+      const idx = r * cols + n, on = active && (E1.task === 'parallel' || idx === 0);
+      g.globalAlpha = on ? 1 : 0.35; rect(g, W, H, 0.03 + n * cw, top + r * ch, 0.03 + (n + 0.8) * cw, top + (r + 0.75) * ch, on ? hi : base);
+    }
+    g.globalAlpha = 1;
+  }
+  if (E1.task === 'serial' && E1.running) text(g, W, k === 'cpu' ? '코어 1개만 일함 · 7개는 쉼' : '코어 1개만 일함 · 9,999개는 쉼', 0.5 * W, (bot + 0.05) * H, C.dim, 'center');
+  // the work itself
+  const y0 = 0.4, y1 = 0.96;
+  if (E1.task === 'parallel') {
+    const cw = 0.94 / GW, ch = (y1 - y0) / GH;
+    for (let idx = 0; idx < GW * GH; idx++) {
+      const i = idx % GW, j = Math.floor(idx / GW), [r, gg, b] = PIX[idx];
+      let col;
+      if (cellDone(k, idx, p)) col = `rgb(${r | 0},${gg | 0},${b | 0})`;
+      else { const l = (0.3 * r + 0.59 * gg + 0.11 * b) * 0.55 | 0; col = `rgb(${l},${l},${l})`; }
+      g.fillStyle = col; g.fillRect((0.03 + i * cw) * W, (y0 + j * ch) * H, cw * W + 0.6, ch * H + 0.6);
+    }
+  } else {
+    const done = Math.floor(p * BEADS), perRow = 20;
+    for (let n = 0; n < BEADS; n++) {
+      const row = Math.floor(n / perRow), col = row % 2 ? perRow - 1 - (n % perRow) : n % perRow;
+      const x = (0.06 + col * 0.0465) * W, y = (y0 + 0.12 + row * 0.26) * H, r = Math.min(W * 0.017, H * 0.07);
+      if (n > 0) {
+        const pn = n - 1, prow = Math.floor(pn / perRow), pcol = prow % 2 ? perRow - 1 - (pn % perRow) : pn % perRow;
+        g.strokeStyle = n <= done ? hi : '#3a4456'; g.lineWidth = 2 * dpr;
+        g.beginPath(); g.moveTo((0.06 + pcol * 0.0465) * W, (y0 + 0.12 + prow * 0.26) * H); g.lineTo(x, y); g.stroke();
+      }
+      g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2);
+      g.fillStyle = n < done ? hi : (n === done && active ? C.data : '#3a4456'); g.fill();
+    }
+    text(g, W, `${Math.round(p * 1000)} / 1,000 단계`, 0.5 * W, (y1 - 0.02) * H, C.dim, 'center');
+  }
+  // data particles: core → the piece of work it just finished
+  g.fillStyle = C.data;
+  for (const d of E1.parts[k]) {
+    const e = d.f * d.f * (3 - 2 * d.f), x = d.a[0] + (d.b[0] - d.a[0]) * e, y = d.a[1] + (d.b[1] - d.a[1]) * e;
+    g.globalAlpha = 1 - d.f * 0.4; g.beginPath(); g.arc(x * W, y * H, 2.1 * dpr, 0, Math.PI * 2); g.fill();
+  }
+  g.globalAlpha = 1;
+}
+function updateE1() {
+  for (const k of ['cpu', 'gpu']) {
+    const p = prog(k);
+    $('#t-' + k).textContent = E1.t > 0 ? fmtNs(realNs(k) * p) : '—';
+  }
+  const pc = prog('cpu'), pg = prog('gpu'), winner = realNs('cpu') < realNs('gpu') ? 'cpu' : 'gpu', loser = winner === 'cpu' ? 'gpu' : 'cpu';
+  const chip = (k, s, win) => { const el = $('#c-' + k); el.textContent = s; el.classList.toggle('win', !!win); };
+  if (E1.t === 0) { chip('cpu', '대기'); chip('gpu', '대기'); }
+  else {
+    chip('cpu', pc >= 1 ? (winner === 'cpu' ? '먼저 끝남' : '끝남') : '일하는 중', pc >= 1 && winner === 'cpu');
+    chip('gpu', pg >= 1 ? (winner === 'gpu' ? '먼저 끝남' : '끝남') : '일하는 중', pg >= 1 && winner === 'gpu');
+  }
+  const ratio = realNs(loser) / realNs(winner);
+  if (pc >= 1 && pg >= 1) {
+    $('#v1').innerHTML = E1.task === 'serial'
+      ? `<b>CPU가 ${Math.round(ratio)}배 빨랐습니다.</b> 앞 단계의 결과가 있어야 다음을 계산할 수 있는 일은 코어 하나밖에 쓸 수 없습니다. 이때는 코어 하나가 빠른 CPU가 이깁니다. GPU의 나머지 코어 9,999개는 쉬었습니다.`
+      : `<b>GPU가 ${Math.round(ratio)}배 빨랐습니다.</b> 픽셀마다 같은 계산을 서로 상관없이 할 수 있으니, 코어 1만 개가 동시에 나눠 맡습니다. CPU는 코어 8개가 한 줄씩 칠하는 동안, GPU는 순식간에 끝냅니다. 그래픽과 AI 계산에 GPU를 쓰는 이유입니다.`;
+  } else if (E1.t > 0) $('#v1').textContent = '경주 중…';
+}
+$$('[data-task]').forEach(b => b.addEventListener('click', () => {
+  E1.task = b.dataset.task; E1.t = 0; E1.running = false; E1.done = { cpu: 0, gpu: 0 }; E1.parts = { cpu: [], gpu: [] };
+  $$('[data-task]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  $('#v1').textContent = '▶ 경주 시작을 눌러 보세요.'; updateE1(); drawLane('cpu'); drawLane('gpu');
+}));
+$('#race1').addEventListener('click', () => { E1.t = 0; E1.running = true; E1.done = { cpu: 0, gpu: 0 }; E1.parts = { cpu: [], gpu: [] }; });
+
+/* =========================================================
+   Experiment 2: cache hierarchy and DRAM latency
+   ========================================================= */
+const LV = [
+  { name: 'L1 캐시', place: '책상 위', ns: 1, x: 0.19, col: C.l1 },
+  { name: 'L2 캐시', place: '서랍', ns: 4, x: 0.27, col: C.l2 },
+  { name: 'L3 캐시', place: '책장', ns: 15, x: 0.385, col: C.l3 },
+  { name: 'DRAM', place: '동네 도서관', ns: 90, x: 0.875, col: C.dram }
+];
+const CORE_X = 0.09;
+const E2 = { trip: null, batch: null, results: { on: null, off: null } };
+// 100 reads like a real program: 90 in L1, 6 in L2, 3 in L3, 1 in DRAM (fixed shuffle so the numbers stay put)
+const MIX = (() => { const a = [].concat(Array(90).fill(0), Array(6).fill(1), Array(3).fill(2), [3]); let s = 7; for (let i = a.length - 1; i > 0; i--) { s = (s * 9301 + 49297) % 233280; const j = Math.floor(s / 233280 * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; })();
+function legTime(ns, scale) { return Math.max(0.09, ns / 2 * scale); }
+function startTrip(lv) { E2.batch = null; E2.trip = { lv, t: 0, leg: legTime(LV[lv].ns, 0.04) }; showLast(lv); }
+function showLast(lv) {
+  const L = LV[lv];
+  $('#last').textContent = `${L.name} · 약 ${L.ns} ns`;
+  $('#last-sub').innerHTML = lv === 3 ? `CPU 사이클로 <b>${L.ns * 5}번</b>을 기다렸습니다. 그동안 계산 ${L.ns * 5}번을 할 수 있었습니다.` : `CPU 사이클로 ${L.ns * 5}번 기다렸습니다. DRAM보다 ${Math.round(90 / L.ns)}배 빠릅니다.`;
+}
+function startBatch(withCache) {
+  const seq = withCache ? MIX : Array(100).fill(3);
+  const total = seq.reduce((s, lv) => s + LV[lv].ns + 1, 0);
+  E2.trip = null;
+  E2.batch = { withCache, seq, i: 0, t: 0, scale: 6 / total, cur: null, waited: 0, worked: 0 };
+}
+function drawMem() {
+  const c = $('#cv-mem'), g = c.getContext('2d'), W = c.width, H = c.height;
+  g.fillStyle = C.pcb; g.fillRect(0, 0, W, H);
+  // traces on the motherboard: only a few wires reach the DRAM
+  g.strokeStyle = 'rgba(214,178,90,0.55)'; g.lineWidth = 1.2 * dpr;
+  for (let n = 0; n < 8; n++) { const y = (0.36 + n * 0.04) * H; g.beginPath(); g.moveTo(0.48 * W, y); g.lineTo(0.8 * W, y); g.stroke(); }
+  text(g, W, '메인보드 배선 · 수 cm', 0.64 * W, 0.26 * H, '#b8c9b0', 'center');
+  // CPU package and die
+  rect(g, W, H, 0.02, 0.1, 0.48, 0.9, C.pkg); rect(g, W, H, 0.035, 0.18, 0.465, 0.82, C.die);
+  text(g, W, 'CPU 칩', 0.25 * W, 0.135 * H, C.dim, 'center');
+  rect(g, W, H, 0.05, 0.3, 0.13, 0.7, C.cpu); text(g, W, '코어', CORE_X * W, 0.5 * H, '#0b1220', 'center');
+  const boxes = [[0.165, 0.215, 0.38, 0.62], [0.235, 0.305, 0.32, 0.68], [0.325, 0.445, 0.24, 0.76]];
+  boxes.forEach(([x0, x1, y0, y1], n) => { rect(g, W, H, x0, y0, x1, y1, LV[n].col); text(g, W, `L${n + 1}`, (x0 + x1) / 2 * W, 0.5 * H, '#0b1220', 'center'); });
+  // DRAM stick
+  rect(g, W, H, 0.8, 0.12, 0.95, 0.88, '#1c3a2c');
+  for (let n = 0; n < 4; n++) rect(g, W, H, 0.82, 0.16 + n * 0.18, 0.93, 0.3 + n * 0.18, C.dram);
+  text(g, W, 'DRAM', 0.875 * W, 0.94 * H, C.text, 'center');
+  // latency tags
+  const fs = Math.max(10 * dpr, W * 0.02);
+  LV.forEach((L, n) => text(g, W, `${L.ns} ns`, L.x * W, (n === 3 ? 0.06 : (n === 2 ? 0.215 : n === 1 ? 0.29 : 0.35)) * H, '#ffffff', 'center', fs, 700));
+  // a request going out and the data coming back
+  const trip = E2.trip || (E2.batch && E2.batch.cur);
+  if (trip) {
+    const L = LV[trip.lv], half = trip.leg, out = trip.t < half, f = out ? trip.t / half : (trip.t - half) / half;
+    const x = out ? CORE_X + (L.x - CORE_X) * f : L.x + (CORE_X - L.x) * f, y = 0.5 + (trip.lv === 3 ? 0.0 : 0);
+    g.fillStyle = out ? '#ffffff' : C.data; g.shadowColor = g.fillStyle; g.shadowBlur = 8 * dpr;
+    g.beginPath(); g.arc(x * W, y * H - (out ? 6 * dpr : -6 * dpr), 5 * dpr, 0, Math.PI * 2); g.fill(); g.shadowBlur = 0;
+    if (trip.lv === 3 && !E2.batch) {
+      const cyc = Math.min(450, Math.round(trip.t / (2 * half) * 450));
+      text(g, W, `코어가 기다리는 중… ${cyc} / 450 사이클`, 0.25 * W, 0.88 * H, '#ffb4a8', 'center');
+    }
+  }
+  if (E2.batch) {
+    const b = E2.batch;
+    text(g, W, `${b.withCache ? '캐시와 함께' : '캐시 없이'} 읽는 중 · ${Math.min(100, b.i)} / 100`, 0.25 * W, 0.88 * H, '#ffffff', 'center');
+  }
+}
+function stepMem(dt) {
+  if (E2.trip) { E2.trip.t += dt; if (E2.trip.t >= 2 * E2.trip.leg) E2.trip = null; }
+  const b = E2.batch;
+  if (!b) return;
+  if (!b.cur) {
+    if (b.i >= b.seq.length) { finishBatch(b); E2.batch = null; return; }
+    const lv = b.seq[b.i];
+    b.cur = { lv, t: 0, leg: Math.max(0.012, LV[lv].ns / 2 * b.scale), work: 1 * b.scale };
+  }
+  b.cur.t += dt;
+  if (b.cur.t >= 2 * b.cur.leg + b.cur.work) { b.waited += LV[b.cur.lv].ns; b.worked += 1; b.i++; b.cur = null; }
+}
+function finishBatch(b) {
+  const total = b.waited + b.worked;
+  E2.results[b.withCache ? 'on' : 'off'] = { waited: b.waited, worked: b.worked, total };
+  renderBatch();
+}
+function renderBatch() {
+  const all = Object.values(E2.results).filter(Boolean), maxT = Math.max(...all.map(r => r.total), 1);
+  for (const k of ['on', 'off']) {
+    const r = E2.results[k], tr = $('#w-' + k), [work, wait] = tr.children;
+    if (!r) { work.style.width = '0'; wait.style.width = '0'; $('#o-' + k).textContent = '—'; continue; }
+    work.style.width = `${r.worked / maxT * 100}%`; wait.style.width = `${r.waited / maxT * 100}%`;
+    $('#o-' + k).textContent = `${fmtNs(r.total)} · 계산 ${Math.round(r.worked / r.total * 100)}%`;
+  }
+  if (E2.results.on && E2.results.off) {
+    $('#last').textContent = `캐시 덕분에 ${Math.round(E2.results.off.total / E2.results.on.total)}배 빨라짐`;
+    $('#last-sub').textContent = `캐시가 없으면 CPU는 시간의 ${Math.round(E2.results.off.waited / E2.results.off.total * 100)}%를 데이터를 기다리며 보냅니다. 캐시가 있으면 평균 ${(E2.results.on.waited / 100).toFixed(1)} ns 만에 데이터를 받습니다.`;
+  }
+}
+// Speed tracks: the same distance, travel time proportional to latency (0.1 s per ns).
+const TRACK = LV.map(() => ({ f: 0, n: 0 }));
+function stepSpeed(dt) { TRACK.forEach((tr, n) => { tr.f += dt / (LV[n].ns * 0.1); while (tr.f >= 1) { tr.f -= 1; tr.n++; } }); }
+function drawSpeed() {
+  const c = $('#cv-speed'), g = c.getContext('2d'), W = c.width, H = c.height;
+  g.fillStyle = C.bg; g.fillRect(0, 0, W, H);
+  const x0 = 0.2, x1 = 0.84, fs = Math.max(10 * dpr, W * 0.019);
+  LV.forEach((L, n) => {
+    const y = (0.14 + n * 0.24) * H, tr = TRACK[n];
+    text(g, W, `${L.name} · ${L.ns} ns`, 0.02 * W, y, C.text, 'left', fs, 700);
+    g.fillStyle = L.col; g.fillRect((x0 - 0.035) * W, y - 0.07 * H, 0.03 * W, 0.14 * H);
+    g.strokeStyle = 'rgba(255,255,255,0.12)'; g.lineWidth = 6 * dpr; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(x0 * W, y); g.lineTo(x1 * W, y); g.stroke();
+    g.fillStyle = C.cpu; g.fillRect((x1 + 0.005) * W, y - 0.07 * H, 0.03 * W, 0.14 * H);
+    // a short trail makes fast data read as a streak and slow data as a crawling dot
+    const x = (x0 + (x1 - x0) * tr.f) * W, trail = Math.min((x1 - x0) * W * 0.5, (x1 - x0) * W / (L.ns * 0.1) * 0.05);
+    const grad = g.createLinearGradient(x - trail, 0, x, 0); grad.addColorStop(0, 'rgba(255,226,122,0)'); grad.addColorStop(1, 'rgba(255,226,122,0.85)');
+    g.strokeStyle = grad; g.lineWidth = 4 * dpr; g.beginPath(); g.moveTo(Math.max(x0 * W, x - trail), y); g.lineTo(x, y); g.stroke();
+    g.fillStyle = C.data; g.shadowColor = C.data; g.shadowBlur = 8 * dpr;
+    g.beginPath(); g.arc(x, y, 5 * dpr, 0, Math.PI * 2); g.fill(); g.shadowBlur = 0;
+    text(g, W, `도착 ${tr.n.toLocaleString('ko-KR')}개`, 0.985 * W, y, '#ffffff', 'right', fs, 700);
+  });
+  text(g, W, '보관 장소 →  코어', ((x0 + x1) / 2) * W, 0.04 * H + fs * 0.3, C.dim, 'center', Math.max(9 * dpr, W * 0.016));
+}
+$('#speed-reset').addEventListener('click', () => TRACK.forEach(tr => { tr.f = 0; tr.n = 0; }));
+$$('[data-lv]').forEach(b => b.addEventListener('click', () => startTrip(Number(b.dataset.lv))));
+$('#batch-on').addEventListener('click', () => startBatch(true));
+$('#batch-off').addEventListener('click', () => startBatch(false));
+
+/* =========================================================
+   Experiment 3: DDR5 vs HBM bandwidth
+   ========================================================= */
+const BW = { ddr: 89.6, hbm: 4 * 819.2 };           // GB/s
+const E3 = { t: 0, running: false, dots: [], acc: { ddr: 0, hbm: 0 }, arrivals: { ddr: [], hbm: [] }, clock: 0 };
+const race3Dur = k => Math.max(0.4, 8 * (1 / BW[k]) / (1 / BW.ddr));
+// bundles: start (memory) → end (processor), in normalized canvas coords
+function bundles() {
+  const ddr = [0, 1].map(n => ({ k: 'ddr', from: [0.355 + n * 0.07, 0.5], to: [0.18, 0.44 + n * 0.12] }));
+  const hbm = [[0.615, 0.32], [0.615, 0.68], [0.905, 0.32], [0.905, 0.68]].map(([x, y]) => ({ k: 'hbm', from: [x, y], to: [x < 0.76 ? 0.69 : 0.83, y] }));
+  return ddr.concat(hbm);
+}
+function drawBus() {
+  const c = $('#cv-bus'), g = c.getContext('2d'), W = c.width, H = c.height;
+  g.fillStyle = C.bg; g.fillRect(0, 0, W, H);
+  // left: CPU and two DIMMs on a motherboard
+  rect(g, W, H, 0.01, 0.06, 0.49, 0.94, C.pcb);
+  rect(g, W, H, 0.05, 0.32, 0.18, 0.68, C.cpu); text(g, W, 'CPU', 0.115 * W, 0.5 * H, '#0b1220', 'center');
+  for (let n = 0; n < 2; n++) {
+    const x = 0.33 + n * 0.07; rect(g, W, H, x, 0.12, x + 0.05, 0.88, '#1c3a2c');
+    for (let m = 0; m < 4; m++) rect(g, W, H, x + 0.006, 0.15 + m * 0.18, x + 0.044, 0.29 + m * 0.18, C.dram);
+  }
+  g.strokeStyle = 'rgba(235,104,52,0.55)'; g.lineWidth = 1 * dpr;
+  for (const b of bundles().filter(b => b.k === 'ddr')) for (let n = 0; n < 8; n++) {
+    const off = (n - 3.5) * 0.008; g.beginPath(); g.moveTo(b.from[0] * W, (b.from[1] + off) * H); g.lineTo(b.to[0] * W, (b.to[1] + off) * H); g.stroke();
+  }
+  text(g, W, 'DDR5 · 64비트 × 2', 0.25 * W, 0.97 * H - 4 * dpr, C.text, 'center');
+  // right: GPU with four HBM stacks on a silicon interposer
+  rect(g, W, H, 0.53, 0.1, 0.99, 0.9, C.inter);
+  rect(g, W, H, 0.69, 0.22, 0.83, 0.78, C.gpu); text(g, W, 'GPU', 0.76 * W, 0.5 * H, '#0b1220', 'center');
+  for (const [x, y] of [[0.575, 0.32], [0.575, 0.68], [0.865, 0.32], [0.865, 0.68]]) {
+    rect(g, W, H, x, y - 0.15, x + 0.08, y + 0.15, C.hbm);
+    for (let m = 1; m < 5; m++) { g.fillStyle = 'rgba(15,21,32,0.25)'; g.fillRect(x * W, (y - 0.15 + m * 0.06) * H, 0.08 * W, 1.2 * dpr); }
+  }
+  g.strokeStyle = 'rgba(232,123,164,0.6)'; g.lineWidth = 0.8 * dpr;
+  for (const b of bundles().filter(b => b.k === 'hbm')) for (let n = 0; n < 32; n++) {
+    const off = (n - 15.5) * 0.0085; g.beginPath(); g.moveTo(b.from[0] * W, (b.from[1] + off) * H); g.lineTo(b.to[0] * W, (b.to[1] + off) * H); g.stroke();
+  }
+  text(g, W, 'HBM3 · 1,024비트 × 4', 0.76 * W, 0.97 * H - 4 * dpr, C.text, 'center');
+  // arrivals in the last second
+  const fs = Math.max(10 * dpr, W * 0.022);
+  text(g, W, `1초에 도착 ${E3.arrivals.ddr.length}묶음`, 0.25 * W, 0.04 * H + fs * 0.4, '#ffd0bd', 'center', fs, 700);
+  text(g, W, `1초에 도착 ${E3.arrivals.hbm.length}묶음`, 0.76 * W, 0.04 * H + fs * 0.4, '#ffd6e6', 'center', fs, 700);
+  // data in flight
+  for (const d of E3.dots) {
+    const x = d.b.from[0] + (d.b.to[0] - d.b.from[0]) * d.f, y = d.b.from[1] + (d.b.to[1] - d.b.from[1]) * d.f + d.off;
+    g.fillStyle = C.data; g.beginPath(); g.arc(x * W, y * H, 2.2 * dpr, 0, Math.PI * 2); g.fill();
+  }
+}
+function stepBus(dt) {
+  const bs = bundles();
+  // dots per second per bundle in proportion to bandwidth: one DDR channel 44.8 GB/s, one HBM3 stack 819 GB/s
+  for (const b of bs) {
+    const rate = b.k === 'ddr' ? 3 : 55, key = b.k + b.from[0] + b.from[1];
+    E3.acc[key] = (E3.acc[key] || 0) + rate * dt;
+    while (E3.acc[key] >= 1) { E3.acc[key] -= 1; E3.dots.push({ b, f: 0, sp: b.k === 'ddr' ? 0.8 : 2.4, off: (Math.random() - 0.5) * (b.k === 'ddr' ? 0.06 : 0.26) }); }
+  }
+  E3.clock += dt;
+  for (let i = E3.dots.length - 1; i >= 0; i--) { const d = E3.dots[i]; d.f += d.sp * dt; if (d.f >= 1) { E3.arrivals[d.b.k].push(E3.clock); E3.dots.splice(i, 1); } }
+  for (const k of ['ddr', 'hbm']) { const a = E3.arrivals[k]; while (a.length && a[0] < E3.clock - 1) a.shift(); }
+}
+const stackDots = [];
+function drawStack(dt) {
+  const c = $('#cv-stack'), g = c.getContext('2d'), W = c.width, H = c.height;
+  g.fillStyle = C.bg; g.fillRect(0, 0, W, H);
+  rect(g, W, H, 0.03, 0.86, 0.97, 0.95, C.sub); text(g, W, '패키지 기판', 0.5 * W, 0.905 * H, C.dim, 'center');
+  rect(g, W, H, 0.05, 0.78, 0.95, 0.86, C.inter); text(g, W, '실리콘 인터포저', 0.5 * W, 0.82 * H, '#dfe6ef', 'center');
+  // interposer wiring between HBM base die and GPU
+  g.strokeStyle = 'rgba(255,211,110,0.5)'; g.lineWidth = 1 * dpr;
+  for (let n = 0; n < 4; n++) { const y = (0.795 + n * 0.014) * H; g.beginPath(); g.moveTo(0.3 * W, y); g.lineTo(0.68 * W, y); g.stroke(); }
+  // GPU
+  rect(g, W, H, 0.62, 0.5, 0.95, 0.78, C.gpu); text(g, W, 'GPU', 0.785 * W, 0.64 * H, '#0b1220', 'center');
+  // HBM stack: base logic die + 8 DRAM dies, joined by TSVs and micro-bumps
+  const x0 = 0.08, x1 = 0.48, dieH = 0.052;
+  rect(g, W, H, x0, 0.715, x1, 0.775, '#7a5a8f'); text(g, W, '베이스(로직) 다이', (x0 + x1) / 2 * W, 0.745 * H, '#f3e8ff', 'center', Math.max(9 * dpr, W * 0.024));
+  for (let n = 0; n < 8; n++) {
+    const yb = 0.705 - n * (dieH + 0.012);
+    rect(g, W, H, x0, yb - dieH, x1, yb, C.hbm);
+    g.fillStyle = '#ffd36e'; for (let m = 0; m < 10; m++) { g.beginPath(); g.arc((x0 + 0.02 + m * 0.036) * W, (yb + 0.005) * H, 1.6 * dpr, 0, Math.PI * 2); g.fill(); }
+  }
+  g.strokeStyle = C.tsv; g.lineWidth = 1.3 * dpr;
+  for (let m = 0; m < 10; m++) { const x = (x0 + 0.02 + m * 0.036) * W; g.beginPath(); g.moveTo(x, (0.705 - 7 * (dieH + 0.012) - dieH) * H); g.lineTo(x, 0.775 * H); g.stroke(); }
+  text(g, W, 'DRAM 다이 8층 (최대 12층)', (x0 + x1) / 2 * W, 0.08 * H, C.text, 'center');
+  text(g, W, '↕ TSV', (x1 + 0.06) * W, 0.4 * H, C.tsv, 'left');
+  // data running down the TSVs, then across the interposer to the GPU
+  if (dt) {
+    if (Math.random() < dt * 40) stackDots.push({ m: Math.floor(Math.random() * 10), f: 0 });
+    for (let i = stackDots.length - 1; i >= 0; i--) { stackDots[i].f += dt * 0.9; if (stackDots[i].f >= 1) stackDots.splice(i, 1); }
+  }
+  for (const d of stackDots) {
+    const xs = (x0 + 0.02 + d.m * 0.036), ytop = 0.705 - 7 * (dieH + 0.012) - dieH;
+    let x, y;
+    if (d.f < 0.6) { x = xs; y = ytop + (0.8 - ytop) * (d.f / 0.6); } else { x = xs + (0.7 - xs) * ((d.f - 0.6) / 0.4); y = 0.8; }
+    g.fillStyle = C.data; g.beginPath(); g.arc(x * W, y * H, 2.4 * dpr, 0, Math.PI * 2); g.fill();
+  }
+}
+function updateRace3() {
+  for (const k of ['ddr', 'hbm']) {
+    const p = Math.min(1, E3.t / race3Dur(k));
+    $('#b-' + k).style.width = `${p * 100}%`;
+    $('#r-' + k).textContent = E3.t > 0 ? `${(1000 / BW[k] * p).toFixed(k === 'ddr' ? 1 : 2)} ms` : '—';
+  }
+  if (E3.t >= race3Dur('ddr')) {
+    $('#v3').innerHTML = `<b>HBM이 약 ${Math.round(BW.hbm / BW.ddr)}배 빨리 옮겼습니다.</b> 1 GB를 DDR5 2채널은 ${(1000 / BW.ddr).toFixed(1)} ms, HBM3 4스택은 ${(1000 / BW.hbm).toFixed(2)} ms에 옮깁니다. 데이터가 지나가는 길의 수가 128개와 4,096개로 32배 차이 나고, 핀 하나의 속도도 조금 더 빠르기 때문입니다(5.6 → 6.4 Gb/s).`;
+  } else if (E3.t > 0) $('#v3').textContent = '옮기는 중…';
+}
+$('#race3').addEventListener('click', () => { E3.t = 0; E3.running = true; });
+
+/* =========================================================
+   Experiment 4: why game loading takes time
+   ========================================================= */
+const STORE = { hdd: { name: 'HDD', bw: 0.2 }, sata: { name: 'SATA SSD', bw: 0.55 }, nvme: { name: 'NVMe SSD', bw: 7 } };
+const E4 = { store: 'nvme', size: 1, t: 0, running: false, dots: [], acc: [0, 0, 0] };
+const stageBW = () => [STORE[E4.store].bw, 32, 1008];           // GB/s: storage → DDR5, PCIe 4.0 x16, GDDR6X
+const stageSec = () => stageBW().map(b => E4.size / b);
+const stageVis = () => { const s = stageSec(), m = Math.max(...s); return s.map(x => Math.max(0.35, 8 * x / m)); };
+function fmtSec(x) { return x >= 60 ? `${Math.floor(x / 60)}분 ${Math.round(x % 60)}초` : x >= 1 ? `${x.toFixed(1)}초` : `${(x * 1000).toFixed(x * 1000 >= 10 ? 0 : 1)} ms`; }
+// link geometry on the canvas: storage → DIMM, DIMM → PCIe slot → card memory, memory → GPU die
+const LINKS = [
+  { from: [0.14, 0.5], to: [0.27, 0.5], col: '#c7ced8' },
+  { from: [0.43, 0.5], to: [0.66, 0.5], col: '#ffb27a' },
+  { from: [0.725, 0.5], to: [0.78, 0.5], col: '#8af0c9' }
+];
+function drawLoad() {
+  const c = $('#cv-load'), g = c.getContext('2d'), W = c.width, H = c.height, bw = stageBW(), fs = Math.max(10 * dpr, W * 0.017);
+  g.fillStyle = C.bg; g.fillRect(0, 0, W, H);
+  // storage
+  rect(g, W, H, 0.02, 0.28, 0.14, 0.72, '#2b313b');
+  if (E4.store === 'hdd') { g.strokeStyle = '#9aa4b2'; g.lineWidth = 2 * dpr; g.beginPath(); g.arc(0.08 * W, 0.5 * H, Math.min(0.045 * W, 0.17 * H), 0, Math.PI * 2); g.stroke(); g.beginPath(); g.arc(0.08 * W, 0.5 * H, 3 * dpr, 0, Math.PI * 2); g.fillStyle = '#9aa4b2'; g.fill(); }
+  else { rect(g, W, H, 0.035, 0.38, 0.125, 0.62, E4.store === 'nvme' ? '#3a4a63' : '#46505e'); for (let n = 0; n < 3; n++) rect(g, W, H, 0.045 + n * 0.027, 0.42, 0.065 + n * 0.027, 0.58, '#1b2230'); }
+  text(g, W, STORE[E4.store].name, 0.08 * W, 0.8 * H, C.text, 'center', fs);
+  // motherboard: CPU + DDR5
+  rect(g, W, H, 0.24, 0.12, 0.46, 0.88, C.pcb);
+  rect(g, W, H, 0.27, 0.36, 0.34, 0.64, C.cpu); text(g, W, 'CPU', 0.305 * W, 0.5 * H, '#0b1220', 'center', fs);
+  for (let n = 0; n < 2; n++) { const x = 0.37 + n * 0.035; rect(g, W, H, x, 0.2, x + 0.022, 0.8, '#1c3a2c'); for (let m = 0; m < 4; m++) rect(g, W, H, x + 0.003, 0.23 + m * 0.14, x + 0.019, 0.33 + m * 0.14, C.dram); }
+  text(g, W, 'DDR5', 0.39 * W, 0.94 * H, C.text, 'center', fs);
+  // PCIe slot and graphics card
+  rect(g, W, H, 0.5, 0.42, 0.66, 0.58, '#1f2633'); for (let n = 0; n < 16; n++) rect(g, W, H, 0.505 + n * 0.0096, 0.45, 0.511 + n * 0.0096, 0.55, '#d9a520');
+  text(g, W, 'PCIe ×16 슬롯', 0.58 * W, 0.34 * H, '#ffd9a8', 'center', fs);
+  rect(g, W, H, 0.66, 0.1, 0.99, 0.9, '#123026');
+  for (const [x, y] of [[0.69, 0.14], [0.69, 0.42], [0.69, 0.7], [0.94, 0.14], [0.94, 0.42], [0.94, 0.7]]) rect(g, W, H, x, y, x + 0.035, y + 0.16, C.hbm);
+  rect(g, W, H, 0.78, 0.3, 0.9, 0.7, C.gpu); text(g, W, 'GPU', 0.84 * W, 0.5 * H, '#0b1220', 'center', fs);
+  text(g, W, '그래픽카드 · 그래픽 메모리(GDDR)', 0.825 * W, 0.95 * H, C.text, 'center', fs);
+  // the three links, drawn as wide as their bandwidth (log scale)
+  LINKS.forEach((L, n) => {
+    const w = Math.max(2, (Math.log10(bw[n]) + 1.2) * 0.035 * H);
+    g.strokeStyle = L.col; g.globalAlpha = 0.28; g.lineWidth = w; g.lineCap = 'butt';
+    g.beginPath(); g.moveTo(L.from[0] * W, L.from[1] * H); g.lineTo(L.to[0] * W, L.to[1] * H); g.stroke(); g.globalAlpha = 1;
+    const label = n === 0 ? `${bw[0]} GB/s` : n === 1 ? '32 GB/s' : '1,008 GB/s';
+    text(g, W, label, ((L.from[0] + L.to[0]) / 2) * W, (L.from[1] * H) - w / 2 - fs * 0.9, '#ffffff', 'center', fs, 700);
+  });
+  for (const d of E4.dots) {
+    const L = LINKS[d.n], x = L.from[0] + (L.to[0] - L.from[0]) * d.f, y = L.from[1] + d.off;
+    g.fillStyle = C.data; g.beginPath(); g.arc(x * W, y * H, 2.2 * dpr, 0, Math.PI * 2); g.fill();
+  }
+}
+function stepLoad(dt) {
+  const bw = stageBW(), H = $('#cv-load').height;
+  bw.forEach((b, n) => {
+    E4.acc[n] += 3 * Math.pow(b, 0.6) * dt;          // dots per second grow with bandwidth (compressed so all three stay visible)
+    const w = Math.max(2, (Math.log10(b) + 1.2) * 0.035 * H) / H;
+    while (E4.acc[n] >= 1) { E4.acc[n] -= 1; if (E4.dots.length < 600) E4.dots.push({ n, f: 0, off: (Math.random() - 0.5) * w * 0.8, sp: [1.1, 0.9, 2.2][n] }); }
+  });
+  for (let i = E4.dots.length - 1; i >= 0; i--) { const d = E4.dots[i]; d.f += d.sp * dt; if (d.f >= 1) E4.dots.splice(i, 1); }
+}
+function updateRace4() {
+  const sec = stageSec(), vis = stageVis();
+  sec.forEach((x, n) => {
+    const p = Math.min(1, E4.t / vis[n]);
+    $('#b-s' + (n + 1)).style.width = `${p * 100}%`;
+    $('#r-s' + (n + 1)).textContent = E4.t > 0 ? fmtSec(x * p) : fmtSec(x);
+  });
+  $('#l-store').textContent = `${STORE[E4.store].name} · 약 ${STORE[E4.store].bw} GB/s`;
+  if (E4.t >= Math.max(...vis)) {
+    const slow = sec[0] >= sec[1] ? 0 : 1, name = slow === 0 ? STORE[E4.store].name : 'PCIe';
+    $('#v4').innerHTML = `<b>가장 좁은 길은 ${name}입니다.</b> ${E4.size} GB를 옮기는 데 저장장치에서 DDR5까지 ${fmtSec(sec[0])}, DDR5에서 그래픽카드까지(PCIe) ${fmtSec(sec[1])}, 그래픽 메모리에서 GPU까지 ${fmtSec(sec[2])} 걸립니다. PCIe는 그래픽카드 안쪽 길보다 ${Math.round(1008 / 32)}배 좁고, 저장장치는 그보다도 좁습니다. 그래서 게임은 화면을 그리기 전에 필요한 데이터를 그래픽 메모리에 미리 옮겨 두는 로딩 시간을 가집니다.`;
+  } else if (E4.t > 0) $('#v4').textContent = '옮기는 중…';
+}
+function setE4(k, v) { E4[k] = v; E4.t = 0; E4.running = false; E4.dots = []; $$('[data-store]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.store === E4.store))); $$('[data-size]').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.size) === E4.size))); $('#v4').textContent = '▶ 데이터 옮기기를 눌러 보세요.'; updateRace4(); }
+$$('[data-store]').forEach(b => b.addEventListener('click', () => setE4('store', b.dataset.store)));
+$$('[data-size]').forEach(b => b.addEventListener('click', () => setE4('size', Number(b.dataset.size))));
+$('#race4').addEventListener('click', () => { E4.t = 0; E4.running = true; });
+
+/* ---------- layout & loop ---------- */
+function fitAll() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  fitCanvas($('#cv-cpu'), 2.0); fitCanvas($('#cv-gpu'), 2.0);
+  fitCanvas($('#cv-mem'), 2.6); fitCanvas($('#cv-speed'), 3.4); fitCanvas($('#cv-bus'), 2.0); fitCanvas($('#cv-stack'), 1.5); fitCanvas($('#cv-load'), 2.8);
+}
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (E1.running) { E1.t += dt; if (E1.t >= Math.max(visDur('cpu'), visDur('gpu'))) E1.running = false; updateE1(); }
+  stepWork(dt); drawLane('cpu'); drawLane('gpu');
+  stepMem(dt); drawMem(); stepSpeed(dt); drawSpeed();
+  stepBus(dt); drawBus(); drawStack(dt);
+  if (E3.running) { E3.t += dt; if (E3.t >= race3Dur('ddr')) E3.running = false; updateRace3(); }
+  stepLoad(dt); drawLoad();
+  if (E4.running) { E4.t += dt; if (E4.t >= Math.max(...stageVis())) E4.running = false; updateRace4(); }
+  requestAnimationFrame(frame);
+}
+window.addEventListener('resize', fitAll);
+fitAll(); updateE1(); updateRace3(); renderBatch(); updateRace4();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

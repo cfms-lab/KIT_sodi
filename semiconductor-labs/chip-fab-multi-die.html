@@ -1,0 +1,1083 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>내 이름 칩 공장 멀티 다이</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: fab column (name → 3D chamber window → shuffled process buttons → run log → verdict) beside a reference column (mask set, process glossary, answer key); stacks on phones. */
+:root {
+  --bg: #eef1f5; --panel: #ffffff; --panel-2: #f5f7fa; --ink: #141a22; --muted: #5a6474; --line: #d5dbe3; --line-strong: #b7c0cc;
+  --accent: #f2b705; --accent-ink: #8a6400; --accent-soft: #fdf1c7; --on-accent: #1a1400;
+  --good: #1d8a4b; --good-soft: #e3f4ea; --bad: #c4372d; --bad-soft: #fbe5e2; --warn: #a86a00;
+  /* the chamber window is dark in both themes: it is the inside of the tool */
+  --stage-top: #222b3b; --stage-bot: #0b0f16; --stage-ink: #e6ebf3; --stage-muted: #9aa6b8; --stage-chip: rgba(10,14,20,.74);
+  --m-si: #9aa3b5; --m-ox: #4a5bd4; --m-nit: #2f9e8c; --m-metal: #e4e7eb; --m-pr: #d4532a;
+  --font-display: "Black Han Sans", "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1116; --panel: #161b22; --panel-2: #1c222b; --ink: #e8ecf2; --muted: #9aa4b2; --line: #29313c; --line-strong: #3a4452;
+    --accent: #f5c518; --accent-ink: #f5c518; --accent-soft: #3a3010; --on-accent: #161200;
+    --good: #4cc283; --good-soft: #15301f; --bad: #f0675c; --bad-soft: #3a1a17; --warn: #e3a83a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1116; --panel: #161b22; --panel-2: #1c222b; --ink: #e8ecf2; --muted: #9aa4b2; --line: #29313c; --line-strong: #3a4452;
+  --accent: #f5c518; --accent-ink: #f5c518; --accent-soft: #3a3010; --on-accent: #161200;
+  --good: #4cc283; --good-soft: #15301f; --bad: #f0675c; --bad-soft: #3a1a17; --warn: #e3a83a;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { background: var(--bg); }
+body { margin: 0; color: var(--ink); font: 400 15px/1.6 var(--font-body); -webkit-font-smoothing: antialiased; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.app { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 18px 48px; }
+.masthead { display: grid; gap: 4px; margin-bottom: 16px; }
+.eyebrow { margin: 0; font: 500 12px/1.4 var(--font-mono); letter-spacing: .04em; color: var(--muted); }
+h1 { margin: 0; font: 400 clamp(32px, 6.5vw, 46px)/1.08 var(--font-display); letter-spacing: -.01em; text-wrap: balance; }
+.lede { margin: 2px 0 0; max-width: 62ch; color: var(--muted); font-size: 14.5px; }
+.lede b { color: var(--ink); }
+
+.layout { display: grid; gap: 28px; }
+@media (min-width: 1020px) { .layout { grid-template-columns: minmax(0, 600px) minmax(0, 1fr); align-items: start; } }
+.fab { display: grid; gap: 12px; min-width: 0; }
+.notes { display: grid; gap: 16px; min-width: 0; }
+
+.name-row { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
+.name-row label { flex: 1 1 100%; font-size: 13px; font-weight: 600; color: var(--muted); }
+.name-row input { flex: 1 1 160px; min-width: 0; min-height: 44px; padding: 8px 12px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--panel); font-size: 17px; font-weight: 600; }
+.btn { appearance: none; cursor: pointer; min-height: 44px; padding: 9px 15px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--panel); font-size: 14px; font-weight: 600; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.stage { position: relative; aspect-ratio: 4 / 3; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: radial-gradient(120% 95% at 50% 18%, var(--stage-top), var(--stage-bot)); }
+@media (max-width: 560px) { .stage { aspect-ratio: 1 / 1; } }
+#gl { position: absolute; inset: 0; }
+#gl canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; cursor: grab; }
+#gl canvas:active { cursor: grabbing; }
+.hud { position: absolute; display: flex; flex-direction: column; gap: 2px; padding: 7px 11px; border-radius: 10px; background: var(--stage-chip); color: var(--stage-ink); pointer-events: none; max-width: calc(100% - 20px); }
+.hud-tl { top: 10px; left: 10px; }
+.hud-tl b { font: 400 19px/1.15 var(--font-display); }
+.hud-tl span { font-size: 12.5px; color: var(--stage-muted); }
+.hud-tr { top: 10px; right: 10px; font: 500 12px/1.35 var(--font-mono); color: var(--stage-ink); text-align: right; }
+.hud-bl { left: 10px; bottom: 10px; flex-direction: row; flex-wrap: wrap; gap: 4px 10px; font-size: 11.5px; color: var(--stage-muted); max-width: calc(100% - 120px); }
+.hud-bl i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+.hud-br { right: 10px; bottom: 10px; padding: 4px; pointer-events: auto; }
+.hud-btn { appearance: none; cursor: pointer; min-height: 34px; padding: 5px 11px; border: 1px solid rgba(230,235,243,.35); border-radius: 8px; background: transparent; color: var(--stage-ink); font-size: 12.5px; font-weight: 600; }
+.hud-btn:disabled { opacity: .4; cursor: not-allowed; }
+.gl-error { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--stage-ink); font-size: 14px; }
+
+.status { margin: 0; min-height: 3.2em; padding: 10px 13px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); font-size: 14px; }
+.status .bad { color: var(--bad); font-weight: 600; }
+.status .warn { color: var(--warn); font-weight: 600; }
+
+.procs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .procs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.proc { appearance: none; cursor: pointer; display: grid; gap: 1px; align-content: start; min-width: 0; padding: 10px 12px; text-align: left; border: 1px solid var(--line-strong); border-radius: 11px; background: var(--panel); transition: background .15s, border-color .15s, transform .08s; }
+.proc b { font: 400 19px/1.2 var(--font-display); }
+.proc small { font-size: 12px; line-height: 1.35; color: var(--muted); }
+.proc:hover:not(:disabled) { border-color: var(--accent); }
+.proc:active:not(:disabled) { transform: translateY(1px); }
+.proc.flash { background: var(--accent-soft); border-color: var(--accent); }
+.proc:disabled { opacity: .5; cursor: not-allowed; }
+
+.log-wrap { display: grid; gap: 6px; }
+.log-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.log { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; min-height: 30px; }
+.log li, .seq li { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px 3px 4px; border-radius: 99px; border: 1px solid var(--line); background: var(--panel); font-size: 13px; font-weight: 600; }
+.log li span, .seq li span { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 99px; background: var(--panel-2); font: 600 11px/1 var(--font-mono); color: var(--muted); }
+.log li.warn { border-color: var(--warn); }
+.log li.warn::after { content: "⚠"; color: var(--warn); font-size: 12px; }
+.log li.wrong, .seq li.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.log .empty { border: 0; background: none; padding: 3px 0; font-weight: 400; color: var(--muted); }
+
+.report { display: grid; gap: 12px; padding: 16px 18px 18px; border-radius: 14px; background: var(--panel); border: 2px solid var(--line-strong); }
+.report[data-ok="true"] { border-color: var(--good); }
+.report[data-ok="false"] { border-color: var(--bad); }
+.report h2 { margin: 0; font: 400 26px/1.2 var(--font-display); text-wrap: balance; }
+.report[data-ok="true"] h2 { color: var(--good); }
+.report[data-ok="false"] h2 { color: var(--bad); }
+.report p { margin: 0; max-width: 64ch; }
+.report ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.seq-block { display: grid; gap: 6px; }
+.seq-block h3 { margin: 0; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.seq { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 5px; }
+.seq li { font-size: 12.5px; }
+
+.card { padding: 16px 18px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; min-width: 0; }
+.card h2 { margin: 0 0 6px; font: 400 22px/1.2 var(--font-display); text-wrap: balance; }
+.card p { margin: 0 0 8px; max-width: 64ch; }
+.card .sub { font-size: 13.5px; color: var(--muted); }
+.masks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 8px; }
+.masks figure { margin: 0; display: grid; gap: 4px; min-width: 0; }
+.masks canvas { width: 100%; aspect-ratio: 1; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); }
+.masks figcaption { font-size: 12px; line-height: 1.35; color: var(--muted); }
+.masks figcaption b { display: block; color: var(--ink); font-size: 12.5px; }
+.gloss { margin: 0; display: grid; gap: 8px; }
+.gloss div { display: grid; grid-template-columns: 6.6em minmax(0, 1fr); gap: 10px; align-items: baseline; }
+.gloss dt { font: 400 16px/1.3 var(--font-display); }
+.gloss dd { margin: 0; font-size: 13.5px; color: var(--muted); }
+details.card summary { cursor: pointer; font: 400 20px/1.3 var(--font-display); }
+details.card ol { margin: 10px 0 0; padding-left: 26px; display: grid; gap: 5px; font-size: 14px; }
+details.card ol li::marker { font-family: var(--font-mono); color: var(--muted); }
+details.card ol b { font-weight: 700; }
+.foot { margin: 0; font-size: 12px; color: var(--muted); max-width: 70ch; }
+@media (prefers-reduced-motion: reduce) { .proc { transition: none; } }
+</style>
+
+</head>
+<body>
+<div class="app">
+  <nav style="margin-bottom:10px;font-size:13px"><a href="index.html" style="color:var(--muted);text-decoration:none;font-weight:600">← 실험 목록</a></nav>
+  <header class="masthead">
+    <p class="eyebrow">IT융합소재 · 반도체 제조공정 · 8대 공정 · 멀티 다이</p>
+    <h1>내 이름 칩 공장</h1>
+    <p class="lede">웨이퍼에 새길 이름을 정하고, 아래 공정 버튼을 <b>올바른 순서</b>로 눌러 나만의 칩을 만드세요. 웨이퍼 한 장에는 같은 칩(다이)이 바둑판처럼 여러 개 새겨집니다. 버튼을 누르면 웨이퍼가 천장 레일을 타고 그 공정 장비로 옮겨집니다. 막을 입히고, 무늬를 그리고, 깎아 내는 일을 여러 번 되풀이해야 층이 쌓입니다. 순서가 틀리면 불량품이 나옵니다.</p>
+  </header>
+
+  <div class="layout">
+    <section class="fab" aria-label="공정 시뮬레이션">
+      <form class="name-row" id="name-form" autocomplete="off">
+        <label for="name-input">웨이퍼에 새길 이름 (예시 이름 대신 자기 이름을 넣어 보세요)</label>
+        <input id="name-input" name="name" maxlength="8" value="홍길동" required>
+        <button class="btn primary" type="submit">이 이름으로 새로 시작</button>
+      </form>
+
+      <div class="stage" id="stage">
+        <div id="gl" role="img" aria-label="반도체 공장 3D 화면. 공정 장비 8대가 통로 양쪽에 있고, 웨이퍼가 장비 사이를 옮겨 다닙니다. 끌어서 돌려 볼 수 있습니다."></div>
+        <div class="hud hud-tl"><b id="hud-proc">대기 중</b><span id="hud-step">첫 공정 버튼을 눌러 보세요</span></div>
+        <div class="hud hud-tr" id="hud-cond">공정 0</div>
+        <div class="hud hud-bl" aria-hidden="true">
+          <span><i style="background:var(--m-si)"></i>실리콘</span>
+          <span><i style="background:var(--m-ox)"></i>산화막</span>
+          <span><i style="background:var(--m-nit)"></i>질화막</span>
+          <span><i style="background:var(--m-metal)"></i>알루미늄</span>
+          <span><i style="background:var(--m-pr)"></i>감광액</span>
+        </div>
+        <div class="hud hud-br" style="flex-direction:row;gap:6px"><button class="hud-btn" type="button" id="btn-zoom" aria-pressed="false" disabled>다이 확대</button><button class="hud-btn" type="button" id="btn-view" disabled>웨이퍼 가까이</button></div>
+      </div>
+
+      <p class="status" id="status" aria-live="polite">첫 번째 공정은 무엇일까요? 버튼에 적힌 하는 일을 보고 골라 보세요.</p>
+
+      <div class="procs" id="procs">
+        <button class="proc" type="button" data-k="etch"><b>식각</b><small>필요 없는 막 깎아 내기</small></button>
+        <button class="proc" type="button" data-k="pkg"><b>패키징</b><small>잘라서 포장하기</small></button>
+        <button class="proc" type="button" data-k="ox"><b>산화</b><small>고온에서 SiO₂ 막 기르기</small></button>
+        <button class="proc" type="button" data-k="metal"><b>금속 배선</b><small>알루미늄 막 입히기</small></button>
+        <button class="proc" type="button" data-k="wafer"><b>웨이퍼 제조</b><small>실리콘 원판 만들기</small></button>
+        <button class="proc" type="button" data-k="eds"><b>EDS</b><small>전기로 검사하기</small></button>
+        <button class="proc" type="button" data-k="photo"><b>포토</b><small>빛으로 무늬 옮기기</small></button>
+        <button class="proc" type="button" data-k="film"><b>박막</b><small>질화막 입히기</small></button>
+      </div>
+
+      <div class="log-wrap">
+        <div class="log-head"><span>내가 누른 순서</span><button class="btn" id="btn-reset" type="button" style="min-height:34px;padding:4px 12px;font-size:13px">처음부터</button></div>
+        <ol class="log" id="log"><li class="empty">아직 누른 공정이 없습니다.</li></ol>
+      </div>
+
+      <section class="report" id="report" hidden aria-live="polite"></section>
+    </section>
+
+    <aside class="notes">
+      <section class="card">
+        <h2>마스크 세트</h2>
+        <p class="sub">입력한 이름으로 마스크 3장을 만듭니다. 한 장에 같은 다이 무늬가 바둑판처럼 반복됩니다. 검은 부분(크롬)이 빛을 가려, 그 아래 감광액이 남습니다. 포토 공정 때는 그 순간 맨 위에 있는 막에 맞는 마스크가 쓰입니다.</p>
+        <div class="masks">
+          <figure><canvas id="mk-name" width="240" height="240"></canvas><figcaption><b>마스크 1</b>이름</figcaption></figure>
+          <figure><canvas id="mk-frame" width="240" height="240"></canvas><figcaption><b>마스크 2</b>테두리</figcaption></figure>
+          <figure><canvas id="mk-wire" width="240" height="240"></canvas><figcaption><b>마스크 3</b>배선과 패드</figcaption></figure>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>공정이 하는 일</h2>
+        <dl class="gloss">
+          <div><dt>식각</dt><dd>감광액이 덮지 않은 부분의 막을 플라즈마(건식)나 용액(습식)으로 깎아 냅니다. 끝나면 남은 감광액을 벗겨 냅니다(애싱).</dd></div>
+          <div><dt>패키징</dt><dd>웨이퍼를 칩 단위로 자르고(다이싱), 수지로 감싼 뒤 제품 이름을 새깁니다.</dd></div>
+          <div><dt>산화</dt><dd>800–1,200 °C 산화로에서 산소(건식)나 수증기(습식)로 실리콘 표면에 SiO₂ 절연막을 기릅니다.</dd></div>
+          <div><dt>금속 배선</dt><dd>전기가 흐를 길을 만들기 위해 알루미늄·구리·텅스텐 같은 금속막을 입힙니다.</dd></div>
+          <div><dt>웨이퍼 제조</dt><dd>실리콘을 녹여 단결정 기둥(잉곳)을 만들고, 얇게 잘라 거울처럼 연마합니다. 지금은 지름 300 mm가 주력입니다.</dd></div>
+          <div><dt>EDS</dt><dd>웨이퍼 상태에서 탐침을 패드에 대고 전기 신호로 칩을 검사합니다(Electrical Die Sorting). 불량 칩에는 잉크로 표시합니다.</dd></div>
+          <div><dt>포토</dt><dd>감광액을 스핀 코팅으로 바르고, 마스크를 통해 자외선을 쬔 뒤 현상해 무늬를 옮깁니다. 빛을 받은 부분이 녹아 나가는 것이 양성 감광액입니다.</dd></div>
+          <div><dt>박막</dt><dd>질화막(Si₃N₄) 같은 얇은 막을 CVD·PVD·ALD로 입힙니다.</dd></div>
+        </dl>
+      </section>
+
+      <details class="card" id="answer">
+        <summary>정답 순서 보기</summary>
+        <ol>
+          <li><b>웨이퍼 제조</b> · 실리콘 원판 준비</li>
+          <li><b>산화</b> · SiO₂ 절연막 기르기</li>
+          <li><b>포토</b> · 마스크 1(이름)을 감광액에 옮기기</li>
+          <li><b>식각</b> · 산화막에 이름 새기기, 감광액 제거</li>
+          <li><b>박막</b> · 질화막 입히기</li>
+          <li><b>포토</b> · 마스크 2(테두리)</li>
+          <li><b>식각</b> · 질화막에 테두리 새기기</li>
+          <li><b>금속 배선</b> · 알루미늄 막 입히기</li>
+          <li><b>포토</b> · 마스크 3(배선·패드)</li>
+          <li><b>식각</b> · 금속 배선 완성</li>
+          <li><b>EDS</b> · 다이마다 패드에 탐침을 대고 전기 검사</li>
+          <li><b>패키징</b> · 다이싱으로 다이를 나누고, 양품 다이를 포장해 이름 새기기</li>
+        </ol>
+        <p class="sub" style="margin-top:10px">막을 하나 입힐 때마다 포토 → 식각을 한 번씩 되풀이합니다. 그래서 8대 공정 가운데 포토와 식각은 여러 번 나옵니다.</p>
+      </details>
+
+      <p class="foot">실제 300 mm 웨이퍼에는 칩 크기에 따라 수십~수천 개의 다이가 들어갑니다. 여기서는 잘 보이도록 다이를 크게 그렸습니다. 막 두께도 보이도록 크게 과장했습니다. 실제 산화막은 수십~수백 nm이고, 300 mm 웨이퍼의 두께는 약 0.8 mm입니다. 실제 공정에는 세정, 이온주입, 평탄화(CMP) 같은 단계가 더 많이 들어갑니다. 실제 공장에서는 웨이퍼 25장을 FOUP라는 통에 담아 천장 레일(OHT)로 옮깁니다. 웨이퍼 제조와 EDS·패키징은 보통 다른 공장에서 하지만, 여기서는 한 공장에 모아 두었습니다.</p>
+    </aside>
+  </div>
+</div>
+
+<script src="lib/three.min.js"></script>
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- process model ---------- */
+const N = 420;                                    // heightfield resolution across the wafer (radius = 1)
+const PITCH = 0.42, DSZ = 0.37;                   // die pitch and die size; the gap between dies is the scribe line
+const DIES = [];
+for (let a = -3; a < 3; a++) for (let b = -3; b < 3; b++) {
+  const x = (a + 0.5) * PITCH, z = (b + 0.5) * PITCH, h = DSZ / 2;
+  const near = Math.hypot(Math.max(0, Math.abs(x) - h), Math.max(0, Math.abs(z) - h));
+  if (near >= 0.99) continue;
+  DIES.push({ x, z, a, b, full: Math.hypot(Math.abs(x) + h, Math.abs(z) + h) <= 0.985 });
+}
+const FULL = DIES.filter(d => d.full).sort((p, q) => p.b - q.b || (p.b % 2 ? q.a - p.a : p.a - q.a));   // serpentine probe order
+const TH = { ox: 0.05, nit: 0.036, metal: 0.045, pr: 0.06, trench: -0.045 };
+const S = ['wafer', 'ox', 'photo', 'etch', 'film', 'photo', 'etch', 'metal', 'photo', 'etch', 'eds', 'pkg'];
+const NAME = { wafer: '웨이퍼 제조', ox: '산화', photo: '포토', etch: '식각', film: '박막', metal: '금속 배선', eds: 'EDS', pkg: '패키징' };
+const MAT = { ox: '산화막(SiO₂)', nit: '질화막(Si₃N₄)', metal: '알루미늄 막', melt: '녹은 금속막' };
+const MASK_OF = { ox: 'name', nit: 'frame', metal: 'wire', melt: 'wire' };
+const MASK_NO = { name: 1, frame: 2, wire: 3 };
+const FILMS = ['ox', 'nit', 'metal', 'melt'];
+
+const RAD = new Float32Array(N * N), DISK = new Float32Array(N * N);
+for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+  const x = -1 + 2 * i / (N - 1), z = -1 + 2 * j / (N - 1), r = Math.hypot(x, z), v = j * N + i;
+  RAD[v] = r; DISK[v] = r <= 1 ? 1 : 0;
+}
+const toW = p => -1 + 2 * p / (N - 1);            // grid index → wafer coordinate
+const toG = w => Math.max(0, Math.min(N - 1, Math.round((w + 1) * (N - 1) / 2)));
+const KERF = new Uint8Array(N * N);                // saw lanes along the scribe lines
+for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+  const x = toW(i), z = toW(j), dx = Math.abs(x / PITCH - Math.round(x / PITCH)) * PITCH, dz = Math.abs(z / PITCH - Math.round(z / PITCH)) * PITCH;
+  KERF[j * N + i] = dx < 0.014 || dz < 0.014 ? 1 : 0;
+}
+
+function josa(word, a, b) {                        // 을/를, 이/가 after the last syllable
+  const c = word.charCodeAt(word.length - 1);
+  if (c >= 0xac00 && c <= 0xd7a3) return word + ((c - 0xac00) % 28 ? a : b);
+  return word + b;
+}
+
+/* ---------- masks from the name ---------- */
+let displayName = '홍길동', masks = null;
+const MASK_FONT = f => `${f}px "Black Han Sans", "IBM Plex Sans KR", "Malgun Gothic", sans-serif`;
+// One die's pattern, laid out around the die centre on a canvas where the die is D pixels wide.
+function dieLayout(g, D, name) {
+  g.font = MASK_FONT(100);
+  let m = g.measureText(name);
+  const asc = m.actualBoundingBoxAscent || 76, desc = m.actualBoundingBoxDescent || 10;
+  const fs = Math.min(100 * 0.8 * D / Math.max(1, m.width), 100 * 0.38 * D / (asc + desc));
+  g.font = MASK_FONT(fs); g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+  m = g.measureText(name);
+  const a = m.actualBoundingBoxAscent || fs * 0.76, d = m.actualBoundingBoxDescent || fs * 0.1;
+  const ty = -0.12 * D, left = -m.width / 2, base = ty + (a - d) / 2;
+  const chars = Array.from(name), centers = [];
+  chars.forEach((ch, k) => {
+    if (!ch.trim()) return;
+    const pre = g.measureText(chars.slice(0, k).join('')).width, cw = g.measureText(ch).width;
+    centers.push(left + pre + cw / 2);
+  });
+  const gap = centers.length > 1 ? Math.min(...centers.slice(1).map((x, k) => x - centers[k])) : 0.3 * D;
+  return { left, right: -left, top: base - a, bottom: base + d, base, ty, centers, padY: 0.33 * D, pad: Math.min(0.11 * D, gap * 0.72) };
+}
+function drawDie(g, L, cx, cy, D, key, name) {
+  g.save(); g.translate(cx, cy);
+  if (key === 'name') g.fillText(name, L.left, L.base);
+  else if (key === 'frame') {
+    const p = 0.05 * D;
+    g.lineWidth = 0.045 * D;
+    g.strokeRect(L.left - p, L.top - p, (L.right - L.left) + 2 * p, (L.bottom - L.top) + 2 * p);
+  } else {
+    g.lineWidth = Math.min(0.045 * D, L.pad * 0.5);
+    for (const x of L.centers) {
+      g.beginPath(); g.moveTo(x, L.ty); g.lineTo(x, L.padY); g.stroke();
+      g.fillRect(x - L.pad / 2, L.padY - L.pad / 2, L.pad, L.pad);
+    }
+  }
+  g.restore();
+}
+// Every die gets the same pattern; the round wafer edge cuts the outer ones.
+function drawMask(g, size, key, name) {
+  const s = size / 2, D = DSZ * s;
+  g.fillStyle = g.strokeStyle = '#000';
+  const L = dieLayout(g, D, name);
+  g.save(); g.beginPath(); g.arc(s, s, s, 0, Math.PI * 2); g.clip();
+  for (const d of DIES) drawDie(g, L, s + d.x * s, s + d.z * s, D, key, name);
+  g.restore();
+  return L;
+}
+function buildMasks(name) {
+  const c = document.createElement('canvas'); c.width = c.height = N;
+  const g = c.getContext('2d', { willReadFrequently: true });
+  const out = {};
+  for (const key of ['name', 'frame', 'wire']) {
+    g.clearRect(0, 0, N, N);
+    const L = drawMask(g, N, key, name);
+    const im = g.getImageData(0, 0, N, N).data, a = new Float32Array(N * N);
+    for (let v = 0; v < N * N; v++) a[v] = (im[v * 4 + 3] / 255) * DISK[v];
+    out[key] = a;
+    if (key === 'wire') out.pads = L.centers.map(x => ({ dx: x / (N / 2), dz: L.padY / (N / 2) }));   // pad offsets from a die centre
+  }
+  return out;
+}
+function drawThumb(id, key) {
+  const c = $(id), g = c.getContext('2d'), size = c.width, R = size / 2 - 2;
+  g.clearRect(0, 0, size, size);
+  g.save(); drawMask(g, size, key, displayName); g.restore();       // chrome pattern
+  g.globalCompositeOperation = 'source-atop'; g.fillStyle = '#2a2f37'; g.fillRect(0, 0, size, size);
+  g.globalCompositeOperation = 'destination-over';                  // quartz plate behind the chrome
+  g.beginPath(); g.arc(size / 2, size / 2, R, 0, Math.PI * 2); g.fillStyle = '#e9eef5'; g.fill();
+  g.globalCompositeOperation = 'source-over';
+  g.setLineDash([4, 4]); g.strokeStyle = '#8a95a5'; g.lineWidth = 1.2;
+  g.beginPath(); g.arc(size / 2, size / 2, R, 0, Math.PI * 2); g.stroke(); g.setLineDash([]);
+}
+
+/* ---------- wafer state ---------- */
+let st;
+function fresh() {
+  st = { wafer: false, appear: 0, at: null, layers: [], pressed: [], marks: [], defects: [], busy: false, done: false, eds: null, ink: false, dieMarks: [], picked: null };
+  fx = { furnace: 0, bake: 0, plasma: 0, uv: 0, plate: 0, plateKey: 'name', spin: 0, dep: null, probe: 0, probeAt: 0, touch: 0, saw: 0, lift: 0, mold: 0, mark: 0, inkT: 0, moving: false };
+}
+let fx = {};
+const mkLayer = (mat, th) => ({ mat, cov: null, cov2: null, t: 1, th, thT: 1, radial: null, exp: null, expT: 0, patterned: false, burnT: 0, meltT: 0 });
+const covOf = ly => ly.cov || DISK;
+function amount(ly) { if (!ly.cov) return Infinity; let s = 0; for (let v = 0; v < N * N; v += 7) s += ly.cov[v]; return s; }
+function topFilm() {
+  for (let k = st.layers.length - 1; k >= 0; k--) {
+    const ly = st.layers[k];
+    if (FILMS.includes(ly.mat) && amount(ly) > 3) return ly;
+  }
+  return null;
+}
+function commit(ly) { ly.cov = ly.cov2; ly.cov2 = null; ly.t = 1; }
+let pressNotes = [];
+function note(text, tone) {
+  pressNotes.push({ text, tone });
+  if (tone === 'bad') { st.defects.push(text); st.marks[st.pressed.length - 1] = true; }
+}
+const seg = (dur, label, cond, h) => Object.assign({ dur, label, cond }, h || {});
+
+const PROC = {
+  wafer() {
+    if (st.wafer) { note('웨이퍼는 이미 있습니다. 웨이퍼 제조는 맨 처음에 한 번만 합니다.', 'bad'); return []; }
+    info = '실리콘 웨이퍼가 준비됐습니다. 잉곳을 얇게 잘라 거울처럼 연마한 원판입니다.';
+    return [seg(1.8, '잉곳을 얇게 잘라 연마', 'Si 단결정 · 지름 300 mm', { start() { st.wafer = true; st.at = 'wafer'; parkAt('wafer'); cam.follow = true; cam.held = 0; cam.zoom = 1; }, update(e) { st.appear = e; } })];
+  },
+  ox() {
+    const segs = [seg(0.6, '산화로 가열', '산화로 · 1,000 °C', { update(e) { fx.furnace = e; } })];
+    const prs = st.layers.filter(l => l.mat === 'pr'), metals = st.layers.filter(l => l.mat === 'metal');
+    if (prs.length) {
+      note('감광액(유기물)이 1,000 °C 산화로에서 타 버렸습니다.', 'bad');
+      segs.push(seg(0.9, '감광액이 타는 중', null, { update(e) { prs.forEach(l => { l.burnT = e; }); }, end() { prs.forEach(l => { l.mat = 'burnt'; }); } }));
+    }
+    if (metals.length) {
+      note('알루미늄은 약 660 °C에서 녹습니다. 산화로에서 금속막이 녹아 망가졌습니다.', 'bad');
+      segs.push(seg(0.9, '금속막이 녹는 중', null, { update(e) { metals.forEach(l => { l.meltT = e; }); }, end() { metals.forEach(l => { l.mat = 'melt'; }); } }));
+    }
+    const L = mkLayer('ox', TH.ox); L.thT = 0;
+    segs.push(seg(1.9, '산화막(SiO₂) 성장', null, { start() { st.layers.unshift(L); }, update(e) { L.thT = e; } }));
+    segs.push(seg(0.5, '냉각', null, { update(e) { fx.furnace = 1 - e; } }));
+    info = '실리콘 표면에 산화막(SiO₂)이 자랐습니다. 자라는 동안 색이 바뀐 것은 얇은 막에서 빛이 간섭하기 때문입니다.';
+    return segs;
+  },
+  photo() {
+    const target = topFilm(), key = target ? MASK_OF[target.mat] : 'name', M = masks[key], no = MASK_NO[key];
+    if (st.layers.some(l => l.mat === 'pr')) note('감광액 위에 감광액을 또 발랐습니다. 무늬가 겹쳐 흐려집니다.', 'bad');
+    else if (!target) note('막이 없는 실리콘 위에 바로 무늬를 그렸습니다.', 'warn');
+    else if (target.patterned) note(`이미 무늬를 새긴 ${MAT[target.mat]} 위에 또 무늬를 그렸습니다.`, 'warn');
+    const L = mkLayer('pr', TH.pr); L.radial = 0;
+    info = `마스크 ${no}의 무늬가 감광액으로 옮겨졌습니다. 빛을 받은 부분은 현상액에 녹아 나갔습니다(양성 감광액).`;
+    return [
+      seg(1.4, '① 감광액 스핀 코팅', '스핀 코팅 · 수천 rpm', { start() { st.layers.push(L); }, update(e) { L.radial = e * 1.04; fx.spin = e; }, end() { L.radial = null; fx.spin = 0; } }),
+      seg(0.7, '② 소프트 베이크', '핫플레이트 · 약 100 °C', { update(e, t) { fx.bake = Math.sin(t * Math.PI); } }),
+      seg(1.7, `③ 노광 · 마스크 ${no}`, '자외선 노광', {
+        start() { fx.plateKey = key; showPlate(key); L.exp = new Float32Array(N * N); for (let v = 0; v < N * N; v++) L.exp[v] = 1 - M[v]; },
+        update(e, t) { fx.plate = Math.min(1, t * 4); fx.uv = t < 0.25 ? 0 : Math.sin((t - 0.25) / 0.75 * Math.PI); L.expT = Math.max(0, (t - 0.25) / 0.75); },
+        end() { fx.uv = 0; }
+      }),
+      seg(1.4, '④ 현상', '현상액', {
+        start() { L.cov = DISK; L.cov2 = M; L.t = 0; },
+        update(e, t) { fx.plate = Math.max(0, 1 - t * 4); L.t = e; },
+        end() { commit(L); fx.plate = 0; }
+      })
+    ];
+  },
+  etch() {
+    const prs = st.layers.filter(l => l.mat === 'pr'), shields = st.layers.filter(l => l.mat === 'pr' || l.mat === 'burnt' || l.mat === 'trapped');
+    const target = topFilm(), keep = new Float32Array(N * N);
+    for (const l of shields) { const c = covOf(l); for (let v = 0; v < N * N; v++) if (c[v] > keep[v]) keep[v] = c[v]; }
+    const segs = [seg(0.5, '플라즈마 켜기', '플라즈마 · 진공 챔버', { update(e) { fx.plasma = e; } })];
+    if (!target) {
+      note(shields.length ? '깎을 막이 없어 실리콘 웨이퍼 자체가 깎였습니다.' : '감광액도 막도 없어 실리콘 표면 전체가 깎였습니다.', 'bad');
+      const T = mkLayer('trench', TH.trench); T.thT = 0; T.cov = new Float32Array(N * N);
+      for (let v = 0; v < N * N; v++) T.cov[v] = (1 - keep[v]) * DISK[v];
+      segs.push(seg(1.8, '실리콘 식각', null, { start() { st.layers.unshift(T); }, update(e) { T.thT = e; } }));
+      info = '실리콘이 깎였습니다.';
+    } else {
+      if (!shields.length) note(`감광액이 지켜 주지 않아 ${josa(MAT[target.mat], '이', '가')} 전부 깎여 나갔습니다.`, 'bad');
+      segs.push(seg(1.8, `${MAT[target.mat]} 식각`, null, {
+        start() { const c = covOf(target); target.cov = c; target.cov2 = new Float32Array(N * N); for (let v = 0; v < N * N; v++) target.cov2[v] = c[v] * keep[v]; target.t = 0; },
+        update(e) { target.t = e; },
+        end() { commit(target); target.patterned = true; }
+      }));
+      info = shields.length ? `감광액이 덮지 않은 ${josa(MAT[target.mat], '이', '가')} 깎여 나가고, 남은 감광액은 벗겨 냈습니다. 이제 ${MAT[target.mat]}에 무늬가 새겨졌습니다.` : '막이 깎였습니다.';
+    }
+    if (prs.length) segs.push(seg(1.0, '감광액 제거(애싱)', 'O₂ 플라즈마 애싱', { update(e) { prs.forEach(l => { l.thT = 1 - e; }); }, end() { st.layers = st.layers.filter(l => !prs.includes(l)); } }));
+    if (st.layers.some(l => l.mat === 'burnt')) note('타 버린 감광액은 애싱으로도 잘 벗겨지지 않아 찌꺼기로 남았습니다.', 'bad');
+    segs.push(seg(0.4, '플라즈마 끄기', null, { update(e) { fx.plasma = 1 - e; } }));
+    return segs;
+  },
+  film() { return deposit('nit', '질화막(Si₃N₄) 증착', 'CVD · 약 700 °C', true); },
+  metal() { return deposit('metal', '알루미늄 증착', '스퍼터링(PVD) · 진공', false); },
+  eds() {
+    if (st.eds !== null) { note('이미 검사를 마쳤습니다.', 'warn'); return []; }
+    const P = st.pressed.slice(0, -1), seqOK = P.length === 10 && P.every((k, i) => k === S[i]);
+    const metal = st.layers.find(l => l.mat === 'metal');
+    if (!metal) note('전기를 연결할 금속 패드가 없어 신호가 나오지 않습니다.', 'bad');
+    else if (!metal.patterned) note('금속막이 웨이퍼 전체를 덮고 있어 모든 패드가 서로 이어졌습니다(단락).', 'bad');
+    else if (!seqOK) note('공정 순서가 어긋나 패드에서 비정상 신호가 나왔습니다.', 'bad');
+    const pass = seqOK && !!metal && metal.patterned, n = FULL.length;
+    info = pass ? `다이 ${n}개 모두 정상 신호가 나왔습니다(초록 표시). 가장자리에 걸린 다이에는 빨간 잉크를 찍었습니다.` : `다이 ${n}개 모두 불량 판정이 나와 빨간 잉크를 찍었습니다.`;
+    return [
+      seg(0.6, '프로브 카드 내리기', '프로브 카드 · 다이마다 전기 검사', { start() { buildProbes(); st.dieMarks = []; fx.probeAt = 0; }, update(e) { fx.probe = e; } }),
+      seg(n * 0.26, '다이를 하나씩 검사', null, {
+        update(e, t) { const k = Math.min(n - 1, Math.floor(t * n)); fx.probeAt = k; fx.touch = Math.sin((t * n - k) * Math.PI); while (st.dieMarks.length < k) st.dieMarks.push(pass); },
+        end() { while (st.dieMarks.length < n) st.dieMarks.push(pass); st.eds = pass; fx.touch = 0; }
+      }),
+      seg(0.7, '불량·가장자리 다이에 잉크 표시', null, { start() { st.ink = true; }, update(e) { fx.probe = 1 - e; fx.inkT = e; } })
+    ];
+  },
+  pkg() {
+    if (st.eds === null) note('EDS 검사를 건너뛰고 포장했습니다. 불량 칩이 섞여 나갈 수 있습니다.', 'bad');
+    const ok = st.pressed.length === S.length && st.pressed.every((k, i) => k === S[i]);
+    info = '다이를 나누고, 그중 하나를 수지로 감싸 이름을 새겼습니다. 나머지 다이도 같은 방법으로 포장합니다. 아래 결과를 확인하세요.';
+    return [
+      seg(1.5, '다이싱(다이 나누기)', '다이아몬드 톱', { update(e) { fx.saw = e; } }),
+      seg(1.1, '양품 다이 하나 집어 올리기', '다이 픽업', { start() { pickDie(); }, update(e) { fx.lift = e; } }),
+      seg(1.3, '몰딩(수지로 감싸기)', '에폭시 몰딩', { start() { buildMold(ok); }, update(e) { fx.mold = e; } }),
+      seg(0.9, '이름 새기기(레이저 마킹)', '레이저 마킹', { update(e) { fx.mark = e; }, end() { st.done = true; } })
+    ];
+  }
+};
+function deposit(mat, label, cond, hot) {
+  const prs = st.layers.filter(l => l.mat === 'pr');
+  if (prs.length) note(hot ? '감광액을 벗기지 않은 채 고온에서 막을 입혀, 감광액이 막 아래에서 타 버렸습니다.' : '감광액을 벗기지 않은 채 금속을 입혀, 감광액이 금속막 아래에 갇혔습니다.', 'bad');
+  const L = mkLayer(mat, TH[mat]); L.thT = 0;
+  info = mat === 'nit' ? '웨이퍼 전체에 질화막(Si₃N₄)이 얇게 덮였습니다.' : '웨이퍼 전체에 알루미늄 막이 덮였습니다. 지금은 웨이퍼 전체가 금속으로 이어져 있습니다.';
+  return [seg(2.0, label, cond, {
+    start() { prs.forEach(p => { p.mat = hot ? 'burnt' : 'trapped'; p.burnT = 1; }); st.layers.push(L); fx.dep = mat; },
+    update(e) { L.thT = e; },
+    end() { fx.dep = null; }
+  })];
+}
+
+/* ---------- timeline ---------- */
+let queue = [], cur = null, info = '';
+const ease = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+function runSegs(segs) { queue = segs.slice(); st.busy = true; nextSeg(); }
+function nextSeg() {
+  cur = queue.shift() || null;
+  if (!cur) { st.busy = false; afterPress(); return; }
+  cur.el = 0;
+  if (cur.start) cur.start();
+  if (cur.label) $('#hud-step').textContent = cur.label;
+  if (cur.cond) $('#hud-cond').textContent = `공정 ${st.pressed.length} · ${cur.cond}`;
+  dirty = true;
+}
+function tick(dt) {
+  if (!cur) return;
+  cur.el += dt;
+  const t = Math.min(1, cur.el / cur.dur);
+  if (cur.update) cur.update(ease(t), t);
+  dirty = true;
+  if (t >= 1) { if (cur.end) cur.end(); nextSeg(); }
+}
+
+/* ---------- fab floor ---------- */
+// Tools sit in two rows along one aisle, in the same arrangement as the button grid (not in process order).
+const STATIONS = {
+  etch:  { col: 0, row: 0, tool: '플라즈마 식각기', accent: 0xa45cff },
+  pkg:   { col: 1, row: 0, tool: '후공정 라인', accent: 0x9aa0aa },
+  ox:    { col: 2, row: 0, tool: '산화로', accent: 0xff7a2f },
+  metal: { col: 3, row: 0, tool: '스퍼터 장비', accent: 0xdfe3e8 },
+  wafer: { col: 0, row: 1, tool: '잉곳 성장로', accent: 0x9aa3b5 },
+  eds:   { col: 1, row: 1, tool: '프로버', accent: 0x37d27a },
+  photo: { col: 2, row: 1, tool: '노광 장비', accent: 0xf5c518 },
+  film:  { col: 3, row: 1, tool: 'CVD 장비', accent: 0x2f9e8c }
+};
+for (const s of Object.values(STATIONS)) {
+  s.x = -9 + s.col * 6;
+  s.zTool = s.row ? 6.3 : -6.3;
+  s.zPed = s.row ? 3.4 : -3.4;
+  s.rot = s.row ? Math.PI : 0;                     // the wafer is turned so its name faces the aisle-side camera
+}
+const PED_Y = 0.62, LIFT_Y = 2.7, RAIL_Y = 3.75;
+const car = { x: 0, y: PED_Y, z: 0, rot: 0 };
+function parkAt(k) { const s = STATIONS[k]; Object.assign(car, { x: s.x, y: PED_Y, z: s.zPed, rot: s.rot }); }
+function transportSegs(to) {
+  if (!st.at || st.at === to) return [];
+  const a = STATIONS[st.at], b = STATIONS[to];
+  const pts = [[a.x, PED_Y, a.zPed], [a.x, LIFT_Y, a.zPed], [a.x, LIFT_Y, 0], [b.x, LIFT_Y, 0], [b.x, LIFT_Y, b.zPed], [b.x, PED_Y, b.zPed]];
+  const lens = []; let total = 0;
+  for (let k = 1; k < pts.length; k++) { const l = Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1], pts[k][2] - pts[k - 1][2]); lens.push(l); total += l; }
+  return [seg(0.7 + total / 12, `${b.tool} 쪽으로 이동`, 'OHT · FOUP 운반', {
+    start() { fx.moving = true; cam.follow = true; cam.held = 0; },
+    update(e) {
+      let d = e * total, k = 0;
+      while (k < lens.length - 1 && d > lens[k]) { d -= lens[k]; k++; }
+      const f = lens[k] ? Math.min(1, d / lens[k]) : 1, p = pts[k], q = pts[k + 1];
+      car.x = p[0] + (q[0] - p[0]) * f; car.y = p[1] + (q[1] - p[1]) * f; car.z = p[2] + (q[2] - p[2]) * f;
+      car.rot = a.rot + (b.rot - a.rot) * Math.min(1, Math.max(0, (e - 0.3) / 0.4));
+    },
+    end() { fx.moving = false; st.at = to; parkAt(to); }
+  })];
+}
+
+/* ---------- 3D ---------- */
+let gl = null, renderer, scene, camera, geo, pos, col, carrier, waferGroup, side, bottom, dieSide, ghost, plate, plateMat, beam, plasma, furnaceRing, furnaceLight, bakeRing, dust, dustMat, probes, saws, mold, markMat, foup, oht, cable, idxDisk, markers, dieGroup = null, waferMat;
+let dirty = true;
+const cam = { follow: false, az: 0, el: 0.95, r: 23, taz: 0, tel: 0.95, x: 0, y: 0, z: 0.6, zoom: 1, held: 0 };
+const C = {}, stripes = {};
+function lin(hex) { const c = new THREE.Color(hex); c.convertSRGBToLinear(); return [c.r, c.g, c.b]; }
+const std = (color, o) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.6, metalness: 0.15 }, o || {}));
+function box(w, h, d, mat, x, y, z) { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x || 0, y || 0, z || 0); return m; }
+function cyl(rt, rb, h, seg, mat, x, y, z) { const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat); m.position.set(x || 0, y || 0, z || 0); return m; }
+
+function buildTool(k) {
+  const s = STATIONS[k], g = new THREE.Group();
+  g.position.set(s.x, 0, s.zTool); g.rotation.y = s.row ? Math.PI : 0;      // front face (+z local) looks at the aisle
+  const shell = std(0xc6ccd5, { roughness: 0.55 }), dark = std(0x2a2f37, { roughness: 0.7 });
+  g.add(box(3.6, 0.15, 2.4, dark, 0, 0.075, 0), box(3.4, 2.1, 2.2, shell, 0, 1.12, 0));
+  const stripe = std(s.accent, { emissive: s.accent, emissiveIntensity: 0.25 });
+  stripes[k] = stripe;
+  g.add(box(3.42, 0.16, 0.03, stripe, 0, 1.85, 1.11));
+  g.add(box(0.62, 0.42, 0.03, std(0x0e2340, { emissive: 0x1d4f8a, emissiveIntensity: 0.6 }), -1.15, 1.35, 1.11));   // operator screen
+  const accentMat = std(s.accent, { emissive: s.accent, emissiveIntensity: 0.7 });
+  if (k === 'wafer') {
+    g.add(cyl(0.55, 0.55, 2.6, 32, shell, 0.6, 3.4, -0.2), cyl(0.7, 0.7, 0.5, 32, dark, 0.6, 2.4, -0.2));
+    const ingot = cyl(0.32, 0.32, 1.5, 32, std(0xaab3c2, { metalness: 0.6, roughness: 0.3 }), -0.5, 2.5, 0.3); ingot.rotation.z = Math.PI / 2; g.add(ingot);
+  } else if (k === 'ox') {
+    g.add(box(1.0, 2.6, 1.0, shell, 0.7, 3.45, -0.3), box(0.3, 2.0, 0.04, accentMat, 0.7, 3.45, 0.21));
+  } else if (k === 'photo') {
+    g.add(box(2.2, 0.75, 0.04, std(0xf5c518, { emissive: 0xf5c518, emissiveIntensity: 0.9 }), 0.4, 1.1, 1.11), box(1.4, 1.0, 1.4, shell, 0.6, 2.67, -0.2));
+  } else if (k === 'etch') {
+    const win = cyl(0.42, 0.42, 0.05, 32, accentMat, 0.5, 1.15, 1.12); win.rotation.x = Math.PI / 2; g.add(win);
+  } else if (k === 'film' || k === 'metal') {
+    g.add(cyl(0.95, 0.95, 0.5, 6, shell, 0.2, 2.42, -0.2));
+    for (let n = 0; n < 3; n++) { const a = n / 3 * Math.PI * 2 + 0.5; g.add(box(0.7, 0.45, 0.7, k === 'metal' ? std(0xdfe3e8, { metalness: 0.7, roughness: 0.3 }) : accentMat, 0.2 + Math.cos(a) * 0.95, 2.42, -0.2 + Math.sin(a) * 0.95)); }
+  } else if (k === 'eds') {
+    for (let n = 0; n < 3; n++) g.add(new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 8), std(n === 2 ? 0xff4a3d : 0x37d27a, { emissive: n === 2 ? 0x5a120e : 0x0f5a2c })).translateX(0.5 + n * 0.3).translateY(1.35).translateZ(1.14));
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.06, 8, 32), std(0x3a6d4a)); ring.rotation.x = Math.PI / 2; ring.position.set(0.4, 2.25, -0.1); g.add(ring);
+  } else if (k === 'pkg') {
+    g.add(box(3.2, 0.12, 0.5, dark, 0, 0.75, 1.45));
+    for (let n = 0; n < 6; n++) g.add(box(0.28, 0.08, 0.28, std(0x15171b), -1.3 + n * 0.52, 0.85, 1.45));
+  }
+  scene.add(g);
+  const ped = cyl(1.15, 1.25, 0.6, 48, std(0x39404b, { metalness: 0.4, roughness: 0.45 }), s.x, 0.3, s.zPed);
+  scene.add(ped);
+}
+function buildLabels() {
+  for (const [k, s] of Object.entries(STATIONS)) {
+    const c = document.createElement('canvas'); c.width = 512; c.height = 176;
+    const g = c.getContext('2d');
+    g.fillStyle = 'rgba(10,14,20,0.82)'; g.beginPath(); g.roundRect ? g.roundRect(4, 4, 504, 168, 26) : g.rect(4, 4, 504, 168); g.fill();
+    g.fillStyle = '#' + s.accent.toString(16).padStart(6, '0'); g.fillRect(4, 150, 504, 22);
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = '#f2f5f9'; g.font = MASK_FONT(70); g.fillText(NAME[k], 256, 68);
+    g.fillStyle = '#a7b2c2'; g.font = '500 30px "IBM Plex Sans KR", sans-serif'; g.fillText(s.tool, 256, 124);
+    const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding;
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, depthWrite: false }));
+    sp.scale.set(3.0, 1.03, 1); sp.position.set(s.x, 3.25, s.zTool + (s.row ? 0.4 : -0.4));
+    scene.add(sp);
+  }
+}
+function init3D() {
+  if (!window.THREE) return false;
+  try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); } catch (e) { return false; }
+  if (!renderer.getContext()) return false;
+  Object.assign(C, {
+    si: lin('#9aa3b5'), ox: lin('#4a5bd4'), nit: lin('#2f9e8c'), metal: lin('#e4e7eb'), pr: lin('#d4532a'), prExp: lin('#f4b88e'),
+    burnt: lin('#2e1f18'), trapped: lin('#8a5a2b'), melt: lin('#5f646c'), trench: lin('#6c7586'),
+    oxRamp: ['#9aa3b5', '#c8b38a', '#8e5b3d', '#6b3e90', '#4a5bd4'].map(lin)
+  });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  $('#gl').appendChild(renderer.domElement);
+  scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x0d1219, 26, 60);
+  camera = new THREE.PerspectiveCamera(34, 4 / 3, 0.05, 140);
+  scene.add(new THREE.HemisphereLight(0xdfe7ff, 0x1a1e26, 0.8));
+  const key = new THREE.DirectionalLight(0xffffff, 0.9); key.position.set(4, 9, 6); scene.add(key);
+  const fill = new THREE.DirectionalLight(0x8fa2ff, 0.3); fill.position.set(-6, 5, -4); scene.add(fill);
+
+  // cleanroom floor, aisle markings and the overhead rail
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 26), std(0x262c35, { roughness: 0.9 })); floor.rotation.x = -Math.PI / 2; scene.add(floor);
+  const grid = new THREE.GridHelper(40, 40, 0x38414e, 0x313946); grid.position.y = 0.003; scene.add(grid);
+  const yellow = new THREE.MeshBasicMaterial({ color: 0xc9a227 });
+  for (const z of [-2.35, 2.35]) for (let x = -14; x < 14; x += 1.2) scene.add(box(0.7, 0.01, 0.07, yellow, x, 0.006, z));
+  const rail = std(0x8a93a3, { metalness: 0.5 });
+  scene.add(box(27, 0.12, 0.26, rail, 0, RAIL_Y, 0));
+  for (const s of Object.values(STATIONS)) scene.add(box(0.26, 0.12, Math.abs(s.zPed), rail, s.x, RAIL_Y, s.zPed / 2));
+  for (const k of Object.keys(STATIONS)) buildTool(k);
+  const pl = STATIONS.photo;                       // photo bay yellow light
+  const yl = new THREE.PointLight(0xffc533, 0.9, 7); yl.position.set(pl.x, 2.4, pl.zPed + 1.2); scene.add(yl);
+
+  // the wafer rides on `carrier`; effects live in the carrier so they follow it from tool to tool
+  carrier = new THREE.Group(); scene.add(carrier);
+  geo = new THREE.BufferGeometry();
+  pos = new Float32Array(N * N * 3); col = new Float32Array(N * N * 3);
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) { const v = j * N + i; pos[v * 3] = toW(i); pos[v * 3 + 2] = toW(j); }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  idxDisk = cells((x, z) => Math.hypot(x, z) < 0.995);
+  geo.setIndex(new THREE.BufferAttribute(idxDisk, 1));
+  waferGroup = new THREE.Group();
+  waferMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.4, metalness: 0.18 });
+  waferGroup.add(new THREE.Mesh(geo, waferMat));
+  const sideMat = std(0x6f7889, { roughness: 0.5, metalness: 0.3 });
+  side = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.06, 128, 1, true), sideMat); side.position.y = -0.03;
+  bottom = new THREE.Mesh(new THREE.CircleGeometry(1, 128), sideMat); bottom.rotation.x = Math.PI / 2; bottom.position.y = -0.06;
+  waferGroup.add(side, bottom);
+  carrier.add(waferGroup);
+
+  const ws = STATIONS.wafer;
+  ghost = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(Array.from({ length: 96 }, (_, k) => new THREE.Vector3(Math.cos(k / 96 * Math.PI * 2), 0, Math.sin(k / 96 * Math.PI * 2)))), new THREE.LineDashedMaterial({ color: 0x8fa0b8, dashSize: 0.05, gapSize: 0.04, transparent: true, opacity: 0.7 }));
+  ghost.computeLineDistances(); ghost.position.set(ws.x, PED_Y + 0.01, ws.zPed); scene.add(ghost);
+
+  const glow = color => new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+  furnaceRing = new THREE.Mesh(new THREE.CylinderGeometry(1.32, 1.32, 0.9, 96, 1, true), glow(0xff6a1a)); furnaceRing.position.y = 0.35;
+  furnaceLight = new THREE.PointLight(0xff7a2f, 0, 6); furnaceLight.position.set(0, 1.2, 0);
+  bakeRing = new THREE.Mesh(new THREE.CylinderGeometry(1.08, 1.08, 0.05, 96, 1, true), glow(0xff9a3d)); bakeRing.position.y = -0.03;
+  plasma = new THREE.Mesh(new THREE.CylinderGeometry(1.06, 1.06, 0.55, 96, 1, true), glow(0xa45cff));
+  const plasmaCap = new THREE.Mesh(new THREE.CircleGeometry(1.06, 96), glow(0xa45cff)); plasmaCap.rotation.x = -Math.PI / 2; plasmaCap.position.y = 0.27;
+  plasma.add(plasmaCap); plasma.position.y = 0.3;
+  beam = new THREE.Mesh(new THREE.CylinderGeometry(1.12, 1.12, 1.5, 96, 1, true), glow(0x8a5cff)); beam.position.y = 1.55;
+  plateMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide });
+  plate = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 2.3), plateMat); plate.rotation.x = -Math.PI / 2; plate.position.y = 0.8;
+  carrier.add(furnaceRing, furnaceLight, bakeRing, plasma, beam, plate);
+
+  const dg = new THREE.BufferGeometry(), dp = new Float32Array(600 * 3);
+  for (let k = 0; k < 600; k++) { const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * 0.97; dp[k * 3] = Math.cos(a) * r; dp[k * 3 + 1] = Math.random() * 1.6; dp[k * 3 + 2] = Math.sin(a) * r; }
+  dg.setAttribute('position', new THREE.BufferAttribute(dp, 3));
+  dustMat = new THREE.PointsMaterial({ size: 0.022, color: 0xffffff, transparent: true, opacity: 0.85, depthWrite: false });
+  dust = new THREE.Points(dg, dustMat); dust.visible = false; carrier.add(dust);
+
+  probes = new THREE.Group(); carrier.add(probes);
+  // wafer map: one marker per die (green = passed EDS, red = ink)
+  markers = new THREE.Group();
+  const passMat = std(0x37d27a, { emissive: 0x0f5a2c }), inkMat = std(0xd22a2a, { emissive: 0x3a0808 });
+  for (const d of DIES) {
+    const m = cyl(0.02, 0.02, 0.008, 20, d.full ? passMat : inkMat, d.x - DSZ * 0.42, 0.17, d.z - DSZ * 0.42);
+    m.userData = { die: d, k: FULL.indexOf(d) }; m.visible = false; markers.add(m);
+  }
+  markers.userData = { passMat, inkMat }; carrier.add(markers);
+  saws = new THREE.Group();
+  const sawMat = new THREE.MeshBasicMaterial({ color: 0x0b0d12 });
+  for (let k = -3; k <= 3; k++) for (const dir of [0, 1]) {
+    const c = k * PITCH, len = 2 * Math.sqrt(Math.max(0, 1 - c * c));
+    if (len < 0.05) continue;
+    const b = box(len, 0.08, 0.016, sawMat); b.userData = { c, dir, order: (k + 3) * 2 + dir };
+    if (dir) { b.rotation.y = Math.PI / 2; b.position.set(c, 0.03, 0); } else b.position.set(0, 0.03, c);
+    saws.add(b);
+  }
+  saws.visible = false; carrier.add(saws);
+  mold = new THREE.Group(); mold.visible = false; carrier.add(mold);
+
+  // FOUP (wafer pod) and the OHT vehicle that carries it along the ceiling rail
+  foup = new THREE.Group();
+  const shellMat = new THREE.MeshStandardMaterial({ color: 0xb9c6d6, transparent: true, opacity: 0.28, roughness: 0.2, depthWrite: false });
+  const foupBox = new THREE.BoxGeometry(2.4, 0.55, 2.4);
+  foup.add(new THREE.Mesh(foupBox, shellMat), new THREE.LineSegments(new THREE.EdgesGeometry(foupBox), new THREE.LineBasicMaterial({ color: 0xdfe8f5 })));
+  foup.add(box(0.8, 0.1, 0.5, std(0xdfe3e8), 0, 0.33, 0));
+  foup.position.y = 0.12; foup.visible = false; carrier.add(foup);
+  oht = box(0.7, 0.42, 0.9, std(0xe6e9ee, { roughness: 0.4 })); oht.visible = false; scene.add(oht);
+  cable = cyl(0.015, 0.015, 1, 6, std(0x9aa3b3)); cable.visible = false; scene.add(cable);
+
+  const ro = new ResizeObserver(sizeGL); ro.observe($('#stage')); sizeGL();
+  bindOrbit(renderer.domElement);
+  return true;
+}
+function sizeGL() {
+  const r = $('#stage').getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  renderer.setSize(r.width, r.height, false);
+  camera.aspect = r.width / r.height; camera.updateProjectionMatrix();
+  dirty = true;
+}
+function bindOrbit(el) {
+  let drag = null;
+  el.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, id: e.pointerId }; try { el.setPointerCapture(e.pointerId); } catch (err) { /* optional */ } });
+  el.addEventListener('pointermove', e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    cam.az -= (e.clientX - drag.x) * 0.008; cam.taz = cam.az;
+    if (e.pointerType === 'mouse') cam.tel = cam.el = Math.min(1.45, Math.max(0.25, cam.el + (e.clientY - drag.y) * 0.006));
+    drag.x = e.clientX; drag.y = e.clientY; cam.held = 1;
+  });
+  const stop = () => { drag = null; };
+  el.addEventListener('pointerup', stop); el.addEventListener('pointercancel', stop);
+  el.addEventListener('wheel', e => { e.preventDefault(); cam.zoom = Math.min(2.4, Math.max(0.5, cam.zoom * Math.exp(e.deltaY * 0.001))); }, { passive: false });
+}
+function showPlate(key) {
+  const c = document.createElement('canvas'); c.width = c.height = 512;
+  const g = c.getContext('2d');
+  g.fillStyle = 'rgba(190,220,255,0.16)'; g.fillRect(0, 0, 512, 512);    // quartz
+  g.save(); drawMask(g, 512, key, displayName); g.restore();
+  g.globalCompositeOperation = 'source-atop'; g.fillStyle = '#1d2128'; g.fillRect(0, 0, 512, 512);   // chrome
+  if (plateMat.map) plateMat.map.dispose();
+  plateMat.map = new THREE.CanvasTexture(c); plateMat.map.encoding = THREE.sRGBEncoding; plateMat.needsUpdate = true;
+}
+function heightAt(gi, gj) { return pos[(Math.min(N - 1, gj) * N + Math.min(N - 1, gi)) * 3 + 1]; }
+function cells(test, skip) {
+  const a = [];
+  for (let j = 0; j < N - 1; j++) for (let i = 0; i < N - 1; i++) {
+    const x = toW(i + 0.5), z = toW(j + 0.5);
+    if (!test(x, z) || (skip && skip(x, z))) continue;
+    const v = j * N + i;
+    a.push(v, v + N, v + 1, v + 1, v + N, v + N + 1);
+  }
+  return new Uint32Array(a);
+}
+const inDie = (d, x, z, m) => Math.abs(x - d.x) < DSZ / 2 + (m || 0) && Math.abs(z - d.z) < DSZ / 2 + (m || 0);
+function buildProbes() {
+  while (probes.children.length) probes.remove(probes.children[0]);
+  const pinMat = std(0xb8bec8, { metalness: 0.7, roughness: 0.35 }), d0 = FULL[0];
+  let top = 0;
+  for (const p of masks.pads) {
+    const h = heightAt(toG(d0.x + p.dx), toG(d0.z + p.dz)); top = Math.max(top, h);
+    probes.add(cyl(0.005, 0.005, 0.5, 8, pinMat, p.dx, h + 0.26, p.dz));
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.012, 10, 8), std(0x9aa4b2)); tip.position.set(p.dx, h + 0.01, p.dz); probes.add(tip);
+  }
+  const card = new THREE.Mesh(new THREE.TorusGeometry(DSZ * 0.62, 0.014, 8, 48), std(0x3a6d4a)); card.rotation.x = Math.PI / 2; card.position.y = top + 0.5;
+  probes.add(card);
+}
+// Copy one good die out of the heightfield into its own mesh so it can be lifted and packaged.
+function pickDie() {
+  const byCentre = FULL.slice().sort((p, q) => Math.hypot(p.x, p.z) - Math.hypot(q.x, q.z));
+  const good = byCentre.find(d => st.dieMarks[FULL.indexOf(d)] === true);
+  const d = good || byCentre[0];
+  st.picked = d;
+  const map = new Map(), verts = [], cols = [], idx = [];
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    const v = j * N + i;
+    if (!inDie(d, pos[v * 3], pos[v * 3 + 2], 0.006)) continue;
+    map.set(v, verts.length / 3);
+    verts.push(pos[v * 3] - d.x, pos[v * 3 + 1], pos[v * 3 + 2] - d.z);
+    cols.push(col[v * 3], col[v * 3 + 1], col[v * 3 + 2]);
+  }
+  for (let j = 0; j < N - 1; j++) for (let i = 0; i < N - 1; i++) {
+    const v = j * N + i, q = [v, v + N, v + 1, v + N + 1].map(k => map.get(k));
+    if (q.some(k => k === undefined)) continue;
+    idx.push(q[0], q[1], q[2], q[2], q[1], q[3]);
+  }
+  const g2 = new THREE.BufferGeometry();
+  g2.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+  g2.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+  g2.setIndex(idx); g2.computeVertexNormals();
+  dieGroup = new THREE.Group();
+  dieGroup.add(new THREE.Mesh(g2, waferMat), box(DSZ, 0.06, DSZ, std(0x6f7889, { roughness: 0.5, metalness: 0.3 }), 0, -0.0305, 0));
+  dieGroup.userData.from = { x: d.x, z: d.z };
+  dieGroup.position.set(d.x, 0, d.z);
+  carrier.add(dieGroup);
+  geo.setIndex(new THREE.BufferAttribute(cells((x, z) => Math.hypot(x, z) < 0.995, (x, z) => inDie(d, x, z)), 1));
+  mold = new THREE.Group(); mold.visible = false; dieGroup.add(mold);
+}
+function markTexture(ok) {
+  const c = document.createElement('canvas'); c.width = c.height = 512;
+  const g = c.getContext('2d');
+  g.fillStyle = '#17191e'; g.fillRect(0, 0, 512, 512);
+  g.fillStyle = '#c9cdd4'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  let fs = 150; g.font = MASK_FONT(fs);
+  const w = g.measureText(displayName).width; if (w > 400) { fs *= 400 / w; g.font = MASK_FONT(fs); }
+  g.fillText(displayName, 256, 220);
+  g.font = '600 30px "IBM Plex Mono", monospace'; g.fillStyle = '#8f949c';
+  g.fillText('IT융합소재 · HA1012', 256, 340); g.fillText('2026 · KOREA', 256, 382);
+  g.beginPath(); g.arc(58, 58, 18, 0, Math.PI * 2); g.fillStyle = '#2c3038'; g.fill();          // pin-1 mark
+  if (!ok) {
+    g.save(); g.translate(256, 250); g.rotate(-0.22);
+    g.strokeStyle = '#e0362f'; g.lineWidth = 12; g.strokeRect(-170, -62, 340, 124);
+    g.fillStyle = '#e0362f'; g.font = MASK_FONT(84); g.fillText('불량', 0, 6); g.restore();
+  }
+  const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; return t;
+}
+function buildMold(ok) {
+  while (mold.children.length) mold.remove(mold.children[0]);
+  const W = DSZ * 1.3, H = 0.21;
+  const body = box(W, H, W, std(0x1b1d22, { roughness: 0.82 }), 0, H / 2 - 0.065, 0);
+  markMat = new THREE.MeshBasicMaterial({ map: markTexture(ok), transparent: true, opacity: 0 });
+  const top = new THREE.Mesh(new THREE.PlaneGeometry(W * 0.98, W * 0.98), markMat); top.rotation.x = -Math.PI / 2; top.position.y = H - 0.065 + 0.002;
+  const leadMat = std(0xc9ced6, { metalness: 0.8, roughness: 0.3 });
+  for (const sgn of [-1, 1]) for (let k = 0; k < 6; k++) mold.add(box(0.07, 0.012, 0.03, leadMat, sgn * (W / 2 + 0.03), -0.04, -W / 2 + W * (k + 0.5) / 6));
+  mold.add(body, top);
+  mold.visible = true;
+}
+
+function compose() {
+  const L = st.layers, si = C.si, out = [0, 0, 0];
+  const kerf = fx.saw;
+  for (let v = 0; v < N * N; v++) {
+    if (!DISK[v]) continue;
+    let h = 0, r = si[0], g = si[1], b = si[2];
+    for (const ly of L) {
+      let c = ly.cov2 ? ly.cov[v] + (ly.cov2[v] - ly.cov[v]) * ly.t : (ly.cov ? ly.cov[v] : 1);
+      if (ly.radial !== null) { const d = RAD[v] - ly.radial; c = d <= 0 ? 1 : Math.max(0, 1 - d * 30); }
+      if (c < 0.004) continue;
+      h += c * ly.th * ly.thT;
+      colorOf(ly, v, out);
+      const k = c * Math.min(1, ly.thT * 5);
+      r += (out[0] - r) * k; g += (out[1] - g) * k; b += (out[2] - b) * k;
+    }
+    if (kerf && KERF[v]) { h = h * (1 - kerf) - 0.02 * kerf; const d = 1 - 0.65 * kerf; r *= d; g *= d; b *= d; }
+    pos[v * 3 + 1] = h; col[v * 3] = r; col[v * 3 + 1] = g; col[v * 3 + 2] = b;
+  }
+  geo.attributes.position.needsUpdate = true; geo.attributes.color.needsUpdate = true;
+  geo.computeVertexNormals();
+}
+function mix(a, b, k, out) { out[0] = a[0] + (b[0] - a[0]) * k; out[1] = a[1] + (b[1] - a[1]) * k; out[2] = a[2] + (b[2] - a[2]) * k; }
+function colorOf(ly, v, out) {
+  switch (ly.mat) {
+    case 'ox': {
+      if (ly.thT >= 1) { mix(C.ox, C.ox, 0, out); return; }
+      const ramp = C.oxRamp, x = ly.thT * (ramp.length - 1), k = Math.min(ramp.length - 2, Math.floor(x));
+      mix(ramp[k], ramp[k + 1], x - k, out); return;
+    }
+    case 'pr': mix(C.pr, C.prExp, ly.exp ? ly.exp[v] * ly.expT : 0, out); return;
+    case 'burnt': mix(C.pr, C.burnt, ly.burnT, out); return;
+    case 'trapped': mix(C.pr, C.trapped, 1, out); return;
+    case 'metal': mix(C.metal, C.melt, ly.meltT, out); return;
+    case 'melt': mix(C.melt, C.melt, 0, out); return;
+    case 'nit': mix(C.nit, C.nit, 0, out); return;
+    case 'trench': mix(C.trench, C.trench, 0, out); return;
+  }
+  mix(C.si, C.si, 0, out);
+}
+function angleTo(a, b, k) { let d = (b - a) % (Math.PI * 2); if (d > Math.PI) d -= Math.PI * 2; if (d < -Math.PI) d += Math.PI * 2; return a + d * k; }
+let clock = 0;
+function render3D(dt) {
+  clock += dt;
+  const k = Math.min(1, dt * 3);
+  // camera: follow the wafer at its tool, pull back while it travels, or show the whole floor
+  const fit = 12.5 / (Math.tan(17 * Math.PI / 180) * Math.min(camera.aspect, 1.7));   // whole floor in view
+  let tx = 0, ty = 0, tz = 0.6, tr = fit, tel = 1.0;
+  if (cam.follow && st.wafer) {
+    tx = car.x; ty = car.y; tz = car.z;
+    tr = fx.moving ? 10 : 4.1; tel = fx.moving ? 0.7 : 0.8;
+    if (dieGroup) { ty += 0.75 * fx.lift; tr = 4.1 - 1.6 * fx.lift; }
+    if (!cam.held) cam.taz = car.rot;
+  }
+  if (!cam.held || fx.moving) cam.el += (tel - cam.el) * k;
+  cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k; cam.z += (tz - cam.z) * k;
+  cam.r += (tr * (fx.moving ? 1 : cam.zoom) - cam.r) * k;
+  cam.az = angleTo(cam.az, cam.taz, k);
+  camera.position.set(cam.x + Math.cos(cam.el) * Math.sin(cam.az) * cam.r, cam.y + Math.sin(cam.el) * cam.r, cam.z + Math.cos(cam.el) * Math.cos(cam.az) * cam.r);
+  camera.lookAt(cam.x, cam.y + 0.05, cam.z);
+  scene.fog.near = cam.r * 0.85; scene.fog.far = cam.r * 2.6;
+
+  carrier.position.set(car.x, car.y, car.z); carrier.rotation.y = car.rot;
+  carrier.visible = st.wafer; ghost.visible = !st.wafer;
+  waferGroup.position.y = (1 - st.appear) * 1.1;
+  waferGroup.rotation.y = (1 - st.appear) * Math.PI * 1.5 + fx.spin * Math.PI * 6;
+  if (dirty && st.wafer) { compose(); dirty = false; }
+  for (const [key, m] of Object.entries(stripes)) m.emissiveIntensity = st.busy && !fx.moving && st.at === key ? 0.9 + 0.3 * Math.sin(clock * 6) : 0.25;
+
+  foup.visible = oht.visible = cable.visible = !!fx.moving;
+  if (fx.moving) {
+    oht.position.set(car.x, RAIL_Y - 0.25, car.z);
+    const top = car.y + 0.45, len = Math.max(0.05, RAIL_Y - 0.45 - top);
+    cable.scale.y = len; cable.position.set(car.x, top + len / 2, car.z);
+  }
+  furnaceRing.material.opacity = fx.furnace * 0.22; furnaceLight.intensity = fx.furnace * 2.4;
+  bakeRing.material.opacity = fx.bake * 0.55;
+  plasma.material.opacity = plasma.children[0].material.opacity = fx.plasma * (0.16 + 0.05 * Math.sin(clock * 9));
+  beam.material.opacity = fx.uv * 0.24;
+  plateMat.opacity = fx.plate * 0.95; plate.visible = fx.plate > 0.01;
+  dust.visible = !!fx.dep;
+  if (fx.dep) {
+    dustMat.color.set(fx.dep === 'nit' ? 0x52d1bd : 0xf2f4f7);
+    const p = dust.geometry.attributes.position.array;
+    for (let n = 0; n < p.length; n += 3) { p[n + 1] -= dt * (fx.dep === 'nit' ? 0.8 : 1.6); if (p[n + 1] < 0.05) p[n + 1] += 1.6; }
+    dust.geometry.attributes.position.needsUpdate = true;
+  }
+  probes.visible = fx.probe > 0.01;
+  if (probes.visible) { const d = FULL[fx.probeAt] || FULL[0]; probes.position.set(d.x, (1 - fx.probe) * 0.6 + (1 - fx.touch) * 0.06, d.z); }
+  markers.children.forEach(m => {
+    const { die, k } = m.userData;
+    if (die.full) { m.visible = k < st.dieMarks.length && !(dieGroup && die === st.picked); if (m.visible) m.material = st.dieMarks[k] ? markers.userData.passMat : markers.userData.inkMat; }
+    else m.visible = st.ink && fx.inkT > 0.3;
+  });
+  saws.visible = fx.saw > 0 && fx.saw < 1;
+  if (saws.visible) saws.children.forEach(b => { b.scale.x = Math.max(0.01, Math.min(1, fx.saw * 14 - b.userData.order * 0.9)); });
+  if (dieGroup) {
+    const f = dieGroup.userData.from, e = fx.lift;
+    dieGroup.position.set(f.x * (1 - e), 0.75 * e, f.z * (1 - e));
+    dieGroup.scale.setScalar(1 + 1.6 * e);
+  }
+  if (mold.visible) { mold.position.y = (1 - fx.mold) * 0.5; if (markMat) markMat.opacity = fx.mark; }
+  renderer.render(scene, camera);
+}
+
+/* ---------- UI ---------- */
+function setBusyUI() {
+  const lock = st.busy || st.done || !masks;
+  $$('.proc').forEach(b => { b.disabled = lock; });
+  const vb = $('#btn-view'), zb = $('#btn-zoom');
+  zb.disabled = !st.wafer || !gl;
+  zb.setAttribute('aria-pressed', String(cam.zoom < 1));
+  zb.textContent = cam.zoom < 1 ? '웨이퍼 전체' : '다이 확대';
+  vb.disabled = !st.wafer || !gl;
+  vb.textContent = cam.follow && st.wafer ? '공장 전체 보기' : '웨이퍼 가까이';
+}
+function renderLog() {
+  const log = $('#log');
+  if (!st.pressed.length) { log.innerHTML = '<li class="empty">아직 누른 공정이 없습니다.</li>'; return; }
+  log.innerHTML = st.pressed.map((k, i) => `<li class="${st.marks[i] ? 'warn' : ''}" data-i="${i}"><span>${i + 1}</span>${NAME[k]}</li>`).join('');
+}
+function press(k) {
+  if (st.busy || st.done || !masks) return;
+  st.pressed.push(k);
+  pressNotes = []; info = '';
+  $('#hud-proc').textContent = NAME[k];
+  $('#hud-cond').textContent = `공정 ${st.pressed.length}`;
+  const btn = $(`.proc[data-k="${k}"]`); btn.classList.add('flash'); setTimeout(() => btn.classList.remove('flash'), 350);
+  let segs;
+  if (!st.wafer && k !== 'wafer') { note('아직 웨이퍼가 없습니다. 실리콘 원판이 있어야 공정을 할 수 있습니다.', 'bad'); segs = []; }
+  else {
+    const proc = PROC[k]();
+    const move = proc.length ? transportSegs(k) : [];
+    segs = move.concat(proc);
+    if (move.length) cam.follow = true;
+  }
+  renderLog();
+  $('#status').textContent = st.at && st.at !== k && segs.length ? `웨이퍼를 ${STATIONS[k].tool} 쪽으로 옮겨 ${NAME[k]} 공정을 진행하는 중…` : `${NAME[k]} 공정을 진행하는 중…`;
+  if (segs.length) { runSegs(segs); setBusyUI(); } else afterPress();
+}
+function afterPress() {
+  const parts = pressNotes.map(n => `<span class="${n.tone}">${n.text}</span>`);
+  if (info) parts.push(info);
+  $('#status').innerHTML = parts.join(' ') || '다음 공정을 골라 보세요.';
+  $('#hud-step').textContent = st.done ? '완성' : '다음 공정을 고르세요';
+  renderLog();
+  setBusyUI();
+  if (st.done) verdict();
+}
+function verdict() {
+  const P = st.pressed, ok = P.length === S.length && P.every((k, i) => k === S[i]);
+  let first = P.findIndex((k, i) => k !== S[i]);
+  if (first < 0 && P.length !== S.length) first = Math.min(P.length, S.length);
+  const rep = $('#report');
+  rep.dataset.ok = String(ok);
+  let html = `<h2>${ok ? `양품 · ${displayName} 칩 완성` : `불량품 · ${displayName} 칩`}</h2>`;
+  const good = st.dieMarks.filter(Boolean).length, edge = DIES.length - FULL.length;
+  if (ok) {
+    html += `<p>막 세 종류(산화막 → 질화막 → 알루미늄)를 입힐 때마다 포토 → 식각을 되풀이해 3층 구조를 만들었습니다. 공정 ${S.length}단계를 모두 맞는 순서로 진행했습니다.</p>`;
+    html += `<p><b>웨이퍼 한 장 = 칩 ${FULL.length}개.</b> EDS에서 다이 ${FULL.length}개 중 ${good}개가 양품이었습니다(수율 ${Math.round(good / FULL.length * 100)}%). 가장자리에 걸려 잘린 다이 ${edge}개는 칩이 될 수 없어 버려집니다. 실제 공장에서는 먼지나 미세한 결함 때문에 수율이 100%가 되기 어렵습니다.</p>`;
+  } else {
+    const reasons = [];
+    if (first < P.length && first < S.length) reasons.push(`${first + 1}번째에 <b>${josa(NAME[P[first]], '을', '를')}</b> 눌렀습니다. 이 자리에는 <b>${josa(NAME[S[first]], '이', '가')}</b> 와야 합니다.`);
+    else if (P.length < S.length) reasons.push(`공정이 ${S.length - P.length}단계 모자랍니다.`);
+    for (const k of ['wafer', 'ox', 'photo', 'etch', 'film', 'metal', 'eds']) {
+      const need = S.filter(x => x === k).length, have = P.filter(x => x === k).length;
+      if (have === need) continue;
+      if (!have) reasons.push(`${josa(NAME[k], '을', '를')} 하지 않았습니다.`);
+      else if (have < need) reasons.push(`${josa(NAME[k], '은', '는')} ${need}번 해야 하는데 ${have}번 했습니다.`);
+      else reasons.push(`${josa(NAME[k], '을', '를')} ${have - need}번 더 했습니다.`);
+    }
+    const defects = Array.from(new Set(st.defects));
+    html += `<p>순서가 맞지 않아 불량품이 나왔습니다. ${st.eds === false ? `EDS에서 다이 ${FULL.length}개가 모두 불량 판정을 받았습니다(수율 0%).` : st.eds === null ? 'EDS 검사를 하지 않아 수율도 알 수 없습니다.' : ''}</p><ul>${reasons.map(r => `<li>${r}</li>`).join('')}</ul>`;
+    if (defects.length) html += `<div class="seq-block"><h3>웨이퍼에 생긴 문제</h3><ul>${defects.map(d => `<li>${d}</li>`).join('')}</ul></div>`;
+  }
+  const chips = (arr, cmp) => arr.map((k, i) => `<li class="${cmp && cmp[i] !== k ? 'wrong' : ''}"><span>${i + 1}</span>${NAME[k]}</li>`).join('');
+  html += `<div class="seq-block"><h3>내가 누른 순서</h3><ol class="seq">${chips(P, S)}</ol></div>`;
+  if (!ok) html += `<div class="seq-block"><h3>올바른 순서</h3><ol class="seq">${chips(S)}</ol></div>`;
+  html += `<div class="btns" style="display:flex;flex-wrap:wrap;gap:8px"><button class="btn primary" type="button" id="rep-again">같은 이름으로 다시 하기</button>${fx.mold ? '<button class="btn" type="button" id="rep-peek" aria-pressed="false">몰딩 벗기고 칩 보기</button>' : ''}</div>`;
+  rep.innerHTML = html; rep.hidden = false;
+  if (first >= 0) { const li = $(`#log li[data-i="${first}"]`); if (li) li.classList.add('wrong'); }
+  $('#rep-again').addEventListener('click', () => { reset(); $('.stage').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' }); });
+  const peek = $('#rep-peek');
+  if (peek) peek.addEventListener('click', () => {
+    const on = peek.getAttribute('aria-pressed') !== 'true';
+    peek.setAttribute('aria-pressed', String(on)); peek.textContent = on ? '몰딩 다시 씌우기' : '몰딩 벗기고 칩 보기';
+    if (mold) mold.visible = !on;
+  });
+  requestAnimationFrame(() => rep.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' }));
+}
+function reset() {
+  queue = []; cur = null;
+  fresh();
+  if (gl) {
+    geo.setIndex(new THREE.BufferAttribute(idxDisk, 1));
+    if (dieGroup) { carrier.remove(dieGroup); dieGroup = null; }
+    mold.visible = false;
+    while (probes.children.length) probes.remove(probes.children[0]);
+  }
+  parkAt('wafer');
+  Object.assign(cam, { follow: false, held: 0, zoom: 1, taz: 0 });
+  dirty = true;
+  $('#report').hidden = true; $('#report').innerHTML = '';
+  $('#hud-proc').textContent = '대기 중'; $('#hud-step').textContent = '첫 공정 버튼을 눌러 보세요'; $('#hud-cond').textContent = '공정 0';
+  $('#status').textContent = '첫 번째 공정은 무엇일까요? 버튼에 적힌 하는 일을 보고 골라 보세요.';
+  renderLog(); setBusyUI();
+}
+async function applyName(name) {
+  displayName = name;
+  try { localStorage.setItem('name-chip-fab.name', name); } catch (e) { /* storage unavailable */ }
+  masks = buildMasks(name);
+  drawThumb('#mk-name', 'name'); drawThumb('#mk-frame', 'frame'); drawThumb('#mk-wire', 'wire');
+  reset();
+}
+
+$$('.proc').forEach(b => b.addEventListener('click', () => press(b.dataset.k)));
+$('#btn-reset').addEventListener('click', reset);
+$('#btn-zoom').addEventListener('click', () => { if (!st.wafer) return; cam.follow = true; cam.zoom = cam.zoom < 1 ? 1 : 0.42; setBusyUI(); });
+$('#btn-view').addEventListener('click', () => { if (!st.wafer) return; cam.follow = !cam.follow; cam.held = 0; cam.zoom = 1; if (!cam.follow) cam.taz = 0; setBusyUI(); });
+$('#name-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const v = $('#name-input').value.trim().slice(0, 8);
+  if (!v) { $('#status').textContent = '이름을 한 글자 이상 넣어 주세요.'; return; }
+  applyName(v);
+});
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  tick(dt);
+  if (gl) render3D(dt);
+  requestAnimationFrame(frame);
+}
+
+fresh();
+gl = init3D();
+if (!gl) $('#stage').insertAdjacentHTML('beforeend', '<div class="gl-error">이 기기에서는 3D 화면을 띄우지 못했습니다. 공정 순서 판정과 결과 설명은 그대로 동작합니다.</div>');
+try { const saved = localStorage.getItem('name-chip-fab.name'); if (saved) $('#name-input').value = saved; } catch (e) { /* storage unavailable */ }
+setBusyUI();
+const fontReady = document.fonts && document.fonts.load ? Promise.race([document.fonts.load('100px "Black Han Sans"', '가A'), new Promise(r => setTimeout(r, 2500))]) : Promise.resolve();
+fontReady.catch(() => {}).then(() => { if (gl) buildLabels(); applyName($('#name-input').value.trim() || '홍길동'); });
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

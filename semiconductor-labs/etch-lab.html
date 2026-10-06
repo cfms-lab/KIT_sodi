@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>습식·건식 식각 실험실</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one shared control bar and clock over two cross-section panels (wet | dry) that run on the same time axis; concept cards and the comparison table follow. */
+:root {
+  --bg: #eef1f5; --panel: #ffffff; --panel-2: #f5f7fa; --ink: #141a22; --muted: #5a6474; --line: #d5dbe3; --line-strong: #b7c0cc;
+  --wet: #0f7f99; --wet-soft: #dff3f8; --dry: #7a3fc4; --dry-soft: #efe5fb;
+  --accent: #f2b705; --on-accent: #1a1400;
+  --good: #1d8a4b; --bad: #c4372d; --bad-soft: #fbe5e2; --warn: #a86a00;
+  --m-si: #8f97a6; --m-ox: #4a5bd4; --m-pr: #d4532a;
+  --font-display: "Black Han Sans", "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1116; --panel: #161b22; --panel-2: #1c222b; --ink: #e8ecf2; --muted: #9aa4b2; --line: #29313c; --line-strong: #3a4452;
+    --wet: #5cc8e0; --wet-soft: #0f2a31; --dry: #b88cf0; --dry-soft: #24163a;
+    --accent: #f5c518; --on-accent: #161200;
+    --good: #4cc283; --bad: #f0675c; --bad-soft: #3a1a17; --warn: #e3a83a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1116; --panel: #161b22; --panel-2: #1c222b; --ink: #e8ecf2; --muted: #9aa4b2; --line: #29313c; --line-strong: #3a4452;
+  --wet: #5cc8e0; --wet-soft: #0f2a31; --dry: #b88cf0; --dry-soft: #24163a;
+  --accent: #f5c518; --on-accent: #161200;
+  --good: #4cc283; --bad: #f0675c; --bad-soft: #3a1a17; --warn: #e3a83a;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { background: var(--bg); }
+body { margin: 0; color: var(--ink); font: 400 15px/1.6 var(--font-body); -webkit-font-smoothing: antialiased; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.app { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 18px 48px; display: grid; gap: 18px; }
+.masthead { display: grid; gap: 4px; }
+.eyebrow { margin: 0; font: 500 12px/1.4 var(--font-mono); letter-spacing: .04em; color: var(--muted); }
+h1 { margin: 0; font: 400 clamp(32px, 6.5vw, 46px)/1.08 var(--font-display); letter-spacing: -.01em; text-wrap: balance; }
+h1 .w { color: var(--wet); } h1 .d { color: var(--dry); }
+.lede { margin: 2px 0 0; max-width: 66ch; color: var(--muted); font-size: 14.5px; }
+.lede b { color: var(--ink); }
+
+.controls { display: grid; gap: 12px; padding: 14px 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.btn { appearance: none; cursor: pointer; min-height: 42px; padding: 8px 15px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--panel); font-size: 14px; font-weight: 600; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.ghost { background: transparent; color: var(--muted); }
+.btn[aria-pressed="true"] { background: var(--panel-2); border-color: var(--ink); }
+.seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 9px; overflow: hidden; }
+.seg button { appearance: none; cursor: pointer; min-height: 42px; padding: 6px 12px; border: 0; background: transparent; font-size: 13.5px; font-weight: 600; line-height: 1.2; }
+.seg button + button { border-left: 1px solid var(--line-strong); }
+.seg button small { display: block; font: 500 11px/1.2 var(--font-body); color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.seg button[aria-pressed="true"] small { color: var(--bg); opacity: .75; }
+.seg-label { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.timeline { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.timeline label { font-size: 13px; font-weight: 600; color: var(--muted); }
+.track { position: relative; padding-bottom: 22px; min-width: 0; }
+.track input { width: 100%; accent-color: var(--ink); margin: 0; }
+.tick { position: absolute; bottom: 0; transform: translateX(-50%); font: 600 11.5px/1.2 var(--font-body); white-space: nowrap; }
+.tick::before { content: ""; position: absolute; left: 50%; bottom: 16px; width: 2px; height: 10px; background: currentColor; }
+.tick.wet { color: var(--wet); } .tick.dry { color: var(--dry); }
+#time-out { font: 700 18px/1 var(--font-body); font-variant-numeric: tabular-nums; min-width: 5.5ch; text-align: right; }
+
+.panels { display: grid; gap: 16px; }
+@media (min-width: 920px) { .panels { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.panel { display: grid; gap: 10px; min-width: 0; padding: 14px 14px 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; border-top: 5px solid var(--c); }
+.panel.wet { --c: var(--wet); --cs: var(--wet-soft); }
+.panel.dry { --c: var(--dry); --cs: var(--dry-soft); }
+.panel header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.panel h2 { margin: 0; font: 400 25px/1.15 var(--font-display); color: var(--c); }
+.panel header .sub { font-size: 13px; color: var(--muted); flex: 1 1 auto; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { padding: 2px 9px; border-radius: 99px; background: var(--cs); color: var(--c); font-size: 12px; font-weight: 700; }
+.chip.bad { background: var(--bad-soft); color: var(--bad); }
+.panel canvas { display: block; width: 100%; aspect-ratio: 2.4; border-radius: 9px; border: 1px solid var(--line); }
+.metrics { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+@media (min-width: 560px) { .metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.metrics div { min-width: 0; padding: 7px 10px; border-radius: 9px; background: var(--panel-2); }
+.metrics dt { font-size: 11.5px; color: var(--muted); line-height: 1.3; }
+.metrics dd { margin: 0; font: 700 16px/1.3 var(--font-body); font-variant-numeric: tabular-nums; }
+.metrics dd small { display: block; font: 500 11px/1.35 var(--font-body); color: var(--muted); }
+.metrics dd.hl { color: var(--c); }
+.metrics dd.badv { color: var(--bad); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; font-size: 12.5px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.verdict { margin: 0; padding: 14px 16px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line-strong); font-size: 14.5px; max-width: none; }
+.verdict b { font-weight: 700; }
+
+.concepts { display: grid; gap: 12px; }
+@media (min-width: 820px) { .concepts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.card { padding: 16px 18px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; min-width: 0; }
+.card h2 { margin: 0 0 6px; font: 400 21px/1.2 var(--font-display); text-wrap: balance; }
+.card p { margin: 0 0 8px; font-size: 14px; }
+.card .f { font: 500 13px/1.55 var(--font-body); padding: 8px 10px; border-radius: 8px; background: var(--panel-2); overflow-x: auto; }
+.tbl { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+thead th { font: 400 18px/1.2 var(--font-display); }
+thead th.w { color: var(--wet); } thead th.d { color: var(--dry); }
+tbody th { font-weight: 600; white-space: nowrap; }
+.foot { margin: 0; font-size: 12px; color: var(--muted); max-width: 78ch; }
+</style>
+
+</head>
+<body>
+<div class="app">
+  <nav style="margin-bottom:10px;font-size:13px"><a href="index.html" style="color:var(--muted);text-decoration:none;font-weight:600">← 실험 목록</a></nav>
+  <header class="masthead">
+    <p class="eyebrow">IT융합소재 · 반도체 8대 공정 · 식각</p>
+    <h1><span class="w">습식</span>·<span class="d">건식</span> 식각 실험실</h1>
+    <p class="lede">똑같이 산화막(SiO₂) 위에 감광액 무늬를 올린 웨이퍼 두 장을, 왼쪽은 <b>용액</b>에 담가서, 오른쪽은 <b>플라즈마</b>로 깎습니다. 옆으로 얼마나 파고드는지(등방성), 지켜야 할 막은 얼마나 덜 깎이는지(선택비), 얼마나 빨리 뚫리는지(식각 속도)를 비교해 보세요.</p>
+  </header>
+
+  <section class="controls" aria-label="실험 조건">
+    <div class="row">
+      <button class="btn primary" id="btn-run" type="button">▶ 식각 시작</button>
+      <button class="btn" id="btn-fast" type="button" aria-pressed="false">≫ 빠르게</button>
+      <button class="btn ghost" id="btn-reset" type="button">처음부터</button>
+      <span class="seg-label">패턴</span>
+      <div class="seg" role="group" aria-label="패턴 크기">
+        <button type="button" data-pat="big" aria-pressed="true">큰 패턴<small>2 µm</small></button>
+        <button type="button" data-pat="fine" aria-pressed="false">미세 패턴<small>0.6 µm</small></button>
+      </div>
+      <span class="seg-label">과식각</span>
+      <div class="seg" role="group" aria-label="과식각 정도">
+        <button type="button" data-oe="0.2" aria-pressed="true">20%<small>보통</small></button>
+        <button type="button" data-oe="1" aria-pressed="false">100%<small>두 배로</small></button>
+      </div>
+    </div>
+    <div class="timeline">
+      <label for="time">공정 시간</label>
+      <div class="track">
+        <input type="range" id="time" min="0" max="12" step="0.01" value="0">
+        <span class="tick wet" id="tick-wet">습식 종말점</span>
+        <span class="tick dry" id="tick-dry">건식 종말점</span>
+      </div>
+      <output id="time-out" for="time">0.0분</output>
+    </div>
+  </section>
+
+  <div class="panels">
+    <article class="panel wet">
+      <header><h2>습식 식각</h2><span class="sub">BOE(완충 불산) 용액에 담그기 · HF 분자가 사방으로 움직임</span><span class="chips" id="chips-wet"></span></header>
+      <canvas id="cv-wet" role="img" aria-label="습식 식각 단면"></canvas>
+      <dl class="metrics" id="m-wet"></dl>
+    </article>
+    <article class="panel dry">
+      <header><h2>건식 식각</h2><span class="sub">CF₄ 플라즈마 반응성 이온 식각(RIE) · 이온이 수직으로 충돌</span><span class="chips" id="chips-dry"></span></header>
+      <canvas id="cv-dry" role="img" aria-label="건식 식각 단면"></canvas>
+      <dl class="metrics" id="m-dry"></dl>
+    </article>
+  </div>
+
+  <p class="legend" aria-hidden="true">
+    <span><i style="background:var(--m-pr)"></i>감광액(PR) · 마스크</span>
+    <span><i style="background:var(--m-ox)"></i>산화막(SiO₂) · 깎을 막</span>
+    <span><i style="background:var(--m-si)"></i>실리콘(Si) · 지켜야 할 막</span>
+    <span><i style="background:#ff8a00;border-radius:50%"></i>습식 반응</span>
+    <span><i style="background:#f1e3a0;border-radius:50%"></i>건식 이온 충돌</span>
+    <span>단면 가로 8.4 µm × 세로 3.5 µm, 가로세로 같은 비율</span>
+  </p>
+  <p class="verdict" id="verdict" aria-live="polite">▶ 식각 시작을 누르거나, 공정 시간 막대를 끌어 보세요. 두 웨이퍼는 같은 시계로 움직입니다.</p>
+
+  <section class="concepts">
+    <article class="card">
+      <h2>등방성과 이방성</h2>
+      <p><b>등방성</b>은 모든 방향으로 같은 속도로 깎이는 것입니다. 습식 화면의 점(HF 분자)은 아무 방향으로나 움직이다가 산화막에 닿는 곳마다 반짝이며 반응합니다. 그래서 바닥뿐 아니라 옆벽과 감광액 아래도 깎입니다(언더컷). <b>이방성</b>은 한 방향으로만 깎이는 것입니다. 건식 화면의 이온은 전기장을 따라 위에서 아래로만 날아와 바닥을 때리므로 벽이 곧게 섭니다.</p>
+      <p class="f">이방성 지수 = 1 − 옆으로 깎인 양 ÷ 아래로 깎인 양<br>등방성 0 · 완전한 이방성 1</p>
+    </article>
+    <article class="card">
+      <h2>선택비</h2>
+      <p>깎으려는 막이 깎이는 속도와 깎이면 안 되는 막이 깎이는 속도의 비율입니다. 클수록 원하는 막만 골라 깎습니다. 용액은 화학 반응이 특정 물질에만 잘 일어나서 선택비가 높습니다. 화면에서도 HF 분자는 실리콘이나 감광액에 닿으면 반응 없이 튕겨 나옵니다. 플라즈마는 이온이 물리적으로 때리기도 해서 감광액·실리콘도 함께 깎입니다(흰 반짝임).</p>
+      <p class="f">선택비 = SiO₂ 식각 속도 ÷ 다른 막 식각 속도<br>건식 SiO₂:PR = 50 ÷ 12.5 = 4 : 1</p>
+    </article>
+    <article class="card">
+      <h2>식각 속도와 종말점</h2>
+      <p>식각 속도는 1분에 깎이는 두께(nm/분)입니다. 막이 다 뚫리는 순간이 <b>종말점</b>이고, 웨이퍼 곳곳의 두께 차이를 생각해 조금 더 깎는 것이 <b>과식각</b>입니다. 과식각 동안 습식은 옆으로 더 파고들고, 건식은 감광액과 실리콘이 더 깎입니다.</p>
+      <p class="f">식각 시간 = 막 두께 ÷ 식각 속도<br>습식 500 nm ÷ 100 nm/분 = 5분</p>
+    </article>
+  </section>
+
+  <section class="card">
+    <h2>한눈에 보는 습식과 건식</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th scope="col"></th><th scope="col" class="w">습식 식각</th><th scope="col" class="d">건식 식각</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">원리</th><td>용액과의 화학 반응</td><td>플라즈마의 이온(물리) + 라디칼(화학)</td></tr>
+          <tr><th scope="row">방향성</th><td>등방성 · 언더컷이 생김</td><td>이방성 · 수직 벽</td></tr>
+          <tr><th scope="row">선택비</th><td>높음</td><td>상대적으로 낮음</td></tr>
+          <tr><th scope="row">식각 속도</th><td>빠름 · 여러 장을 한꺼번에</td><td>보통 · 한 장씩</td></tr>
+          <tr><th scope="row">미세 패턴</th><td>어려움 (수 µm 이상)</td><td>유리</td></tr>
+          <tr><th scope="row">장비·비용</th><td>간단하고 저렴</td><td>진공·플라즈마 장비로 비쌈</td></tr>
+          <tr><th scope="row">주의할 점</th><td>약품 폐액, 오염 관리</td><td>플라즈마 손상, 장비 관리</td></tr>
+          <tr><th scope="row">주로 쓰는 곳</th><td>전면 막 제거, 세정</td><td>회로 무늬 새기기</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="foot">수치는 비교를 위한 예시 값입니다. BOE 6:1 용액은 열산화막을 1분에 약 100 nm, 단순한 RIE 장비는 수십 nm 정도 깎습니다. 선택비도 용액 농도, 온도, 가스 조성, 장비에 따라 크게 달라집니다. 건식 식각에도 화학 반응 위주(등방성에 가까움)부터 이온 충돌 위주(이방성)까지 여러 방식이 있으며, 여기서는 가장 널리 쓰이는 반응성 이온 식각(RIE)을 보여 줍니다.</p>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- model (µm, nm/분, 분) ---------- */
+const G = { W: 8.4, H: 0.5, PR: 1.0, SI: 1.0, AIR: 1.0 };          // oxide 500 nm, resist 1 µm
+const YTOP = G.H + G.PR + G.AIR, YBOT = -G.SI, SPANY = YTOP - YBOT;
+const PATS = {
+  big:  { open: [[1.0, 3.0], [5.4, 7.4]], line: [3.0, 5.4] },
+  fine: { open: [[3.3, 3.9], [4.5, 5.1]], line: [3.9, 4.5] }
+};
+const M = {
+  wet: { v: 100, vPR: 0, vSi: 1, iso: true, sPR: '매우 큼', sSi: '100 : 1' },
+  dry: { v: 50, vPR: 12.5, vSi: 5, iso: false, sPR: '4 : 1', sSi: '10 : 1' }
+};
+let pat = 'big', oe = 0.2, T = 0, playing = false, fast = false;
+const t0 = m => G.H * 1000 / M[m].v;                // endpoint: the oxide is cleared
+const tEnd = m => t0(m) * (1 + oe);
+const maxT = () => Math.max(tEnd('wet'), tEnd('dry'));
+
+function dxOpen(x) {                                // horizontal distance to the nearest opening (0 inside one)
+  let d = Infinity;
+  for (const [a, b] of PATS[pat].open) d = Math.min(d, Math.max(a - x, 0, x - b));
+  return d;
+}
+function stateOf(m, t) {
+  const k = M[m], P = PATS[pat], tp = Math.min(t, tEnd(m)), R = k.v * tp / 1000;
+  const half = (P.line[1] - P.line[0]) / 2, liftT = k.iso ? half * 1000 / k.v : Infinity;
+  const over = Math.max(0, tp - t0(m));
+  return {
+    m, k, tp, R, liftT, lifted: tp >= liftT,
+    depth: Math.min(R, G.H), under: k.iso ? R : 0,
+    prLoss: k.vPR * tp, siLoss: k.vSi * over,
+    phase: tp <= 0 ? 'idle' : tp < t0(m) ? 'etch' : tp < tEnd(m) - 1e-6 ? 'over' : 'done'
+  };
+}
+function column(s, x) {                             // what is left at horizontal position x
+  const P = PATS[pat], dx = dxOpen(x), open = dx === 0, inLine = x > P.line[0] && x < P.line[1];
+  let oxTop = G.H, siTop = 0;
+  if (s.k.iso) {
+    if (s.R >= dx) oxTop = G.H - Math.sqrt(s.R * s.R - dx * dx);       // circle around the opening edge
+    const tClear = Math.hypot(dx, G.H) * 1000 / s.k.v;
+    siTop = -Math.max(0, s.k.vSi * (s.tp - tClear)) / 1000;
+  } else if (open) {
+    oxTop = G.H - s.depth;
+    siTop = -s.siLoss / 1000;
+  }
+  const pr = !open && !(s.lifted && inLine);
+  return { oxTop, siTop, pr, prTh: G.PR - s.prLoss / 1000 };
+}
+
+/* ---------- drawing ---------- */
+const COL = { si: '#8f97a6', ox: '#4a5bd4', pr: '#d4532a' };
+const cv = { wet: $('#cv-wet'), dry: $('#cv-dry') };
+let dpr = 1;
+function size() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  for (const c of Object.values(cv)) {
+    const w = Math.min(1400, Math.round(c.clientWidth * dpr));
+    c.width = w; c.height = Math.round(w / 2.4);
+  }
+  draw();
+}
+// HF molecules wander through every bit of liquid, cavities included; ions fall straight down through the plasma.
+function matAt(s, x, y) {
+  if (x < 0 || x > G.W || y > YTOP || y < YBOT) return 'wall';
+  const k = column(s, x);
+  if (y < k.siTop) return 'si';
+  if (y >= 0 && y < k.oxTop) return 'ox';
+  if (k.pr && y >= G.H && y < G.H + k.prTh) return 'pr';
+  return null;
+}
+function surfaceY(s, x) { const c = column(s, x); return c.pr ? G.H + c.prTh : (c.oxTop > 0 ? c.oxTop : c.siTop); }
+const parts = { wet: [], dry: [] }, flashes = { wet: [], dry: [] };
+const FLASH = { wet: '#ff8a00', ox: '#fff3a6', pr: '#ffffff', si: '#ffffff' };
+function spawnWet(s, p) {
+  for (let n = 0; n < 60; n++) {
+    const x = Math.random() * G.W, y = YBOT + Math.random() * SPANY;
+    if (!matAt(s, x, y)) { p.x = x; p.y = y; return p; }
+  }
+  p.x = Math.random() * G.W; p.y = YTOP - 0.2; return p;
+}
+function seedParticles() {
+  const sw = stateOf('wet', T);
+  parts.wet = Array.from({ length: 90 }, () => { const a = Math.random() * Math.PI * 2; return spawnWet(sw, { vx: Math.cos(a), vy: Math.sin(a), cool: 0 }); });
+  parts.dry = Array.from({ length: 42 }, () => ({ x: Math.random() * G.W, y: G.H + G.PR + Math.random() * (YTOP - G.H - G.PR + 0.6), sp: 5 + Math.random() * 2 }));
+  flashes.wet.length = 0; flashes.dry.length = 0;
+}
+function stepParticles(dt) {
+  const sw = stateOf('wet', T), sd = stateOf('dry', T);
+  const wetOn = sw.phase === 'etch' || sw.phase === 'over', dryOn = sd.phase === 'etch' || sd.phase === 'over';
+  for (const p of parts.wet) {
+    if (matAt(sw, p.x, p.y)) spawnWet(sw, p);
+    const a = Math.random() * Math.PI * 2;           // random kicks: no direction is preferred
+    p.vx = p.vx * 0.85 + Math.cos(a) * 0.9; p.vy = p.vy * 0.85 + Math.sin(a) * 0.9;
+    const sp = Math.hypot(p.vx, p.vy); if (sp > 2.2) { p.vx *= 2.2 / sp; p.vy *= 2.2 / sp; }
+    p.cool -= dt;
+    const nx = p.x + p.vx * dt, ny = p.y + p.vy * dt, hit = matAt(sw, nx, ny);
+    if (!hit) { p.x = nx; p.y = ny; continue; }
+    if (hit === 'ox' && wetOn && p.cool <= 0 && flashes.wet.length < 90) { flashes.wet.push({ x: nx, y: ny, t: 0, c: FLASH.wet }); p.cool = 0.45; }
+    p.vx = -p.vx; p.vy = -p.vy;                      // silicon and resist: bounce off without reacting
+  }
+  for (const p of parts.dry) {
+    p.y -= p.sp * dt;
+    const sy = surfaceY(sd, p.x);
+    if (p.y > sy) continue;
+    const hit = matAt(sd, p.x, sy - 0.004) || 'ox';
+    if (dryOn && flashes.dry.length < 90) flashes.dry.push({ x: p.x, y: sy, t: 0, c: FLASH[hit] || FLASH.ox, small: hit !== 'ox' });
+    p.y = YTOP + Math.random() * 0.6; p.x = Math.random() * G.W;
+  }
+  for (const k of ['wet', 'dry']) { const f = flashes[k]; for (let i = f.length - 1; i >= 0; i--) if ((f[i].t += dt) > 0.4) f.splice(i, 1); }
+}
+
+function arrow(g, x1, y1, x2, y2, color, w) {
+  g.strokeStyle = g.fillStyle = color; g.lineWidth = w;
+  g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke();
+  for (const [ax, ay, bx, by] of [[x1, y1, x2, y2], [x2, y2, x1, y1]]) {
+    const a = Math.atan2(by - ay, bx - ax), h = w * 4;
+    g.beginPath(); g.moveTo(ax, ay); g.lineTo(ax + h * Math.cos(a - 0.45), ay + h * Math.sin(a - 0.45)); g.lineTo(ax + h * Math.cos(a + 0.45), ay + h * Math.sin(a + 0.45)); g.closePath(); g.fill();
+  }
+}
+function tag(g, text, x, y, fg, bg, align) {
+  const fs = Math.max(11 * dpr, g.canvas.width * 0.019);
+  g.font = `600 ${fs}px "IBM Plex Sans KR", "Malgun Gothic", sans-serif`;
+  const w = g.measureText(text).width + fs * 0.8, h = fs * 1.5;
+  const x0 = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
+  g.fillStyle = bg; g.beginPath(); g.roundRect ? g.roundRect(x0, y - h / 2, w, h, h / 3) : g.rect(x0, y - h / 2, w, h); g.fill();
+  g.fillStyle = fg; g.textBaseline = 'middle'; g.textAlign = 'left'; g.fillText(text, x0 + fs * 0.4, y + 0.5);
+}
+function drawPanel(m) {
+  const c = cv[m], g = c.getContext('2d'), W = c.width, H = c.height, sx = W / G.W, sy = H / SPANY;
+  const X = x => x * sx, Y = y => (YTOP - y) * sy, s = stateOf(m, T), wet = m === 'wet';
+  // what fills the space: solution or plasma
+  const bg = g.createLinearGradient(0, 0, 0, H);
+  if (wet) { bg.addColorStop(0, '#e3f5fa'); bg.addColorStop(1, '#a6dcea'); }
+  else { bg.addColorStop(0, '#120d1c'); bg.addColorStop(0.55, '#2c1748'); bg.addColorStop(1, '#3a1d5e'); }
+  g.fillStyle = bg; g.fillRect(0, 0, W, H);
+  if (!wet && s.phase !== 'idle' && s.phase !== 'done') { g.fillStyle = 'rgba(190,120,255,0.10)'; g.fillRect(0, 0, W, Y(G.H + G.PR + 0.15)); }
+
+  for (let px = 0; px < W; px++) {
+    const k = column(s, (px + 0.5) / sx);
+    g.fillStyle = COL.si; g.fillRect(px, Y(k.siTop), 1, Y(YBOT) - Y(k.siTop) + 1);
+    if (k.oxTop > 0) { g.fillStyle = COL.ox; g.fillRect(px, Y(k.oxTop), 1, Y(0) - Y(k.oxTop)); }
+    if (k.pr && k.prTh > 0) { g.fillStyle = COL.pr; g.fillRect(px, Y(G.H + k.prTh), 1, Y(G.H) - Y(G.H + k.prTh)); }
+  }
+  // a fully undercut resist line floats off
+  if (s.lifted) {
+    const P = PATS[pat], up = Math.min(1.1, (s.tp - s.liftT) * 0.45), a = Math.max(0, 1 - up / 1.25);
+    g.save(); g.globalAlpha = a;
+    g.translate(X((P.line[0] + P.line[1]) / 2), Y(G.H + G.PR / 2 + up)); g.rotate(-up * 0.35);
+    g.fillStyle = COL.pr; g.fillRect(-X(P.line[1] - P.line[0]) / 2, -sy * G.PR / 2, X(P.line[1] - P.line[0]), sy * G.PR);
+    g.restore();
+  }
+  // particles, plus a flash wherever one reacts with the film (shown even with reduced motion: they are the content, and only move after Start)
+  {
+    if (wet) {
+      g.fillStyle = 'rgba(10,85,110,0.8)';
+      for (const p of parts.wet) { if (matAt(s, p.x, p.y)) continue; g.beginPath(); g.arc(X(p.x), Y(p.y), 2.4 * dpr, 0, Math.PI * 2); g.fill(); }
+    } else if (s.phase !== 'idle' && s.phase !== 'done') {
+      g.strokeStyle = 'rgba(225,190,255,0.8)'; g.lineWidth = 1.6 * dpr; g.fillStyle = '#f3e6ff';
+      for (const p of parts.dry) {
+        if (p.y > YTOP) continue;
+        g.beginPath(); g.moveTo(X(p.x), Y(p.y)); g.lineTo(X(p.x), Y(Math.min(YTOP, p.y + 0.32))); g.stroke();
+        g.beginPath(); g.arc(X(p.x), Y(p.y), 1.9 * dpr, 0, Math.PI * 2); g.fill();
+      }
+    }
+    for (const f of flashes[m]) {
+      const k = f.t / 0.4, r = (f.small ? 2.5 : 4) * dpr + k * (f.small ? 4 : 8) * dpr;
+      g.globalAlpha = 1 - k; g.strokeStyle = f.c; g.lineWidth = 2.2 * dpr;
+      g.beginPath(); g.arc(X(f.x), Y(f.y), r, 0, Math.PI * 2); g.stroke();
+      g.globalAlpha = 1;
+    }
+  }
+  // annotations
+  const ink = wet ? '#0b2a33' : '#f1e8ff', plate = wet ? 'rgba(255,255,255,0.85)' : 'rgba(20,12,32,0.8)';
+  const edge = PATS[pat].open[0][0], yA = Y(G.H - 0.07);
+  if (s.phase !== 'idle') {
+    if (wet && s.R > 0.03) {
+      const reach = Math.min(s.R, edge - 0.08);
+      arrow(g, X(edge - reach), yA, X(edge), yA, ink, 1.6 * dpr);
+      tag(g, `언더컷 ${Math.round(s.R * 1000)} nm`, X(edge - reach) - 4 * dpr, Y(G.H + G.PR + 0.35), ink, plate, 'left');
+    }
+    if (!wet) tag(g, '수직 벽 · 언더컷 0', X(edge) - 4 * dpr, Y(G.H + G.PR + 0.35), ink, plate, 'right');
+    if (!wet && s.prLoss >= 5) tag(g, `감광액 −${Math.round(s.prLoss)} nm`, X(G.W - 0.08), Y(G.H + G.PR + 0.35), ink, plate, 'right');
+    if (s.siLoss >= 0.5) {
+      const [a, b] = PATS[pat].open[1];
+      tag(g, `실리콘 −${s.siLoss < 10 ? s.siLoss.toFixed(1) : Math.round(s.siLoss)} nm`, X((a + b) / 2), Y(-0.45), '#0b0e14', 'rgba(255,255,255,0.85)', 'center');
+    }
+  }
+  tag(g, wet ? 'BOE 용액 · 점 = HF 분자' : 'CF₄ 플라즈마 · 빛줄기 = 이온', X(0.12), Y(YTOP - 0.25), ink, plate, 'left');
+}
+function draw() { drawPanel('wet'); drawPanel('dry'); }
+
+/* ---------- read-outs ---------- */
+const nm = v => `${Math.round(v)} nm`;
+function metrics(m) {
+  const s = stateOf(m, T), k = s.k;
+  const A = s.depth > 0.001 ? Math.max(0, 1 - s.under / s.depth) : null;
+  const row = (label, val, note, cls) => `<div><dt>${label}</dt><dd class="${cls || ''}">${val}${note ? `<small>${note}</small>` : ''}</dd></div>`;
+  $('#m-' + m).innerHTML =
+    row('식각 속도 (SiO₂)', `${k.v} nm/분`, m === 'wet' ? '두 배 빠름' : '', m === 'wet' ? 'hl' : '') +
+    row('뚫은 깊이', nm(s.depth * 1000), s.depth >= G.H - 1e-6 ? `${t0(m)}분에 다 뚫음` : '목표 500 nm') +
+    row('언더컷', nm(s.under * 1000), m === 'wet' ? (s.lifted ? '감광액 줄 밑이 다 파임' : '마스크 아래로 파고듦') : '옆으로 안 깎임', s.lifted ? 'badv' : (m === 'dry' ? 'hl' : '')) +
+    row('이방성 지수', A === null ? '—' : A.toFixed(2), A === null ? '' : A < 0.5 ? '등방성' : '이방성', m === 'dry' && A !== null ? 'hl' : '') +
+    row('감광액 손실', nm(s.prLoss), `선택비 SiO₂:PR = ${k.sPR}`, m === 'wet' ? 'hl' : '') +
+    row('실리콘 손실', `${s.siLoss < 10 ? s.siLoss.toFixed(1) : Math.round(s.siLoss)} nm`, `선택비 SiO₂:Si = ${k.sSi}`, m === 'wet' ? 'hl' : '');
+  const chips = [];
+  chips.push({ idle: '대기', etch: '식각 중', over: '과식각 중', done: '완료' }[s.phase]);
+  if (s.phase === 'over' || s.phase === 'done') chips.push(`종말점 ${t0(m)}분`);
+  let html = chips.map(c => `<span class="chip">${c}</span>`).join('');
+  if (s.lifted) html += '<span class="chip bad">감광액이 떨어져 나감</span>';
+  $('#chips-' + m).innerHTML = html;
+  cv[m].setAttribute('aria-label', `${m === 'wet' ? '습식' : '건식'} 식각 단면. 깊이 ${Math.round(s.depth * 1000)} nm, 언더컷 ${Math.round(s.under * 1000)} nm, 감광액 손실 ${Math.round(s.prLoss)} nm.`);
+}
+function verdict() {
+  const w = stateOf('wet', T), d = stateOf('dry', T), el = $('#verdict');
+  if (T <= 0) { el.textContent = '▶ 식각 시작을 누르거나, 공정 시간 막대를 끌어 보세요. 두 웨이퍼는 같은 시계로 움직입니다.'; return; }
+  if (T < maxT() - 1e-6) {
+    el.innerHTML = w.phase === 'done' && d.phase !== 'done'
+      ? `습식은 이미 끝났습니다(${tEnd('wet').toFixed(1)}분). 건식은 식각 속도가 절반이라 아직 깎는 중입니다.`
+      : '두 웨이퍼를 같은 시간 동안 깎는 중입니다. 단면에서 깎이는 모양을 비교해 보세요.';
+    return;
+  }
+  let t = `<b>습식</b>은 ${tEnd('wet').toFixed(1)}분 만에 끝났지만(100 nm/분) 감광액 아래로 ${Math.round(w.under * 1000)} nm 파고들었습니다(등방성). `;
+  if (w.lifted) t += `감광액 줄의 폭(${pat === 'fine' ? '0.6' : '2.4'} µm)보다 양쪽 언더컷이 커져 줄 밑이 다 파였고, 감광액이 떨어져 나가 무늬가 사라졌습니다. `;
+  t += `<b>건식</b>은 ${tEnd('dry').toFixed(1)}분 걸렸지만 수직으로만 깎여 무늬 폭이 그대로입니다(이방성). 대신 감광액이 ${Math.round(d.prLoss)} nm, 실리콘이 ${Math.round(d.siLoss)} nm 깎였습니다(습식은 각각 0 nm, ${w.siLoss.toFixed(1)} nm). 건식의 선택비가 더 낮기 때문입니다. `;
+  t += pat === 'fine' ? '미세한 회로 무늬를 새길 때 건식 식각을 쓰는 이유입니다.' : '미세 패턴으로 바꿔서 다시 해 보세요.';
+  el.innerHTML = t;
+}
+function syncControls() {
+  const mt = maxT(), sl = $('#time');
+  sl.max = mt.toFixed(2); sl.value = T.toFixed(2);
+  $('#time-out').textContent = `${T.toFixed(1)}분`;
+  $('#tick-wet').style.left = `${t0('wet') / mt * 100}%`;
+  $('#tick-dry').style.left = `${t0('dry') / mt * 100}%`;
+  const rb = $('#btn-run');
+  rb.textContent = playing ? '⏸ 일시정지' : T >= mt - 1e-6 ? '↺ 다시 식각' : T > 0 ? '▶ 계속' : '▶ 식각 시작';
+  $('#btn-fast').setAttribute('aria-pressed', String(fast));
+  $$('[data-pat]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.pat === pat)));
+  $$('[data-oe]').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.oe) === oe)));
+}
+function refresh() { draw(); metrics('wet'); metrics('dry'); verdict(); syncControls(); }
+
+/* ---------- controls ---------- */
+$('#btn-run').addEventListener('click', () => {
+  if (T >= maxT() - 1e-6) T = 0;
+  playing = !playing; refresh();
+});
+$('#btn-fast').addEventListener('click', () => { fast = !fast; syncControls(); });
+$('#btn-reset').addEventListener('click', () => { T = 0; playing = false; seedParticles(); refresh(); });
+$('#time').addEventListener('input', e => { T = Number(e.target.value); playing = false; refresh(); });
+$$('[data-pat]').forEach(b => b.addEventListener('click', () => { pat = b.dataset.pat; refresh(); }));
+$$('[data-oe]').forEach(b => b.addEventListener('click', () => { oe = Number(b.dataset.oe); T = Math.min(T, maxT()); refresh(); }));
+
+/* ---------- loop ---------- */
+let last = performance.now(), roTimer = 0;
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (playing) {
+    T += dt * (fast ? 3 : 1) / 0.8;                  // 1 process-minute every 0.8 s
+    if (T >= maxT()) { T = maxT(); playing = false; }
+    stepParticles(dt);
+    draw(); metrics('wet'); metrics('dry'); syncControls();
+    if ((roTimer += dt) > 0.4 || !playing) { roTimer = 0; verdict(); }
+  }
+  requestAnimationFrame(frame);
+}
+window.addEventListener('resize', size);
+seedParticles(); size(); refresh();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

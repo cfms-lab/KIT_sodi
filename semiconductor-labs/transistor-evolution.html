@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MOSFET에서 MBCFET까지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one control bar (gate voltage, gate length) drives five transistor cards in a row (cross-section + electron flow + numbers), then an Id–Vg chart with its table, then explainer cards; cards stack on narrow screens. */
+:root {
+  --bg: #eef1f5; --panel: #ffffff; --panel-2: #f5f7fa; --ink: #141a22; --ink-2: #52514e; --muted: #6a7280; --line: #d5dbe3; --line-strong: #b7c0cc;
+  --accent: #f2b705; --on-accent: #1a1400;
+  --chart-surface: #fcfcfb; --grid: #e1e0d9; --axis: #c3c2b7;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4;
+  --good: #0ca30c; --warning: #fab219; --critical: #d03b3b;
+  --font-display: "Black Han Sans", "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1116; --panel: #161b22; --panel-2: #1c222b; --ink: #e8ecf2; --ink-2: #c3c2b7; --muted: #98a2b0; --line: #29313c; --line-strong: #3a4452;
+    --accent: #f5c518; --on-accent: #161200;
+    --chart-surface: #1a1a19; --grid: #2c2c2a; --axis: #383835;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1116; --panel: #161b22; --panel-2: #1c222b; --ink: #e8ecf2; --ink-2: #c3c2b7; --muted: #98a2b0; --line: #29313c; --line-strong: #3a4452;
+  --accent: #f5c518; --on-accent: #161200;
+  --chart-surface: #1a1a19; --grid: #2c2c2a; --axis: #383835;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { background: var(--bg); }
+body { margin: 0; color: var(--ink); font: 400 15px/1.6 var(--font-body); -webkit-font-smoothing: antialiased; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.app { max-width: 1320px; margin: 0 auto; padding-inline: 16px; padding-block: 18px 48px; display: grid; gap: 18px; }
+.masthead { display: grid; gap: 4px; }
+.eyebrow { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--muted); }
+h1 { margin: 0; font: 400 clamp(30px, 6vw, 46px)/1.08 var(--font-display); letter-spacing: -.01em; text-wrap: balance; }
+.lede { margin: 2px 0 0; max-width: 70ch; color: var(--muted); font-size: 14.5px; }
+.lede b { color: var(--ink); }
+
+.controls { display: grid; gap: 14px; padding: 14px 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+@media (min-width: 900px) { .controls { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; } }
+.ctl { display: grid; gap: 6px; min-width: 0; }
+.ctl-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 10px; }
+.ctl-head label { font-weight: 700; }
+.ctl-head output { font-weight: 700; font-variant-numeric: tabular-nums; }
+.ctl-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ctl input[type="range"] { width: 100%; accent-color: var(--ink); margin: 0; }
+.scale { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); }
+.seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 9px; overflow: hidden; }
+.seg button { appearance: none; cursor: pointer; min-height: 40px; padding: 6px 14px; border: 0; background: transparent; font-size: 14px; font-weight: 700; }
+.seg button + button { border-left: 1px solid var(--line-strong); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.btn { appearance: none; cursor: pointer; min-height: 40px; padding: 6px 13px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--panel); font-size: 13.5px; font-weight: 600; }
+.btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.hint { margin: 0; font-size: 12.5px; color: var(--muted); }
+
+.summary { margin: 0; padding: 12px 16px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line-strong); font-size: 14.5px; }
+
+.cards { display: grid; gap: 12px; }
+@media (min-width: 1180px) { .cards { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.dev { display: grid; gap: 8px; align-content: start; min-width: 0; padding: 12px 12px 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; border-top: 5px solid var(--c); }
+@media (min-width: 640px) and (max-width: 1179px) {
+  .dev { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr) minmax(0, 1fr); align-items: start; column-gap: 14px; }
+  .dev header { grid-column: 1 / -1; }
+}
+.dev header { display: grid; gap: 2px; }
+.dev h2 { margin: 0; font: 400 22px/1.15 var(--font-display); display: flex; align-items: center; gap: 8px; }
+.dev h2 i { width: 12px; height: 12px; border-radius: 50%; background: var(--c); flex: none; }
+.dev .sub { font-size: 12.5px; color: var(--muted); }
+.fig { margin: 0; display: grid; gap: 3px; min-width: 0; }
+.fig canvas { display: block; width: 100%; border-radius: 9px; }
+.fig figcaption { font-size: 11.5px; color: var(--muted); line-height: 1.35; }
+.nums { margin: 0; display: grid; gap: 6px; min-width: 0; }
+.big { padding: 8px 10px; border-radius: 9px; background: var(--panel-2); }
+.big dt { font-size: 11.5px; color: var(--muted); }
+.big dd { margin: 0; font-size: 21px; font-weight: 700; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.big dd small { font-size: 12px; font-weight: 500; color: var(--muted); }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.pair div { padding: 6px 9px; border-radius: 9px; background: var(--panel-2); min-width: 0; }
+.pair dt { font-size: 11px; color: var(--muted); line-height: 1.3; }
+.pair dd { margin: 0; font-size: 14.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.status { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; }
+.status::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--st); }
+.status.good { --st: var(--good); } .status.warning { --st: var(--warning); } .status.critical { --st: var(--critical); }
+.status.good::before { border-radius: 50%; } .status.warning::before { border-radius: 2px; transform: rotate(45deg); } .status.critical::before { border-radius: 1px; }
+.faces { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--panel-2); justify-self: start; }
+
+.chart-card { display: grid; gap: 10px; padding: 16px 18px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+.chart-card h2 { margin: 0; font: 400 22px/1.2 var(--font-display); }
+.chart-card .sub { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 72ch; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 16px; height: 3px; border-radius: 2px; background: var(--c); }
+.plot { position: relative; width: 100%; max-width: 900px; background: var(--chart-surface); border-radius: 10px; }
+.plot svg { display: block; width: 100%; height: auto; }
+.plot .gridl { stroke: var(--grid); stroke-width: 1; }
+.plot .axisl { stroke: var(--axis); stroke-width: 1; }
+.plot text { fill: var(--muted); font: 500 11px var(--font-body); }
+.plot .ttl { fill: var(--ink-2); font-weight: 600; }
+.plot .series { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.plot .vgline { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.plot .cross { stroke: var(--ink-2); stroke-width: 1; }
+.tip { position: absolute; pointer-events: none; min-width: 170px; padding: 8px 10px; border-radius: 8px; background: var(--panel); border: 1px solid var(--line-strong); box-shadow: 0 6px 18px rgba(0,0,0,.12); font-size: 12.5px; line-height: 1.5; }
+.tip b { display: block; margin-bottom: 2px; }
+.tip span { display: flex; align-items: center; gap: 6px; justify-content: space-between; font-variant-numeric: tabular-nums; }
+.tip span i { width: 10px; height: 3px; border-radius: 2px; background: var(--c); margin-right: auto; }
+.tbl { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th, td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
+th:first-child, td:first-child { text-align: left; }
+thead th { font-size: 12px; color: var(--muted); font-weight: 600; }
+td .sw { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--c); margin-right: 6px; vertical-align: -1px; }
+
+.explain { display: grid; gap: 12px; }
+@media (min-width: 820px) { .explain { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.card { padding: 16px 18px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; min-width: 0; }
+.card h2 { margin: 0 0 6px; font: 400 21px/1.2 var(--font-display); text-wrap: balance; }
+.card p { margin: 0 0 8px; font-size: 14px; max-width: 70ch; }
+.foot { margin: 0; font-size: 12px; color: var(--muted); max-width: 80ch; }
+</style>
+
+</head>
+<body>
+<div class="app">
+  <nav style="margin-bottom:10px;font-size:13px"><a href="index.html" style="color:var(--muted);text-decoration:none;font-weight:600">← 실험 목록</a></nav>
+  <header class="masthead">
+    <p class="eyebrow">IT융합소재 · 반도체 제조공정 · 미세 공정과 트랜지스터 구조</p>
+    <h1>MOSFET에서 MBCFET까지</h1>
+    <p class="lede">트랜지스터는 게이트 전압으로 전자의 흐름을 켜고 끄는 스위치입니다. 아래 다섯 구조에 같은 게이트 전압을 걸고, <b>게이트 길이를 줄여 보세요.</b> 게이트가 채널을 적게 감싼 구조일수록 꺼 놓아도 전자가 새어 나갑니다. 파란 점 하나하나가 전자입니다.</p>
+  </header>
+
+  <section class="controls" aria-label="조건">
+    <div class="ctl">
+      <div class="ctl-head"><label for="vg">게이트 전압</label><output id="vg-out" for="vg">0.00 V · 꺼짐</output></div>
+      <div class="ctl-row">
+        <div class="seg" role="group" aria-label="빠르게 바꾸기">
+          <button type="button" data-vg="0" aria-pressed="true">끄기 0 V</button>
+          <button type="button" data-vg="1" aria-pressed="false">켜기 1 V</button>
+        </div>
+        <button class="btn" type="button" id="btn-blink" aria-pressed="false">켜고 끄기 반복</button>
+      </div>
+      <input type="range" id="vg" min="0" max="1" step="0.05" value="0">
+    </div>
+    <div class="ctl">
+      <div class="ctl-head"><label for="lg">게이트 길이 (미세화 →)</label><output id="lg-out" for="lg">15 nm</output></div>
+      <input type="range" id="lg" min="0" max="100" step="1" value="68">
+      <div class="scale"><span>50 nm</span><span>20 nm</span><span>8 nm</span></div>
+      <p class="hint">MOSFET 카드는 선폭이 넓던 시절의 기준으로 게이트 길이 100 nm에 고정했습니다.</p>
+    </div>
+  </section>
+
+  <p class="summary" id="summary" aria-live="polite"></p>
+
+  <div class="cards" id="cards"></div>
+
+  <section class="chart-card">
+    <h2>게이트 전압에 따른 전류</h2>
+    <p class="sub">세로축은 로그 눈금이라 한 칸 올라갈 때마다 전류가 10배 커집니다. 0 V에서 곡선이 낮을수록 잘 꺼지고, 곡선이 가파를수록 스위칭이 날카롭습니다. 점선은 지금 게이트 전압입니다. 그래프를 누르면 그 전압으로 바뀝니다.</p>
+    <div class="legend" id="legend"></div>
+    <div class="plot" id="plot"><svg id="svg" viewBox="0 0 720 320" role="img" aria-label="게이트 전압에 따른 드레인 전류 그래프"></svg><div class="tip" id="tip" hidden></div></div>
+    <div class="tbl"><table id="tbl"><thead><tr><th scope="col">구조</th><th scope="col">꺼짐(0 V) 전류</th><th scope="col">켜짐(1 V) 전류</th><th scope="col">켜짐 ÷ 꺼짐</th><th scope="col">SS (mV/dec)</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="explain">
+    <article class="card">
+      <h2>왜 새 구조가 필요할까</h2>
+      <p>게이트 길이가 줄면 소스와 드레인이 가까워져, 드레인의 전기장이 채널까지 끼어듭니다(단채널 효과). 게이트가 위쪽 한 면만 누르는 평면 구조는 게이트에서 먼 아래쪽을 붙잡지 못해, 꺼 놓아도 전자가 아래로 새어 나갑니다. 이 누설 전류는 대기 전력과 발열로 이어집니다.</p>
+    </article>
+    <article class="card">
+      <h2>감싸는 면이 늘수록</h2>
+      <p>게이트가 채널을 1면(평면) → 3면(FinFET) → 4면(GAA)으로 더 많이 감쌀수록, 전자가 다니는 통로 전체를 확실히 열고 닫을 수 있습니다. 그래서 같은 게이트 길이에서도 꺼짐 전류가 작고 스위칭이 날카롭습니다. 새는 길이 막히니 더 짧은 게이트까지 줄일 수 있습니다.</p>
+    </article>
+    <article class="card">
+      <h2>MBCFET</h2>
+      <p>삼성전자가 붙인 이름(Multi-Bridge Channel FET)으로, 가는 나노와이어 대신 넓적한 나노시트를 여러 장 쌓은 GAA입니다. 4면을 감싸는 장점은 그대로이면서 전류가 흐를 길이 넓어, 같은 면적에서 켜졌을 때 전류가 큽니다. TSMC는 나노시트, 인텔은 RibbonFET라는 이름으로 같은 방향의 구조를 씁니다.</p>
+    </article>
+    <article class="card">
+      <h2>스위칭 성능을 재는 두 숫자</h2>
+      <p><b>켜짐 ÷ 꺼짐 전류 비</b>는 클수록 확실한 스위치입니다. <b>SS(문턱 아래 기울기)</b>는 꺼진 상태에서 전류를 10배 바꾸는 데 필요한 게이트 전압으로, 작을수록 적은 전압으로 날카롭게 켜고 끕니다. 상온에서 이론적인 한계는 약 60 mV입니다.</p>
+    </article>
+  </section>
+
+  <p class="foot">전류와 전압은 구조의 차이를 보여 주기 위한 단순 모델의 상대값이며, 실제 소자의 측정값이 아닙니다. 카드의 "켜짐 전류 · 면적당"은 Planar FET를 1로 둔 값입니다. 새는 전자의 점 개수는 보이도록 크게 과장했고, 정확한 비율은 표의 숫자를 보세요. 공정 이름의 nm(예: 3 nm 공정)는 실제 게이트 길이가 아니며, 최신 공정의 실제 게이트 길이는 10 nm대입니다.</p>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+/* ---------- device model (relative units) ---------- */
+// lam: electrostatic scale length (nm) - the more faces the gate wraps, the smaller it is.
+const DEVS = [
+  { key: 'mos', name: 'MOSFET', sub: '평면 · 선폭이 넓던 시절', kind: 'planar', lam: 8, W: 1.0, fixedL: 100, faces: '게이트 1면', slot: 1 },
+  { key: 'planar', name: 'Planar FET', sub: '평면 · 같은 구조를 미세화', kind: 'planar', lam: 8, W: 1.0, faces: '게이트 1면', slot: 2 },
+  { key: 'fin', name: 'FinFET', sub: '세운 지느러미 채널', kind: 'fin', lam: 3.5, W: 1.6, faces: '게이트 3면', slot: 3 },
+  { key: 'gaa', name: 'GAAFET', sub: '나노와이어 채널', kind: 'gaa', lam: 2.2, W: 1.2, faces: '게이트 4면', slot: 4 },
+  { key: 'mbc', name: 'MBCFET', sub: '나노시트를 여러 장 쌓은 GAA', kind: 'mbc', lam: 2.6, W: 2.0, faces: '게이트 4면 × 3장', slot: 5 }
+];
+let Vg = 0, Lnm = 15, blink = false, blinkT = 0;
+const Lof = d => d.fixedL || Lnm;
+function params(d) {
+  const L = Lof(d), s = Math.exp(-L / (2 * d.lam));            // short-channel weakness
+  return { L, s, SS: 60 * (1 + 3 * s), Vt: 0.35 - 0.4 * s };
+}
+function Id(d, v) {
+  const p = params(d), x = (v - p.Vt) * Math.LN10 / (p.SS / 1000);
+  const g = Math.pow(Math.log1p(Math.exp(x / 2)), 2);           // exponential below threshold, quadratic above
+  return d.W * g * Math.sqrt(20 / p.L);
+}
+const sliderToL = v => 50 * Math.pow(8 / 50, v / 100);
+// On-current per unit chip area: a long-gate transistor takes more room (contacts ≈ 20 nm).
+const onPerArea = d => Id(d, 1) * (Lnm + 20) / (Lof(d) + 20);
+
+/* ---------- number formatting ---------- */
+const SUP = { '-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
+function sci(v) {
+  if (v >= 0.1 && v < 1000) return v < 10 ? v.toFixed(2) : Math.round(v).toString();
+  const e = Math.floor(Math.log10(v)), m = v / Math.pow(10, e);
+  return `${m.toFixed(1)}×10${String(e).split('').map(c => SUP[c]).join('')}`;
+}
+function kor(r) {
+  if (r >= 1e8) return `${(r / 1e8).toFixed(r >= 1e9 ? 0 : 1)}억`;
+  if (r >= 1e4) return `${Math.round(r / 1e4).toLocaleString('ko-KR')}만`;
+  return Math.round(r).toLocaleString('ko-KR');
+}
+const status = r => r >= 1e6 ? ['good', '잘 꺼짐'] : r >= 1e4 ? ['warning', '조금 샘'] : ['critical', '많이 샘'];
+
+/* ---------- cards ---------- */
+const cardsEl = $('#cards');
+cardsEl.innerHTML = DEVS.map(d => `
+  <article class="dev" style="--c: var(--s${d.slot})" id="card-${d.key}">
+    <header><h2><i></i>${d.name}</h2><span class="sub">${d.sub}${d.fixedL ? ' · 100 nm 고정' : ''}</span></header>
+    <figure class="fig"><canvas data-x="${d.key}" role="img" aria-label="${d.name} 단면: ${d.faces}"></canvas><figcaption>단면 · 전류는 화면 안쪽으로 · <b>${d.faces}</b></figcaption></figure>
+    <figure class="fig"><canvas data-s="${d.key}" role="img" aria-label="${d.name} 옆모습, 전자의 흐름"></canvas><figcaption>옆모습 · 전자가 소스(왼쪽) → 드레인(오른쪽)</figcaption></figure>
+    <dl class="nums">
+      <div class="big"><dt>켜짐 ÷ 꺼짐 전류</dt><dd id="r-${d.key}">—</dd></div>
+      <span class="status" id="st-${d.key}"></span>
+      <div class="pair">
+        <div><dt>SS · 작을수록 좋음</dt><dd id="ss-${d.key}">—</dd></div>
+        <div><dt>켜짐 전류 · 면적당</dt><dd id="on-${d.key}">—</dd></div>
+      </div>
+    </dl>
+  </article>`).join('');
+$('#legend').innerHTML = DEVS.map(d => `<span style="--c: var(--s${d.slot})"><i></i>${d.name}${d.fixedL ? ' (100 nm)' : ''}</span>`).join('');
+
+/* ---------- canvas drawing (the chip interior keeps one dark look in both themes) ---------- */
+const COL = { bg: '#0f1520', sub: '#4b5361', si: '#7c8696', nplus: '#3f6aa3', ox: '#a9bfd6', sti: 'rgba(169,191,214,0.35)', barrier: '255,92,92', e: '#6fd3ff', text: '#cfd8e6' };
+let dpr = 1;
+const canv = {};
+for (const c of $$('canvas[data-x], canvas[data-s]')) canv[(c.dataset.x ? 'x-' : 's-') + (c.dataset.x || c.dataset.s)] = c;
+function fit() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  for (const [k, c] of Object.entries(canv)) {
+    const w = Math.round(c.clientWidth * dpr) || 300, ratio = k.startsWith('x-') ? 1.7 : 1.45;
+    c.width = w; c.height = Math.round(w / ratio);
+  }
+  drawAllX();
+}
+function gateColor(a) {                            // dull gold when off, bright when on
+  const lo = [138, 106, 31], hi = [245, 196, 78], m = lo.map((v, i) => Math.round(v + (hi[i] - v) * a));
+  return `rgb(${m[0]},${m[1]},${m[2]})`;
+}
+function rectN(g, W, H, x0, y0, x1, y1, fill) { g.fillStyle = fill; g.fillRect(x0 * W, y0 * H, (x1 - x0) * W, (y1 - y0) * H); }
+function label(g, W, H, txt, x, y, align) {
+  g.font = `600 ${Math.max(10 * dpr, W * 0.045)}px "IBM Plex Sans KR", "Malgun Gothic", sans-serif`;
+  g.fillStyle = COL.text; g.textAlign = align || 'center'; g.textBaseline = 'middle'; g.fillText(txt, x * W, y * H);
+}
+// Cross-section across the channel: how many faces the gate touches.
+function drawX(d) {
+  const c = canv['x-' + d.key], g = c.getContext('2d'), W = c.width, H = c.height, gc = gateColor(Vg);
+  g.fillStyle = COL.bg; g.fillRect(0, 0, W, H);
+  const edge = (x0, y0, x1, y1) => { g.strokeStyle = 'rgba(255,230,150,0.95)'; g.lineWidth = 2.4 * dpr; g.beginPath(); g.moveTo(x0 * W, y0 * H); g.lineTo(x1 * W, y1 * H); g.stroke(); };
+  if (d.kind === 'planar') {
+    rectN(g, W, H, 0.06, 0.5, 0.94, 0.96, COL.sub);
+    rectN(g, W, H, 0.06, 0.5, 0.94, 0.58, COL.si);
+    rectN(g, W, H, 0.2, 0.46, 0.8, 0.5, COL.ox);
+    rectN(g, W, H, 0.2, 0.14, 0.8, 0.46, gc);
+    edge(0.2, 0.5, 0.8, 0.5);
+    label(g, W, H, '게이트', 0.5, 0.3); label(g, W, H, '채널', 0.5, 0.75);
+  } else if (d.kind === 'fin') {
+    rectN(g, W, H, 0.06, 0.82, 0.94, 0.96, COL.sub);
+    rectN(g, W, H, 0.06, 0.66, 0.94, 0.82, COL.ox);
+    rectN(g, W, H, 0.24, 0.1, 0.76, 0.66, gc);
+    rectN(g, W, H, 0.405, 0.2, 0.595, 0.82, COL.ox);
+    rectN(g, W, H, 0.42, 0.22, 0.58, 0.96, COL.si);
+    edge(0.42, 0.22, 0.58, 0.22); edge(0.42, 0.22, 0.42, 0.66); edge(0.58, 0.22, 0.58, 0.66);
+    label(g, W, H, '게이트', 0.68, 0.16, 'center'); label(g, W, H, '핀', 0.5, 0.74);
+  } else {
+    rectN(g, W, H, 0.06, 0.86, 0.94, 0.96, COL.sub);
+    rectN(g, W, H, 0.22, 0.08, 0.78, 0.86, gc);
+    const ys = [0.24, 0.47, 0.7], wide = d.kind === 'mbc', hw = wide ? 0.2 : 0.055, hh = wide ? 0.05 : 0.055;
+    for (const y of ys) {
+      rectN(g, W, H, 0.5 - hw - 0.02, y - hh - 0.035, 0.5 + hw + 0.02, y + hh + 0.035, COL.ox);
+      rectN(g, W, H, 0.5 - hw, y - hh, 0.5 + hw, y + hh, COL.si);
+      edge(0.5 - hw, y - hh, 0.5 + hw, y - hh); edge(0.5 - hw, y + hh, 0.5 + hw, y + hh);
+      edge(0.5 - hw, y - hh, 0.5 - hw, y + hh); edge(0.5 + hw, y - hh, 0.5 + hw, y + hh);
+    }
+    label(g, W, H, '게이트', 0.5, 0.04 + 0.025);
+  }
+}
+function drawAllX() { for (const d of DEVS) drawX(d); }
+
+// Side view along the channel, with the electron paths for this structure.
+function geom(d) {
+  const gw = d.fixedL ? 0.3 : 0.07 + 0.17 * Math.min(1, Math.max(0, (Lnm - 8) / 42));
+  return { gw, g0: 0.5 - gw, g1: 0.5 + gw };
+}
+function lanesOf(d, G) {
+  // returns { main: [[x,y]...] path builder, leak: path builder or null }
+  const p = params(d);
+  if (d.kind === 'planar') return {
+    main: () => [[0.06 + Math.random() * (G.g0 - 0.1), 0.5 + Math.random() * 0.1], [G.g0, 0.468], [G.g1, 0.468], [G.g1 + 0.04 + Math.random() * (0.9 - G.g1), 0.5 + Math.random() * 0.1]],
+    leak: () => [[0.06 + Math.random() * (G.g0 - 0.1), 0.52 + Math.random() * 0.08], [G.g0, 0.62], [0.5, 0.66 + 0.12 * (1 - p.s)], [G.g1, 0.62], [G.g1 + 0.04 + Math.random() * (0.9 - G.g1), 0.52 + Math.random() * 0.08]]
+  };
+  if (d.kind === 'fin') return {
+    main: () => { const y = 0.33 + Math.random() * 0.26; return [[0.05 + Math.random() * (G.g0 - 0.08), y], [G.g0, y], [G.g1, y], [G.g1 + 0.03 + Math.random() * (0.92 - G.g1), y]]; },
+    leak: () => { const y = 0.69 + Math.random() * 0.07; return [[0.05 + Math.random() * (G.g0 - 0.08), y], [G.g0, y], [G.g1, y], [G.g1 + 0.03 + Math.random() * (0.92 - G.g1), y]]; }
+  };
+  const ys = d.kind === 'mbc' ? [0.34, 0.52, 0.7] : [0.36, 0.52, 0.68], j = d.kind === 'mbc' ? 0.022 : 0.008;
+  return {
+    main: () => { const y = ys[Math.floor(Math.random() * 3)] + (Math.random() - 0.5) * 2 * j; return [[0.05 + Math.random() * (G.g0 - 0.08), y], [G.g0, y], [G.g1, y], [G.g1 + 0.03 + Math.random() * (0.92 - G.g1), y]]; },
+    leak: null
+  };
+}
+const flows = {};                                   // per device: electrons in flight + spawn accumulator
+for (const d of DEVS) flows[d.key] = { list: [], acc: 0, cloud: Array.from({ length: 26 }, () => ({ u: Math.random(), v: Math.random(), ph: Math.random() * 6.28 })) };
+const onFrac = d => 1 / (1 + Math.exp(-(Vg - params(d).Vt) / 0.06));
+function rateOf(d) {                                // electrons per second shown (leakage exaggerated on a log scale)
+  const I = Id(d, Vg), vis = Math.min(1, Math.max(0, (Math.log10(I) + 5) / (Math.log10(280) + 5)));
+  return 34 * Math.min(1, I / 280) + 12 * Math.pow(vis, 1.5);
+}
+function stepFlows(dt) {
+  for (const d of DEVS) {
+    const f = flows[d.key], G = geom(d), lanes = lanesOf(d, G);
+    f.acc += rateOf(d) * dt;
+    while (f.acc >= 1 && f.list.length < 160) {
+      f.acc -= 1;
+      const deep = lanes.leak && Math.random() > onFrac(d);
+      const pts = (deep ? lanes.leak : lanes.main)();
+      let len = 0; for (let k = 1; k < pts.length; k++) len += Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1]);
+      f.list.push({ pts, len, s: 0, sp: (deep ? 0.32 : 0.5) * (0.85 + Math.random() * 0.3), deep });
+    }
+    for (let i = f.list.length - 1; i >= 0; i--) { const e = f.list[i]; e.s += e.sp * dt; if (e.s >= e.len) f.list.splice(i, 1); }
+    for (const c of f.cloud) c.ph += dt * 2;
+  }
+}
+function pointOn(e) {
+  let d = e.s;
+  for (let k = 1; k < e.pts.length; k++) {
+    const a = e.pts[k - 1], b = e.pts[k], l = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    if (d <= l) return [a[0] + (b[0] - a[0]) * d / l, a[1] + (b[1] - a[1]) * d / l];
+    d -= l;
+  }
+  return e.pts[e.pts.length - 1];
+}
+function drawS(d) {
+  const c = canv['s-' + d.key], g = c.getContext('2d'), W = c.width, H = c.height, G = geom(d), p = params(d), gc = gateColor(Vg);
+  const off = 1 - onFrac(d);
+  g.fillStyle = COL.bg; g.fillRect(0, 0, W, H);
+  // where the electrons can come from and go to: source/drain regions, drawn per structure
+  let srcY = [0.5, 0.6];
+  if (d.kind === 'planar') {
+    rectN(g, W, H, 0, 0.46, 1, 1, COL.sub);
+    rectN(g, W, H, 0.02, 0.46, G.g0 + 0.01, 0.64, COL.nplus); rectN(g, W, H, G.g1 - 0.01, 0.46, 0.98, 0.64, COL.nplus);
+    // barrier under the gate: strong near the gate, fading with depth (fades faster when the gate is short)
+    const reach = 0.45 * Math.pow(1 - p.s, 2) + 0.05;
+    const grad = g.createLinearGradient(0, 0.46 * H, 0, (0.46 + reach) * H);
+    grad.addColorStop(0, `rgba(${COL.barrier},${0.55 * off})`); grad.addColorStop(1, `rgba(${COL.barrier},0)`);
+    g.fillStyle = grad; g.fillRect(G.g0 * W, 0.46 * H, (G.g1 - G.g0) * W, reach * H);
+    rectN(g, W, H, G.g0, 0.435, G.g1, 0.46, COL.ox);
+    rectN(g, W, H, G.g0, 0.16, G.g1, 0.435, gc);
+    label(g, W, H, '소스', G.g0 / 2, 0.8); label(g, W, H, '드레인', (1 + G.g1) / 2, 0.8);
+  } else if (d.kind === 'fin') {
+    rectN(g, W, H, 0, 0.8, 1, 1, COL.sub);
+    rectN(g, W, H, 0.02, 0.3, 0.98, 0.8, COL.si);
+    rectN(g, W, H, 0.02, 0.3, G.g0, 0.64, COL.nplus); rectN(g, W, H, G.g1, 0.3, 0.98, 0.64, COL.nplus);
+    g.fillStyle = `rgba(${COL.barrier},${0.55 * off})`; g.fillRect(G.g0 * W, 0.3 * H, (G.g1 - G.g0) * W, 0.34 * H);
+    g.fillStyle = `rgba(${COL.barrier},${0.55 * off * (1 - p.s) * 0.35})`; g.fillRect(G.g0 * W, 0.64 * H, (G.g1 - G.g0) * W, 0.16 * H);
+    g.globalAlpha = 0.55; rectN(g, W, H, G.g0, 0.18, G.g1, 0.64, gc); g.globalAlpha = 1;
+    rectN(g, W, H, 0, 0.64, 1, 0.8, COL.sti);
+    label(g, W, H, '소스', G.g0 / 2, 0.9); label(g, W, H, '드레인', (1 + G.g1) / 2, 0.9);
+    srcY = [0.33, 0.6];
+  } else {
+    rectN(g, W, H, 0, 0.84, 1, 1, COL.sub);
+    rectN(g, W, H, 0.02, 0.24, G.g0, 0.84, COL.nplus); rectN(g, W, H, G.g1, 0.24, 0.98, 0.84, COL.nplus);
+    rectN(g, W, H, G.g0, 0.2, G.g1, 0.84, gc);
+    const ys = d.kind === 'mbc' ? [0.34, 0.52, 0.7] : [0.36, 0.52, 0.68], hh = d.kind === 'mbc' ? 0.035 : 0.018;
+    for (const y of ys) {
+      rectN(g, W, H, G.g0, y - hh - 0.012, G.g1, y + hh + 0.012, COL.ox);
+      rectN(g, W, H, G.g0, y - hh, G.g1, y + hh, COL.si);
+      g.fillStyle = `rgba(${COL.barrier},${0.6 * off})`; g.fillRect(G.g0 * W, (y - hh) * H, (G.g1 - G.g0) * W, 2 * hh * H);
+    }
+    label(g, W, H, '소스', G.g0 / 2, 0.94); label(g, W, H, '드레인', (1 + G.g1) / 2, 0.94);
+    srcY = [0.3, 0.76];
+  }
+  label(g, W, H, '게이트', 0.5, d.kind === 'planar' ? 0.3 : (d.kind === 'fin' ? 0.1 : 0.12));
+  // electrons waiting in the source and drain
+  const f = flows[d.key], r = Math.max(1.8, 2.4 * dpr * Math.min(1, W / 360));
+  g.fillStyle = 'rgba(111,211,255,0.45)';
+  for (const cdot of f.cloud) {
+    const left = cdot.u < 0.5, xu = (cdot.u % 0.5) * 2;
+    const x = left ? 0.04 + xu * (G.g0 - 0.07) : G.g1 + 0.03 + xu * (0.94 - G.g1);
+    const y = srcY[0] + cdot.v * (srcY[1] - srcY[0]) + Math.sin(cdot.ph) * 0.006;
+    g.beginPath(); g.arc(x * W, y * H, r * 0.8, 0, Math.PI * 2); g.fill();
+  }
+  // electrons in flight
+  g.shadowColor = COL.e; g.shadowBlur = 6 * dpr;
+  for (const e of f.list) {
+    const [x, y] = pointOn(e);
+    g.fillStyle = e.deep ? '#ff9e9e' : COL.e;
+    g.beginPath(); g.arc(x * W, y * H, r, 0, Math.PI * 2); g.fill();
+  }
+  g.shadowBlur = 0;
+}
+
+/* ---------- read-outs ---------- */
+function readouts() {
+  for (const d of DEVS) {
+    const p = params(d), on = Id(d, 1), off = Id(d, 0), r = on / off, [cls, txt] = status(r);
+    $('#r-' + d.key).innerHTML = `${kor(r)}배 <small>꺼짐이 켜짐의 1/${kor(r)}</small>`;
+    const st = $('#st-' + d.key); st.className = `status ${cls}`; st.textContent = txt;
+    $('#ss-' + d.key).textContent = `${Math.round(p.SS)} mV`;
+    $('#on-' + d.key).textContent = `${(onPerArea(d) / onPerArea(DEVS[1])).toFixed(1)}배`;
+  }
+  $('#tbl tbody').innerHTML = DEVS.map(d => {
+    const on = Id(d, 1), off = Id(d, 0);
+    return `<tr><td><span class="sw" style="--c: var(--s${d.slot})"></span>${d.name}${d.fixedL ? ' (100 nm)' : ''}</td><td>${sci(off)}</td><td>${sci(on)}</td><td>${kor(on / off)}배</td><td>${Math.round(params(d).SS)}</td></tr>`;
+  }).join('');
+  const R = k => { const d = DEVS.find(x => x.key === k); return Id(d, 1) / Id(d, 0); };
+  const rp = R('planar'), rf = R('fin'), rg = R('gaa'), rm = R('mbc'), rmos = R('mos');
+  let t = `게이트 길이 ${Lnm.toFixed(0)} nm에서 켜짐 ÷ 꺼짐 전류는 Planar FET ${kor(rp)}배, FinFET ${kor(rf)}배, GAAFET ${kor(rg)}배, MBCFET ${kor(rm)}배입니다. `;
+  if (rp < 1e4) t += `같은 평면 구조라도 선폭이 넓던 MOSFET(100 nm)은 ${kor(rmos)}배로 잘 꺼졌는데, 미세화하니 꺼 놓아도 전자가 아래로 새어 나갑니다. `;
+  else t += '이 길이에서는 평면 구조도 아직 쓸 만합니다. 게이트 길이를 더 줄여 보세요. ';
+  t += `MBCFET는 같은 면적에서 켜졌을 때 전류도 Planar FET의 ${(onPerArea(DEVS[4]) / onPerArea(DEVS[1])).toFixed(1)}배입니다.`;
+  $('#summary').textContent = t;
+}
+
+/* ---------- Id–Vg chart ---------- */
+const svg = $('#svg'), tip = $('#tip');
+const CH = { x0: 64, x1: 700, y0: 22, y1: 272, lo: -6, hi: 3 };
+const sx = v => CH.x0 + v * (CH.x1 - CH.x0);
+const sy = I => { const l = Math.min(CH.hi, Math.max(CH.lo, Math.log10(I))); return CH.y1 - (l - CH.lo) / (CH.hi - CH.lo) * (CH.y1 - CH.y0); };
+function drawChart() {
+  let h = '';
+  for (let e = CH.lo; e <= CH.hi; e++) {
+    h += `<line class="gridl" x1="${CH.x0}" x2="${CH.x1}" y1="${sy(Math.pow(10, e))}" y2="${sy(Math.pow(10, e))}"/>`;
+    if (e % 3 === 0) h += `<text x="${CH.x0 - 8}" y="${sy(Math.pow(10, e)) + 4}" text-anchor="end">10${String(e).split('').map(c => SUP[c]).join('')}</text>`;
+  }
+  for (let v = 0; v <= 1.0001; v += 0.25) h += `<text x="${sx(v)}" y="${CH.y1 + 18}" text-anchor="middle">${v.toFixed(2)}</text>`;
+  h += `<line class="axisl" x1="${CH.x0}" x2="${CH.x1}" y1="${CH.y1}" y2="${CH.y1}"/><line class="axisl" x1="${CH.x0}" x2="${CH.x0}" y1="${CH.y0}" y2="${CH.y1}"/>`;
+  h += `<text class="ttl" x="${(CH.x0 + CH.x1) / 2}" y="${CH.y1 + 38}" text-anchor="middle">게이트 전압 Vg (V)</text>`;
+  h += `<text class="ttl" x="14" y="${(CH.y0 + CH.y1) / 2}" text-anchor="middle" transform="rotate(-90 14 ${(CH.y0 + CH.y1) / 2})">드레인 전류 (상대값)</text>`;
+  for (const d of DEVS) {
+    const pts = []; for (let k = 0; k <= 100; k++) { const v = k / 100; pts.push(`${sx(v).toFixed(1)},${sy(Id(d, v)).toFixed(1)}`); }
+    h += `<polyline class="series" style="stroke: var(--s${d.slot})" points="${pts.join(' ')}"/>`;
+  }
+  h += `<line class="vgline" x1="${sx(Vg)}" x2="${sx(Vg)}" y1="${CH.y0}" y2="${CH.y1}"/>`;
+  for (const d of DEVS) h += `<circle cx="${sx(Vg)}" cy="${sy(Id(d, Vg))}" r="5" style="fill: var(--s${d.slot}); stroke: var(--chart-surface); stroke-width: 2"/>`;
+  h += `<line class="cross" id="cross" x1="0" x2="0" y1="${CH.y0}" y2="${CH.y1}" visibility="hidden"/>`;
+  svg.innerHTML = h;
+}
+function vgFromEvent(e) { const b = svg.getBoundingClientRect(), x = (e.clientX - b.left) / b.width * 720; return Math.min(1, Math.max(0, (x - CH.x0) / (CH.x1 - CH.x0))); }
+svg.addEventListener('pointermove', e => {
+  const v = vgFromEvent(e), cr = $('#cross'), b = svg.getBoundingClientRect(), pb = $('#plot').getBoundingClientRect();
+  cr.setAttribute('x1', sx(v)); cr.setAttribute('x2', sx(v)); cr.setAttribute('visibility', 'visible');
+  tip.innerHTML = `<b>Vg ${v.toFixed(2)} V</b>` + DEVS.map(d => `<span style="--c: var(--s${d.slot})"><i></i>${d.name}&nbsp;&nbsp;${sci(Id(d, v))}</span>`).join('');
+  tip.hidden = false;
+  const px = e.clientX - pb.left, left = px > pb.width / 2 ? px - tip.offsetWidth - 14 : px + 14;
+  tip.style.left = `${Math.max(4, left)}px`; tip.style.top = `${Math.max(4, e.clientY - pb.top - tip.offsetHeight / 2)}px`;
+});
+svg.addEventListener('pointerleave', () => { tip.hidden = true; const cr = $('#cross'); if (cr) cr.setAttribute('visibility', 'hidden'); });
+svg.addEventListener('click', e => setVg(Math.round(vgFromEvent(e) * 20) / 20));
+
+/* ---------- controls ---------- */
+function setVg(v) {
+  Vg = v;
+  $('#vg').value = String(v);
+  $('#vg-out').textContent = `${v.toFixed(2)} V · ${v >= 0.5 ? '켜짐' : '꺼짐'}`;
+  $$('[data-vg]').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.vg) === v)));
+  drawAllX(); drawChart();
+}
+function setL(sv) {
+  Lnm = sliderToL(sv);
+  $('#lg-out').textContent = `${Lnm.toFixed(0)} nm`;
+  readouts(); drawChart();
+}
+$('#vg').addEventListener('input', e => { blink = false; $('#btn-blink').setAttribute('aria-pressed', 'false'); setVg(Number(e.target.value)); });
+$$('[data-vg]').forEach(b => b.addEventListener('click', () => { blink = false; $('#btn-blink').setAttribute('aria-pressed', 'false'); setVg(Number(b.dataset.vg)); }));
+$('#btn-blink').addEventListener('click', e => { blink = !blink; blinkT = 0; e.currentTarget.setAttribute('aria-pressed', String(blink)); });
+$('#lg').addEventListener('input', e => setL(Number(e.target.value)));
+
+/* ---------- loop ---------- */
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (blink && (blinkT += dt) > 2.4) { blinkT = 0; setVg(Vg >= 0.5 ? 0 : 1); }
+  stepFlows(dt);
+  for (const d of DEVS) drawS(d);
+  requestAnimationFrame(frame);
+}
+window.addEventListener('resize', fit);
+fit(); setL(Number($('#lg').value)); setVg(0);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { drawAllX(); drawChart(); });
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1178 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>증착 버블 슈터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: game column (process tabs → live gauges → chamber cross-section → controls → result) beside a reading column (process card, my-results table, summary); stacks to one column on phones. */
+:root {
+  --bg: #eef1f4; --panel: #ffffff; --panel-2: #f6f8fa; --ink: #17212b; --muted: #586474; --line: #d4dbe3; --line-strong: #b8c2cd;
+  --pvd-ink: #8a5a00; --pvd-soft: #fbf0d9; --cvd-ink: #a3305a; --cvd-soft: #fae4ec; --ald-ink: #2c4f9e; --ald-soft: #e4ebfa; --on-accent: #ffffff;
+  --chamber: #f8fafc; --channel: #e3e8ee; --wall: #8b96a4; --sub: #aab2bc; --sub-edge: #7d8794; --sub-ink: #2e3843; --hatch: rgba(23,33,43,.14); --ghost: rgba(23,33,43,.5);
+  --atom: #e0a61b; --sih4: #2a9d8f; --o2: #df5440; --sio2: #e58fb0; --tma: #2f5597; --h2o: #7d3aa8; --al2o3: #28a65b; --al2o3-b: #1e8a4a; --ch4: #b4a35e; --h2: #9fb0c2; --ar: #4a9de0; --imp: #1d2026;
+  --shine: rgba(255,255,255,.45); --ball-edge: rgba(20,28,38,.28); --target: #b89a52; --shower: #c4ccd5; --plasma: rgba(139,92,246,.09);
+  --good: #1d8a4b; --warn: #a86a00; --bad: #c4372d; --bad-soft: rgba(196,55,45,.16);
+  --accent: var(--pvd-ink); --accent-soft: var(--pvd-soft);
+  --font-display: "Do Hyeon", "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1419; --panel: #171e26; --panel-2: #1d2630; --ink: #e7ecf2; --muted: #9aa6b5; --line: #2a3542; --line-strong: #3a4757;
+    --pvd-ink: #e2b04f; --pvd-soft: #33290f; --cvd-ink: #f08aac; --cvd-soft: #3a1c28; --ald-ink: #8fb0f5; --ald-soft: #1b2745; --on-accent: #10151b;
+    --chamber: #121a22; --channel: #0b1117; --wall: #5b6878; --sub: #4f5965; --sub-edge: #6f7a87; --sub-ink: #d3d9e0; --hatch: rgba(255,255,255,.08); --ghost: rgba(231,236,242,.55);
+    --atom: #f0bd3a; --sih4: #3fbfae; --o2: #f06b57; --sio2: #ee9bbb; --tma: #5b86d6; --h2o: #a46ad0; --al2o3: #3cc072; --al2o3-b: #2b9a59; --ch4: #c9b871; --h2: #c6d2df; --ar: #6fb6f0; --imp: #0b0d10;
+    --shine: rgba(255,255,255,.28); --ball-edge: rgba(0,0,0,.45); --target: #6b5a2c; --shower: #3a4654; --plasma: rgba(167,139,250,.11);
+    --good: #4cc283; --warn: #e3a83a; --bad: #f0675c; --bad-soft: rgba(240,103,92,.22);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1419; --panel: #171e26; --panel-2: #1d2630; --ink: #e7ecf2; --muted: #9aa6b5; --line: #2a3542; --line-strong: #3a4757;
+  --pvd-ink: #e2b04f; --pvd-soft: #33290f; --cvd-ink: #f08aac; --cvd-soft: #3a1c28; --ald-ink: #8fb0f5; --ald-soft: #1b2745; --on-accent: #10151b;
+  --chamber: #121a22; --channel: #0b1117; --wall: #5b6878; --sub: #4f5965; --sub-edge: #6f7a87; --sub-ink: #d3d9e0; --hatch: rgba(255,255,255,.08); --ghost: rgba(231,236,242,.55);
+  --atom: #f0bd3a; --sih4: #3fbfae; --o2: #f06b57; --sio2: #ee9bbb; --tma: #5b86d6; --h2o: #a46ad0; --al2o3: #3cc072; --al2o3-b: #2b9a59; --ch4: #c9b871; --h2: #c6d2df; --ar: #6fb6f0; --imp: #0b0d10;
+  --shine: rgba(255,255,255,.28); --ball-edge: rgba(0,0,0,.45); --target: #6b5a2c; --shower: #3a4654; --plasma: rgba(167,139,250,.11);
+  --good: #4cc283; --warn: #e3a83a; --bad: #f0675c; --bad-soft: rgba(240,103,92,.22);
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { background: var(--bg); }
+body { margin: 0; color: var(--ink); font: 400 15px/1.6 var(--font-body); -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.app { max-width: 1160px; margin: 0 auto; padding-inline: 16px; padding-block: 18px 48px; }
+.app[data-mode="cvd"] { --accent: var(--cvd-ink); --accent-soft: var(--cvd-soft); }
+.app[data-mode="ald"] { --accent: var(--ald-ink); --accent-soft: var(--ald-soft); }
+
+.masthead { display: grid; gap: 4px; margin-bottom: 16px; }
+.eyebrow { margin: 0; font: 500 12px/1.4 var(--font-mono); letter-spacing: .04em; color: var(--muted); }
+h1 { margin: 0; font: 400 clamp(34px, 7vw, 48px)/1.05 var(--font-display); letter-spacing: -.01em; text-wrap: balance; }
+.lede { margin: 2px 0 0; max-width: 60ch; color: var(--muted); font-size: 14.5px; }
+
+.layout { display: grid; gap: 28px; }
+@media (min-width: 1000px) { .layout { grid-template-columns: minmax(0, 520px) minmax(0, 1fr); align-items: start; } }
+.play { display: grid; gap: 10px; min-width: 0; }
+.notes { display: grid; gap: 16px; min-width: 0; }
+
+.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.tab { appearance: none; cursor: pointer; display: grid; gap: 0; justify-items: center; padding: 7px 4px 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); position: relative; }
+.tab[data-mode="pvd"] { --t-ink: var(--pvd-ink); --t-soft: var(--pvd-soft); }
+.tab[data-mode="cvd"] { --t-ink: var(--cvd-ink); --t-soft: var(--cvd-soft); }
+.tab[data-mode="ald"] { --t-ink: var(--ald-ink); --t-soft: var(--ald-soft); }
+.tab b { font: 400 23px/1.1 var(--font-display); color: var(--t-ink); }
+.tab span { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.tab[aria-selected="true"] { background: var(--t-soft); border-color: var(--t-ink); box-shadow: inset 0 0 0 1px var(--t-ink); }
+.tab .rec { position: absolute; top: 5px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--t-ink); }
+
+.gauges { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.gauge { min-width: 0; padding: 6px 9px 7px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+.g-label { display: block; font-size: 11px; line-height: 1.3; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.g-val { display: block; font: 600 18px/1.25 var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.g-val small { font-size: 11px; font-weight: 500; color: var(--muted); }
+.g-val[data-tone="good"] { color: var(--good); } .g-val[data-tone="warn"] { color: var(--warn); } .g-val[data-tone="bad"] { color: var(--bad); }
+
+.stage { position: relative; display: flex; justify-content: center; min-width: 0; }
+#cv { display: block; max-width: 100%; border: 1px solid var(--line); border-radius: 12px; background: var(--chamber); }
+.hint { position: absolute; left: 50%; top: 23%; transform: translateX(-50%); width: max-content; max-width: 86%; padding: 8px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line-strong); text-align: center; font-size: 13.5px; line-height: 1.45; pointer-events: none; box-shadow: 0 6px 18px rgba(0,0,0,.08); }
+.hint b { color: var(--accent); }
+.toast { position: absolute; left: 50%; top: 10px; transform: translate(-50%, -6px); max-width: 92%; padding: 6px 13px; border-radius: 999px; background: var(--ink); color: var(--bg); font-size: 13px; font-weight: 600; line-height: 1.35; text-align: center; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast[data-tone="bad"] { background: var(--bad); color: var(--on-accent); }
+.toast[data-tone="good"] { background: var(--good); color: var(--on-accent); }
+
+.controls { display: grid; gap: 8px; }
+.ctl-hint { margin: 0; font-size: 13.5px; color: var(--muted); }
+.ctl-hint b { color: var(--ink); }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { appearance: none; cursor: pointer; min-height: 42px; padding: 9px 15px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--panel); font-size: 14px; font-weight: 600; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.ghost { background: transparent; border-color: var(--line); color: var(--muted); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.steps li { min-width: 0; padding: 5px 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); font-size: 12.5px; font-weight: 600; line-height: 1.3; }
+.steps li small { display: block; font-size: 10.5px; font-weight: 400; color: var(--muted); }
+.steps .n { font-family: var(--font-mono); color: var(--muted); margin-right: 4px; }
+.steps li.now { background: var(--accent-soft); border-color: var(--accent); }
+.steps li.now .n { color: var(--accent); }
+.prog { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+.bar { height: 8px; border-radius: 99px; background: var(--channel); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .15s; }
+.prog span:last-child { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink); min-width: 4ch; text-align: right; }
+
+.report { display: grid; gap: 12px; padding: 14px 16px 16px; background: var(--panel); border: 1px solid var(--accent); border-radius: 12px; }
+.rep-head { display: flex; align-items: center; gap: 10px; }
+.rep-head h2 { margin: 0; font: 400 22px/1.2 var(--font-display); }
+.pill { display: inline-block; padding: 2px 9px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); font: 600 12px/1.5 var(--font-mono); }
+.rep-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; }
+@media (min-width: 520px) { .rep-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.rep-grid div { min-width: 0; padding: 7px 10px; border-radius: 9px; background: var(--panel-2); }
+.rep-grid dt { font-size: 11.5px; color: var(--muted); }
+.rep-grid dd { margin: 0; font: 600 17px/1.3 var(--font-mono); font-variant-numeric: tabular-nums; }
+.rep-grid dd small { display: block; font: 400 11px/1.35 var(--font-body); color: var(--muted); }
+.rep-grid dd[data-tone="good"] { color: var(--good); } .rep-grid dd[data-tone="warn"] { color: var(--warn); } .rep-grid dd[data-tone="bad"] { color: var(--bad); }
+.rep-take { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; }
+
+.card { padding: 16px 18px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; min-width: 0; }
+.card h2 { margin: 0 0 6px; font: 400 23px/1.2 var(--font-display); text-wrap: balance; }
+.card h2 .en { font: 500 12px/1 var(--font-mono); color: var(--muted); margin-left: 6px; letter-spacing: .02em; }
+.card h3 { margin: 14px 0 4px; font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .02em; }
+.card p { margin: 0 0 6px; max-width: 64ch; }
+.card .sub { font-size: 13.5px; color: var(--muted); }
+.proc { border-top: 4px solid var(--accent); }
+.eq { font-family: var(--font-mono); font-size: 13px; padding: 6px 10px; background: var(--panel-2); border-radius: 8px; overflow-x: auto; white-space: nowrap; }
+.pc { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+.pc ul { margin: 0; padding-left: 18px; font-size: 14px; }
+.pc h4 { margin: 0 0 2px; font-size: 13px; }
+.pc .plus h4 { color: var(--good); } .pc .minus h4 { color: var(--bad); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 12.5px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; border: 1px solid var(--ball-edge); }
+
+.tbl { overflow-x: auto; margin-top: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th, td { padding: 7px 8px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+thead th { font-size: 12px; color: var(--muted); font-weight: 600; }
+thead th.m { font: 400 18px/1 var(--font-display); }
+th.m.pvd { color: var(--pvd-ink); } th.m.cvd { color: var(--cvd-ink); } th.m.ald { color: var(--ald-ink); }
+tbody th { font-weight: 600; white-space: nowrap; }
+tbody th small { display: block; font-weight: 400; font-size: 11px; color: var(--muted); }
+#cmp td { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+#cmp td.best { color: var(--good); font-weight: 600; }
+#cmp td.best::after { content: " ▲"; font-size: 10px; }
+#cmp td.na { color: var(--muted); }
+.verdict { margin: 10px 0 0; padding: 9px 12px; border-radius: 9px; background: var(--panel-2); font-size: 13.5px; }
+.ref td { font-size: 13px; }
+.map td:first-child { white-space: nowrap; font-weight: 600; }
+.foot { margin: 0; font-size: 12px; color: var(--muted); max-width: 70ch; }
+.small-btn { margin-top: 10px; min-height: 34px; padding: 5px 12px; font-size: 12.5px; }
+@media (max-width: 420px) {
+  .g-val { font-size: 16px; }
+  .tab span { font-size: 10.5px; }
+  .pc { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .toast, .bar i { transition: none; } }
+</style>
+
+</head>
+<body>
+<div class="app" id="app" data-mode="pvd">
+  <nav style="margin-bottom:10px;font-size:13px"><a href="index.html" style="color:var(--muted);text-decoration:none;font-weight:600">← 실험 목록</a></nav>
+  <header class="masthead">
+    <p class="eyebrow">IT융합소재 · 반도체 제조공정 · 박막 공정</p>
+    <h1>증착 버블 슈터</h1>
+    <p class="lede">공정을 시작하면 원자와 분자가 날아가 트렌치(홈)를 막으로 덮습니다. 세 공정 모두 목표는 <b>막 두께 2층</b>입니다. PVD·CVD·ALD를 차례로 돌려 보면 세 공정의 장단점이 내 결과표에 숫자로 남습니다.</p>
+  </header>
+
+  <div class="layout">
+    <section class="play" aria-label="게임">
+      <div class="tabs" role="tablist" aria-label="증착 공정">
+        <button class="tab" role="tab" type="button" data-mode="pvd" aria-selected="true"><b>PVD</b><span>물리적 기상 증착</span><i class="rec" hidden></i></button>
+        <button class="tab" role="tab" type="button" data-mode="cvd" aria-selected="false"><b>CVD</b><span>화학적 기상 증착</span><i class="rec" hidden></i></button>
+        <button class="tab" role="tab" type="button" data-mode="ald" aria-selected="false"><b>ALD</b><span>원자층 증착</span><i class="rec" hidden></i></button>
+      </div>
+
+      <div class="gauges" aria-live="off">
+        <div class="gauge"><span class="g-label">윗면 두께</span><span class="g-val" id="g-t1">0.0<small> / 2층</small></span></div>
+        <div class="gauge"><span class="g-label">단차피복성</span><span class="g-val" id="g-step">—</span></div>
+        <div class="gauge"><span class="g-label">불순물</span><span class="g-val" id="g-imp">0%</span></div>
+        <div class="gauge"><span class="g-label">공정 시간</span><span class="g-val" id="g-time">0<small> s</small></span></div>
+      </div>
+
+      <div class="stage" id="stage">
+        <canvas id="cv" role="img" aria-label="증착 챔버 단면. 공정을 시작하면 위쪽 소스에서 원자와 분자가 날아와 아래쪽 기판의 트렌치를 덮습니다."></canvas>
+        <div class="hint" id="hint"></div>
+        <div class="toast" id="toast" role="status" aria-live="polite"></div>
+      </div>
+
+      <div class="controls">
+        <div id="ald-panel" hidden>
+          <ol class="steps" id="steps">
+            <li data-step="0"><span class="n">1</span>TMA 주입<small>전구체 흡착</small></li>
+            <li data-step="1"><span class="n">2</span>퍼지<small>여분 TMA 제거</small></li>
+            <li data-step="2"><span class="n">3</span>H₂O 주입<small>반응 → Al₂O₃</small></li>
+            <li data-step="3"><span class="n">4</span>퍼지<small>CH₄ 배출</small></li>
+          </ol>
+          <div class="prog" style="margin-top:8px"><span id="prog-label">표면 덮임</span><div class="bar"><i id="prog-bar"></i></div><span id="prog-val">0%</span></div>
+        </div>
+        <p class="ctl-hint" id="ctl-hint"></p>
+        <div class="btns">
+          <button class="btn primary" id="btn-run" type="button">▶ 공정 시작</button>
+          <button class="btn" id="btn-fast" type="button" aria-pressed="false">≫ 빠르게</button>
+          <button class="btn ghost" id="btn-reset" type="button">처음부터</button>
+        </div>
+      </div>
+
+      <section class="report" id="report" hidden>
+        <div class="rep-head"><span class="pill" id="rep-tag">PVD</span><h2 id="rep-title">공정 결과</h2></div>
+        <dl class="rep-grid" id="rep-grid"></dl>
+        <ul class="rep-take" id="rep-take"></ul>
+        <div class="btns">
+          <button class="btn" id="rep-fill" type="button">계속 쌓으면? 트렌치 메우기</button>
+          <button class="btn primary" id="rep-next" type="button">다음: CVD</button>
+        </div>
+      </section>
+    </section>
+
+    <aside class="notes">
+      <article class="card proc" data-proc="pvd">
+        <h2>PVD<span class="en">Physical Vapor Deposition</span></h2>
+        <p>챔버 천장에 금속 타깃을 달고 음극(−)을 걸면, 아르곤 플라즈마 속 Ar⁺ 이온이 타깃으로 끌려가 부딪힙니다. 이때 튕겨 나온 금속 원자가 기판까지 날아가 쌓입니다(스퍼터링). 재료를 가열해 증발시키는 증발법도 같은 계열입니다. 화학 반응 없이 <b>물리적으로</b> 옮겨 붙입니다.</p>
+        <p class="sub">화면에서: 천장의 금색 공이 타깃 원자입니다. 파란 점(Ar⁺)이 타깃을 때리면 원자가 아무 방향으로나 튕겨 나와 그대로 직진하고, 처음 닿은 자리에 바로 붙습니다.</p>
+        <div class="pc">
+          <div class="plus"><h4>장점</h4><ul><li>저온 공정</li><li>불순물이 적은 고순도 막</li><li>금속 배선·전극에 적합</li></ul></div>
+          <div class="minus"><h4>단점</h4><ul><li>단차피복성 나쁨: 직진하므로 옆벽·바닥이 얇고 입구에 overhang이 생김</li></ul></div>
+        </div>
+        <div class="legend"><span><i style="background:var(--atom)"></i>금속 원자</span><span><i style="background:var(--ar)"></i>Ar⁺ 이온</span><span><i style="background:var(--plasma);border-color:var(--line-strong)"></i>플라즈마</span><span><i style="background:var(--sub)"></i>Si 기판</span></div>
+      </article>
+
+      <article class="card proc" data-proc="cvd" hidden>
+        <h2>CVD<span class="en">Chemical Vapor Deposition</span></h2>
+        <p>원료 가스(예: SiH₄ + O₂)를 함께 흘려 보내면 뜨거운 기판 표면에서 <b>화학 반응</b>이 일어나 막(SiO₂)이 생기고, 부산물(H₂ 등)은 배기됩니다.</p>
+        <p class="eq">SiH₄ + O₂ → SiO₂ + 2H₂</p>
+        <p class="sub">화면에서: 가스 분자는 이리저리 튕기며 트렌치 안까지 들어가고, 표면에 닿을 때마다 일정 확률로 반응해 막이 됩니다.</p>
+        <div class="pc">
+          <div class="plus"><h4>장점</h4><ul><li>증착 속도가 빠름</li><li>PVD보다 단차피복성이 좋음</li><li>막질이 좋고 절연막 등 여러 물질에 사용</li></ul></div>
+          <div class="minus"><h4>단점</h4><ul><li>고온 공정 (열 CVD는 약 600 °C 이상)</li><li>원료 찌꺼기(H, C, Cl 등)가 불순물로 남을 수 있음</li><li>원자층 단위의 두께 조절은 어려움</li></ul></div>
+        </div>
+        <p class="sub" style="margin-top:10px">플라즈마로 반응을 돕는 PECVD는 약 200–400 °C에서도 증착할 수 있습니다.</p>
+        <div class="legend"><span><i style="background:var(--sih4)"></i>SiH₄</span><span><i style="background:var(--o2)"></i>O₂</span><span><i style="background:var(--sio2)"></i>SiO₂ 막</span><span><i style="background:var(--sio2);box-shadow:inset 0 0 0 3px var(--sio2), inset 0 0 0 6px var(--imp)"></i>불순물</span><span><i style="background:var(--h2)"></i>H₂ 부산물</span></div>
+      </article>
+
+      <article class="card proc" data-proc="ald" hidden>
+        <h2>ALD<span class="en">Atomic Layer Deposition</span></h2>
+        <p>전구체(TMA)와 반응체(H₂O)를 <b>번갈아</b> 넣고, 그 사이마다 퍼지 가스로 남은 분자를 내보냅니다. 표면에 화학적으로 붙은 한 겹만 남고 약하게 얹힌 여분은 떨어져 나가므로(<b>자기제한 반응</b>), 사이클마다 같은 두께만큼 자랍니다.</p>
+        <p class="eq">2Al(CH₃)₃ + 3H₂O → Al₂O₃ + 6CH₄</p>
+        <p class="sub">화면에서: TMA는 빈 표면 자리에만 단단히 붙고(화학흡착), 이미 덮인 곳에는 살짝 얹혔다가(물리흡착) 퍼지 때 떨어집니다. H₂O는 붙어 있는 TMA와만 반응합니다.</p>
+        <div class="pc">
+          <div class="plus"><h4>장점</h4><ul><li>단차피복성이 매우 좋음</li><li>사이클 수로 두께를 정밀하게 조절</li><li>비교적 저온 (약 150–350 °C), 불순물 적음</li></ul></div>
+          <div class="minus"><h4>단점</h4><ul><li>증착 속도가 매우 느림 (한 사이클에 약 1 Å)</li><li>그래서 두꺼운 막에는 쓰기 어려움</li></ul></div>
+        </div>
+        <div class="legend"><span><i style="background:var(--tma)"></i>TMA (전구체)</span><span><i style="background:var(--h2o)"></i>H₂O (반응체)</span><span><i style="background:var(--al2o3)"></i>Al₂O₃ 막</span><span><i style="background:var(--ch4)"></i>CH₄ 부산물</span></div>
+      </article>
+
+      <section class="card" id="compare">
+        <h2>내 결과 비교</h2>
+        <p class="sub">세 공정을 한 번씩 끝내면 칸이 채워집니다. ▲는 셋 중 가장 좋은 값입니다.</p>
+        <div class="tbl">
+          <table id="cmp">
+            <thead><tr><th scope="col">항목</th><th scope="col" class="m pvd">PVD</th><th scope="col" class="m cvd">CVD</th><th scope="col" class="m ald">ALD</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="verdict" id="verdict">아직 끝낸 공정이 없습니다. 왼쪽에서 PVD부터 시작해 보세요.</p>
+        <button class="btn ghost small-btn" id="btn-clear" type="button">기록 지우기</button>
+      </section>
+
+      <section class="card">
+        <h2>한눈에 보는 세 공정</h2>
+        <div class="tbl">
+          <table class="ref">
+            <thead><tr><th scope="col"></th><th scope="col" class="m pvd">PVD</th><th scope="col" class="m cvd">CVD</th><th scope="col" class="m ald">ALD</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">원리</th><td>원자를 물리적으로 떼어 내 날려 보냄</td><td>원료 가스가 표면에서 화학 반응</td><td>두 원료를 번갈아 넣어 한 겹씩</td></tr>
+              <tr><th scope="row">단차피복성</th><td>나쁨</td><td>보통~좋음</td><td>매우 좋음</td></tr>
+              <tr><th scope="row">증착 속도</th><td>빠른 편</td><td>빠름</td><td>매우 느림</td></tr>
+              <tr><th scope="row">두께 조절</th><td>보통</td><td>보통</td><td>매우 정밀</td></tr>
+              <tr><th scope="row">공정 온도</th><td>낮음</td><td>높음 (PECVD는 낮춤)</td><td>낮은 편</td></tr>
+              <tr><th scope="row">불순물</th><td>적음</td><td>남을 수 있음</td><td>적음</td></tr>
+              <tr><th scope="row">대표 용도</th><td>금속 배선, 전극</td><td>절연막(SiO₂, Si₃N₄), 폴리실리콘</td><td>High-k 절연막, 얇은 배리어</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>버블 슈터로 읽는 증착</h2>
+        <div class="tbl">
+          <table class="map">
+            <thead><tr><th scope="col">버블 슈터</th><th scope="col">박막 공정</th></tr></thead>
+            <tbody>
+              <tr><td>천장에 붙어 있는 공</td><td>PVD 타깃: 챔버 천장(음극)에 붙은 금속 원자</td></tr>
+              <tr><td>공을 쏘아 맞힌다</td><td>플라즈마 속 Ar⁺ 이온이 타깃을 때린다</td></tr>
+              <tr><td>맞은 공이 떨어진다</td><td>스퍼터링: 튕겨 나온 금속 원자가 기판으로 날아가 쌓인다</td></tr>
+              <tr><td>짝이 맞아야 터진다</td><td>ALD: 붙어 있는 TMA는 H₂O가 와야 반응한다</td></tr>
+              <tr><td>매달릴 곳 없는 공은 우수수 떨어진다</td><td>ALD 퍼지: 표면과 화학결합하지 못한 분자가 떨어져 나간다</td></tr>
+              <tr><td>벽에 맞은 공</td><td>PVD 원자는 챔버 벽에도 붙어 재료가 버려진다</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <p class="foot">격자 한 칸을 원자(분자) 하나로 단순화한 개념 모델입니다. 시간·속도·두께는 세 공정을 비교하기 위한 게임 값이며 실제 공정 수치와 다릅니다. 실제 ALD는 한 사이클에 원자 한 층보다 얇게(TMA/H₂O 기준 약 1 Å) 자랍니다.</p>
+    </aside>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+//@@SIM_START
+const COLS = 19, ROWS = 26, Y0 = 13, TARGET = 2;
+const TR = { x0: 6, w: 7, d: 12 };                 // trench: 7 cells wide, 12 deep → AR ≈ 1.7
+const TGT = 2, ION_Y = 6.4;                        // PVD: target rows on the ceiling; bottom of the plasma glow
+const X1 = TR.x0 + TR.w - 1, YB = Y0 + TR.d;       // last trench column, first solid row under the trench
+const E = 0, SUB = 1, FILM = 2, IMP = 3, CHEM = 4, PHT = 5, PHW = 6;
+const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+const N8 = N4.concat([[1, 1], [1, -1], [-1, 1], [-1, -1]]);
+const P = {
+  atomSpeed: 20, atomR: 0.2, pvdDrop: 2, pvdSide: false, ionSpeed: 24, yield2: 0.25, pvdCost: 0.75,
+  gasSpeed: 30, mfp: 1.5, gasLife: 8, puff: { cvd: 6, ald: 8 }, gasCost: 1,
+  cvdS: 0.06, cvdImp: 0.06,
+  physP: 0.3, desorb: 0.25, purgeReal: 1.6, purgeCost: 8
+};
+const rand = Math.random;
+const isMargin = c => c <= 0 || c >= COLS - 1;
+const isDep = t => t === SUB || t === FILM || t === IMP;
+const isFilm = t => t === FILM || t === IMP;
+const passable = t => t === E || t === PHT || t === PHW;
+const at = (w, c, r) => (c < 0 || c >= COLS || r < 0 || r >= ROWS) ? E : w.grid[r * COLS + c];
+const expo = m => -Math.log(1 - rand()) * m;
+function hasN4(w, c, r, f) { for (const [a, b] of N4) if (f(at(w, c + a, r + b))) return true; return false; }
+function countN4(w, c, r, f) { let n = 0; for (const [a, b] of N4) if (f(at(w, c + a, r + b))) n++; return n; }
+function count(w, t) { let n = 0; for (const v of w.grid) if (v === t) n++; return n; }
+
+function makeWorld(mode) {
+  const n = COLS * ROWS;
+  const w = {
+    mode, grid: new Uint8Array(n), meta: new Uint8Array(n), born: new Float32Array(n).fill(-9),
+    parts: [], fx: [], wall: [], tgt: new Float32Array(COLS), t: 0, clock: 0, fired: 0, lost: 0,
+    src: { x: COLS / 2 }, state: 'idle', goal: 'coat', auto: false, autoT: 0,
+    ald: { step: 0, cycle: 0, purgeLeft: 0, chemAtStep: 0, wait: 0 },
+    flags: {}, events: [], m: null, result: null, fill: null, dirty: false
+  };
+  for (let r = Y0; r < ROWS; r++) for (let c = 1; c < COLS - 1; c++) {
+    if (c >= TR.x0 && c <= X1 && r < YB) continue;
+    w.grid[r * COLS + c] = SUB;
+  }
+  w.m = measure(w);
+  return w;
+}
+
+function put(w, c, r, type, meta) {
+  const i = r * COLS + c;
+  w.grid[i] = type; w.meta[i] = meta || 0; w.born[i] = w.t; w.dirty = true;
+  if (r < (w.mode === 'pvd' ? TGT + 1 : 2)) w.flags.full = true;   // film is closing in on the source
+}
+function gasPart(k, x, y, dx, dy) {
+  return { k, x, y, dx, dy, sp: P.gasSpeed * (0.85 + rand() * 0.3), gas: true, life: 0, free: expo(P.mfp) + 1 };
+}
+
+function canFire(w) {
+  if (w.state === 'ending' || w.state === 'done') return false;
+  return !(w.mode === 'ald' && (w.ald.step === 1 || w.ald.step === 3));
+}
+// PVD: `aim` is where an Ar+ ion leaves the plasma; it is pulled straight up into the target (the cathode).
+// CVD/ALD: `aim` is the direction of a gas puff from the showerhead.
+function fire(w, aim) {
+  if (!canFire(w)) return false;
+  if (w.state === 'idle') w.state = 'run';
+  if (w.mode === 'pvd') {
+    const x = Math.max(0.6, Math.min(COLS - 0.6, aim));
+    w.parts.push({ k: 'ion', x, y: ION_Y - rand() * 1.5, dx: 0, dy: -1, sp: P.ionSpeed, gas: false, life: 0 });
+    w.clock += P.pvdCost;
+  } else {
+    const ang = Math.max(-1.25, Math.min(1.25, aim));
+    const k = w.mode === 'ald' ? (w.ald.step === 0 ? 'tma' : 'h2o') : null;
+    for (let i = 0; i < P.puff[w.mode]; i++) {
+      const a = ang + (rand() - 0.5) * 0.8;
+      w.parts.push(gasPart(k || (rand() < 0.5 ? 'sih4' : 'o2'), w.src.x + (rand() - 0.5) * 0.8, 0.8, Math.sin(a), Math.cos(a)));
+    }
+    w.fired += P.puff[w.mode]; w.clock += P.gasCost;
+  }
+  return true;
+}
+// The struck target atom (sometimes two) leaves in a random direction, most often near straight down.
+function sputter(w, x) {
+  const c = Math.max(0, Math.min(COLS - 1, x | 0)), n = rand() < P.yield2 ? 2 : 1;
+  w.tgt[c] = 1;
+  for (let i = 0; i < n; i++) {
+    const a = cosAngle();
+    w.parts.push({ k: 'atom', x: c + 0.5, y: TGT + 0.05, dx: Math.sin(a), dy: Math.cos(a), sp: P.atomSpeed, gas: false, life: 0 });
+  }
+  w.fired += n;
+  w.fx.push({ k: 'hit', x: c + 0.5, y: TGT - 0.5, t: 0, ttl: 0.3 });
+}
+
+// Gas drifts from the showerhead toward the wafer, then out over the wafer edge into the pump channels.
+function flowOf(p) {
+  if (isMargin(p.x | 0) && p.y > Y0 - 1) return [0, 3];
+  if (p.purge || p.life > P.gasLife) return [p.x < COLS / 2 ? -2 : 2, p.y < Y0 - 1 ? 1.2 : -1];
+  if (p.y < Y0 - 4) return [0, 0.6];
+  return [(p.x - COLS / 2) / (COLS / 2) * 0.25, 0.15];
+}
+function redirect(p) {
+  const a = rand() * Math.PI * 2, f = flowOf(p);
+  const dx = Math.cos(a) + f[0], dy = Math.sin(a) + f[1], l = Math.hypot(dx, dy) || 1;
+  p.dx = dx / l; p.dy = dy / l;
+}
+function bounce(p, nx, ny) {                       // diffuse reflection off a surface with normal (nx, ny)
+  const nl = Math.hypot(nx, ny) || 1; nx /= nl; ny /= nl;
+  const a = rand() * Math.PI * 2;
+  let ux = Math.cos(a), uy = Math.sin(a);
+  if (ux * nx + uy * ny < 0) { ux = -ux; uy = -uy; }
+  const dx = ux + nx * 0.6, dy = uy + ny * 0.6, l = Math.hypot(dx, dy) || 1;
+  p.dx = dx / l; p.dy = dy / l;
+}
+function touches(w, x, y, c, r) {
+  const R2 = P.atomR * P.atomR;
+  for (const [a, b] of N8) {
+    const nc = c + a, nr = r + b;
+    if (!isDep(at(w, nc, nr))) continue;
+    const ex = Math.max(nc - x, 0, x - nc - 1), ey = Math.max(nr - y, 0, y - nr - 1);
+    if (ex * ex + ey * ey < R2) return true;
+  }
+  return false;
+}
+// Short surface diffusion: hop once to the best-bonded empty spot nearby.
+function settle(w, c, r, nb) {
+  let bc = c, br = r, bs = countN4(w, c, r, isDep);
+  for (const [a, b] of nb || N8) {
+    const nc = c + a, nr = r + b;
+    if (isMargin(nc) || nr < 0 || nr >= ROWS || at(w, nc, nr) !== E) continue;
+    const s = countN4(w, nc, nr, isDep);
+    if (s > bs) { bc = nc; br = nr; bs = s; }
+  }
+  return [bc, br];
+}
+// A PVD atom that lands on top of the film may roll to a lower neighbouring column; one that hits a side stays put.
+function land(w, c, r) {
+  let bc = c, br = r;
+  if (isDep(at(w, c, r + 1))) {
+    for (const dc of rand() < 0.5 ? [-1, 1] : [1, -1]) {
+      const nc = c + dc;
+      if (isMargin(nc) || at(w, nc, r) !== E) continue;
+      let nr = r;
+      while (nr - r < P.pvdDrop && at(w, nc, nr + 1) === E) nr++;
+      if (nr > br && isDep(at(w, nc, nr + 1))) { bc = nc; br = nr; }
+    }
+  } else if (P.pvdSide) [bc, br] = settle(w, c, r, N4);
+  put(w, bc, br, FILM, 0);
+}
+function physOK(w, c, r) {                         // weakly held molecules sit on the open top surface only
+  if (r >= Y0) return false;
+  const lr = at(w, c - 1, r) !== E && at(w, c + 1, r) !== E;
+  const ud = at(w, c, r - 1) !== E && at(w, c, r + 1) !== E;
+  return !lr && !ud;
+}
+function contact(w, p, c0, r0) {
+  if (p.purge || isMargin(c0) || at(w, c0, r0) !== E) return false;
+  switch (p.k) {
+    case 'atom':
+      land(w, c0, r0); return true;
+    case 'sih4': case 'o2': {
+      if (!hasN4(w, c0, r0, isDep) || rand() >= P.cvdS) return false;
+      const imp = rand() < P.cvdImp, [bc, br] = settle(w, c0, r0);
+      put(w, bc, br, imp ? IMP : FILM, 0);
+      if (!imp) w.fx.push(puffFx('h2', bc + 0.5, br + 0.5));
+      return true;
+    }
+    case 'tma':
+      if (hasN4(w, c0, r0, isDep)) {                // settle into a neighbouring corner site first
+        let bc = c0, br = r0, bs = countN4(w, c0, r0, isDep);
+        for (const [a, b] of N8) {
+          const nc = c0 + a, nr = r0 + b;
+          if (isMargin(nc) || nr < 0 || nr >= ROWS || at(w, nc, nr) !== E) continue;
+          const s = countN4(w, nc, nr, isDep);
+          if (s > bs) { bc = nc; br = nr; bs = s; }
+        }
+        put(w, bc, br, CHEM, 0); return true;
+      }
+      if (hasN4(w, c0, r0, t => t === CHEM) && physOK(w, c0, r0) && rand() < P.physP) { put(w, c0, r0, PHT, 0); return true; }
+      return false;
+    case 'h2o':
+      for (const [a, b] of N8) {
+        if (at(w, c0 + a, r0 + b) !== CHEM) continue;
+        const c = c0 + a, r = r0 + b;
+        put(w, c, r, FILM, w.ald.cycle);
+        w.fx.push(puffFx('ch4', c + 0.5, r + 0.5));
+        return true;
+      }
+      if (hasN4(w, c0, r0, isDep) && physOK(w, c0, r0) && rand() < P.physP) { put(w, c0, r0, PHW, 0); return true; }
+      return false;
+  }
+  return false;
+}
+function movePart(w, p, dt) {                      // returns true when the particle is used up
+  p.life += dt;
+  if (p.k === 'ion') { p.y -= p.sp * dt; if (p.y <= TGT) { sputter(w, p.x); return true; } return false; }
+  let dist = p.sp * dt * (p.purge ? 1.7 : 1);
+  while (dist > 1e-6) {
+    const h = Math.min(0.2, dist); dist -= h;
+    if (p.gas && (p.y < Y0 - 0.2 || isMargin(p.x | 0))) {
+      p.free -= h;
+      if (p.free <= 0) { redirect(p); p.free = expo(P.mfp); }
+    }
+    let nx = p.x + p.dx * h, ny = p.y + p.dy * h;
+    if (nx < 0.02 || nx > COLS - 0.02) {
+      if (!p.gas) { w.lost++; if (w.wall.length < 160) w.wall.push({ s: nx < 1 ? 0 : 1, y: p.y }); return true; }
+      p.dx = -p.dx; nx = p.x + p.dx * h;
+    }
+    if (ny < 0.4) { p.dy = Math.abs(p.dy); ny = p.y + p.dy * h; }
+    if (ny >= ROWS - 0.02) { w.lost++; return true; }
+    const c0 = p.x | 0, r0 = p.y | 0, c = nx | 0, r = ny | 0;
+    if (at(w, c, r) !== E) {
+      if (contact(w, p, c0, r0)) return true;
+      if (!p.gas) { w.lost++; return true; }
+      bounce(p, c0 - c, r0 - r);
+      continue;
+    }
+    p.x = nx; p.y = ny;
+    if (!p.gas && !isMargin(c) && touches(w, nx, ny, c, r)) { land(w, c, r); return true; }
+  }
+  if (p.gas && p.life > P.gasLife * 2.5) { w.lost++; return true; }
+  return false;
+}
+
+function puffFx(k, x, y) { return { k, x, y, t: 0, ttl: 0.7, vx: (rand() - 0.5) * 1.5 }; }
+function exitFx(k, x, y, delay) {
+  return { k, x, y, delay, t: 0, ph: 0, vy: 0, lift: Y0 - 3 - rand() * 2.5, side: x < COLS / 2 ? 0.5 : COLS - 0.5, sp: 8 + rand() * 4 };
+}
+function fxTick(w, dt) {
+  for (let i = w.fx.length - 1; i >= 0; i--) {
+    const f = w.fx[i];
+    f.t += dt;
+    if (f.ttl) {
+      if (f.k !== 'hit') { f.y -= 3 * dt; f.x += f.vx * dt; }
+      if (f.t > f.ttl) w.fx.splice(i, 1);
+      continue;
+    }
+    if (f.t < f.delay) continue;
+    if (f.ph === 0) { f.y -= f.sp * dt; if (f.y <= f.lift) f.ph = 1; }
+    else if (f.ph === 1) {
+      const d = f.side - f.x, s = f.sp * 1.4 * dt;
+      if (Math.abs(d) <= s) { f.x = f.side; f.ph = 2; } else f.x += Math.sign(d) * s;
+    } else { f.vy += 40 * dt; f.y += f.vy * dt; if (f.y > ROWS + 1) w.fx.splice(i, 1); }
+  }
+}
+
+function aldNext(w) {
+  const a = w.ald;
+  if (w.mode !== 'ald' || w.state === 'done' || (a.step !== 0 && a.step !== 2)) return false;
+  if (w.state === 'idle') w.state = 'run';
+  a.step++; a.purgeLeft = P.purgeReal; a.wait = 0; w.clock += P.purgeCost;
+  let n = 0;
+  for (let i = 0; i < w.grid.length; i++) {
+    const t = w.grid[i];
+    if (t !== PHT && t !== PHW) continue;
+    w.grid[i] = E;
+    w.fx.push(exitFx(t === PHT ? 'tma' : 'h2o', i % COLS + 0.5, ((i / COLS) | 0) + 0.5, rand() * 0.5));
+    n++;
+  }
+  for (const p of w.parts) p.purge = true;
+  w.events.push({ k: 'purge', n, step: a.step });
+  return true;
+}
+function endPurge(w) {
+  const a = w.ald;
+  for (const p of w.parts) w.fx.push(exitFx(p.k, p.x, p.y, 0));
+  w.parts.length = 0;
+  for (let i = 0; i < w.grid.length; i++) if (w.grid[i] === PHT || w.grid[i] === PHW) w.grid[i] = E;
+  if (a.step === 1) { a.step = 2; a.chemAtStep = count(w, CHEM); return; }
+  a.step = 0; a.cycle++; w.dirty = true;
+  if (a.cycle >= TARGET) finalize(w); else w.events.push({ k: 'cycle', n: a.cycle });
+}
+function aldProgress(w) {
+  const a = w.ald;
+  if (a.step === 0) {
+    const seen = reach(w);
+    let chem = 0, free = 0;
+    for (let i = 0; i < w.grid.length; i++) {
+      const t = w.grid[i];
+      if (t === CHEM) chem++;
+      else if (t === E && seen[i]) {
+        const c = i % COLS, r = (i / COLS) | 0;
+        if (!isMargin(c) && hasN4(w, c, r, isDep)) free++;
+      }
+    }
+    return chem + free ? chem / (chem + free) : 1;
+  }
+  if (a.step === 2) return a.chemAtStep ? 1 - count(w, CHEM) / a.chemAtStep : 1;
+  return 1 - Math.max(0, a.purgeLeft) / P.purgeReal;
+}
+function aldTick(w, dt) {
+  const a = w.ald;
+  if (a.step === 1 || a.step === 3) { a.purgeLeft -= dt; if (a.purgeLeft <= 0) endPurge(w); return; }
+  if (w.state !== 'run') return;
+  const pr = P.desorb * dt;
+  for (let i = 0; i < w.grid.length; i++) {
+    const t = w.grid[i];
+    if ((t !== PHT && t !== PHW) || rand() >= pr) continue;
+    w.grid[i] = E;
+    const ang = Math.PI + (rand() - 0.5) * 2;
+    w.parts.push(gasPart(t === PHT ? 'tma' : 'h2o', i % COLS + 0.5, ((i / COLS) | 0) + 0.5, Math.sin(ang), Math.cos(ang)));
+  }
+}
+
+function cosAngle() { let a; do { a = Math.asin(2 * rand() - 1); } while (Math.abs(a) > 1.2); return a; }
+function autoTick(w, dt) {
+  if (w.state === 'ending' || w.state === 'done') { w.auto = false; return; }
+  w.autoT -= dt;
+  if (w.mode === 'pvd') {
+    while (w.autoT <= 0) { if (!fire(w, 0.6 + rand() * (COLS - 1.2))) break; w.autoT += 0.1; }
+  } else if (w.mode === 'cvd') {
+    if (w.autoT <= 0) { if (w.parts.length < 40) fire(w, (rand() - 0.5) * 1.4); w.autoT = 0.2; }
+  } else {
+    const a = w.ald;
+    if (a.step !== 0 && a.step !== 2) return;
+    if (aldProgress(w) < 1) {
+      a.wait = 0;
+      if (w.autoT <= 0) { if (w.parts.length < 36) fire(w, (rand() - 0.5) * 1.4); w.autoT = 0.18; }
+    } else if ((a.wait += dt) > 0.6) { a.wait = 0; aldNext(w); }
+  }
+}
+function stopSupply(w, why) {
+  if (w.state !== 'run') return;
+  w.state = 'ending'; w.auto = false;
+  w.events.push({ k: why });
+}
+function afterDeposit(w) {
+  const m = measure(w);
+  w.m = m;
+  if (!w.flags.overhang && m.overhang >= 1 && m.T1 >= 0.8) { w.flags.overhang = true; w.events.push({ k: 'overhang' }); }
+  if (!w.flags.void && m.voids >= 2) { w.flags.void = true; w.events.push({ k: 'void' }); }
+  if (w.state !== 'run' || w.mode === 'ald') return;
+  if (w.goal === 'coat' && (m.T1 >= TARGET || w.flags.full)) stopSupply(w, 'target');
+  else if (w.goal === 'fill' && (m.open === 0 || w.clock > 400 || w.flags.full)) stopSupply(w, 'filled');
+}
+function finalize(w) {
+  for (let i = 0; i < w.grid.length; i++) {
+    if (w.grid[i] === CHEM) w.grid[i] = IMP;      // TMA that never met H2O stays as carbon residue
+    else if (w.grid[i] === PHT || w.grid[i] === PHW) w.grid[i] = E;
+  }
+  const m = measure(w);
+  w.m = m; w.state = 'done'; w.auto = false;
+  const rec = Object.assign({ mode: w.mode, clock: w.clock, fired: w.fired }, m);
+  if (w.goal === 'coat') w.result = rec; else w.fill = rec;
+  w.events.push({ k: 'done', goal: w.goal });
+}
+function continueFill(w) {
+  if (w.mode === 'ald' || w.state !== 'done') return false;
+  w.goal = 'fill'; w.state = 'run'; w.auto = true; w.autoT = 0;
+  return true;
+}
+function update(w, dt) {
+  w.t += dt;
+  for (let c = 0; c < COLS; c++) if (w.tgt[c] > 0) w.tgt[c] = Math.max(0, w.tgt[c] - dt / 0.3);
+  if (w.auto) autoTick(w, dt);
+  if (w.mode === 'ald') aldTick(w, dt);
+  for (let i = w.parts.length - 1; i >= 0; i--) if (movePart(w, w.parts[i], dt)) w.parts.splice(i, 1);
+  fxTick(w, dt);
+  if (w.dirty) { w.dirty = false; afterDeposit(w); }
+  if (w.state === 'ending' && w.parts.length === 0) finalize(w);
+}
+
+function reach(w) {                                // cells gas can still get to from the top of the chamber
+  const seen = new Uint8Array(COLS * ROWS), q = [];
+  for (let c = 0; c < COLS; c++) if (passable(w.grid[c])) { seen[c] = 1; q.push(c); }
+  while (q.length) {
+    const i = q.pop(), c = i % COLS, r = (i / COLS) | 0;
+    for (const [a, b] of N4) {
+      const nc = c + a, nr = r + b;
+      if (nc < 0 || nc >= COLS || nr < 0 || nr >= ROWS) continue;
+      const j = nr * COLS + nc;
+      if (!seen[j] && passable(w.grid[j])) { seen[j] = 1; q.push(j); }
+    }
+  }
+  return seen;
+}
+// Thickness = film cells walked from the surface until open gas or a void; closed single-cell pores are skipped.
+function walk(w, seen, c, r, dc, dr, max) {
+  let n = 0;
+  for (let k = 0; k < max; k++, c += dc, r += dr) {
+    if (c < 0 || c >= COLS || r < 0 || r >= ROWS) break;
+    const t = w.grid[r * COLS + c];
+    if (isFilm(t)) { n++; continue; }
+    if (t !== E || seen[r * COLS + c] || hasN4(w, c, r, v => v === E)) break;
+  }
+  return n;
+}
+function upCount(w, c, r0, seen) { return walk(w, seen || reach(w), c, r0, 0, -1, ROWS); }
+function rowL(w, r, seen) { return walk(w, seen || reach(w), TR.x0, r, 1, 0, TR.w); }
+function rowR(w, r, seen) { return walk(w, seen || reach(w), X1, r, -1, 0, TR.w); }
+function measure(w) {
+  const g = w.grid, avg = a => a.length ? a.reduce((s, v) => s + v, 0) / a.length : 0;
+  const seen = reach(w), mc = [], tc = [];
+  for (let c = 1; c < COLS - 1; c++) {
+    if (c >= TR.x0 && c <= X1) continue;
+    const n = upCount(w, c, Y0 - 1, seen);
+    tc.push(n);
+    if (c >= 2 && c <= COLS - 3 && (c <= TR.x0 - 2 || c >= X1 + 2)) mc.push(n);
+  }
+  const T1 = avg(mc);                                                       // top of the wafer, away from edges
+  const T2 = avg([TR.x0 + 2, TR.x0 + 3, TR.x0 + 4].map(c => upCount(w, c, YB - 1, seen)));   // trench bottom, centre columns
+  const side = [];
+  for (let r = Y0 + 2; r <= YB - 3; r++) { const L = rowL(w, r, seen); side.push(L >= TR.w ? Math.max(T1, TR.w / 2) : (L + rowR(w, r, seen)) / 2); }
+  const T3 = avg(side);                                                     // sidewalls, mid-depth
+  let mouth = 0;
+  for (let r = Y0 - 2; r <= Y0 + 1; r++) { const L = rowL(w, r, seen); mouth = Math.max(mouth, L >= TR.w ? TR.w / 2 : (L + rowR(w, r, seen)) / 2); }
+  let voids = 0, open = 0;
+  for (let r = Y0 - 4; r < YB; r++) for (let c = TR.x0; c <= X1; c++) {
+    const i = r * COLS + c;
+    if (g[i] !== E) continue;
+    if (!seen[i]) { if (hasN4(w, c, r, v => v === E)) voids++; } else if (r >= Y0) open++;
+  }
+  let film = 0, imp = 0;
+  for (const t of g) { if (t === FILM) film++; else if (t === IMP) { film++; imp++; } }
+  const thin = Math.min(T2, T3);
+  return {
+    T1, T2, T3, step: T1 > 0.05 ? Math.min(1, thin / T1) : 0,
+    overhang: Math.max(0, mouth - T3), voids, open, film, imp, impPct: film ? imp / film : 0,
+    spread: tc.length ? Math.max(...tc) - Math.min(...tc) : 0, dev: T1 - TARGET,
+    rate: w.clock > 0 ? T1 / w.clock * 60 : 0
+  };
+}
+//@@SIM_END
+
+/* ---------- page ---------- */
+const TAU = Math.PI * 2;
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const app = $('#app'), cv = $('#cv'), ctx = cv.getContext('2d'), stage = $('#stage');
+const NAME = { pvd: 'PVD', cvd: 'CVD', ald: 'ALD' };
+const NEXT = { pvd: 'cvd', cvd: 'ald', ald: null };
+const TEMP_LABEL = { pvd: '기판 온도 · 낮음', cvd: '기판 온도 · 600 °C 이상', ald: '기판 온도 · 150–350 °C' };
+const STORE = 'deposition-shooter.v1';
+const FONT_UI = '"IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif';
+const FONT_MONO = '"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace';
+const TOK = ['chamber', 'channel', 'wall', 'sub', 'sub-edge', 'sub-ink', 'hatch', 'ghost', 'ink', 'muted', 'panel', 'atom', 'sih4', 'o2', 'sio2', 'tma', 'h2o', 'al2o3', 'al2o3-b', 'ch4', 'h2', 'ar', 'imp', 'shine', 'ball-edge', 'bad', 'bad-soft', 'target', 'shower', 'plasma'];
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let mode = 'pvd', world = makeWorld(mode), CS = 20, dpr = 1, subPath = null;
+const SPEED = { normal: 1 / 3, fast: 1 };          // simulation seconds per real second
+let paused = false, fast = false, hudT = 0, toastTimer = 0, noticeKey = '';
+const tok = {};
+let results = loadResults();
+
+function loadResults() { try { return JSON.parse(localStorage.getItem(STORE)) || {}; } catch (e) { return {}; } }
+function saveResults() { try { localStorage.setItem(STORE, JSON.stringify(results)); } catch (e) { /* storage unavailable */ } }
+function readTokens() { const s = getComputedStyle(document.documentElement); for (const k of TOK) tok[k] = s.getPropertyValue('--' + k).trim(); }
+
+const pct = v => Math.round(v * 100) + '%';
+const one = v => (Math.round(v * 10) / 10).toFixed(1);
+const signed = v => (v >= 0 ? '+' : '−') + one(Math.abs(v));
+const toneStep = v => v >= 0.8 ? 'good' : v >= 0.45 ? 'warn' : 'bad';
+const toneImp = v => v <= 0.01 ? 'good' : v <= 0.05 ? 'warn' : 'bad';
+
+/* ---------- layout ---------- */
+function resize() {
+  const availW = stage.clientWidth;
+  const maxH = Math.max(340, Math.min(window.innerHeight * 0.64, 640));
+  CS = Math.max(14, Math.floor(Math.min(availW / COLS, maxH / ROWS, 30)));
+  dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  cv.width = Math.round(COLS * CS * dpr); cv.height = Math.round(ROWS * CS * dpr);
+  cv.style.width = COLS * CS + 'px'; cv.style.height = ROWS * CS + 'px';
+  const s = CS, p = new Path2D();
+  p.moveTo(s, ROWS * s); p.lineTo(s, Y0 * s); p.lineTo(TR.x0 * s, Y0 * s); p.lineTo(TR.x0 * s, YB * s);
+  p.lineTo((X1 + 1) * s, YB * s); p.lineTo((X1 + 1) * s, Y0 * s); p.lineTo((COLS - 1) * s, Y0 * s); p.lineTo((COLS - 1) * s, ROWS * s);
+  p.closePath();
+  subPath = p;
+}
+
+/* ---------- drawing ---------- */
+function ball(x, y, r, fill, alpha, ring) {
+  ctx.globalAlpha = alpha == null ? 1 : alpha;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fillStyle = fill; ctx.fill();
+  ctx.lineWidth = 1; ctx.strokeStyle = tok['ball-edge']; ctx.stroke();
+  if (r > 4) { ctx.beginPath(); ctx.arc(x - r * 0.32, y - r * 0.34, r * 0.3, 0, TAU); ctx.fillStyle = tok.shine; ctx.fill(); }
+  if (ring) { ctx.globalAlpha = 1; ctx.setLineDash([2, 2]); ctx.strokeStyle = fill; ctx.beginPath(); ctx.arc(x, y, r + 1.5, 0, TAU); ctx.stroke(); ctx.setLineDash([]); }
+  ctx.globalAlpha = 1;
+}
+function text(str, x, y, color, align, size, weight, font) {
+  ctx.font = `${weight || 500} ${size || Math.max(10, CS * 0.5)}px ${font || FONT_UI}`;
+  ctx.fillStyle = color; ctx.textAlign = align || 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText(str, x, y);
+}
+function tag(str, x, y, color, align) {            // label on a small plate so it reads over balls
+  const size = Math.max(10, CS * 0.52);
+  ctx.font = `600 ${size}px ${FONT_MONO}`;
+  const wd = ctx.measureText(str).width + 8, h = size + 6;
+  const x0 = align === 'right' ? x - wd : align === 'center' ? x - wd / 2 : x;
+  ctx.fillStyle = tok.panel; ctx.globalAlpha = 0.92; ctx.fillRect(x0, y - h / 2, wd, h); ctx.globalAlpha = 1;
+  ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.strokeRect(x0 + 0.5, y - h / 2 + 0.5, wd - 1, h - 1);
+  text(str, x0 + 4, y + 0.5, color, 'left', size, 600, FONT_MONO);
+}
+const partColor = k => ({ ion: tok.ar, atom: tok.atom, sih4: tok.sih4, o2: tok.o2, tma: tok.tma, h2o: tok.h2o, h2: tok.h2, ch4: tok.ch4 })[k] || tok.muted;
+function filmColor(w, i) {
+  if (w.mode === 'pvd') return tok.atom;
+  if (w.mode === 'cvd') return tok.sio2;
+  return w.meta[i] % 2 ? tok['al2o3-b'] : tok.al2o3;
+}
+function drawSource(w) {
+  const s = CS, fs = Math.max(10, s * 0.48);
+  if (w.mode === 'pvd') {
+    const W = COLS * s;
+    ctx.fillStyle = tok.plasma;                      // glow, with a thin dark space just under the target
+    ctx.fillRect(0, (TGT + 0.5) * s, W, (ION_Y - TGT) * s);
+    ctx.fillRect(0, (TGT + 1.3) * s, W, (ION_Y - TGT - 1.8) * s);
+    text('Ar 플라즈마', (COLS - 0.7) * s, (ION_Y - 0.15) * s, tok.muted, 'right', fs);
+    ctx.fillStyle = tok.target; ctx.fillRect(0, 0, W, s * 0.3);
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, TGT * s); ctx.clip();
+    for (let c = 0; c < COLS; c++) for (let k = 0; k < TGT; k++) ball((c + 0.5) * s, (k + 0.5 - w.tgt[c]) * s, s * 0.46, tok.atom);
+    ctx.restore();
+    text('금속 타깃 (−극)', 0.7 * s, (TGT + 0.95) * s, tok.muted, 'left', fs, 600);
+  } else {
+    ctx.fillStyle = tok.shower; ctx.fillRect(s * 0.5, 0, (COLS - 1) * s, s * 0.5);
+    ctx.fillStyle = tok.chamber;
+    for (let c = 1; c < COLS - 1; c++) ctx.fillRect((c + 0.5) * s - 1.5, s * 0.5 - 3, 3, 3);
+    const x = w.src.x * s;
+    const col = w.mode === 'cvd' ? tok.sih4 : (w.ald.step >= 2 ? tok.h2o : tok.tma);
+    ctx.fillStyle = (w.mode === 'ald' && (w.ald.step === 1 || w.ald.step === 3)) ? tok.wall : col;
+    ctx.beginPath(); ctx.moveTo(x - s * 0.55, s * 0.5); ctx.lineTo(x + s * 0.55, s * 0.5); ctx.lineTo(x, s * 1.05); ctx.closePath(); ctx.fill();
+    text('샤워헤드 (가스 주입)', s * 0.7, s * 1.2, tok.muted, 'left', fs);
+  }
+}
+function drawChamber(w) {
+  const s = CS, W = COLS * s, H = ROWS * s;
+  ctx.fillStyle = tok.chamber; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = tok.channel;
+  ctx.fillRect(0, Y0 * s, s, H - Y0 * s); ctx.fillRect((COLS - 1) * s, Y0 * s, s, H - Y0 * s);
+  ctx.strokeStyle = tok.wall; ctx.lineWidth = 1.2;
+  for (const cx of [0.5 * s, (COLS - 0.5) * s]) {
+    for (let y = Y0 + 2; y < ROWS - 1; y += 3) {
+      ctx.beginPath(); ctx.moveTo(cx - s * 0.22, y * s); ctx.lineTo(cx, (y + 0.3) * s); ctx.lineTo(cx + s * 0.22, y * s); ctx.stroke();
+    }
+  }
+  text('펌프', 0.5 * s, (ROWS - 0.6) * s, tok.muted, 'center', Math.max(9, s * 0.42), 600);
+  text('펌프', (COLS - 0.5) * s, (ROWS - 0.6) * s, tok.muted, 'center', Math.max(9, s * 0.42), 600);
+  for (const h of w.wall) ball(h.s ? W - s * 0.12 : s * 0.12, h.y * s, s * 0.14, tok.atom, 0.85);
+}
+function drawSubstrate(w) {
+  const s = CS;
+  ctx.fillStyle = tok.sub; ctx.fill(subPath);
+  ctx.save(); ctx.clip(subPath);
+  ctx.strokeStyle = tok.hatch; ctx.lineWidth = 1;
+  for (let k = -ROWS * s; k < COLS * s; k += 7) { ctx.beginPath(); ctx.moveTo(k, ROWS * s); ctx.lineTo(k + ROWS * s, 0); ctx.stroke(); }
+  ctx.restore();
+  ctx.strokeStyle = tok['sub-edge']; ctx.lineWidth = 1.5; ctx.stroke(subPath);
+  const fs = Math.max(10, s * 0.5);
+  text('Si 기판', 1.4 * s, (ROWS - 0.8) * s, tok['sub-ink'], 'left', fs, 600);
+  text(TEMP_LABEL[w.mode], (COLS - 1.4) * s, (ROWS - 0.8) * s, tok['sub-ink'], 'right', fs, 500);
+  text(`트렌치 AR = 깊이/폭 ≈ ${(TR.d / TR.w).toFixed(1)}`, (TR.x0 + TR.w / 2) * s, (YB + 0.55) * s, tok['sub-ink'], 'center', Math.max(9.5, s * 0.44), 500);
+}
+function drawGhost() {
+  const s = CS, t = TARGET;
+  ctx.save(); ctx.setLineDash([4, 4]); ctx.lineWidth = 1.25; ctx.strokeStyle = tok.ghost;
+  ctx.beginPath();
+  ctx.moveTo(s, (Y0 - t) * s); ctx.lineTo(TR.x0 * s, (Y0 - t) * s);
+  ctx.arc(TR.x0 * s, Y0 * s, t * s, -Math.PI / 2, 0);
+  ctx.lineTo((TR.x0 + t) * s, (YB - t) * s); ctx.lineTo((X1 + 1 - t) * s, (YB - t) * s); ctx.lineTo((X1 + 1 - t) * s, Y0 * s);
+  ctx.arc((X1 + 1) * s, Y0 * s, t * s, Math.PI, Math.PI * 1.5);
+  ctx.lineTo((COLS - 1) * s, (Y0 - t) * s);
+  ctx.stroke(); ctx.restore();
+  text('목표 두께', (COLS - 1.2) * s, (Y0 - t - 0.5) * s, tok.muted, 'right', Math.max(10, s * 0.46));
+}
+function drawCells(w) {
+  const s = CS;
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+    const i = r * COLS + c, t = w.grid[i];
+    if (t === E || t === SUB) continue;
+    const x = (c + 0.5) * s, y = (r + 0.5) * s;
+    const k = reduceMotion ? 1 : Math.min(1, 0.55 + (w.t - w.born[i]) * 5), R = s * 0.46 * k;
+    if (t === FILM) ball(x, y, R, filmColor(w, i));
+    else if (t === IMP) {
+      ball(x, y, R, w.mode === 'ald' ? tok.tma : filmColor(w, i));
+      ctx.beginPath(); ctx.arc(x, y, R * 0.36, 0, TAU); ctx.fillStyle = tok.imp; ctx.fill();
+    } else if (t === CHEM) ball(x, y, R, tok.tma);
+    else if (t === PHT) ball(x, y, R * 0.88, tok.tma, 0.45, true);
+    else if (t === PHW) ball(x, y, R * 0.88, tok.h2o, 0.45, true);
+  }
+}
+function drawMoving(w) {
+  const s = CS;
+  for (const p of w.parts) {
+    if (p.k === 'ion') {
+      ctx.strokeStyle = tok.ar; ctx.lineWidth = 2; ctx.globalAlpha = 0.45;
+      ctx.beginPath(); ctx.moveTo(p.x * s, p.y * s); ctx.lineTo(p.x * s, (p.y + 0.9) * s); ctx.stroke(); ctx.globalAlpha = 1;
+      ball(p.x * s, p.y * s, s * 0.2, tok.ar);
+      continue;
+    }
+    ball(p.x * s, p.y * s, s * (p.gas ? 0.32 : 0.4), partColor(p.k), p.purge ? 0.55 : 1);
+  }
+  for (const f of w.fx) {
+    if (f.k === 'hit') {
+      const k = Math.min(1, f.t / f.ttl);
+      ctx.globalAlpha = 1 - k; ctx.strokeStyle = tok.ar; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(f.x * s, f.y * s, s * (0.25 + 0.6 * k), 0, TAU); ctx.stroke(); ctx.globalAlpha = 1;
+      continue;
+    }
+    if (f.ttl) { ball(f.x * s, f.y * s, s * 0.17, partColor(f.k), Math.max(0, 1 - f.t / f.ttl)); continue; }
+    if (f.t < f.delay) { ball(f.x * s + (reduceMotion ? 0 : Math.sin(f.t * 45) * 1.5), f.y * s, s * 0.4, partColor(f.k), 0.6, true); continue; }
+    ball(f.x * s, f.y * s, s * 0.36, partColor(f.k), 0.75);
+  }
+}
+function dim(x0, y0, x1, y1, color) {
+  const s = CS, vert = x0 === x1, tk = s * 0.28;
+  ctx.strokeStyle = color; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+  ctx.beginPath();
+  if (vert) { ctx.moveTo(x0 - tk, y0); ctx.lineTo(x0 + tk, y0); ctx.moveTo(x1 - tk, y1); ctx.lineTo(x1 + tk, y1); }
+  else { ctx.moveTo(x0, y0 - tk); ctx.lineTo(x0, y0 + tk); ctx.moveTo(x1, y1 - tk); ctx.lineTo(x1, y1 + tk); }
+  ctx.stroke();
+}
+function annotate(w) {
+  if (w.state !== 'done') return;
+  const s = CS, m = w.m;
+  if (m.voids >= 2) {
+    const seen = reach(w);
+    ctx.fillStyle = tok['bad-soft'];
+    let vx = 0, vy = 0, n = 0;
+    for (let r = Y0 - 4; r < YB; r++) for (let c = TR.x0; c <= X1; c++) {
+      const i = r * COLS + c;
+      if (w.grid[i] === E && !seen[i]) { ctx.fillRect(c * s, r * s, s, s); vx += c; vy += r; n++; }
+    }
+    if (n) tag('Void', (vx / n + 0.5) * s, (vy / n + 0.5) * s, tok.bad, 'center');
+  }
+  if (m.overhang >= 1) {
+    ctx.save(); ctx.setLineDash([3, 3]); ctx.strokeStyle = tok.bad; ctx.lineWidth = 1.5;
+    for (const cx of [TR.x0, X1 + 1]) { ctx.beginPath(); ctx.arc(cx * s, (Y0 - 0.4) * s, 1.7 * s, 0, TAU); ctx.stroke(); }
+    ctx.restore();
+    tag('Overhang', (TR.x0 - 1.9) * s, (Y0 - 2.6) * s, tok.bad, 'right');
+  }
+  const ink = tok.ink, xc = 3.5 * s, t1 = upCount(w, 3, Y0 - 1);
+  if (t1) { dim(xc, Y0 * s, xc, (Y0 - t1) * s, ink); tag('T1', xc - s * 0.6, (Y0 - t1 / 2) * s, ink, 'right'); }
+  const bc = TR.x0 + (TR.w >> 1), t2 = upCount(w, bc, YB - 1);
+  if (t2 && m.voids < 2) { dim((bc + 0.5) * s, YB * s, (bc + 0.5) * s, (YB - t2) * s, ink); tag('T2', (bc + 1.1) * s, (YB - t2 / 2) * s, ink, 'left'); }
+  const rr = Y0 + 5, t3 = rowL(w, rr);
+  if (t3 && t3 < TR.w) { dim(TR.x0 * s, (rr + 0.5) * s, (TR.x0 + t3) * s, (rr + 0.5) * s, ink); tag('T3', (TR.x0 + t3 + 0.3) * s, (rr + 0.5) * s, ink, 'left'); }
+  else if (!t3) tag('T3 = 0', (TR.x0 + 0.3) * s, (rr + 0.5) * s, tok.bad, 'left');
+}
+function draw() {
+  const w = world;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  drawChamber(w); drawSource(w); drawSubstrate(w); drawGhost(); drawCells(w); drawMoving(w); annotate(w);
+}
+
+/* ---------- HUD & controls ---------- */
+const HINTS = {
+  pvd: '<b>Ar⁺ 이온</b>이 천장의 금속 타깃을 때리면<br>튕겨 나온 원자가 기판으로 날아가 쌓여요<br><b>▶ 공정 시작</b>을 눌러 보세요',
+  cvd: '<b>SiH₄ + O₂</b> 가스가 퍼지면서<br>뜨거운 표면에서 반응해 막이 돼요<br><b>▶ 공정 시작</b>을 눌러 보세요',
+  ald: '<b>TMA → 퍼지 → H₂O → 퍼지</b>를 반복하며<br>한 겹씩 쌓아요<br><b>▶ 공정 시작</b>을 눌러 보세요'
+};
+const CTL_HINT = {
+  pvd: '지켜볼 점: 이온에 맞아 튕겨 나온 원자는 방향이 제각각입니다. 비스듬히 날아온 원자는 트렌치 입구 모서리에 먼저 걸립니다.',
+  cvd: '지켜볼 점: SiH₄와 O₂가 함께 들어와 이리저리 튕기다 표면에서 반응합니다. 트렌치 안까지 들어가지만, 입구 쪽에서 먼저 반응하는 분자가 많습니다.',
+  ald: ['① TMA 주입: 빈 표면 자리에만 단단히 붙고, 이미 덮인 곳에는 약하게 얹힐 뿐입니다.', '② 퍼지: 약하게 얹힌 TMA가 우수수 떨어져 나갑니다.', '③ H₂O 주입: 붙어 있는 TMA와 반응해 Al₂O₃가 되고 CH₄가 나옵니다.', '④ 퍼지: 부산물 CH₄와 남은 H₂O를 내보냅니다.']
+};
+function setTone(el, tone) { if (tone) el.dataset.tone = tone; else delete el.dataset.tone; }
+function hud() {
+  const w = world, m = w.m;
+  $('#g-t1').innerHTML = `${one(m.T1)}<small> / ${TARGET}층</small>`;
+  const gs = $('#g-step');
+  if (m.T1 < 0.5) { gs.textContent = '—'; setTone(gs); } else { gs.textContent = pct(m.step); setTone(gs, toneStep(m.step)); }
+  const gi = $('#g-imp'); gi.textContent = pct(m.impPct); setTone(gi, m.film ? toneImp(m.impPct) : null);
+  $('#g-time').innerHTML = `${Math.round(w.clock)}<small> s</small>`;
+
+  const playing = w.state !== 'done', rb = $('#btn-run');
+  rb.disabled = !playing;
+  rb.textContent = !playing ? '완료' : w.state === 'idle' ? '▶ 공정 시작' : paused ? '▶ 계속' : '⏸ 일시정지';
+  const fb = $('#btn-fast');
+  fb.setAttribute('aria-pressed', String(fast));
+  fb.textContent = fast ? '▷ 보통 속도' : '≫ 빠르게';
+  $('#ctl-hint').textContent = !playing ? '결과를 확인하세요. 다시 보려면 ‘처음부터’를 누르세요.'
+    : w.state === 'idle' ? '▶ 공정 시작을 누르면 끝까지 자동으로 진행됩니다. ≫ 빠르게를 누르면 3배 속도로 바로 시작합니다.'
+    : paused ? '일시정지 중입니다.'
+    : w.mode === 'ald' ? CTL_HINT.ald[w.ald.step]
+    : w.state === 'ending' ? '목표 두께에 도달해 공급을 멈췄습니다. 날아가던 입자가 마저 내려앉는 중…' : CTL_HINT[w.mode];
+
+  if (w.mode === 'ald') {
+    const a = w.ald, prog = playing ? aldProgress(w) : 1;
+    $$('#steps li').forEach(li => li.classList.toggle('now', playing && +li.dataset.step === a.step));
+    $('#prog-label').textContent = a.step === 0 ? '표면 덮임' : a.step === 2 ? 'TMA 반응' : '퍼지';
+    $('#prog-bar').style.width = pct(prog);
+    $('#prog-val').textContent = pct(prog);
+    if (playing && (a.step === 0 || a.step === 2) && prog >= 1 && w.state === 'run') {
+      const key = `${a.cycle}-${a.step}`;
+      if (noticeKey !== key) { noticeKey = key; toast(a.step === 0 ? 'TMA가 표면을 다 덮었어요. 더 넣어도 붙지 않으니 퍼지합니다' : 'TMA가 모두 반응했어요. 퍼지로 CH₄를 내보냅니다', 'good'); }
+    }
+  }
+}
+function toast(msg, tone) {
+  const t = $('#toast');
+  t.textContent = msg;
+  if (tone) t.dataset.tone = tone; else delete t.dataset.tone;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+function onEvent(e) {
+  switch (e.k) {
+    case 'overhang': toast('Overhang: 입구 모서리에 먼저 쌓이고 있어요'); break;
+    case 'void': toast('Void: 입구가 먼저 막혀 안쪽이 비었어요', 'bad'); break;
+    case 'target': toast('목표 두께 도달. 원료 공급을 멈춥니다'); break;
+    case 'filled': toast('트렌치 입구가 닫혔어요'); break;
+    case 'purge': toast(e.n ? `퍼지: 약하게 붙어 있던 분자 ${e.n}개가 우수수 떨어져요` : '퍼지: 남은 가스를 내보내요'); break;
+    case 'cycle': toast(`${e.n} 사이클 완료. 막이 한 겹 자랐어요`, 'good'); break;
+    case 'done': finish(e.goal); break;
+  }
+}
+
+/* ---------- results ---------- */
+function finish(goal) {
+  const w = world;
+  if (goal === 'coat') {
+    const r = w.result;
+    results[w.mode] = { step: r.step, T1: r.T1, T2: r.T2, T3: r.T3, rate: r.rate, dev: r.dev, impPct: r.impPct, overhang: r.overhang, voids: r.voids, clock: r.clock };
+  } else if (results[w.mode]) {
+    results[w.mode].fillVoids = w.fill.voids;
+  }
+  saveResults();
+  showReport();
+  renderCompare();
+}
+function showReport() {
+  const w = world, r = w.result, f = w.fill;
+  $('#rep-tag').textContent = NAME[w.mode];
+  $('#rep-title').textContent = f ? '트렌치 메우기 결과' : '공정 결과';
+  const entry = (label, val, note, tone) => `<div><dt>${label}</dt><dd${tone ? ` data-tone="${tone}"` : ''}>${val}${note ? `<small>${note}</small>` : ''}</dd></div>`;
+  let html = entry('단차피복성', pct(r.step), '가장 얇은 곳 ÷ 윗면', toneStep(r.step))
+    + entry('윗면 두께', `${one(r.T1)}층`, `목표 대비 ${signed(r.dev)}층`, Math.abs(r.dev) <= 0.15 ? 'good' : Math.abs(r.dev) <= 0.5 ? 'warn' : 'bad')
+    + entry('증착 속도', `${one(r.rate)}`, '층/분 (게임 값)')
+    + entry('불순물', pct(r.impPct), r.impPct ? '검은 점' : '없음', toneImp(r.impPct))
+    + entry('입구 상태', r.voids >= 2 ? 'Void' : r.overhang >= 1 ? 'Overhang' : '깨끗함', r.voids >= 2 ? '안쪽이 비었음' : r.overhang >= 1 ? '입구가 좁아짐' : '고르게 덮임', r.voids >= 2 ? 'bad' : r.overhang >= 1 ? 'warn' : 'good')
+    + entry('공정 시간', `${Math.round(r.clock)} s`, w.mode === 'ald' ? '퍼지 시간 포함' : '');
+  if (f) {
+    const fv = f.voids >= 2, full = f.open === 0;
+    html = entry('트렌치 메우기', fv ? 'Void' : full ? '완전히 메움' : '못 메움', fv ? `빈칸 ${f.voids}개가 갇힘` : full ? '빈 공간 없음' : '안쪽이 아직 비어 있음', fv || !full ? 'bad' : 'good') + html;
+  }
+  $('#rep-grid').innerHTML = html;
+  $('#rep-take').innerHTML = takeaways(w).map(t => `<li>${t}</li>`).join('');
+  const fb = $('#rep-fill');
+  fb.hidden = w.mode === 'ald' || !!f;
+  const nb = $('#rep-next'), nx = NEXT[w.mode];
+  nb.textContent = nx ? `다음: ${NAME[nx]} →` : '결과 비교 보기 →';
+  $('#report').hidden = false;
+  requestAnimationFrame(() => $('#report').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' }));
+}
+function takeaways(w) {
+  const r = w.result, f = w.fill, out = [];
+  const side = r.T1 ? Math.min(1, r.T3 / r.T1) : 0;
+  if (f) out.push(f.voids >= 2 ? '계속 쌓았더니 입구가 먼저 닫혀 안쪽에 빈 공간(void)이 갇혔습니다. 단차피복성이 나쁘면 생기는 대표적인 불량입니다.'
+    : f.open === 0 ? '빈 공간 없이 끝까지 메워졌습니다.'
+    : '막이 윗면에만 계속 쌓여 소스 가까이까지 자랐는데도 트렌치 안쪽은 비어 있습니다. 원자가 안쪽까지 들어가지 못한 것입니다.');
+  if (w.mode === 'pvd') {
+    out.push('이온에 맞아 튕겨 나온 원자는 방향이 제각각이고, 그 방향 그대로 직진해 처음 닿은 곳에 붙습니다.');
+    out.push(r.overhang >= 1 ? '그래서 비스듬히 날아온 원자가 트렌치 입구 모서리에 먼저 쌓였습니다(overhang).' : '그래서 트렌치 옆벽까지 날아가는 원자는 적습니다.');
+    out.push(`옆벽 두께는 윗면의 ${pct(side)}였습니다. 이것이 PVD의 단차피복성이 나쁜 이유입니다.`);
+    if (!r.impPct) out.push('반응 가스를 쓰지 않으니 불순물은 0%입니다.');
+  } else if (w.mode === 'cvd') {
+    const pv = results.pvd;
+    out.push(pv ? `가스가 퍼져 트렌치 안까지 들어가므로 단차피복성이 ${pct(r.step)}로 PVD(${pct(pv.step)})${r.step > pv.step ? '보다 좋습니다' : '와 비교됩니다'}.` : `가스가 퍼져 트렌치 안까지 들어가므로 옆벽과 바닥도 덮입니다(단차피복성 ${pct(r.step)}).`);
+    if (r.impPct) out.push(`반응이 덜 끝난 원료 찌꺼기가 막에 ${pct(r.impPct)} 남았습니다(검은 점).`);
+    if (r.dev > 0.2) out.push(`공급을 멈춘 뒤에도 챔버에 남은 가스가 계속 반응해 목표보다 ${one(r.dev)}층 더 쌓였습니다. 두께를 딱 맞추기가 어렵습니다.`);
+  } else {
+    out.push(r.step >= 0.9 ? `TMA는 빈자리에만 붙고 여분은 퍼지로 떨어져 나가므로, 윗면·옆벽·바닥이 같은 두께로 덮였습니다(단차피복성 ${pct(r.step)}).` : `단차피복성은 ${pct(r.step)}입니다. 일부 자리가 덮이지 않았습니다.`);
+    out.push(`두께는 사이클 수로 정해집니다: ${TARGET} 사이클 = ${TARGET}층.`);
+    const cv2 = results.cvd;
+    out.push(`대신 퍼지를 기다리느라 공정 시간이 ${Math.round(r.clock)} s 걸렸습니다${cv2 ? ` (CVD ${Math.round(cv2.clock)} s)` : ''}.`);
+    if (r.impPct) out.push('H₂O를 만나지 못한 TMA가 탄소 찌꺼기로 남았습니다(검은 점).');
+  }
+  return out;
+}
+const CMP = [
+  { label: '단차피복성', note: '높을수록 좋음', val: r => r.step, fmt: r => pct(r.step) + (r.voids >= 2 ? ' void' : r.overhang >= 1 ? ' OH' : ''), hi: true },
+  { label: '증착 속도', note: '층/분 · 높을수록 빠름', val: r => r.rate, fmt: r => one(r.rate), hi: true },
+  { label: '두께 오차', note: '목표 2층과의 차이', val: r => Math.abs(r.dev), fmt: r => signed(r.dev) + '층', hi: false },
+  { label: '불순물', note: '낮을수록 좋음', val: r => r.impPct, fmt: r => pct(r.impPct), hi: false }
+];
+function renderCompare() {
+  const modes = ['pvd', 'cvd', 'ald'], have = modes.filter(m => results[m]);
+  const body = CMP.map(row => {
+    let best = null;
+    if (have.length >= 2) {
+      const vals = have.map(m => row.val(results[m]));
+      best = row.hi ? Math.max(...vals) : Math.min(...vals);
+    }
+    const cells = modes.map(m => {
+      const r = results[m];
+      if (!r) return '<td class="na">—</td>';
+      const isBest = best !== null && Math.abs(row.val(r) - best) < 1e-6;
+      return `<td${isBest ? ' class="best"' : ''}>${row.fmt(r)}</td>`;
+    }).join('');
+    return `<tr><th scope="row">${row.label}<small>${row.note}</small></th>${cells}</tr>`;
+  }).join('');
+  $('#cmp tbody').innerHTML = body;
+  $$('.tab').forEach(t => { t.querySelector('.rec').hidden = !results[t.dataset.mode]; });
+  const v = $('#verdict');
+  if (have.length < 3) {
+    v.textContent = have.length ? `${have.map(m => NAME[m]).join(', ')} 완료. ${modes.filter(m => !results[m]).map(m => NAME[m]).join(', ')}도 해 보세요.` : '아직 끝낸 공정이 없습니다. 왼쪽에서 PVD부터 시작해 보세요.';
+    return;
+  }
+  const order = (fn, hi) => modes.slice().sort((a, b) => hi ? fn(results[b]) - fn(results[a]) : fn(results[a]) - fn(results[b])).map(m => NAME[m]).join(' > ');
+  v.innerHTML = `<b>내 결과 순위</b><br>단차피복성: ${order(r => r.step, true)}<br>증착 속도: ${order(r => r.rate, true)}<br>두께 정확도: ${order(r => Math.abs(r.dev), false)}<br>불순물 적은 순: ${order(r => r.impPct, false)}<br><span style="color:var(--muted)">아래 ‘한눈에 보는 세 공정’ 표와 순서가 같은지 확인해 보세요.</span>`;
+}
+
+/* ---------- mode & input ---------- */
+function setMode(m) {
+  mode = m;
+  app.dataset.mode = m;
+  $$('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.mode === m)));
+  $$('.proc').forEach(p => { p.hidden = p.dataset.proc !== m; });
+  $('#ald-panel').hidden = m !== 'ald';
+  reset();
+}
+function reset() {
+  world = makeWorld(mode);
+  paused = false; noticeKey = '';
+  $('#report').hidden = true;
+  const h = $('#hint'); h.innerHTML = HINTS[mode]; h.hidden = false;
+  hud();
+}
+function hideHint() { $('#hint').hidden = true; }
+$$('.tab').forEach(t => t.addEventListener('click', () => setMode(t.dataset.mode)));
+$('#btn-run').addEventListener('click', () => {
+  const w = world;
+  if (w.state === 'done') return;
+  if (w.state === 'idle') { w.state = 'run'; w.auto = true; w.autoT = 0; paused = false; hideHint(); }
+  else paused = !paused;
+  hud();
+});
+$('#btn-fast').addEventListener('click', () => {
+  const w = world;
+  fast = !fast;
+  if (fast && w.state === 'idle') { w.state = 'run'; w.auto = true; w.autoT = 0; hideHint(); }
+  if (fast) paused = false;
+  hud();
+});
+$('#btn-reset').addEventListener('click', reset);
+$('#rep-fill').addEventListener('click', () => { if (continueFill(world)) { paused = false; $('#report').hidden = true; toast('입구가 닫히거나 다 찰 때까지 계속 쌓습니다'); hud(); } });
+$('#rep-next').addEventListener('click', () => {
+  const nx = NEXT[world.mode];
+  if (nx) { setMode(nx); $('.play').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }); }
+  else $('#compare').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+});
+$('#btn-clear').addEventListener('click', () => { results = {}; saveResults(); renderCompare(); });
+
+/* ---------- loop ---------- */
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  if (!paused) update(world, dt * (fast ? SPEED.fast : SPEED.normal));
+  while (world.events.length) onEvent(world.events.shift());
+  if (now - hudT > 120) { hudT = now; hud(); }
+  draw();
+  requestAnimationFrame(frame);
+}
+readTokens();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readTokens);
+new MutationObserver(readTokens).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+window.addEventListener('resize', resize);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => {});
+resize();
+setMode('pvd');
+renderCompare();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
