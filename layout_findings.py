@@ -550,7 +550,7 @@ HYPEREDGES = [
 # ``등급 없음`` is distinct from ToDo: it marks repositories that are useful
 # infrastructure/integration records but are not paper-quality candidates.
 QUALITY_ROWS = [
-    ("Tomo_SFTF", "Tomo_SFTF", "상", "TDP v2.1·외부 60-mesh 감사·budget–complexity·PiAM 연속성; **2026-09-17 수정본 제출 완료(3DP-2026-0119.R1)** — 1차 리뷰 지적 2건(속도 기준 불일치·후보 영역 미입증)에 전향 확증 70메쉬로 대응(SFTF 단독 not confirmed, 혼합 30메쉬 기준 충족)하고 그대로 실었다. 심사 결과 대기, 본문 4,740/4,000 단어가 남은 위험"),
+    ("Tomo_SFTF", "Tomo_SFTF", "상", "TDP v2.1·외부 60-mesh 감사·budget–complexity·PiAM 연속성; **2026-10-07 TDP 게재확정(3DP-2026-0119.R1, 「in its current form」 — 추가 수정 없음)** — 투고(08-13) → 1차 리뷰(09-16) → 수정본 제출(09-17) → 게재확정(10-07). 1차 리뷰 지적 2건에 전향 확증 70메쉬로 대응한 수정본이 그대로 실렸고, 우려하던 분량 4,740/4,000 감축 요구는 오지 않았다. 남은 것은 행정(Sage 라이선스 서명·게재비·교정쇄 → 권/호·쪽·DOI 가 나오면 published)"),
     ("Tomo_SFTFSoft", "Tomo_SFTFSoft", "상", "TDP v2.1·현대/legacy Cura·receiver 반례·조건부 first-hit 수렴"),
     ("SFTFSoft_GNN", "SFTFSoft_GNN", "상", "3,817 mesh·held-out·Cura 재라벨·Prusa 교차검증"),
     ("SFTF_Clustering", "SFTF_Clustering", "상", "SFTFCluster 계열 TDP 원고·cross-slicer/partition 자산; 독립성 게이트 잔여"),
@@ -1136,7 +1136,9 @@ if preserve_extended_quality:
             # 2026-09-16: TDP 1차 리뷰 도착.  옛 「TDP,submit,08-13」 배지를 갈아 끼운다.
             # 2026-09-17: 하루 만에 수정본을 냈다(3DP-2026-0119.R1).  단계는 revision 그대로다 —
             # 볼트 통합 어휘에서 revision 은 「심사 수정」이고, 재제출 뒤 결과 대기도 그 안에 든다.
-            "Tomo_SFTF": "TDP 수정본 제출 완료 (2026-09-17, 3DP-2026-0119.R1)",
+            # 2026-10-07: 게재확정 통보(「in its current form」 — 추가 수정 없음).  볼트 badge 와
+            # 같은 문구다.  권/호·쪽·DOI 가 나오면 published 로 올리면서 다시 갈아 끼운다.
+            "Tomo_SFTF": "TDP 게재확정 (2026-10-07, 3DP-2026-0119.R1)",
             # 2026-09-17: 게재확정.  이 배지는 파일에 이미 있던 값(투고 완료, #51937 번호 할당 중)을
             # 갈아 끼우는 것이라 여기 적어야 한다 — 이 갱신기는 병합이라 적지 않으면 옛 값이 남는다.
             "SFTF_DrapePrior": "TSE 게재확정 (2026-09-17, 원고번호 26M-08-029)",
@@ -1170,7 +1172,8 @@ if preserve_extended_quality:
             "TSE_TomoSh5": "심사 결과 대기 (2026-09-14 투고, 원고번호 26M-09-036)",
             # 2026-09-16: 볼트 노트의 bottleneck·next_gate 를 옮긴 것이다(표가 살아 있으면 표 값이 이긴다).
             # 2026-09-17: 수정본을 냈으므로 병목이 「대응」에서 「대기」로 옮겨 갔다.  볼트 값과 같다.
-            "Tomo_SFTF": "심사 결과 대기(3DP-2026-0119.R1). accept 가 나오면 Tomo_SFTFSoft·SFTF_Clustering·SFTFSoft_GNN 의 게이트가 열린다",
+            # 2026-10-07: 게재확정.  병목은 없고 남은 것은 행정이다(볼트 bottleneck·next_gate 를 옮긴 것).
+            "Tomo_SFTF": "없음 — 게재확정(2026-10-07). 남은 것은 행정: Sage 라이선스 서명·게재비 $90/쪽·교정쇄 → 권/호·쪽·DOI 가 나오면 stage 를 published 로 올리고 업적 행 p101 재발행. 후속 Tomo_SFTFSoft·SFTF_QEM·SFTF_Clustering 의 accept 게이트가 열렸다(SFTFSoft_GNN 은 SFTFSoft preprint DOI 를 더 기다린다)",
             # 2026-09-17: 게재확정 뒤 남은 것은 행정이다(볼트 next_gate 를 옮긴 것).
             "SFTF_DrapePrior": "게재확정 후 행정 — 교정쇄 확인·게재료 처리 → 권/호·쪽·DOI 가 나오면 stage 를 published 로 올리고 업적 행 p253 재발행",
             "SFTF_UrbanTraffic": "접수(원고번호) 회신 확인 → 심사 결과 대기; 설인환 몫은 hwpx v1 공저자 검토(방법·수치 정합)",
