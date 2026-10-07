@@ -69,7 +69,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -477,6 +477,32 @@ if (findIn(dispGradeHandSample.root, "cfmsDispersityProp").kind !== "high") thro
 const dispGradeNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyDispersityGrades(dispGradeNoNodeSample)) throw new Error("dispersity grade migration must still stamp its version without the nodes");
 if (childIds(dispGradeNoNodeSample.root) !== "n0llvuh1") throw new Error("dispersity grade migration touched a document that never had the nodes");
+
+// 2026-10-07: Tomo_SFTF TDP 게재확정. 문서의 sftf 단계를 submitted → accepted 로 올리고, 옛 씨앗
+// 제목·메모일 때만 갈아 끼운다. 손으로 둔 제목·메모와 더 올려 둔 단계는 되감지 않는다.
+const sftfAcceptedSample = { root: mk("root", [
+  { id: "sftf", title: "#1 Tomo_SFTF — TDP submit 完 (3DP-2026-0119)", kind: "high", status: "submitted",
+    note: "2026-08-12 특허 3건 출원 → 2026-08-13 TDP 제출(3DP-2026-0119, Under Review). 원칙은 여전히 … 2026-09-16 1차 리뷰 도착 → revision 준비 중.",
+    children: [{ id: "ny0tqz74", title: "SFTFsoft", kind: "high", status: "draft", children: [] }] },
+]), links: [] };
+if (!context.__applyTomoSftfAccepted(sftfAcceptedSample)) throw new Error("Tomo_SFTF accepted migration did not run");
+if (context.__applyTomoSftfAccepted(sftfAcceptedSample)) throw new Error("Tomo_SFTF accepted migration is not idempotent");
+const sftfAccepted = findIn(sftfAcceptedSample.root, "sftf");
+if (sftfAccepted.status !== "accepted") throw new Error(`Tomo_SFTF accepted migration left sftf at ${sftfAccepted.status}`);
+if (sftfAccepted.title !== "#1 Tomo_SFTF — TDP 게재확정 (3DP-2026-0119.R1)") throw new Error("Tomo_SFTF accepted migration did not retitle the old seed title");
+if (!/2026-10-07 게재확정/.test(sftfAccepted.note) || /Under Review/.test(sftfAccepted.note)) throw new Error("Tomo_SFTF accepted migration did not replace the seed note");
+if (findIn(sftfAcceptedSample.root, "ny0tqz74").status !== "draft") throw new Error("Tomo_SFTF accepted migration touched SFTFsoft");
+const sftfAcceptedValidation = context.__validate(sftfAcceptedSample);
+if (!sftfAcceptedValidation.ok) throw new Error(`Tomo_SFTF accepted sample is invalid: ${sftfAcceptedValidation.errors[0]}`);
+const sftfHandSample = { root: mk("root", [
+  { id: "sftf", title: "Tomo_SFTF", kind: "high", status: "published", note: "손으로 쓴 메모", children: [] },
+]), links: [] };
+context.__applyTomoSftfAccepted(sftfHandSample);
+const sftfHand = findIn(sftfHandSample.root, "sftf");
+if (sftfHand.status !== "published" || sftfHand.title !== "Tomo_SFTF" || sftfHand.note !== "손으로 쓴 메모") throw new Error("Tomo_SFTF accepted migration overrode a hand-set field");
+const sftfNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyTomoSftfAccepted(sftfNoNodeSample)) throw new Error("Tomo_SFTF accepted migration must still stamp its version without the node");
+if (childIds(sftfNoNodeSample.root) !== "n0llvuh1") throw new Error("Tomo_SFTF accepted migration touched a document that never had the node");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);
