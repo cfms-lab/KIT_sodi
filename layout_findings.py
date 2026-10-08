@@ -557,7 +557,7 @@ QUALITY_ROWS = [
     ("SFTFSoft_GNN", "SFTFSoft_GNN", "상", "3,817 mesh·held-out·Cura 재라벨·Prusa 교차검증"),
     ("SFTF_Clustering", "SFTF_Clustering", "상", "SFTFCluster 계열 TDP 원고·cross-slicer/partition 자산; 독립성 게이트 잔여"),
     ("PFTF", "PFTF", "중", "PFTF v0.9 이론·family synthesis; 삼형제 V2/V3/V4 synchronization TODO"),
-    ("SFTF_DrapePrior", "SFTF_DrapePrior", "하", "**2026-09-17 한국섬유공학회지 게재확정(26M-08-029)** — 투고(2026-08-14) → 수정후 게재가(2026-09-03) → Rev1 당일 제출 → 게재확정. 드레이프 품질 평가의 재현성(노이즈 플로어·예산 일치·솔버 간 이득 부호 반전). 권/호·쪽·DOI 는 미정"),
+    ("SFTF_DrapePrior", "SFTF_DrapePrior", "하", "**2026-10-31 한국섬유공학회지 63권 5호 출판(26M-08-029)** — 투고(2026-08-14) → 수정후 게재가(2026-09-03) → Rev1 당일 제출 → 게재확정(2026-09-17) → 교정쇄 회신(2026-10-08) → 발행. 드레이프 품질 평가의 재현성(노이즈 플로어·예산 일치·솔버 간 이득 부호 반전). 쪽·DOI 는 미정"),
     ("SFTF_Composite", "SFTF_Composite", "상", "한·영문 완성·191 tests·R9–R13 사전등록/독립감사; R11 합성 held-out 음성, 공식 CAD·물리 검증 잔여"),
     ("SFTF_InjMold", "SFTF_InjMold", "중", "B24·exact integration·set-cover·B-rep·blind protocol; 원고 조립 잔여"),
     ("Tomo_DiffSupport", "Tomo_DiffSupport", "중", "claim–evidence matrix·JAX gradient·fail-closed; utility/print gate 미실행"),
@@ -1143,7 +1143,8 @@ if preserve_extended_quality:
             "Tomo_SFTF": "TDP 게재확정 (2026-10-07, 3DP-2026-0119.R1)",
             # 2026-09-17: 게재확정.  이 배지는 파일에 이미 있던 값(투고 완료, #51937 번호 할당 중)을
             # 갈아 끼우는 것이라 여기 적어야 한다 — 이 갱신기는 병합이라 적지 않으면 옛 값이 남는다.
-            "SFTF_DrapePrior": "TSE 게재확정 (2026-09-17, 원고번호 26M-08-029)",
+            # 2026-10-08: 출판 — 63권 5호(2026-10-31 발행, 사용자 통보).  볼트 badge 와 같은 문구다.
+            "SFTF_DrapePrior": "TSE 출판 (2026-10-31, 63권 5호)",
             # 2026-09-17: 파일의 원고번호가 26M-08-029(SFTF_DrapePrior 것)로 잘못 적혀 있었다.
             # cfmsCIPC 는 26M-08-030 이다(볼트 badge·표 둘 다 그렇게 적는다).
             "cfmsCIPC": "TSE 투고 완료 (2026-08-21, 원고번호 26M-08-030)",
@@ -1177,7 +1178,8 @@ if preserve_extended_quality:
             # 2026-10-07: 게재확정.  병목은 없고 남은 것은 행정이다(볼트 bottleneck·next_gate 를 옮긴 것).
             "Tomo_SFTF": "없음 — 게재확정(2026-10-07). 남은 것은 행정: Sage 라이선스 서명·게재비 $90/쪽·교정쇄 → 권/호·쪽·DOI 가 나오면 stage 를 published 로 올리고 업적 행 p101 재발행. 후속 Tomo_SFTFSoft·SFTF_QEM·SFTF_Clustering 의 accept 게이트가 열렸다(SFTFSoft_GNN 은 SFTFSoft preprint DOI 를 더 기다린다)",
             # 2026-09-17: 게재확정 뒤 남은 것은 행정이다(볼트 next_gate 를 옮긴 것).
-            "SFTF_DrapePrior": "게재확정 후 행정 — 교정쇄 확인·게재료 처리 → 권/호·쪽·DOI 가 나오면 stage 를 published 로 올리고 업적 행 p253 재발행",
+            # 2026-10-08: 출판(2026-10-31, 63권 5호).  남은 것은 쪽·DOI 뿐이다(볼트 next_gate).
+            "SFTF_DrapePrior": "없음 — 출판(2026-10-31, 63권 5호). 남은 것은 서지뿐: 쪽·DOI 가 나오면 업적 행 p253 의 page·doi 를 채운다",
             "SFTF_UrbanTraffic": "접수(원고번호) 회신 확인 → 심사 결과 대기; 설인환 몫은 hwpx v1 공저자 검토(방법·수치 정합)",
             "PFTF_AsymTensor": "⛔ 긍정적 효과 규칙 — 주 기여 축 결정(복합재 순서 뒤집기, 은종현 교수 실측 회신 대기) 전에는 투고 불가; 그다음 60° 임계각 정합 재측정",
             "PFTF_DrapePrior_VisCull_kDop": "독립 논문 등급 미적용 — 통합 evidence 저장소",

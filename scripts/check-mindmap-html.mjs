@@ -69,7 +69,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -503,6 +503,32 @@ if (sftfHand.status !== "published" || sftfHand.title !== "Tomo_SFTF" || sftfHan
 const sftfNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyTomoSftfAccepted(sftfNoNodeSample)) throw new Error("Tomo_SFTF accepted migration must still stamp its version without the node");
 if (childIds(sftfNoNodeSample.root) !== "n0llvuh1") throw new Error("Tomo_SFTF accepted migration touched a document that never had the node");
+
+// 2026-10-08: SFTF_DrapePrior 한국섬유공학회지 63권 5호 출판(2026-10-31). 문서의 njkskwe4 단계를
+// accepted → published 로 올리고, 옛 볼트 메모일 때만 갈아 끼운다. 자식(cfmsCIPC)과 손으로 둔 값은 그대로.
+const drapePubSample = { root: mk("root", [
+  { id: "njkskwe4", title: "SFTF_DrapePrior", kind: "low", status: "accepted",
+    note: "섬유공학회지. 2026-08 투고 → 2026-09-17 게재확정.",
+    children: [{ id: "n2dzarb3", title: "cfmsCIPC", kind: "low", status: "submitted", children: [] }] },
+]), links: [] };
+if (!context.__applyDrapePriorPublished(drapePubSample)) throw new Error("DrapePrior published migration did not run");
+if (context.__applyDrapePriorPublished(drapePubSample)) throw new Error("DrapePrior published migration is not idempotent");
+const drapePub = findIn(drapePubSample.root, "njkskwe4");
+if (drapePub.status !== "published") throw new Error(`DrapePrior published migration left njkskwe4 at ${drapePub.status}`);
+if (drapePub.note !== "섬유공학회지 63권 5호. 2026-08 투고 → 2026-09-17 게재확정 → 2026-10-31 발행.") throw new Error("DrapePrior published migration did not replace the vault note");
+if (drapePub.title !== "SFTF_DrapePrior") throw new Error("DrapePrior published migration touched the title");
+if (findIn(drapePubSample.root, "n2dzarb3").status !== "submitted") throw new Error("DrapePrior published migration touched cfmsCIPC");
+const drapePubValidation = context.__validate(drapePubSample);
+if (!drapePubValidation.ok) throw new Error(`DrapePrior published sample is invalid: ${drapePubValidation.errors[0]}`);
+const drapeHandSample = { root: mk("root", [
+  { id: "njkskwe4", title: "SFTF_DrapePrior", kind: "low", status: "cancelled", note: "손으로 쓴 메모", children: [] },
+]), links: [] };
+context.__applyDrapePriorPublished(drapeHandSample);
+const drapeHand = findIn(drapeHandSample.root, "njkskwe4");
+if (drapeHand.status !== "cancelled" || drapeHand.note !== "손으로 쓴 메모") throw new Error("DrapePrior published migration overrode a hand-set field");
+const drapeNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyDrapePriorPublished(drapeNoNodeSample)) throw new Error("DrapePrior published migration must still stamp its version without the node");
+if (childIds(drapeNoNodeSample.root) !== "n0llvuh1") throw new Error("DrapePrior published migration touched a document that never had the node");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);

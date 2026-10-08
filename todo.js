@@ -21,7 +21,7 @@
     "SFTF_UrbanTraffic":    "심사 대기",
     "TSE_TomoSh4":          "심사 대기",
     "TSE_TomoSh5":          "심사 대기",
-    "SFTF_DrapePrior":      "게재확정 — 교정쇄 확인",  /* TSE 는 게재료가 없다 (2026-09-21) */
+    "SFTF_DrapePrior":      "",  /* 출판 — 63권 5호 (2026-10-31). cfmsDispersityKNN 처럼 빈 칸으로 둔다 */
     "cfmsDispersityKNN":       "",  /* 게재 완료 — 빈 칸으로 둔다 */
 
     /* ── Tomo_SFTF accept 가 열어 준 것 (2026-10-07) ─────────
