@@ -2174,7 +2174,8 @@ SEM_TRACKS = [
         "id": "TSE_SEM2_Tensor",
         "label": "TSE_SEM2_Tensor",
         "level": 4,
-        "scope": "② 배향 텐서장 트랙 · 한국복합재료학회지(① 접수 후, 은종현 교수 투고)",
+        # 2026-10-09: 09-16 의 「①과 같은 한국복합재료학회지」 결정과 달리 TSE 로 나갔다.
+        "scope": "② 배향 텐서장 트랙 · 한국섬유공학회지(2026-10-09 투고 완료 · 학문후속세대논문상 트랙 · 은종현 교수 교신)",
         "summary": "이진화 없는 섬유 배향 텐서장으로 전체 배향·교차점·하부층까지 정량화",
     },
     {
@@ -2245,7 +2246,9 @@ def _sem_node(track, template=None):
         # 세 트랙이 한 저장소를 쓴다 — 볼트 노트의 path 가 정본이다.
         "_project_path": PROJECT_PATHS.get(LEGACY_SEM_ID, r"D:\__AI_automatized\TSE_SEM2026_dev"),
         "_grade": grade,
-        "_stage": "draft",
+        # VAULT_STAGES 와 같은 규칙(TRACK_STAGES 덮개 → 부모 노트 stage). 화면은 VAULT_STAGES 를
+        # 읽지만, 여기 "draft" 를 박아 두면 노드 데이터만 보고 단계를 잘못 읽는다(2026-10-09).
+        "_stage": TRACK_STAGES.get(track["id"]) or NOTE_STAGES.get(LEGACY_SEM_ID, "draft"),
         "_horizon": "near",
         "_level": track["level"],
         # 인접행렬의 주제 가족.  접두어 규칙(id.split('_')[0])도 TSE 를 주지만 명시해 둔다.
