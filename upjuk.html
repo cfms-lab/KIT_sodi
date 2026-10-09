@@ -224,6 +224,16 @@ const CATEG_KOR={IJ:"SCIE",DJ:"국내논문",IC:"해외학회",DC:"국내학회"
 const CATEG_HEADER={IJ:"SC<br>IE",DJ:"국내<br>논문",IC:"해외<br>학회",DC:"국내<br>학회",IL:"초청<br>강연"};
 const PRINT_SUFFIX={2:"(In Print)",3:"(Accepted)",4:"(Submitted)",5:"(draft)"};
 
+/* ===== 화면에서만 감추는 기록 (2026-10-09, 사용자 지시) =====
+   볼트 노트와 research_outputs 행은 그대로 둔다 — 볼트가 정본이라 행을 지워도 다음 발행이
+   되살리므로, 목록·통계표에 올리기 전에 여기서 거른다.
+   · p142   JASR 2015 「A Simple Evaluation Method for Particle Positional Dispersity of LCD
+            Anti-Glare Films Using Connectivity Graph」 — 저급 저널이라 업적 목록에서 뺀다.
+   · bridge 볼트 전용 분류(계보 이음새, IJ/DJ 집계 제외). 표에 이 값이 남아 있으면 통계표에
+            「bridge」열이 생기므로 분류째 거른다. */
+const HIDDEN_IDS=new Set(["p142"]);
+const HIDDEN_CATEGS=new Set(["bridge"]);
+
 /* ===== 투고 진도 파이 · 깜빡임 (2026-09-22, 사용자 지시) =====
    graph.html 의 STAGE_PIE, portfolio.html 의 파이()·깜빡임과 같은 규칙이다 — 세 화면이 같은
    그림·같은 박자를 쓴다. 단계 어휘는 research_outputs.stage(볼트의 통합 단계 어휘)다. */
@@ -292,12 +302,16 @@ const BLINK_KEY="cfms_upjuk_blink_v1";
   cb.addEventListener("change",()=>{ try{localStorage.setItem(BLINK_KEY,cb.checked?'1':'0');}catch(e){} document.body.classList.toggle("blink-on",cb.checked); });
 })();
 
-/* ===== 저자(드물게 변경 → 내장) ===== */
+/* ===== 저자(드물게 변경 → 내장) =====
+   2026-10-09 사용자 지시: 대학원생 강지언을 빼고 공저자 이희란·은종현 교수를 넣는다.
+   영문 표기는 표의 authors 칸 그대로다 — 「Heeran Lee」(p25·p27·v-IC-2026-01 등),
+   「Jonghyun Eun」(p63·p64). 둘 다 이름이 한 단어라 ENGNAME_SECOND 는 비운다. */
 const PEOPLE=[
  {NAME:"설인환",ENGNAME_FIRST:"In",ENGNAME_SECOND:"Hwan",ENGNAME_LAST:"Sul"},
  {NAME:"정진영",ENGNAME_FIRST:"Jin",ENGNAME_SECOND:"Young",ENGNAME_LAST:"Jung"},
  {NAME:"김재룡",ENGNAME_FIRST:"Jae",ENGNAME_SECOND:"Ryoung",ENGNAME_LAST:"Kim"},
- {NAME:"강지언",ENGNAME_FIRST:"Jieon",ENGNAME_SECOND:"",ENGNAME_LAST:"Kang"},
+ {NAME:"이희란",ENGNAME_FIRST:"Heeran",ENGNAME_SECOND:"",ENGNAME_LAST:"Lee"},
+ {NAME:"은종현",ENGNAME_FIRST:"Jonghyun",ENGNAME_SECOND:"",ENGNAME_LAST:"Eun"},
  {NAME:"문선희",ENGNAME_FIRST:"Sun",ENGNAME_SECOND:"Hee",ENGNAME_LAST:"Moon"}
 ];
 
@@ -376,6 +390,7 @@ async function loadPapers(){
       {headers:authHeaders(true)});
     HAS_PROJECT_COL=true;                     // research_outputs 는 project_id 를 늘 가진다
     PAPERS=data.map(normalizePaper);
+    PAPERS=PAPERS.filter(p=>!HIDDEN_IDS.has(p.ID)&&!HIDDEN_CATEGS.has(p.CATEG));   // 감춘 기록·분류 (위 HIDDEN_*)
     // 방어적 클라이언트 필터: 비로그인은 draft 숨김. (실제 보안은 Supabase RLS가 담당)
     if(!isLoggedIn()) PAPERS=PAPERS.filter(p=>p.PrintStatus!==5);
     document.getElementById("banner").style.display="none";
@@ -408,8 +423,19 @@ function checkName(Str,author,first,second,last){
   Str=(Str||"").toLowerCase();first=(first||"").toLowerCase();second=(second||"").toLowerCase();last=(last||"").toLowerCase();
   if(author==="ALL")return true;
   if(author&&instr(Str,author.toLowerCase())>0)return true;
-  if(!author)return false;
-  let nLast=instr(Str," "+last);if(nLast===0)nLast=instr(Str,"."+last);if(nLast===0)return false;
+  if(!author||!last)return false;
+  /* 2026-10-09: 성이 처음 나오는 자리 하나만 보던 것을 **성이 나오는 자리마다** 본다.
+     「Okkyung Lee, Heeran Lee, …」(v-IC-2026-02)처럼 같은 성의 다른 저자가 앞에 있으면 첫 자리에서
+     실패하고 끝나, 이희란 교수 필터가 그 기록을 놓쳤다. 자리마다의 판정은 원본 로직 그대로다. */
+  for(const sep of [" ","."]){
+    for(let i=Str.indexOf(sep+last);i>=0;i=Str.indexOf(sep+last,i+1)){
+      if(checkNameAt(Str,i+1,first,second))return true;   // i+1 = 옛 instr() 의 1-기반 nLast
+    }
+  }
+  return false;
+}
+/* 성이 Str 의 nLast 자리(1-기반, 구분자 포함)에서 시작한다고 보고 그 앞 토큰이 이름·중간이름과 맞는지 본다. */
+function checkNameAt(Str,nLast,first,second){
   let temp=Str.substring(0,nLast-1).replace(/\s+$/,"");
   let nFirst=0,nSecond=0,n1=instrRev(temp," "),n2=instrRev(temp,".");
   if(n1!==0)nSecond=n1;

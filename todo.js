@@ -12,17 +12,20 @@
  * 여기에 없는 프로젝트는 지금까지처럼 DB 의 옛 문장을 그대로 보여 준다.
  *
  * 2026-09-21 사용자 지시로 신설.
+ * 2026-10-09 사용자 지시로 투고분 정리 — HipDetect·PFTF_GFiberCT 는 09-22 에 나갔는데 옛 줄이 남아 있었다.
  */
 (function () {
   const TODO = {
     /* ── 저널 손에 가 있는 것 ─────────────────────────────── */
     "Tomo_SFTF":            "게재확정 — 라이선스 서명",  /* TDP 3DP-2026-0119.R1 (2026-10-07) */
-    "cfmsCIPC":             "심사 대기",
+    "cfmsCIPC":             "2차 심사 대기",  /* TSE 26M-08-030 — Rev1 제출 2026-09-22 */
     "SFTF_UrbanTraffic":    "심사 대기",
     "TSE_TomoSh4":          "심사 대기",
     "TSE_TomoSh5":          "심사 대기",
     "TSE_SEM1_Bezier":      "심사 대기",  /* 한국복합재료학회지 S-26-0085 (2026-09-22) */
     "TSE_SEM2_Tensor":      "심사 대기",  /* 한국섬유공학회지 학문후속세대논문상 트랙 (2026-10-09), 논문 ID 대기 */
+    "HIPDetect":            "심사 대기",  /* IJCST IJCST-09-2026-0266 (2026-09-22 ScholarOne 투고) */
+    "PFTF_GFiberCT":        "심사 대기",  /* 한국복합재료학회지 S-26-0084 (2026-09-22, 은종현 교수 측 투고) */
     "SFTF_DrapePrior":      "",  /* 출판 — 63권 5호 (2026-10-31). cfmsDispersityKNN 처럼 빈 칸으로 둔다 */
     "cfmsDispersityKNN":       "",  /* 게재 완료 — 빈 칸으로 둔다 */
 
@@ -42,7 +45,6 @@
 
     /* ── 남의 눈이 필요한 것 ──────────────────────────────── */
     "cfmsAutoPlace_IJCST":  "제2 전문가 의견 대기 중",
-    "HIPDetect":            "제2 전문가 의견 대기 중",
 
     /* ── 내가 실측·촬영을 해야 하는 것 ────────────────────── */
     "cfmsDrapeInverse":     "직물 촬영 필요",
@@ -52,7 +54,6 @@
     "SFTF_ActiveOverprint": "RGB-D 촬영 필요",
     "PFTF_Compression":     "SizeKorea 실측 연동 필요",
     "SFTF_Composite":       "공식 CAD·물성 시험 확보",
-    "PFTF_GFiberCT":        "대조군 실험 보강",
     "SFTFSoft_DFSVR":       "절제 사다리 실측",
     "cfmsPINNDrape":        "봉제 구간 시간 계측",
     "cfmsPINNCAD":          "실제 스커트·스캔 대조",
