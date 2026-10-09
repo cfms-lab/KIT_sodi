@@ -21,6 +21,8 @@
     "SFTF_UrbanTraffic":    "심사 대기",
     "TSE_TomoSh4":          "심사 대기",
     "TSE_TomoSh5":          "심사 대기",
+    "TSE_SEM1_Bezier":      "심사 대기",  /* 한국복합재료학회지 S-26-0085 (2026-09-22) */
+    "TSE_SEM2_Tensor":      "심사 대기",  /* 한국섬유공학회지 학문후속세대논문상 트랙 (2026-10-09), 논문 ID 대기 */
     "SFTF_DrapePrior":      "",  /* 출판 — 63권 5호 (2026-10-31). cfmsDispersityKNN 처럼 빈 칸으로 둔다 */
     "cfmsDispersityKNN":       "",  /* 게재 완료 — 빈 칸으로 둔다 */
 
@@ -36,8 +38,6 @@
     "SFTF_InjMold":         "공저자 작업 중",
     "PFTF_Mold":            "공저자 작업 중",
     "ColdOndol_Materials":  "공저자 작업 중",  /* 김우석 교수님께 넘어갔다 (2026-09-21) */
-    "TSE_SEM1_Bezier":      "공저자 작업 중",
-    "TSE_SEM2_Tensor":      "공저자 작업 중 — ① 접수 후 투고",
     "PFTF_AsymTensor":      "은종현 교수님 실측 회신 대기",
 
     /* ── 남의 눈이 필요한 것 ──────────────────────────────── */

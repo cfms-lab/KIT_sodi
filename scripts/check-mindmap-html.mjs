@@ -69,7 +69,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -529,6 +529,50 @@ if (drapeHand.status !== "cancelled" || drapeHand.note !== "손으로 쓴 메모
 const drapeNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyDrapePriorPublished(drapeNoNodeSample)) throw new Error("DrapePrior published migration must still stamp its version without the node");
 if (childIds(drapeNoNodeSample.root) !== "n0llvuh1") throw new Error("DrapePrior published migration touched a document that never had the node");
+
+// 2026-10-09: TSE_SEM2_Tensor 한국섬유공학회지 투고. n9ccnpv1(②)과 문서에 draft 로 남은 nuzx6yz7(①)을
+// submitted 로 올리고, ② 의 옛 씨앗 메모·복사된 projectPath 만 갈아 끼운다. 같은 방의 AutoTune(nggbas52)·
+// GFiberCT(nzyk4gd6)와 제목, 손으로 둔 값은 건드리지 않는다.
+const tensorSample = {
+  root: mk("root", [
+    mk("nffg4ou5", [
+      { id: "nzyk4gd6", title: "PFTF_GFiberCT", kind: "low", status: "submitted", children: [] },
+      { id: "nuzx6yz7", title: "TSE_SEM1_Bezier", kind: "low", status: "draft", note: "선빈. 2026-10",
+        projectPath: "D:\\__AI_automatized\\TSE_SEM2026_dev\\draft1_Bezier", children: [
+        { id: "n9ccnpv1", title: "TSE_SEM2_Tensor", kind: "low", status: "draft", note: "선빈. 2026-12",
+          projectPath: "D:\\__AI_automatized\\TSE_SEM2026_dev\\draft1_Bezier", children: [
+          { id: "nggbas52", title: "TSE_SEM3_AutoTune", kind: "low", status: "blocked", note: "2027-04월호(교내과제결과물)", children: [] },
+        ] },
+      ] },
+    ]),
+  ]),
+  links: [],
+};
+if (!context.__applyTensorSubmitted(tensorSample)) throw new Error("Tensor submitted migration did not run");
+if (context.__applyTensorSubmitted(tensorSample)) throw new Error("Tensor submitted migration is not idempotent");
+const tensorNode = findIn(tensorSample.root, "n9ccnpv1");
+if (tensorNode.status !== "submitted") throw new Error(`Tensor submitted migration left n9ccnpv1 at ${tensorNode.status}`);
+if (tensorNode.note !== "한국섬유공학회지 투고 2026-10-09 (학문후속세대논문상 트랙, 박명진·은종현*·설인환) → 논문 ID 대기.") throw new Error("Tensor submitted migration did not replace the seed note");
+if (tensorNode.projectPath !== "D:\\__KIT_projects\\TSE_SEM2026_dev\\draft2_Tensor") throw new Error("Tensor submitted migration did not fix the copied projectPath");
+if (tensorNode.title !== "TSE_SEM2_Tensor" || childIds(tensorNode) !== "nggbas52") throw new Error("Tensor submitted migration touched the title or children");
+const bezierNode = findIn(tensorSample.root, "nuzx6yz7");
+if (bezierNode.status !== "submitted") throw new Error(`Tensor submitted migration left nuzx6yz7 at ${bezierNode.status}`);
+if (bezierNode.note !== "선빈. 2026-10" || bezierNode.projectPath !== "D:\\__AI_automatized\\TSE_SEM2026_dev\\draft1_Bezier") throw new Error("Tensor submitted migration touched Bezier's note or path");
+if (findIn(tensorSample.root, "nggbas52").status !== "blocked") throw new Error("Tensor submitted migration touched TSE_SEM3_AutoTune");
+if (findIn(tensorSample.root, "nzyk4gd6").status !== "submitted") throw new Error("Tensor submitted migration touched PFTF_GFiberCT");
+const tensorValidation = context.__validate(tensorSample);
+if (!tensorValidation.ok) throw new Error(`Tensor submitted sample is invalid: ${tensorValidation.errors[0]}`);
+const tensorHandSample = { root: mk("root", [
+  { id: "n9ccnpv1", title: "Tensor", kind: "low", status: "accepted", note: "손으로 쓴 메모", projectPath: "E:\\somewhere", children: [] },
+  { id: "nuzx6yz7", title: "TSE_SEM1_Bezier", kind: "low", status: "revision", children: [] },
+]), links: [] };
+context.__applyTensorSubmitted(tensorHandSample);
+const tensorHand = findIn(tensorHandSample.root, "n9ccnpv1");
+if (tensorHand.status !== "accepted" || tensorHand.note !== "손으로 쓴 메모" || tensorHand.projectPath !== "E:\\somewhere" || tensorHand.title !== "Tensor") throw new Error("Tensor submitted migration overrode a hand-set field");
+if (findIn(tensorHandSample.root, "nuzx6yz7").status !== "revision") throw new Error("Tensor submitted migration demoted a hand-advanced Bezier status");
+const tensorNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyTensorSubmitted(tensorNoNodeSample)) throw new Error("Tensor submitted migration must still stamp its version without the nodes");
+if (childIds(tensorNoNodeSample.root) !== "n0llvuh1") throw new Error("Tensor submitted migration touched a document that never had the nodes");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);
