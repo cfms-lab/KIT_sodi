@@ -130,7 +130,7 @@ const positions = Object.assign(
   readJsonConstant("CURATED_POSITIONS", "{"),
 );
 // 2026-09-10: graph.html 의 POS + CURATED_POSITIONS 병합 결과 전체를 그대로 적는다.
-const expectedPositions = {"Tomo_SFTF":{"x":760,"y":190},"Tomo_SFTFSoft":{"x":470,"y":60},"SFTF_Clustering":{"x":470,"y":310},"PFTF":{"x":760,"y":380},"SFTF_Composite":{"x":760,"y":650},"SFTF_InjMold":{"x":910,"y":0},"PFTF_Mold":{"x":1010,"y":100},"PFTF_Compression":{"x":200,"y":650},"Tomo_DFSVR":{"x":180,"y":60},"PFTF_VisCull_kDop":{"x":80,"y":250},"SFTF_SewerPOC":{"x":1050,"y":510},"SFTFSoft_GNN":{"x":260,"y":190},"SFTF_DrapePrior":{"x":-70,"y":660},"PFTF_AsymTensor":{"x":600,"y":650},"PFTF_DrapePrior_VisCull_kDop":{"x":-100,"y":360},"PFTF_GFiberCT":{"x":600,"y":850},"SFTF_QEM":{"x":470,"y":190},"SFTF_DynamicTargetSearch":{"x":360,"y":440},"DFSVR_VisCull":{"x":-20,"y":-150},"SFTFSoft_GNN_DFSVR":{"x":-20,"y":60},"SFTF_ActiveOverprint":{"x":560,"y":420},"ColdOndol":{"x":1190,"y":470},"ColdOndol_Positioning":{"x":1050,"y":700},"cfmsCIPC":{"x":-40,"y":910},"TSE_SEM1_Bezier":{"x":940,"y":650},"TSE_SEM2_Tensor":{"x":940,"y":850},"TSE_SEM3_AutoTune":{"x":940,"y":1110},"SFTF_HeatMethod":{"x":760,"y":850},"cfmsPINNDrape":{"x":-20,"y":1130},"cfmsDrape":{"x":-220,"y":970},"cfmsMiindo":{"x":-100,"y":770},"cfmsPINNCAD":{"x":110,"y":1070},"SFTFSoft_DFSVR":{"x":180,"y":-150},"SFTF_UrbanTraffic":{"x":1190,"y":290},"cfmsAutoSew":{"x":460,"y":1280},"cfmsAutoPlace_IJCST":{"x":170,"y":1280},"cfmsAutoPlace_JCDE":{"x":0,"y":1370},"cfmsDrapeSCAN":{"x":360,"y":930},"cfmsDrapeInverse":{"x":240,"y":800},"SFTF_Holonomy":{"x":760,"y":1050},"HIPDetect":{"x":460,"y":1090},"cfmsDispersityKNN":{"x":600,"y":1050},"TSE_TomoSh4":{"x":450,"y":650},"TSE_TomoSh5":{"x":420,"y":850},"Jeon_DLPOrient":{"x":680,"y":-50},"cfmsDispersityProp":{"x":950,"y":1220},"Cho_MoldWarpDIC":{"x":1140,"y":130},"cfmsHMDispersity":{"x":670,"y":1270},"dynamicDispersity":{"x":600,"y":1370},"cfmsAnatomy":{"x":-300,"y":720}};
+const expectedPositions = {"Tomo_SFTF":{"x":760,"y":190},"Tomo_SFTFSoft":{"x":470,"y":60},"SFTF_Clustering":{"x":470,"y":310},"PFTF":{"x":760,"y":380},"SFTF_Composite":{"x":760,"y":650},"SFTF_InjMold":{"x":910,"y":0},"PFTF_Mold":{"x":1010,"y":100},"PFTF_Compression":{"x":200,"y":650},"Tomo_DFSVR":{"x":180,"y":60},"PFTF_VisCull_kDop":{"x":80,"y":250},"SFTF_SewerPOC":{"x":1050,"y":510},"SFTFSoft_GNN":{"x":260,"y":190},"SFTF_DrapePrior":{"x":-70,"y":660},"PFTF_AsymTensor":{"x":600,"y":650},"PFTF_DrapePrior_VisCull_kDop":{"x":-100,"y":360},"PFTF_GFiberCT":{"x":600,"y":850},"SFTF_QEM":{"x":470,"y":190},"SFTF_DynamicTargetSearch":{"x":600,"y":400},"DFSVR_VisCull":{"x":-20,"y":-150},"SFTFSoft_GNN_DFSVR":{"x":-20,"y":60},"SFTF_ActiveOverprint":{"x":300,"y":500},"ColdOndol":{"x":1190,"y":470},"ColdOndol_Positioning":{"x":1050,"y":700},"cfmsCIPC":{"x":-40,"y":910},"TSE_SEM1_Bezier":{"x":940,"y":650},"TSE_SEM2_Tensor":{"x":940,"y":850},"TSE_SEM3_AutoTune":{"x":940,"y":1110},"SFTF_HeatMethod":{"x":760,"y":850},"cfmsPINNDrape":{"x":-20,"y":1130},"cfmsDrape":{"x":-220,"y":970},"cfmsMiindo":{"x":-100,"y":770},"cfmsPINNCAD":{"x":110,"y":1070},"SFTFSoft_DFSVR":{"x":180,"y":-150},"SFTF_UrbanTraffic":{"x":1190,"y":290},"cfmsAutoSew":{"x":460,"y":1280},"cfmsAutoPlace_IJCST":{"x":170,"y":1280},"cfmsAutoPlace_JCDE":{"x":0,"y":1370},"cfmsDrapeSCAN":{"x":360,"y":930},"cfmsDrapeInverse":{"x":240,"y":800},"SFTF_Holonomy":{"x":760,"y":1050},"HIPDetect":{"x":460,"y":1090},"cfmsDispersityKNN":{"x":600,"y":1050},"TSE_TomoSh4":{"x":450,"y":650},"TSE_TomoSh5":{"x":420,"y":850},"Jeon_DLPOrient":{"x":680,"y":-50},"cfmsDispersityProp":{"x":950,"y":1220},"Cho_MoldWarpDIC":{"x":1140,"y":130},"cfmsHMDispersity":{"x":670,"y":1270},"dynamicDispersity":{"x":600,"y":1370},"cfmsAnatomy":{"x":-300,"y":720}};
 const hyperedges = readJsonConstant("hyperedges", "[");
 const curatedHyperedgeMembers = readJsonConstant("CURATED_HYPEREDGE_MEMBERS", "{");
 for (const [label, nodeIds] of Object.entries(curatedHyperedgeMembers)) {
@@ -300,12 +300,15 @@ if (
 // Papers/SFTF_동적표적탐색_연구아이디어_2026-07-29.md §3·§6), 자식은 SFTF_ActiveOverprint 다.
 // 2026-08-28 개발 목표 전환 때 떨어졌던 부모 화살표가 다시 사라지면 막는다.
 // 2026-10-15: SFTF_ActiveOverprint 의 계보도 같이 지킨다 — 다음 과제(2026-11 연구재단 신규
-// 공고)의 주 내용이라, 현 과제의 결과물 Tomo_SFTF 에서 이어지는 **실선**이 있어야 한다.
-// 부모 넷은 볼트 Projects/SFTF_ActiveOverprint.md §관련 프로젝트와 근거 그대로이고, 정본은
-// layout_findings.py 의 DYNAMIC_TARGET_SEARCH_GOAL_EDGES 다. 두 노드에 닿는 선은 이 다섯뿐이다.
+// 공고)의 주 내용이라, 현 과제의 결과물 Tomo_SFTF 에서 이어지는 사슬이 있어야 한다. 같은 날
+// 둘째 판(사용자 지적): AO 는 Tomo_SFTF 의 **손자**다 — 저장소 README 가 자신을 DTS 엔진의 3D 프린팅
+// 응용 구성으로 적고 코드가 Tomo_SFTF 를 쓰지 않는다. 그래서 첫 판의 Tomo_SFTF → AO 실선은 걷었고,
+// 대신 DTS 의 둘째 부모 Tomo_SFTFSoft(연속 증거 가중, DTS README·PROVENANCE)를 넣어
+// Tomo_SFTF → Tomo_SFTFSoft → DTS → AO 네 단 사슬이 보인다. 정본은 layout_findings.py 의
+// DYNAMIC_TARGET_SEARCH_GOAL_EDGES 다. 두 노드에 닿는 선은 이 다섯뿐이고 모두 점선·잠정이다.
 const expectedLineageEdges = [
   ["Tomo_SFTF", "SFTF_DynamicTargetSearch", "표적 탐색", "확장", true],
-  ["Tomo_SFTF", "SFTF_ActiveOverprint", "덧출력 후보 평가", "확장", false],
+  ["Tomo_SFTFSoft", "SFTF_DynamicTargetSearch", "연속 증거 가중", "정확도", true],
   ["SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint", "표면 덧출력", "확장", true],
   ["SFTF_Clustering", "SFTF_ActiveOverprint", "표면 basin 압축", "가속", true],
   ["SFTF_DrapePrior", "SFTF_ActiveOverprint", "의복 접촉 상태", "확장", true],
@@ -326,6 +329,9 @@ const lineageNodeIds = new Set(["SFTF_DynamicTargetSearch", "SFTF_ActiveOverprin
 const lineageTouchingEdges = edges.filter(
   (edge) => lineageNodeIds.has(edge.from) || lineageNodeIds.has(edge.to),
 );
+if (edges.some((edge) => edge.from === "Tomo_SFTF" && edge.to === "SFTF_ActiveOverprint")) {
+  throw new Error("Tomo_SFTF -> SFTF_ActiveOverprint direct edge is back; AO is a grandchild via SFTF_DynamicTargetSearch");
+}
 if (lineageTouchingEdges.length !== expectedLineageEdges.length) {
   throw new Error(
     "Tomo_SFTF -> SFTF_DynamicTargetSearch -> SFTF_ActiveOverprint lineage has stray edges: "

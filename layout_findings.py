@@ -260,18 +260,21 @@ POS = {
     "PFTF_DrapePrior_VisCull_kDop": (-100, 360),
     "PFTF_GFiberCT": (600, 850),
     "SFTF_QEM": (470, 190),
-    # 2026-10-15: SFTF_ActiveOverprint 와 자리를 바꿨다(아래 그 노드 주석). 훌 밖, 왼쪽 아래.
-    "SFTF_DynamicTargetSearch": (360, 440),
+    # 2026-10-15 둘째 판: Tomo_SFTF(760,190) 와 AO(300,500) 사이에 두어 사슬이 위에서 아래로 읽힌다.
+    # AO 가 3D프린팅 훌 구성원이라 DTS 를 둘의 직선 위에 두면 훌이 삼키므로 훌 밖(오른쪽 아래)으로
+    # 비켜 세웠다(훌 여유 67px). 이 자리는 PFTF→PFTF_VisCull_kDop·SFTF_Clustering→SFTF_SewerPOC(위)와
+    # PFTF→PFTF_Compression(아래) 세 선 사이의 띠라 여유가 43~51px 뿐이다 — Tomo_SFTF 바로 아래가
+    # PFTF 와 그 나가는 선들로 차 있어 더 곧은 사슬은 다른 노드를 옮기지 않고는 안 된다.
+    # Tomo_SFTFSoft→DTS 점선은 SFTF_QEM 을 46px 로 지난다(Soft 가 QEM 바로 위라 어디로 가도 가깝다).
+    "SFTF_DynamicTargetSearch": (600, 400),
     "DFSVR_VisCull": (-20, -150),
     "SFTFSoft_GNN_DFSVR": (-20, 60),
-    # 2026-10-15: 다음 과제 주제라 Tomo_SFTF 와 직접 잇는 실선이 생겼는데, 옛 자리(250, 420)
-    # 로 가는 선은 SFTF_Clustering(470, 310)을 10px 거리로 관통했다. 그래서 DTS 가 쓰던
-    # (560, 420)으로 올려 Tomo_SFTF 바로 아래(3D프린팅 훌의 오른쪽 아래 모서리)에 두고, DTS 는
-    # (360, 440)으로 내렸다. 재 보면 AO 에 닿는 선 넷과 Tomo_SFTF → DTS 점선 중 다른 노드에
-    # 가장 가까운 것이 Tomo_SFTF → DTS 와 SFTF_Clustering 의 52px, 그다음이 DrapePrior → AO 와
-    # DTS 의 53px 이고, 3D프린팅 훌은 DTS(121px)·PFTF(100px)를 삼키지 않는다. 표(graph_positions)
-    # 에는 tmp/graph-positions-2026-10-15-activeoverprint.sql 로 같은 값을 올린다.
-    "SFTF_ActiveOverprint": (560, 420),
+    # 2026-10-15: 다음 과제 주제. 첫 판은 Tomo_SFTF → AO 실선을 긋고 AO 를 (560,420)에 두었으나,
+    # 둘째 판에서 AO 가 손자(Tomo_SFTF → DTS → AO)로 정리되며 실선을 걷고 사슬 맨 아래로 내렸다.
+    # 3D프린팅 훌의 왼쪽 아래 모서리가 되고, 훌은 DTS(67px)·PFTF_Compression·TSE_TomoSh4 를
+    # 삼키지 않는다. 이희란 훌의 위 꼭짓점(PFTF_Compression)과는 훌끼리 120px 떨어진다.
+    # 표(graph_positions)에는 tmp/graph-positions-2026-10-15-activeoverprint.sql 로 같은 값을 올린다.
+    "SFTF_ActiveOverprint": (300, 500),
     "ColdOndol": (1190, 470),
     "ColdOndol_Positioning": (1050, 700),
     "cfmsCIPC": (-40, 910),
@@ -1967,20 +1970,32 @@ DRAPESCAN_EDGES = [
 #
 # 2026-10-15: SFTF_ActiveOverprint 의 계보도 이 목록에 둔다. 2026-11 연구재단 신규 과제
 # 공고에 낼 다음 과제의 주 내용이 이 프로젝트라, 현 과제의 결과물 Tomo_SFTF 에서 이어지는
-# 선이 화면에서 읽혀야 한다(사용자 지시). 그전까지 AO 로 들어오는 선은 DTS → AO
+# 사슬이 화면에서 읽혀야 한다(사용자 지시). 그전까지 AO 로 들어오는 선은 DTS → AO
 # 「표면 덧출력」 하나뿐이었고 그마저 graph.html 스냅샷에만 있었다 — Tomo_SFTF 와 두 걸음
 # 떨어진 ToDo 흰 점으로 보여 「노드가 없다」는 보고가 나왔다. 이제 이 파일이 정본이다.
-# 근거는 볼트 Projects/SFTF_ActiveOverprint.md §관련 프로젝트와 근거(넷)와 저장소
-# docs/PROVENANCE.md §Internal lineage 다.
-#   · Tomo_SFTF → AO  실선. 노트가 「support-aware 후보 평가와 evidence-path 계보」로 적고
-#     Tomo_SFTF.md 의 depends_on 에도 AO 가 있다 — 두 노트가 서로를 적는 계보라 잠정이 아니다.
+# 근거는 볼트 Projects/SFTF_ActiveOverprint.md §관련 프로젝트와 근거(넷), 저장소
+# SFTF_ActiveOverprint_dev 의 README·docs/PROVENANCE.md §Internal lineage,
+# SFTF_DynamicTargetSearch_dev 의 README §관련 프로젝트·docs/PROVENANCE.md 다.
+#
+# AO 는 Tomo_SFTF 의 **손자**다 — 직접 자식이 아니다(같은 날 둘째 판, 사용자 지적). 첫 판에
+# Tomo_SFTF → AO 실선을 그었다가 걷어냈다. AO 저장소 코드는 Tomo_SFTF 에서 아무것도 가져오지
+# 않고(src 는 자기 core 만 import), README 가 자신을 DTS 엔진의 「3D-printing application
+# configuration」으로, Tomo_SFTF 는 「support/evidence-path research lineage」(개념 계보)로만
+# 적는다. Tomo_SFTF 가 AO 에 주는 것은 전부 DTS 를 거쳐 들어가므로 사슬은 Tomo_SFTF → DTS → AO 다.
+# (Tomo_SFTF.md 의 depends_on 에 AO 가 있지만 그 목록은 열다섯짜리 관련 목록이지 부모 관계가 아니다.)
+#   · Tomo_SFTF → DTS  점선·잠정(그대로). DTS 의 골격(후보 생성·평가와 경로 기반 support 누적).
+#   · Tomo_SFTFSoft → DTS  점선·잠정, 둘째 판에 추가. DTS README·PROVENANCE 가 부모 셋 중 하나로
+#     「시간 감쇠와 불확실한 관측의 연속 가중(soft evidence weighting)」을 적는다. 위 09-10 판단
+#     (보조 부모는 두지 않는다)의 예외다 — Tomo_SFTF → Tomo_SFTFSoft → DTS → AO 네 단 사슬이
+#     보이게 하려는 사용자 지시. 셋째 보조 부모 SFTF_Clustering → DTS 는 여전히 두지 않는다.
 #   · DTS → AO  점선·잠정(그대로). 노트 「후보 불확실성과 다음 관측을 다루는 일반 엔진」.
 #   · SFTF_Clustering → AO · SFTF_DrapePrior → AO  점선·잠정. 저장소 README 가 둘을
 #     「architectural hypotheses until an adapter and comparison test are implemented」로 두고
 #     DrapePrior 는 「adjacent, not a direct dependency」다. DrapePrior 선은 Drape 훌과
 #     3D프린팅 훌을 잇는 유일한 선이기도 하다 — AO 의 「Physical AI 직접 통합선」(의복 위
-#     덧출력, manipulate-to-manufacture)이 그 둘의 접점이다.
-# DTS 의 보조 부모 둘은 위 판단대로 여전히 두지 않는다. 좌표는 POS 의 같은 날 주석을 본다.
+#     덧출력, manipulate-to-manufacture)이 그 둘의 접점이다. 둘 다 Tomo_SFTF 의 자식이라
+#     어느 길로 세어도 AO 는 손자다.
+# 좌표는 POS 의 같은 날 주석을 본다.
 DYNAMIC_TARGET_SEARCH_GOAL_EDGES = [
     {
         **_autoplace_goal_edge(
@@ -1991,11 +2006,15 @@ DYNAMIC_TARGET_SEARCH_GOAL_EDGES = [
         "dashes": True,
         "_tentative": True,
     },
-    _autoplace_goal_edge(
-        "Tomo_SFTF", "SFTF_ActiveOverprint", "덧출력 후보 평가",
-        "support-aware 빌드방향 후보 평가와 evidence path 계보를, 빌드 플레이트 위에 이미 놓인 물체의 출력 가능 표면 후보 평가로 잇는다 — 현 과제의 결과물에서 다음 과제 주제로 이어지는 계보",
-        "확장",
-    ),
+    {
+        **_autoplace_goal_edge(
+            "Tomo_SFTFSoft", "SFTF_DynamicTargetSearch", "연속 증거 가중",
+            "보고를 발견/미발견의 0·1 로 자르지 않고 애매한 관측을 연속 신뢰도와 시간 감쇠로 가중한다",
+            "정확도",
+        ),
+        "dashes": True,
+        "_tentative": True,
+    },
     {
         **_autoplace_goal_edge(
             "SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint", "표면 덧출력",
@@ -2527,6 +2546,11 @@ def _preserve_goal_edges(match):
     # 빼기만 하면 스냅샷에 남은 옛 사본이 살아남아 사슬이 둘로 갈려 보인다 — 그 짝도 지운다.
     # 이 줄은 스냅샷에서 그 엣지가 사라진 게 확인되면 걷어도 된다.
     lineage_pairs |= {("cfmsDispersityKNN", "cfmsHMDispersity")}
+    # 2026-10-15 둘째 판: 첫 판에 그었던 Tomo_SFTF → SFTF_ActiveOverprint 실선을 목록에서 뺐다(AO 는
+    # DTS 를 거치는 손자다). 목록에서 빼기만 하면 위와 같은 이유로 스냅샷 사본이 살아남아 가드
+    # (check-graph-html.mjs 의 직접 자식 금지)에 걸린다 — 그 짝도 지운다. 스냅샷에서 사라진 게
+    # 확인되면 걷어도 된다.
+    lineage_pairs |= {("Tomo_SFTF", "SFTF_ActiveOverprint")}
     edges = [
         edge for edge in edges
         if (str(edge.get("from")), str(edge.get("to"))) not in lineage_pairs
