@@ -241,89 +241,97 @@ NODE_SOURCE_FILES = {
 POS = {
     # 2026-08-31: 사용자가 graph.html에서 조정한 34-node 배치를 정본으로 승격.
     "Tomo_SFTF": (760, 190),
-    "Tomo_SFTFSoft": (500, 60),
-    "SFTF_Clustering": (460, 300),
-    "PFTF": (760, 400),
+    "Tomo_SFTFSoft": (470, 60),
+    "SFTF_Clustering": (470, 310),
+    "PFTF": (760, 380),
     "SFTF_Composite": (760, 650),
-    "SFTF_InjMold": (940, -50),
+    "SFTF_InjMold": (910, 0),
     # 2026-09-20: 방대석 교수님 훌을 세우면서 PFTF_Mold 가 그래프에 처음 들어왔다.
     # SFTF_InjMold 와 같은 왼쪽 끝 열(x=-360), 한 칸 위인 y=190 행이다 — 그 행은
     # SFTFSoft_GNN_DFSVR·SFTF_QEM·Tomo_SFTF 가 쓰는 줄이라 격자에 맞는다.
-    "PFTF_Mold": (1040, 40),
-    "PFTF_Compression": (210, 570),
-    "Tomo_DFSVR": (170, 20),
-    "PFTF_VisCull_kDop": (90, 220),
-    "SFTF_SewerPOC": (1130, 430),
+    "PFTF_Mold": (1010, 100),
+    "PFTF_Compression": (200, 650),
+    "Tomo_DFSVR": (180, 60),
+    "PFTF_VisCull_kDop": (80, 250),
+    "SFTF_SewerPOC": (1050, 510),
     "SFTFSoft_GNN": (260, 190),
-    "SFTF_DrapePrior": (-20, 560),
+    "SFTF_DrapePrior": (-70, 660),
     "PFTF_AsymTensor": (600, 650),
-    "PFTF_DrapePrior_VisCull_kDop": (-20, 360),
+    "PFTF_DrapePrior_VisCull_kDop": (-100, 360),
     "PFTF_GFiberCT": (600, 850),
     "SFTF_QEM": (470, 190),
-    "SFTF_DynamicTargetSearch": (560, 420),
+    # 2026-10-15: SFTF_ActiveOverprint 와 자리를 바꿨다(아래 그 노드 주석). 훌 밖, 왼쪽 아래.
+    "SFTF_DynamicTargetSearch": (360, 440),
     "DFSVR_VisCull": (-20, -150),
-    "SFTFSoft_GNN_DFSVR": (-20, 30),
-    "SFTF_ActiveOverprint": (250, 420),
-    "ColdOndol": (1050, 490),
-    "ColdOndol_Positioning": (1050, 640),
-    "cfmsCIPC": (-20, 900),
+    "SFTFSoft_GNN_DFSVR": (-20, 60),
+    # 2026-10-15: 다음 과제 주제라 Tomo_SFTF 와 직접 잇는 실선이 생겼는데, 옛 자리(250, 420)
+    # 로 가는 선은 SFTF_Clustering(470, 310)을 10px 거리로 관통했다. 그래서 DTS 가 쓰던
+    # (560, 420)으로 올려 Tomo_SFTF 바로 아래(3D프린팅 훌의 오른쪽 아래 모서리)에 두고, DTS 는
+    # (360, 440)으로 내렸다. 재 보면 AO 에 닿는 선 넷과 Tomo_SFTF → DTS 점선 중 다른 노드에
+    # 가장 가까운 것이 Tomo_SFTF → DTS 와 SFTF_Clustering 의 52px, 그다음이 DrapePrior → AO 와
+    # DTS 의 53px 이고, 3D프린팅 훌은 DTS(121px)·PFTF(100px)를 삼키지 않는다. 표(graph_positions)
+    # 에는 tmp/graph-positions-2026-10-15-activeoverprint.sql 로 같은 값을 올린다.
+    "SFTF_ActiveOverprint": (560, 420),
+    "ColdOndol": (1190, 470),
+    "ColdOndol_Positioning": (1050, 700),
+    "cfmsCIPC": (-40, 910),
     # 2026-09-11: TSE_SEM 을 논문 3편 트랙으로 나눴다.  ① 은 옛 TSE_SEM 자리를 잇고
     # ②·③ 은 SFTF_Composite → ① 방향을 따라 위쪽으로 한 칸씩 이어진다.
     "TSE_SEM1_Bezier": (940, 650),
     "TSE_SEM2_Tensor": (940, 850),
-    "TSE_SEM3_AutoTune": (930, 1080),
+    "TSE_SEM3_AutoTune": (940, 1110),
     "SFTF_HeatMethod": (760, 850),
     "cfmsPINNDrape": (-20, 1130),
-    "cfmsDrape": (-220, 990),
-    "cfmsMiindo": (-20, 720),
+    "cfmsDrape": (-220, 970),
+    "cfmsMiindo": (-100, 770),
     "cfmsPINNCAD": (110, 1070),
     "SFTFSoft_DFSVR": (180, -150),
     # Restored from the last pre-archive graph snapshot.
-    "SFTF_UrbanTraffic": (1130, 310),
+    "SFTF_UrbanTraffic": (1190, 290),
     "cfmsAutoSew": (460, 1280),
-    "cfmsAutoPlace_IJCST": (190, 1310),
-    "cfmsAutoPlace_JCDE": (-20, 1320),
+    "cfmsAutoPlace_IJCST": (170, 1280),
+    "cfmsAutoPlace_JCDE": (0, 1370),
     # 2026-09-01: ToDo DrapeSCAN onboarding from the Obsidian project note.
     "cfmsDrapeSCAN": (360, 930),
     # 2026-09-18: 93196cb 가 graph.html 에만 넣어 둔 노드를 여기로 들여왔다. 파일 씨앗이
     # 이 노드를 몰라서 전체 재생성이 좌표를 날려 버리고 있었다.
-    "cfmsDrapeInverse": (230, 830),
+    "cfmsDrapeInverse": (240, 800),
     # 2026-09-07: graph.html 의 큐레이션 노드(SFTF_HOLONOMY_NODE)와 짝을 이룬다.
-    "SFTF_Holonomy": (760, 1090),
+    "SFTF_Holonomy": (760, 1050),
     # 2026-09-10: graph.html 의 큐레이션 노드(HIPDETECT_NODE)와 짝을 이룬다.
-    "HIPDetect": (440, 1090),
+    "HIPDetect": (460, 1090),
     # 2026-09-14: graph.html 의 큐레이션 노드(CFMSDISPERSITY_NODE)와 짝을 이룬다.
     # 이미 나온 논문인데 그래프에 없었다. 자리는 은종현 교수님 묶음 오른쪽의 빈 곳이다.
-    "cfmsDispersityKNN": (600, 1100),
+    "cfmsDispersityKNN": (600, 1050),
     # 2026-09-14: graph.html 의 큐레이션 노드(TOMO_SHELL_NODES)와 짝을 이룬다.
     # 포트폴리오 표에는 두 트랙이 있는데 그래프에는 노드가 없었다(사용자 지적).
     # 자리는 이희란 교수님 묶음 왼쪽 아래의 빈 곳이다 — 파일 씨앗과 표(graph_positions)
     # 양쪽에서 가장 한산한 자리를 골랐다.
-    "TSE_TomoSh4": (470, 650),
-    "TSE_TomoSh5": (400, 800),
+    "TSE_TomoSh4": (450, 650),
+    "TSE_TomoSh5": (420, 850),
     # 2026-09-19: 전석진 교수님 후보 둘. 김우석 묶음(y<=470) 아래, 은종현 묶음(x<=914)
     # 오른쪽의 빈 자리다. 드래그 격자(10)에 맞춰 두었다 — 웹에서 옮기면 표가 정본이 된다.
-    "Jeon_DLPOrient": (730, -50),
+    "Jeon_DLPOrient": (680, -50),
     # 2026-09-19: 볼트에서 Jeon_DispersityProp → cfmsDispersityProp 로 개명되고 공저
     # 후보도 전석진 → 은종현 으로 바뀌었다. 자리도 은종현 묶음 안으로 옮긴다 —
     # 부모 cfmsDispersityKNN 바로 아래이고 그 묶음의 격자 간격(180)과 같은 칸이다.
-    "cfmsDispersityProp": (600, 1250),
+    "cfmsDispersityProp": (950, 1220),
     # 2026-09-22: 볼트에 Cho_MoldWarpDIC 가 섰다(조범곤 교수 공저 **후보**, ToDo·undecided). 자리는
     # 방대석 훌(SFTF_InjMold 860 · PFTF_Mold 980, y −150) 바로 오른쪽 빈 칸 — 부모가 PFTF_Mold 라
     # 같은 줄에 둔다. 후보라 훌에는 넣지 않는다(노드 정보의 「공저 후보」 줄로만 보인다).
-    "Cho_MoldWarpDIC": (1130, 140),
+    "Cho_MoldWarpDIC": (1140, 130),
     # 2026-09-23: 볼트에 cfmsHMDispersity 가 섰다(ToDo·undecided, 공저 은종현). 부모는
     # cfmsDispersityKNN 이고 cfmsDispersityProp 과는 형제지만 「별도 보존 연구선」이라 둘 사이엔
     # 선을 긋지 않는다(사용자: 4촌처럼). 자리는 Prop 와 같은 줄. 같은 날 사용자 지시로 은종현 훌에
     # 넣었으므로 이제 훌 안쪽 오른쪽 아래 모서리가 된다.
-    "cfmsHMDispersity": (690, 1220),
+    "cfmsHMDispersity": (670, 1270),
     # 2026-09-24: 분산도 사슬의 맨 앞(2013 JAPS). 자식 cfmsDispersityKNN 은 은종현 훌 안인데
     # 이 노드는 **훌 밖이어야 한다**(사용자 지시 — 공저자가 Young Seok Song 이지 은종현이 아니다).
     # 훌을 피하면서 자식과 가장 가까운 칸을 재서 골랐다: 은종현 훌 밖 57px · 최근접 노드
     # (cfmsHMDispersity) 150px · 자식으로 가는 엣지가 어떤 노드도 45px 안으로 스치지 않는다.
     # 자식 위쪽은 은종현 훌이 통째로 덮고 있어 「조상은 위」 배치가 안 됐다 — 훌 밖에서 가장
     # 가까운 위쪽 자리는 460px 떨어진 (1040, 970) 인데 그 엣지가 SFTF_Holonomy 를 스친다.
-    "dynamicDispersity": (840, 1220),
+    "dynamicDispersity": (600, 1370),
     # 2026-09-28: 볼트에 cfmsAnatomy 가 섰다(ToDo·undecided, 이희란 교수 공저 **후보**). 부모는
     # cfmsMiindo 다(볼트 depends_on 의 mhcore 가 그 모노레포 안에 있다). 후보라 훌에 넣지 않으므로
     # Drape 훌 왼쪽 바깥의 빈 칸, 부모와 같은 줄(y 720)에 둔다.
@@ -1956,11 +1964,60 @@ DRAPESCAN_EDGES = [
 # Tomo_SFTFSoft(soft evidence)·SFTF_Clustering(basin 압축)은 부품만 보태는 보조 부모라
 # 공개 그래프에는 두지 않는다. 대상이 아직 ToDo(물리 레인 보류)라서 나가는 엣지와
 # 같이 점선·잠정으로 그린다.
+#
+# 2026-10-15: SFTF_ActiveOverprint 의 계보도 이 목록에 둔다. 2026-11 연구재단 신규 과제
+# 공고에 낼 다음 과제의 주 내용이 이 프로젝트라, 현 과제의 결과물 Tomo_SFTF 에서 이어지는
+# 선이 화면에서 읽혀야 한다(사용자 지시). 그전까지 AO 로 들어오는 선은 DTS → AO
+# 「표면 덧출력」 하나뿐이었고 그마저 graph.html 스냅샷에만 있었다 — Tomo_SFTF 와 두 걸음
+# 떨어진 ToDo 흰 점으로 보여 「노드가 없다」는 보고가 나왔다. 이제 이 파일이 정본이다.
+# 근거는 볼트 Projects/SFTF_ActiveOverprint.md §관련 프로젝트와 근거(넷)와 저장소
+# docs/PROVENANCE.md §Internal lineage 다.
+#   · Tomo_SFTF → AO  실선. 노트가 「support-aware 후보 평가와 evidence-path 계보」로 적고
+#     Tomo_SFTF.md 의 depends_on 에도 AO 가 있다 — 두 노트가 서로를 적는 계보라 잠정이 아니다.
+#   · DTS → AO  점선·잠정(그대로). 노트 「후보 불확실성과 다음 관측을 다루는 일반 엔진」.
+#   · SFTF_Clustering → AO · SFTF_DrapePrior → AO  점선·잠정. 저장소 README 가 둘을
+#     「architectural hypotheses until an adapter and comparison test are implemented」로 두고
+#     DrapePrior 는 「adjacent, not a direct dependency」다. DrapePrior 선은 Drape 훌과
+#     3D프린팅 훌을 잇는 유일한 선이기도 하다 — AO 의 「Physical AI 직접 통합선」(의복 위
+#     덧출력, manipulate-to-manufacture)이 그 둘의 접점이다.
+# DTS 의 보조 부모 둘은 위 판단대로 여전히 두지 않는다. 좌표는 POS 의 같은 날 주석을 본다.
 DYNAMIC_TARGET_SEARCH_GOAL_EDGES = [
     {
         **_autoplace_goal_edge(
             "Tomo_SFTF", "SFTF_DynamicTargetSearch", "표적 탐색",
             "메시 표면의 후보 생성·평가와 support path를 시간가변 공간 그래프의 이동 표적 탐색으로 옮긴다",
+            "확장",
+        ),
+        "dashes": True,
+        "_tentative": True,
+    },
+    _autoplace_goal_edge(
+        "Tomo_SFTF", "SFTF_ActiveOverprint", "덧출력 후보 평가",
+        "support-aware 빌드방향 후보 평가와 evidence path 계보를, 빌드 플레이트 위에 이미 놓인 물체의 출력 가능 표면 후보 평가로 잇는다 — 현 과제의 결과물에서 다음 과제 주제로 이어지는 계보",
+        "확장",
+    ),
+    {
+        **_autoplace_goal_edge(
+            "SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint", "표면 덧출력",
+            "후보 불확실성과 next-view 를 고르는 능동 탐색 엔진을 3D 프린팅 응용으로 구성해, 능동 탐색으로 찾은 표면 위에 안전하게 덧출력한다",
+            "확장",
+        ),
+        "dashes": True,
+        "_tentative": True,
+    },
+    {
+        **_autoplace_goal_edge(
+            "SFTF_Clustering", "SFTF_ActiveOverprint", "표면 basin 압축",
+            "조밀한 표면 샘플을 출력 가능한 basin 으로 묶어 평가·재관측 후보를 줄인다",
+            "가속",
+        ),
+        "dashes": True,
+        "_tentative": True,
+    },
+    {
+        **_autoplace_goal_edge(
+            "SFTF_DrapePrior", "SFTF_ActiveOverprint", "의복 접촉 상태",
+            "접촉·clearance prior 와 드레이프된 의복 상태를 의복 위 덧출력(manipulate-to-manufacture)의 입력으로 잇는다 — 인접 연구선이지 직접 의존은 아니다",
             "확장",
         ),
         "dashes": True,
