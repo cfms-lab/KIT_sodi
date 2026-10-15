@@ -219,8 +219,8 @@ NODE_TITLES = {
                             "RGB-D replay·controlled textile print 전",
     # 2026-10-15 신설. 공개 그래프라 진행 수치·병목은 싣지 않는다(볼트 Rules §8).
     "SFTF_DrapeOverprint": "SFTF_DrapeOverprint — ToDo: "
-                           "드레이프된 의복 위 덧출력의 가상 재관측 설계선; "
-                           "착수 게이트 조건부 통과, 3D 본 실험 전",
+                           "드레이프된 의복 위 덧출력의 가상 재관측; "
+                           "3D 가상 실험 완료, 국문 원고 준비",
     "SFTF_UrbanTraffic": "SFTF_UrbanTraffic — 하: 한국재난정보학회논문집(KOSDI) 투고 완료(2026-09-16, 김우석 교수 측 투고). 도시 교통 가역차로 방향장 응용",
     "PFTF_GFiberCT": "PFTF_GFiberCT — 중: positive two-layer draft; "
                   "Phase 50/51C frozen evidence, B5/M1 상대 207/207 paired wins·"
@@ -638,7 +638,7 @@ QUALITY_ROWS = [
      "surface·next-view 계약 8 tests, Physical AI 의복 시뮬레이션 직접 통합선; RGB-D replay·controlled textile overprint 전"),
     # 2026-10-15 신설. 볼트 grade: ToDo · stage: undecided. 공개 가능한 한 줄만 싣는다(Rules §8).
     ("SFTF_DrapeOverprint", "SFTF_DrapeOverprint", "ToDo",
-     "드레이프된 의복 위 덧출력의 가상 재관측 설계선; 착수 게이트 조건부 통과, 3D 본 실험 전"),
+     "드레이프된 의복 위 덧출력의 가상 재관측; 3D 가상 실험 완료, 국문 원고 준비"),
     ("DFSVR_VisCull", "DFSVR_VisCull", "ToDo",
      "DFSVR exact first-hit용 conservative BVH scalability 설계선; 값·gradient parity·거짓음성 0·end-to-end utility gate 전"),
     ("SFTFSoft_GNN_DFSVR", "SFTFSoft_GNN_DFSVR", "ToDo",
