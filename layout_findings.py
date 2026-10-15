@@ -217,6 +217,10 @@ NODE_TITLES = {
                             "surface·next-view 계약 테스트 8개 완료; "
                             "Physical AI 의복 시뮬레이션 직접 통합선; "
                             "RGB-D replay·controlled textile print 전",
+    # 2026-10-15 신설. 공개 그래프라 진행 수치·병목은 싣지 않는다(볼트 Rules §8).
+    "SFTF_DrapeOverprint": "SFTF_DrapeOverprint — ToDo: "
+                           "드레이프된 의복 위 덧출력의 가상 재관측 설계선; "
+                           "착수 게이트 조건부 통과, 3D 본 실험 전",
     "SFTF_UrbanTraffic": "SFTF_UrbanTraffic — 하: 한국재난정보학회논문집(KOSDI) 투고 완료(2026-09-16, 김우석 교수 측 투고). 도시 교통 가역차로 방향장 응용",
     "PFTF_GFiberCT": "PFTF_GFiberCT — 중: positive two-layer draft; "
                   "Phase 50/51C frozen evidence, B5/M1 상대 207/207 paired wins·"
@@ -241,8 +245,8 @@ NODE_SOURCE_FILES = {
 POS = {
     # 2026-08-31: 사용자가 graph.html에서 조정한 34-node 배치를 정본으로 승격.
     "Tomo_SFTF": (760, 190),
-    "Tomo_SFTFSoft": (470, 60),
-    "SFTF_Clustering": (470, 310),
+    "Tomo_SFTFSoft": (480, 60),
+    "SFTF_Clustering": (460, 320),
     "PFTF": (760, 380),
     "SFTF_Composite": (760, 650),
     "SFTF_InjMold": (910, 0),
@@ -251,8 +255,8 @@ POS = {
     # SFTFSoft_GNN_DFSVR·SFTF_QEM·Tomo_SFTF 가 쓰는 줄이라 격자에 맞는다.
     "PFTF_Mold": (1010, 100),
     "PFTF_Compression": (200, 650),
-    "Tomo_DFSVR": (180, 60),
-    "PFTF_VisCull_kDop": (80, 250),
+    "Tomo_DFSVR": (150, 60),
+    "PFTF_VisCull_kDop": (40, 250),
     "SFTF_SewerPOC": (1050, 510),
     "SFTFSoft_GNN": (260, 190),
     "SFTF_DrapePrior": (-70, 660),
@@ -260,21 +264,27 @@ POS = {
     "PFTF_DrapePrior_VisCull_kDop": (-100, 360),
     "PFTF_GFiberCT": (600, 850),
     "SFTF_QEM": (470, 190),
+    # 2026-10-15 넷째: 사용자가 웹에서 AO 와 가로로 다시 놓았다 — 아래 둘째·셋째 판 설명은 그 전 자리의 것이다.
     # 2026-10-15 둘째 판: Tomo_SFTF(760,190) 와 AO 사이에 두어 사슬이 위에서 아래로 읽힌다. 이 자리는
     # PFTF→PFTF_VisCull_kDop·SFTF_Clustering→SFTF_SewerPOC(위)와 PFTF→PFTF_Compression(아래) 세 선
     # 사이의 띠라 여유가 43~51px 뿐이다 — Tomo_SFTF 바로 아래가 PFTF 와 그 나가는 선들로 차 있어
     # 더 곧은 사슬은 다른 노드를 옮기지 않고는 안 된다. Tomo_SFTFSoft→DTS 점선은 SFTF_QEM 을 46px 로
     # 지난다(Soft 가 QEM 바로 위라 어디로 가도 가깝다). 셋째 판에서 AO 와 함께 「Physics-AI」 훌이 됐다.
-    "SFTF_DynamicTargetSearch": (600, 400),
-    "DFSVR_VisCull": (-20, -150),
-    "SFTFSoft_GNN_DFSVR": (-20, 60),
+    "SFTF_DynamicTargetSearch": (350, 470),
+    "DFSVR_VisCull": (-80, -150),
+    "SFTFSoft_GNN_DFSVR": (-80, 50),
     # 2026-10-15: 다음 과제 주제. 첫 판은 Tomo_SFTF → AO 실선을 긋고 AO 를 (560,420)에 두었으나,
     # 둘째 판에서 AO 가 손자(Tomo_SFTF → DTS → AO)로 정리되며 실선을 걷고 사슬 맨 아래로 내렸다.
     # 셋째 판: AO 가 3D프린팅 훌을 떠나 DTS 와 「Physics-AI」 훌(과제 훌)이 됐다. DTS 를 훌 밖에 두던
     # 제약이 없어져 (340,510)으로 조금 올려 사슬 각을 146°→150° 로 폈다. 캡슐 훌은 SFTF_Clustering
     # 과 68px, 3D프린팅 훌(AO 없이)은 DTS 와 118px 떨어진다. PFTF→PFTF_Compression 선과는 65px.
     # 표(graph_positions)에는 tmp/graph-positions-2026-10-15-activeoverprint.sql 로 같은 값을 올린다.
-    "SFTF_ActiveOverprint": (340, 510),
+    "SFTF_ActiveOverprint": (150, 470),
+    # 2026-10-15: AO 의 자식. 같은 날 사용자가 웹에서 DTS·AO 를 가로로 다시 놓았고(DTS 350,470 · AO 150,470,
+    # 그 밖에 여덟 노드도 옮겼다 — 위 값은 그 표를 되받은 것이다), 그 배치에서 AO 바로 아래를 재서 골랐다.
+    # Drape 훌의 SFTF_DrapePrior 와 이희란 훌의 PFTF_Compression 사이라 의복 쪽과 Physics-AI 쪽을 잇는다.
+    # 모든 노드와 130px 이상, 새 선 둘은 다른 노드와 66px 이상, 훌 여유 55px 이상(tmp/ao/search_child.py).
+    "SFTF_DrapeOverprint": (70, 630),
     "ColdOndol": (1190, 470),
     "ColdOndol_Positioning": (1050, 700),
     "cfmsCIPC": (-40, 910),
@@ -288,7 +298,7 @@ POS = {
     "cfmsDrape": (-220, 970),
     "cfmsMiindo": (-100, 770),
     "cfmsPINNCAD": (110, 1070),
-    "SFTFSoft_DFSVR": (180, -150),
+    "SFTFSoft_DFSVR": (160, -150),
     # Restored from the last pre-archive graph snapshot.
     "SFTF_UrbanTraffic": (1190, 290),
     "cfmsAutoSew": (460, 1280),
@@ -314,7 +324,7 @@ POS = {
     "TSE_TomoSh5": (420, 850),
     # 2026-09-19: 전석진 교수님 후보 둘. 김우석 묶음(y<=470) 아래, 은종현 묶음(x<=914)
     # 오른쪽의 빈 자리다. 드래그 격자(10)에 맞춰 두었다 — 웹에서 옮기면 표가 정본이 된다.
-    "Jeon_DLPOrient": (680, -50),
+    "Jeon_DLPOrient": (710, -80),
     # 2026-09-19: 볼트에서 Jeon_DispersityProp → cfmsDispersityProp 로 개명되고 공저
     # 후보도 전석진 → 은종현 으로 바뀌었다. 자리도 은종현 묶음 안으로 옮긴다 —
     # 부모 cfmsDispersityKNN 바로 아래이고 그 묶음의 격자 간격(180)과 같은 칸이다.
@@ -428,7 +438,8 @@ HYPEREDGES = [
     # 보라 이희란·남색 Rendering)과 겹치지 않는 노랑이다. scale 1.10 에서 캡슐이 SFTF_Clustering 과 68px.
     {"label": "Physics-AI",
      "kind": "grant",
-     "nodes": ["SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint"],
+     # 2026-10-15: SFTF_DrapeOverprint 추가 — 이 과제의 예비 실험 논문(국내지 투고 목표)이다.
+     "nodes": ["SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint", "SFTF_DrapeOverprint"],
      "color": "#ca8a04", "labelColor": "#a16207",
      "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95,
      "lineWidth": 3, "dash": [12, 6], "scale": 1.10},
@@ -625,6 +636,9 @@ QUALITY_ROWS = [
      "Net1 G0 topology·provenance, 11 nodes·12 candidate pipes, 총 15 tests; LeakDB scenario localization·baseline 전"),
     ("SFTF_ActiveOverprint", "SFTF_ActiveOverprint", "ToDo",
      "surface·next-view 계약 8 tests, Physical AI 의복 시뮬레이션 직접 통합선; RGB-D replay·controlled textile overprint 전"),
+    # 2026-10-15 신설. 볼트 grade: ToDo · stage: undecided. 공개 가능한 한 줄만 싣는다(Rules §8).
+    ("SFTF_DrapeOverprint", "SFTF_DrapeOverprint", "ToDo",
+     "드레이프된 의복 위 덧출력의 가상 재관측 설계선; 착수 게이트 조건부 통과, 3D 본 실험 전"),
     ("DFSVR_VisCull", "DFSVR_VisCull", "ToDo",
      "DFSVR exact first-hit용 conservative BVH scalability 설계선; 값·gradient parity·거짓음성 0·end-to-end utility gate 전"),
     ("SFTFSoft_GNN_DFSVR", "SFTFSoft_GNN_DFSVR", "ToDo",
@@ -746,6 +760,7 @@ INTRODUCTIONS = {
     "SFTF_QEM": "3D 프린팅 배향 순위를 값싸게 매기는 대리모델이, 정답 역할을 하는 두 방법(복셀 solver·프로덕션 슬라이서)이 서로 일치하는 정도보다 더 정확하게 순위를 맞히면서 배향당 100배 싸다는 것을 보인 연구다. 여기에 메쉬를 중앙값 6%만 남겨도 같은 배향을 고르는 자동 정지 규칙이 붙는데, 선행 방법이 형상마다 손으로 맞추던 상수가 필요 없어진다. 여각 규약 오류 정정과 자기 철회 기록은 보충자료로 내렸다.",
     "SFTF_DynamicTargetSearch": "여러 이동 센서의 불완전한 보고를 합쳐 구조가 바뀌는 공간에서 목표물과 다음 탐색 경로를 찾으려는 연구다.",
     "SFTF_ActiveOverprint": "카메라로 기존 물체나 로봇이 고정한 의복의 출력 가능 표면과 다음 관측 위치를 찾고 그 위에 안전하게 작은 형상을 덧출력하려는 연구다.",
+    "SFTF_DrapeOverprint": "드레이프된 옷의 주름이 깊이 카메라 시선을 가려 노즐이 안전하게 덧출력할 자리를 놓치는데, 두 번째 시점 하나로 그 자리를 얼마나 되찾는지를 시뮬레이션 착장 위에서 재는 연구다.",
     "DFSVR_VisCull": "정확한 지지 구조 계산 전에 안전하게 불필요한 교차 후보를 줄여 DFSVR을 빠르게 하려는 연구선이다.",
     "SFTFSoft_GNN_DFSVR": "GNN이 좋은 출력 방향 후보를 빠르게 고르고 DFSVR이 정밀하게 다듬은 뒤 슬라이서로 확인하는 후속 연구다.",
     "cfmsAutoPlace_IJCST": "IJCST 패턴 관점에서 라벨 없는 의복 패턴의 배치와 검증을 다루는 논문 트랙이다.",
@@ -1329,6 +1344,25 @@ ACTIVE_OVERPRINT_NODE = {
     "degree": 4,
 }
 
+# 2026-10-15: SFTF_ActiveOverprint 의 자식. 2027 핵심연구 과제(「Physics-AI」 훌)의 예비 실험 논문이다.
+DRAPE_OVERPRINT_NODE = {
+    "id": "SFTF_DrapeOverprint",
+    "label": "SFTF_DrapeOverprint",
+    "color": {"background": "#ffffff", "border": "#000000",
+               "highlight": {"background": "#ffffff", "border": "#000000"}},
+    "size": 16.4,
+    "font": {"size": 12, "color": "#333333", "bold": False},
+    "title": NODE_TITLES["SFTF_DrapeOverprint"],
+    "community": 4,
+    "community_name": "ToDo",
+    "source_file": "SFTF_DrapeOverprint.md",
+    "file_type": "concept",
+    "degree": 2,
+    "_intro": INTRODUCTIONS["SFTF_DrapeOverprint"],
+    "_project_path": PROJECT_PATHS.get("SFTF_DrapeOverprint",
+                                       r"D:\__SFTF_Projects(2026)\SFTF_DrapeOverprint_dev"),
+}
+
 DFSVR_VIS_CULL_NODE = {
     "id": "DFSVR_VisCull",
     "label": "DFSVR_VisCull",
@@ -1599,6 +1633,7 @@ TODO_NODES = [
     QEM_NODE,
     DYNAMIC_TARGET_SEARCH_NODE,
     ACTIVE_OVERPRINT_NODE,
+    DRAPE_OVERPRINT_NODE,
     DFSVR_VIS_CULL_NODE,
     SFTFSOFT_GNN_DFSVR_NODE,
     URBAN_TRAFFIC_NODE,
@@ -2062,6 +2097,19 @@ DYNAMIC_TARGET_SEARCH_GOAL_EDGES = [
         "dashes": True,
         "_tentative": True,
     },
+    # 2026-10-15: SFTF_DrapeOverprint — AO 의 「Physical AI 직접 통합선」을 가상 재관측으로 먼저 여는 자식이다.
+    # 둘 다 실선이다. 리포 README·docs/PROVENANCE.md 가 AO 를 부모로, cfmsMiindo 드레이프 벤치(8912cee) 착장
+    # 메시를 입력으로 적고 실제로 그 메시를 읽는다(scripts/fold_stats.py).
+    _autoplace_goal_edge(
+        "SFTF_ActiveOverprint", "SFTF_DrapeOverprint", "의복 가상 재관측",
+        "print/observe/abstain 결정과 보수적 노즐 여유 계약을 로봇이 고정한 의복 패치로 옮겨, 주름 가림을 재관측으로 푼다",
+        "확장",
+    ),
+    _autoplace_goal_edge(
+        "cfmsMiindo", "SFTF_DrapeOverprint", "착장 형상",
+        "드레이프 벤치의 착장 메시(치마·저고리 등)를 출력 대상 표면과 주름 치수의 출처로 제공한다",
+        "통합",
+    ),
 ]
 
 # ------------------------------------- 김우석 교수님 훌을 본문에 붙인다 (2026-09-18)
