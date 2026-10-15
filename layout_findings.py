@@ -260,21 +260,21 @@ POS = {
     "PFTF_DrapePrior_VisCull_kDop": (-100, 360),
     "PFTF_GFiberCT": (600, 850),
     "SFTF_QEM": (470, 190),
-    # 2026-10-15 둘째 판: Tomo_SFTF(760,190) 와 AO(300,500) 사이에 두어 사슬이 위에서 아래로 읽힌다.
-    # AO 가 3D프린팅 훌 구성원이라 DTS 를 둘의 직선 위에 두면 훌이 삼키므로 훌 밖(오른쪽 아래)으로
-    # 비켜 세웠다(훌 여유 67px). 이 자리는 PFTF→PFTF_VisCull_kDop·SFTF_Clustering→SFTF_SewerPOC(위)와
-    # PFTF→PFTF_Compression(아래) 세 선 사이의 띠라 여유가 43~51px 뿐이다 — Tomo_SFTF 바로 아래가
-    # PFTF 와 그 나가는 선들로 차 있어 더 곧은 사슬은 다른 노드를 옮기지 않고는 안 된다.
-    # Tomo_SFTFSoft→DTS 점선은 SFTF_QEM 을 46px 로 지난다(Soft 가 QEM 바로 위라 어디로 가도 가깝다).
+    # 2026-10-15 둘째 판: Tomo_SFTF(760,190) 와 AO 사이에 두어 사슬이 위에서 아래로 읽힌다. 이 자리는
+    # PFTF→PFTF_VisCull_kDop·SFTF_Clustering→SFTF_SewerPOC(위)와 PFTF→PFTF_Compression(아래) 세 선
+    # 사이의 띠라 여유가 43~51px 뿐이다 — Tomo_SFTF 바로 아래가 PFTF 와 그 나가는 선들로 차 있어
+    # 더 곧은 사슬은 다른 노드를 옮기지 않고는 안 된다. Tomo_SFTFSoft→DTS 점선은 SFTF_QEM 을 46px 로
+    # 지난다(Soft 가 QEM 바로 위라 어디로 가도 가깝다). 셋째 판에서 AO 와 함께 「Physics-AI」 훌이 됐다.
     "SFTF_DynamicTargetSearch": (600, 400),
     "DFSVR_VisCull": (-20, -150),
     "SFTFSoft_GNN_DFSVR": (-20, 60),
     # 2026-10-15: 다음 과제 주제. 첫 판은 Tomo_SFTF → AO 실선을 긋고 AO 를 (560,420)에 두었으나,
     # 둘째 판에서 AO 가 손자(Tomo_SFTF → DTS → AO)로 정리되며 실선을 걷고 사슬 맨 아래로 내렸다.
-    # 3D프린팅 훌의 왼쪽 아래 모서리가 되고, 훌은 DTS(67px)·PFTF_Compression·TSE_TomoSh4 를
-    # 삼키지 않는다. 이희란 훌의 위 꼭짓점(PFTF_Compression)과는 훌끼리 120px 떨어진다.
+    # 셋째 판: AO 가 3D프린팅 훌을 떠나 DTS 와 「Physics-AI」 훌(과제 훌)이 됐다. DTS 를 훌 밖에 두던
+    # 제약이 없어져 (340,510)으로 조금 올려 사슬 각을 146°→150° 로 폈다. 캡슐 훌은 SFTF_Clustering
+    # 과 68px, 3D프린팅 훌(AO 없이)은 DTS 와 118px 떨어진다. PFTF→PFTF_Compression 선과는 65px.
     # 표(graph_positions)에는 tmp/graph-positions-2026-10-15-activeoverprint.sql 로 같은 값을 올린다.
-    "SFTF_ActiveOverprint": (300, 500),
+    "SFTF_ActiveOverprint": (340, 510),
     "ColdOndol": (1190, 470),
     "ColdOndol_Positioning": (1050, 700),
     "cfmsCIPC": (-40, 910),
@@ -405,13 +405,33 @@ HYPEREDGES = [
     # 아래 Rendering 훌로 옮겨 갔다. 열이던 것이 여섯이 됐다. 「한 노드는 한 훌」 규약을
     # 지킨 결과다 — 2026-09-20 에 SFTF_Clustering 을 이희란 훌에서 뺀 것과 같은 판단이다.
     # 셋이 여전히 3D 프린팅 연구인 것은 맞지만, 훌 둘을 겹쳐 그리면 둘 다 안 읽힌다.
+    # 2026-10-15: SFTF_ActiveOverprint 가 빠졌다 — 아래 「Physics-AI」 과제 훌로 갔다(한 노드는 한 훌).
     {"label": "3D프린팅",
      "kind": "topic",
      "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering",
-               "SFTFSoft_GNN", "SFTF_QEM", "SFTF_ActiveOverprint"],
+               "SFTFSoft_GNN", "SFTF_QEM"],
      "color": "#0f766e", "labelColor": "#115e59",
      "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95,
      "lineWidth": 3, "dash": [12, 6], "scale": 1.14},
+    # 2026-10-15: 「Physics-AI」 — 2027 연구재단 핵심연구(구 중견) 신규 과제의 훌(사용자 지시, 제목도 지정).
+    # 과제명(안) 「G-code를 넘어서: 로컬 Physics-AI 기반 자율 적응형(Autonomous Adaptive) 3D프린팅」.
+    # 자료는 D:\OneDrive\Documents\__과제\__연구재단\__과제준비(2027) (볼트 연구노트/과제준비(2027) 에 사본).
+    # 구성원은 과제의 기술 축 [C] 「자율 폐루프 제어 — 관측→예측→재계획」에 해당하는 둘이다 —
+    # SFTF_DynamicTargetSearch(불확실성 기반 후보·next-view 탐색의 일반 엔진)와 SFTF_ActiveOverprint
+    # (그 엔진의 3D 프린팅 인스턴스, RGB-D 관측→덧출력→재스캔). AO 는 3D프린팅 훌에서 빼 왔다.
+    # 과제의 다른 축 — [T] PFTF, [B] 미분가능 SFTF(Tomo_SFTFSoft·Tomo_DFSVR), PFTF-Drape — 는 PFTF 가
+    # 일부러 훌 밖이고 나머지는 다른 훌 소속이라 넣지 않는다. 묶고 싶어지면 그때 정한다.
+    # 제목 후보였던 「능동 탐색」·「Active SFTF」는 과제 쪽 결정(2026-07-01, 「active/환경 응답형」은 4D
+    # 자극응답 소재로 오인될까 배제)과 어긋나 쓰지 않았다.
+    # kind 는 topic·coauthor 와 구분해 grant 로 둔다(그리기 순위는 셋 다 같다 — graph.html afterDrawing).
+    # 두 노드짜리라 코드가 PAD 60 링의 볼록껍질(캡슐)로 그린다. 색은 이웃(청록 3D프린팅·주황 Drape·
+    # 보라 이희란·남색 Rendering)과 겹치지 않는 노랑이다. scale 1.10 에서 캡슐이 SFTF_Clustering 과 68px.
+    {"label": "Physics-AI",
+     "kind": "grant",
+     "nodes": ["SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint"],
+     "color": "#ca8a04", "labelColor": "#a16207",
+     "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95,
+     "lineWidth": 3, "dash": [12, 6], "scale": 1.10},
     # 2026-09-21: 세 번째 주제 훌(사용자 지시). 묶는 축은 **렌더링**이다.
     # 근거는 방법 이름 자체다 — 볼트 Tomo_DFSVR.md 의 정의가
     # 「DFSVR (Differentiable First-Hit Support-Volume **Rendering**)」이다. 넷은 그
@@ -1992,7 +2012,7 @@ DRAPESCAN_EDGES = [
 #   · SFTF_Clustering → AO · SFTF_DrapePrior → AO  점선·잠정. 저장소 README 가 둘을
 #     「architectural hypotheses until an adapter and comparison test are implemented」로 두고
 #     DrapePrior 는 「adjacent, not a direct dependency」다. DrapePrior 선은 Drape 훌과
-#     3D프린팅 훌을 잇는 유일한 선이기도 하다 — AO 의 「Physical AI 직접 통합선」(의복 위
+#     Physics-AI 훌(셋째 판에 세운 과제 훌, 그전엔 3D프린팅 훌)을 잇는 유일한 선이기도 하다 — AO 의 「Physical AI 직접 통합선」(의복 위
 #     덧출력, manipulate-to-manufacture)이 그 둘의 접점이다. 둘 다 Tomo_SFTF 의 자식이라
 #     어느 길로 세어도 AO 는 손자다.
 # 좌표는 POS 의 같은 날 주석을 본다.
