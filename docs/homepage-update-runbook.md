@@ -111,6 +111,11 @@ SQL 만으로 바뀌지 않는 것들이다. 필요하면 고쳐서 커밋·푸�
 - **그래프 툴팁·등급 행** — `layout_findings.py` 의 `NODE_TITLES` · `QUALITY_ROWS` · `STATUS_BADGES` ·
   `REMAINING_BOTTLENECKS` 를 고치고 `.venv\Scripts\python.exe layout_findings.py` 로 `graph.html` 재생성.
   `graph.html` 을 직접 고치지 않는다(재생성 때 사라진다). 공개 파일에는 판정 수치를 싣지 않는다.
+  - ⚠ `NODE_TITLES` 는 **새 노드를 주입할 때만** 읽힌다. 이미 그래프에 있는 노드는 등급 접두어(`— 하:`)만
+    맞춰지고 본문은 그대로다. 본문까지 바꾸려면 그 id 를 `TITLE_REFRESH_IDS` 에 넣는다 — 넣기 전에 그 노드의
+    `NODE_TITLES` 문구가 graph.html 의 현재 문구보다 새로운지 확인한다(2026-10-16 발견).
+  - 재생성 뒤에는 HEAD 와 상수별(`RAW_NODES` · `QUALITY_ROWS` · `STATUS_BADGES` · `VAULT_STAGES` · `POS` …)로
+    키를 비교해 **의도한 노드만** 바뀌었는지 보고, 두 번 돌려 해시가 같은지 본다.
 - **마인드맵** — 트리에 노드가 없으면 표만으로는 안 뜬다. `mindmap.html` 에
   `apply{이름}{YYYYMMDD}(data)` 마이그레이션을 넣고 호출부 넷(기본 DATA 체인 · loadDoc · catch 폴백 ·
   importJSON)에 끼운 뒤 `APP_VERSION` 을 올린다. `scripts/check-mindmap-html.mjs` 에 검사를 더한다.
@@ -127,6 +132,7 @@ SQL 만으로 바뀌지 않는 것들이다. 필요하면 고쳐서 커밋·푸�
 | 수정 요청 | stage `revision` | stage `revision` | `next_gate` |
 | 게재확정 | stage `accepted` | stage `accepted` | `badge` |
 | 출판 | stage `published`, badge 「… 출판 (날짜, 권호)」 | `published`, volume `63(5)` 꼴, 쪽·DOI, 실제 발행일 | `todo.js` 는 빈 칸으로 |
+| 등급 변경 | grade · grade_note | — | `grade` 와 `grade_note` 첫머리(「날짜 A → B (사용자 지정)」), 노트 머리 콜아웃. 저장소는 `QUALITY_ROWS` 등급 · `NODE_TITLES` 접두어(+ 본문을 바꾸면 `TITLE_REFRESH_IDS`). 등급은 사용자가 정한다 |
 
 ## 4. 함정
 

@@ -202,7 +202,10 @@ CAPTION_SUFFIXES = {
 # 노드 hover 툴팁.  TODO_NODES 로 주입된 노드는 이미 graph.html 안에 있으면
 # 다시 주입되지 않으므로, 등급이 바뀌어도 예전 title 이 그대로 남는다.
 # (SFTF_QEM 이 상으로 올라간 뒤에도 이전 등급이 표시될 수 있는 것이 그 사례다.)
-# 여기에 적어 두면 매 실행마다 덮어쓴다.
+# ⚠ 2026-10-16 확인: 이 사전은 **새 노드를 주입할 때만** 읽힌다. 이미 그래프에 있는 노드는
+# 등급 접두어(— 하:)만 매 실행 맞춰지고 본문은 그대로다 — SFTF_DrapeOverprint 툴팁이 10-15 첫 문구
+# 「… 3D 본 실험 전」에 머물렀다. 본문까지 갈아 끼우려면 아래 TITLE_REFRESH_IDS 에 id 를 넣는다.
+# (전부 켜지 않는 이유: SFTF_ActiveOverprint 처럼 graph.html 쪽 문구가 이 사전보다 새로운 노드가 있다.)
 NODE_TITLES = {
     # 2026-09-20 볼트 동기화. 옛 문구(여각 규약 오류 정정·천장 ρ=+0.754·코퍼스 50메쉬)는
     # 2026-08-21 에 주 기여가 양성 2건으로 교체되기 전의 것이었다.
@@ -218,8 +221,8 @@ NODE_TITLES = {
                             "Physical AI 의복 시뮬레이션 직접 통합선; "
                             "RGB-D replay·controlled textile print 전",
     # 2026-10-15 신설. 공개 그래프라 진행 수치·병목은 싣지 않는다(볼트 Rules §8).
-    # 2026-10-16: 한국섬유공학회지 투고(원고번호 할당중). 등급은 볼트 grade 그대로 ToDo.
-    "SFTF_DrapeOverprint": "SFTF_DrapeOverprint — ToDo: "
+    # 2026-10-16: 한국섬유공학회지 투고(원고번호 할당중). 같은 날 등급 ToDo → 하(사용자 지정, 볼트 grade).
+    "SFTF_DrapeOverprint": "SFTF_DrapeOverprint — 하: "
                            "드레이프된 의복 위 덧출력의 가상 재관측; "
                            "한국섬유공학회지 투고 완료(2026-10-16, 원고번호 할당중)",
     "SFTF_UrbanTraffic": "SFTF_UrbanTraffic — 하: 한국재난정보학회논문집(KOSDI) 투고 완료(2026-09-16, 김우석 교수 측 투고). 도시 교통 가역차로 방향장 응용",
@@ -233,6 +236,12 @@ NODE_TITLES = {
     "SFTFSoft_GNN_DFSVR": "SFTFSoft_GNN_DFSVR — ToDo: profile-conditioned "
                           "GNN proposer → DFSVR first-hit refiner → "
                           "held-out slicer verifier",
+}
+
+# 이미 그래프에 있는데 NODE_TITLES 로 툴팁 본문을 갈아 끼울 노드(위 ⚠ 참고). 넣을 때는 그 노드의
+# NODE_TITLES 문구가 graph.html 의 현재 문구보다 새로운지 먼저 확인한다.
+TITLE_REFRESH_IDS = {
+    "SFTF_DrapeOverprint",   # 2026-10-16 — 10-15 첫 문구에 머물러 있었다
 }
 
 # Nodes promoted from idea-only placeholders to real project notes keep their
@@ -639,7 +648,8 @@ QUALITY_ROWS = [
      "surface·next-view 계약 8 tests, Physical AI 의복 시뮬레이션 직접 통합선; RGB-D replay·controlled textile overprint 전"),
     # 2026-10-15 신설. 볼트 grade: ToDo · stage: undecided. 공개 가능한 한 줄만 싣는다(Rules §8).
     # 2026-10-16: stage submitted — 한국섬유공학회지 투고(설인환 단독, 원고번호 할당중).
-    ("SFTF_DrapeOverprint", "SFTF_DrapeOverprint", "ToDo",
+    # 같은 날 등급 ToDo → 하(사용자 지정). 볼트 grade 와 같다.
+    ("SFTF_DrapeOverprint", "SFTF_DrapeOverprint", "하",
      "드레이프된 의복 위 덧출력의 가상 재관측; **2026-10-16 한국섬유공학회지 투고 완료**(설인환 단독). 원고번호 할당중"),
     ("DFSVR_VisCull", "DFSVR_VisCull", "ToDo",
      "DFSVR exact first-hit용 conservative BVH scalability 설계선; 값·gradient parity·거짓음성 0·end-to-end utility gate 전"),
@@ -1352,16 +1362,18 @@ ACTIVE_OVERPRINT_NODE = {
 }
 
 # 2026-10-15: SFTF_ActiveOverprint 의 자식. 2027 핵심연구 과제(「Physics-AI」 훌)의 예비 실험 논문이다.
+# 2026-10-16: 등급 하 — 이 사전은 새 노드를 주입할 때만 쓰이고(이미 있으면 안 바뀐다) 화면 색·분류는
+# QUALITY_ROWS 가 런타임에 입힌다. 씨앗도 같은 값으로 맞춰 둔다.
 DRAPE_OVERPRINT_NODE = {
     "id": "SFTF_DrapeOverprint",
     "label": "SFTF_DrapeOverprint",
-    "color": {"background": "#ffffff", "border": "#000000",
-               "highlight": {"background": "#ffffff", "border": "#000000"}},
+    "color": {"background": "#2a78d6", "border": "#2a78d6",
+               "highlight": {"background": "#2a78d6", "border": "#2a78d6"}},
     "size": 16.4,
     "font": {"size": 12, "color": "#333333", "bold": False},
     "title": NODE_TITLES["SFTF_DrapeOverprint"],
-    "community": 4,
-    "community_name": "ToDo",
+    "community": 3,
+    "community_name": "하",
     "source_file": "SFTF_DrapeOverprint.md",
     "file_type": "concept",
     "degree": 2,
@@ -2543,6 +2555,12 @@ def _preserve_raw_nodes(match):
         if node_id in HIDDEN_NODE_IDS or node_id in seen_ids:
             continue
         seen_ids.add(node_id)
+        if node_id in TITLE_REFRESH_IDS:
+            # 이미 graph.html 에 있는 노드는 주입을 건너뛰므로 NODE_TITLES 가 닿지 않는다.
+            # 적어 둔 id 만 첫 줄을 갈아 끼우고, 등급 접두어는 아래 블록이 다시 맞춘다.
+            title_lines = str(node.get("title") or node.get("label") or node_id).split("\n")
+            title_lines[0] = NODE_TITLES[node_id]
+            node["title"] = "\n".join(title_lines)
         if node_id in quality_lookup:
             grade, note = quality_lookup[node_id]
             color = GRADE_COLORS[grade]
