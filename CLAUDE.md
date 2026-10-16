@@ -1,5 +1,11 @@
 # KIT_sodi 작업 메모
 
+## 투고·게재 같은 사건을 홈페이지에 반영할 때
+
+[docs/homepage-update-runbook.md](docs/homepage-update-runbook.md) 를 따른다 — 볼트 노트를 먼저
+고치고, `tmp/research-outputs-{날짜}-{이름}.sql`(손으로) + `tmp/portfolio-rows.sql`(`--sql` 생성)
+두 파일을 사용자가 Supabase SQL Editor 에서 돌린다. 클로드 셸에는 쓰기 자격이 없다.
+
 ## 연구 그래프 노드 좌표
 
 2026-09-13 부터 **평소 경로는 웹이다.** 사용자가 `graph.html` 에서 노드를 끌어 놓고

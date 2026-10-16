@@ -218,9 +218,10 @@ NODE_TITLES = {
                             "Physical AI 의복 시뮬레이션 직접 통합선; "
                             "RGB-D replay·controlled textile print 전",
     # 2026-10-15 신설. 공개 그래프라 진행 수치·병목은 싣지 않는다(볼트 Rules §8).
+    # 2026-10-16: 한국섬유공학회지 투고(원고번호 할당중). 등급은 볼트 grade 그대로 ToDo.
     "SFTF_DrapeOverprint": "SFTF_DrapeOverprint — ToDo: "
                            "드레이프된 의복 위 덧출력의 가상 재관측; "
-                           "3D 가상 실험 완료, 국문 원고 준비",
+                           "한국섬유공학회지 투고 완료(2026-10-16, 원고번호 할당중)",
     "SFTF_UrbanTraffic": "SFTF_UrbanTraffic — 하: 한국재난정보학회논문집(KOSDI) 투고 완료(2026-09-16, 김우석 교수 측 투고). 도시 교통 가역차로 방향장 응용",
     "PFTF_GFiberCT": "PFTF_GFiberCT — 중: positive two-layer draft; "
                   "Phase 50/51C frozen evidence, B5/M1 상대 207/207 paired wins·"
@@ -637,8 +638,9 @@ QUALITY_ROWS = [
     ("SFTF_ActiveOverprint", "SFTF_ActiveOverprint", "ToDo",
      "surface·next-view 계약 8 tests, Physical AI 의복 시뮬레이션 직접 통합선; RGB-D replay·controlled textile overprint 전"),
     # 2026-10-15 신설. 볼트 grade: ToDo · stage: undecided. 공개 가능한 한 줄만 싣는다(Rules §8).
+    # 2026-10-16: stage submitted — 한국섬유공학회지 투고(설인환 단독, 원고번호 할당중).
     ("SFTF_DrapeOverprint", "SFTF_DrapeOverprint", "ToDo",
-     "드레이프된 의복 위 덧출력의 가상 재관측; 3D 가상 실험 완료, 국문 원고 준비"),
+     "드레이프된 의복 위 덧출력의 가상 재관측; **2026-10-16 한국섬유공학회지 투고 완료**(설인환 단독). 원고번호 할당중"),
     ("DFSVR_VisCull", "DFSVR_VisCull", "ToDo",
      "DFSVR exact first-hit용 conservative BVH scalability 설계선; 값·gradient parity·거짓음성 0·end-to-end utility gate 전"),
     ("SFTFSoft_GNN_DFSVR", "SFTFSoft_GNN_DFSVR", "ToDo",
@@ -1198,6 +1200,9 @@ if preserve_extended_quality:
             # 2026-09-17: 파일의 원고번호가 26M-08-029(SFTF_DrapePrior 것)로 잘못 적혀 있었다.
             # cfmsCIPC 는 26M-08-030 이다(볼트 badge·표 둘 다 그렇게 적는다).
             "cfmsCIPC": "TSE 투고 완료 (2026-08-21, 원고번호 26M-08-030)",
+            # 2026-10-16: 한국섬유공학회지 투고. 원고번호는 접수 승인 메일이 와야 생기므로 TomoSh4 처럼
+            # 날짜만 적고, 번호가 오면 고친다.  볼트 badge 와 같은 문구다.
+            "SFTF_DrapeOverprint": "한국섬유공학회지 투고 완료 (2026-10-16, 원고번호 할당중)",
         },
         # 옛 노드 id 도 함께 지운다.  이 갱신기는 **병합**이라 적어 주지 않으면 옛 키가
         # 남아, 그래프에 없는 id 의 배지가 파일에 계속 실린다(2026-09-14 개명 때 실제로 그랬다).
@@ -1226,6 +1231,8 @@ if preserve_extended_quality:
             # 2026-09-21: ④ 투고로 「저자 확인 4건 반영 → 투고」가 닫혔다. 남은 것은 행정이다.
             "TSE_TomoSh4": "원고번호 발급 대기 (2026-09-21 투고) — 접수 승인 메일이 오면 submission·badge 에 적는다. 그다음은 심사 결과 대기",
             "TSE_TomoSh5": "심사 결과 대기 (2026-09-14 투고, 원고번호 26M-09-036)",
+            # 2026-10-16: 투고로 「국문 원고 준비」가 닫혔다. 공개 파일이라 판정 수치는 싣지 않는다.
+            "SFTF_DrapeOverprint": "원고번호 발급 대기 (2026-10-16 한국섬유공학회지 투고) — 접수 승인 메일이 오면 배지에 적는다. 그다음은 심사 결과 대기",
             # 2026-09-16: 볼트 노트의 bottleneck·next_gate 를 옮긴 것이다(표가 살아 있으면 표 값이 이긴다).
             # 2026-09-17: 수정본을 냈으므로 병목이 「대응」에서 「대기」로 옮겨 갔다.  볼트 값과 같다.
             # 2026-10-07: 게재확정.  병목은 없고 남은 것은 행정이다(볼트 bottleneck·next_gate 를 옮긴 것).

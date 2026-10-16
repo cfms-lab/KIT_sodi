@@ -1,0 +1,140 @@
+# 홈페이지 갱신 런북 — 투고·원고번호·게재 같은 사건을 화면에 반영하기
+
+> 2026-10-16 정리. SFTF_DrapeOverprint 한국섬유공학회지 투고를 반영하면서 그동안의 선례
+> (`tmp/research-outputs-*.sql`, 커밋 `f0dbe50` · `9421378`)를 한곳에 모았다.
+> 좌표 작업은 따로 있다 — [graph-positions-runbook.md](graph-positions-runbook.md).
+
+## 한 줄 요약
+
+**볼트 노트를 먼저 고치고, SQL 두 파일을 만들어 사용자가 Supabase SQL Editor 에서 돌린다.**
+화면 글자까지 바꾸려면 저장소 파일(그래프·마인드맵·todo)도 고쳐 푸시한다.
+
+클로드 셸에는 Supabase 로그인 자격이 없다. 그래서 쓰기는 늘 사용자가 SQL Editor 에서 한다
+(대시보드 세션이 곧 권한이라 비밀번호가 필요 없다). 클로드는 **공개 anon 키로 읽기만** 한다.
+
+## 1. 어느 화면이 어디서 읽나
+
+| 화면 | 읽는 곳 | 사건이 바꾸는 것 |
+|---|---|---|
+| `graph.html` | 파일에 구운 값(`layout_findings.py` → `graph.html`) 위에 **`research_outputs` kind='node'** 를 덮는다(`r.id` = 그래프 노드 id). 좌표만 `graph_positions` | 단계 파이(stage) · 배지 · 등급 설명 · 병목 · 소개 |
+| `mindmap.html` | 클라우드 문서 `mindmaps`(id `cfms`) 위에 **`research_outputs` kind='node'** 를 덮는다(`mindmap_id` 또는 `id` 로 짝지음) | 노드 상태·메모. ⚠ **트리에 이미 있는 노드만** 덮는다 |
+| `upjuk.html` | **`research_outputs` kind='output'** (업적 행). grade='ToDo' 인 노드 행은 TODO 로 보인다 | 업적 목록·배지(Submit/Accept/…) |
+| `portfolio.html` | **`portfolio_rows`** (로그인 필요). 볼트에서 생성 | 단계 · 저널 · 투고순서 · 완성도 · 다음 게이트 |
+| `todo.js` | 저장소 파일 | 그래프·포트폴리오의 「할 일」 한 줄(DB 값보다 먼저 쓴다) |
+
+`research_outputs` 한 표가 노드 행과 업적 행을 모두 갖는다(`schema_research_outputs.sql`).
+
+## 2. 순서
+
+### ① 볼트를 고친다 (정본)
+
+`D:\cfms-research-vault\Projects\{프로젝트}.md` frontmatter:
+
+| 키 | 투고 때 | 비고 |
+|---|---|---|
+| `stage` | `submitted` | 어휘: published inprint accepted revision submitted draft undecided blocked cancelled idea |
+| `badge` | `"한국섬유공학회지 투고 완료 (2026-10-16, 원고번호 할당중)"` | 그래프 배지로 그대로 뜬다 |
+| `submission` · `next_gate` · `bottleneck` | 투고 사실 · 「원고번호 발급 대기」 · 「심사 대기 …」 | 병목은 그래프 「남은 병목」 |
+| `paper_completeness` | `1` (+ `_commit` · `_date`) | **투고본은 1** 이 규칙 |
+| `mindmap_id` | 노드 행 키. 없으면 노트 이름으로 새로 만든다 | 이게 있어야 발행 SQL 이 노드 행을 갱신한다 |
+| `papers_ids` | `[262]` 처럼 업적 행 번호 | 진행 중 원고는 UPJUK 노트 없이 프로젝트 노트가 업적 행을 소유한다 |
+
+그리고 `Dashboards\프로젝트현황.md` 의 `const 투고순서 = {…}` 에 **`"{프로젝트}": 1`** —
+나간 원고는 투고순서도 1 이다. 한 노트에 논문이 여럿이면(TSE_SEM, Tomo_Shell2026) 같은 파일의
+`분리트랙` 배열을 고친다.
+
+### ② 표에 행이 있는지 읽어 본다
+
+있으면 UPDATE, 없으면 INSERT 다. **새 프로젝트는 노드 행도 업적 행도 없는 경우가 많다**
+(그래프 노드와 좌표만 세워 둔 상태). 읽기 전용 조회:
+
+```js
+// 저장소 밖 스크래치 폴더에 .mjs 로 저장해 `node 파일.mjs` 로 돌린다(SFTF_X 를 바꿔서).
+// anon 키는 publish-portfolio.mjs 에서 읽는다.
+import { readFileSync } from "node:fs";
+const s = readFileSync("D:/IIS_Home/KIT_sodi/scripts/publish-portfolio.mjs", "utf8");
+const URL = s.match(/"(https:\/\/[a-z0-9]+\.supabase\.co)"/)[1], KEY = s.match(/\|\|\s*"(eyJ[^"]+)"/)[1];
+const q = (p) => fetch(`${URL}/rest/v1/${p}`, { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } }).then((r) => r.json());
+console.log(await q("research_outputs?or=(id.eq.SFTF_X,mindmap_id.eq.SFTF_X,project_id.eq.SFTF_X)&select=id,kind,stage,mindmap_id,papers_id"));
+console.log(await q("research_outputs?kind=eq.output&select=id,papers_id&order=papers_id.desc.nullslast&limit=1")); // 다음 빈 번호
+```
+
+### ③ SQL 두 파일을 만든다
+
+**(가) 손으로 쓰는 것** — `tmp/research-outputs-{날짜}-{이름}.sql` (`tmp/` 는 gitignore)
+
+- **노드 행이 없으면 INSERT**: `id` = `mindmap_id` = `vault_note` = 노트 이름, `kind='node'`, 값은 볼트
+  frontmatter 그대로(grade·badge·grade_note·bottleneck·brief·repository→url·path→project_path).
+  선례: `Cho_MoldWarpDIC`(볼트 `tmp/publish-2026-09-22.sql`), `SFTF_DrapeOverprint`(이 저장소 `tmp/`, 10-16).
+- **업적 행이 없으면 INSERT**: `id = 'p{다음 번호}'`, `papers_id` 같은 번호, `kind='output'`,
+  `vault_note`·`project_id` = 노트 이름. 앞에 번호가 비었는지 확인하는 `do $$ … raise exception … $$` 를 둔다.
+  선례: `upjuk-urbantraffic.sql`(p261), `research-outputs-2026-10-16-drapeoverprint.sql`(p262).
+- **이미 있으면 UPDATE**: `where kind = … and id = …` 에 `and (stage is distinct from …)` 를 붙여
+  여러 번 돌려도 안전하게. 선례: `research-outputs-2026-10-09-tensor.sql`.
+- 맨 아래에 확인 `select` 를 둔다(이웃 행까지 같이 보이게).
+
+**업적 행 칸 쓰는 법** (같은 학회지 이웃 행을 먼저 읽고 따른다)
+
+| 칸 | 값 |
+|---|---|
+| `title` | `(약칭) 논문 제목` — 예 `(SFTF_DrapePrior) 의복 드레이프 …` |
+| `categ` | `DJ` 국내저널 · `IJ` 해외저널 · `DC`/`IC` 학회 |
+| `authors` | 투고본 표제 순서. 교신이 여럿이면 `*` 표시(`강지언, 설인환*, 이희란*`), 단독이면 `설인환` |
+| `volume` · `page` · `doi` | 게재 전에는 빈 문자열 `''` |
+| `p_year` · `p_month` · `p_day` | **투고일이 아니라 예상 게재일.** TSE 는 짝수달 말 발행 |
+| `memo` | 투고 사실 — 날짜 · 트랙 · 분야 · 교신 · 원고번호(없으면 「할당중」) · 영문 제목 |
+| `funding` | `중견과제2026년` 등 이웃 행과 같은 표기 |
+
+`stage` 가 `draft` 에서 벗어나면 비로그인 방문자에게도 upjuk 에 보인다 — 나간 원고는 그게 맞다.
+
+**(나) 생성하는 것** — `tmp/portfolio-rows.sql`
+
+```powershell
+cd D:\IIS_Home\KIT_sodi
+node scripts/publish-portfolio.mjs --sql
+```
+
+볼트 전체에서 `portfolio_rows` 를 다시 만들고(**볼트에 없는 행은 지운다**), 같은 파일 ② 에서
+`research_outputs` 노드 행을 `mindmap_id` 로 UPDATE 한다(행을 만들지는 않는다). 다른 세션이 볼트를
+고쳐 둔 것도 함께 실린다 — 돌리기 전 사본을 떠 두고 행 id 를 비교해 의도하지 않은 추가·삭제가
+없는지 본다.
+
+### ④ 사용자가 SQL Editor 에서 돌린다
+
+**(가) → (나) 순서.** (나) 의 노드 UPDATE 는 행이 있어야 닿으므로 INSERT 가 먼저다.
+둘 다 통째로 붙여넣고 Run. 각 파일 끝의 확인 `select` 결과를 본다.
+
+### ⑤ (선택) 저장소의 구운 글자
+
+SQL 만으로 바뀌지 않는 것들이다. 필요하면 고쳐서 커밋·푸시한다.
+
+- **그래프 툴팁·등급 행** — `layout_findings.py` 의 `NODE_TITLES` · `QUALITY_ROWS` · `STATUS_BADGES` ·
+  `REMAINING_BOTTLENECKS` 를 고치고 `.venv\Scripts\python.exe layout_findings.py` 로 `graph.html` 재생성.
+  `graph.html` 을 직접 고치지 않는다(재생성 때 사라진다). 공개 파일에는 판정 수치를 싣지 않는다.
+- **마인드맵** — 트리에 노드가 없으면 표만으로는 안 뜬다. `mindmap.html` 에
+  `apply{이름}{YYYYMMDD}(data)` 마이그레이션을 넣고 호출부 넷(기본 DATA 체인 · loadDoc · catch 폴백 ·
+  importJSON)에 끼운 뒤 `APP_VERSION` 을 올린다. `scripts/check-mindmap-html.mjs` 에 검사를 더한다.
+  배포 뒤 로그인한 사용자가 페이지를 열어야 클라우드 문서에 저장된다.
+- **할 일 한 줄** — `todo.js` 에 `"{프로젝트}": "심사 대기"` 같은 한 줄.
+- 검증: `pwsh -File scripts/publish-research-views.ps1` (푸시 없이). 그다음 커밋과 `git push origin main`.
+
+## 3. 사건별 값
+
+| 사건 | 노드 행 | 업적 행 | 볼트 |
+|---|---|---|---|
+| 투고 | stage `submitted`, badge 「… 투고 완료 (날짜, 원고번호 할당중)」 | 없으면 INSERT, stage `submitted` | 위 ① 전부 |
+| 원고번호 수령 | badge 의 「할당중」 → 번호 | memo 에 번호 | `submission` · `badge` |
+| 수정 요청 | stage `revision` | stage `revision` | `next_gate` |
+| 게재확정 | stage `accepted` | stage `accepted` | `badge` |
+| 출판 | stage `published`, badge 「… 출판 (날짜, 권호)」 | `published`, volume `63(5)` 꼴, 쪽·DOI, 실제 발행일 | `todo.js` 는 빈 칸으로 |
+
+## 4. 함정
+
+- `portfolio-rows.sql` 은 **볼트에 없는 행을 지운다.** 볼트에서 노트를 옮기거나 지운 직후라면 먼저 확인한다.
+- 노드 행 짝짓기는 `mindmap_id` 다. 볼트 노트에 `mindmap_id` 가 없으면 생성 SQL 의 노드 UPDATE 가 그 행에 닿지 않는다.
+- 업적 번호(`p…`)는 SQL 을 쓰는 날의 최대값 + 1 이다. 다른 SQL 을 아직 안 돌렸다면 번호가 겹칠 수 있으니
+  INSERT 앞의 확인 블록을 빼지 않는다.
+- 업적 노트(`Papers/UPJUK/**`)에서 태어난 업적은 번호가 `v-DJ-2026-01` 꼴이고 볼트
+  `node scripts/publish-research-outputs.mjs --push --allow-new` 로 넣는다(볼트 `Rules/새업적_등록절차.md`).
+  진행 중 원고는 이 길이 아니라 위의 `p…` + `papers_ids` 다.
+- 볼트 `Projects/*.md` 와 `Dashboards/프로젝트현황.md` 는 사용자가 커밋한다.
