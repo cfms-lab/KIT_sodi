@@ -122,7 +122,7 @@
 
 <div class="toolbar">
   <label>종류 (Category)<select id="fCateg"></select></label>
-  <label>저자 (Author)<select id="fAuthor"><option value="ALL">ALL</option></select></label>
+  <label>저자 (Author)<select id="fAuthor" onchange="doSearch()"><option value="ALL">ALL</option></select></label>
   <label>평가연도 From (3월~다음해 2월)<input type="number" id="fFrom" value="1998"></label>
   <label>평가연도 To<input type="number" id="fTo"></label>
   <button class="btn" onclick="doSearch()">검색</button>
@@ -370,7 +370,9 @@ async function loadNodes(){
   try{ NODES=await api('/rest/v1/research_outputs?kind=eq.node&select=*&order=id',{headers:authHeaders(true)})||[]; }
   catch(e){ NODES=[]; }
 }
-function todoNodes(){ return NODES.filter(n=>n.grade==="ToDo"); }
+/* 2026-10-16 사용자 지시: 비로그인 방문자에게서 감추는 것은 ToDo 하나다(draft 업적은 보인다).
+   여기서 비우면 종류 목록의 TODO 와 할일 목록이 함께 빠진다. */
+function todoNodes(){ return isLoggedIn()?NODES.filter(n=>n.grade==="ToDo"):[]; }
 function nodeById(id){ return id?NODES.find(n=>n.id===id):null; }
 
 let HAS_PROJECT_COL=true;           // research_outputs 는 project_id 를 늘 가진다
@@ -385,14 +387,12 @@ async function loadPapers(){
     /* 2026-09-12: `papers` 대신 `research_outputs` 의 kind='output' 을 읽는다.
        한 표에서 mindmap 은 kind='node' 를, 이 페이지는 kind='output' 을 본다.
        정본은 옵시디언 볼트이고 이 페이지는 **읽기 전용**이다(볼트 Rules/업적통합_설계안.md 7절).
-       로그인은 여전히 의미가 있다 — RLS 가 로그인 사용자에게만 draft 를 내려준다. */
+       2026-10-16: draft 도 방문자에게 보인다(사용자 지시). 로그인은 ToDo·PDF·수정에만 쓰인다. */
     const data=await api('/rest/v1/research_outputs?kind=eq.output&select=*',
       {headers:authHeaders(true)});
     HAS_PROJECT_COL=true;                     // research_outputs 는 project_id 를 늘 가진다
     PAPERS=data.map(normalizePaper);
     PAPERS=PAPERS.filter(p=>!HIDDEN_IDS.has(p.ID)&&!HIDDEN_CATEGS.has(p.CATEG));   // 감춘 기록·분류 (위 HIDDEN_*)
-    // 방어적 클라이언트 필터: 비로그인은 draft 숨김. (실제 보안은 Supabase RLS가 담당)
-    if(!isLoggedIn()) PAPERS=PAPERS.filter(p=>p.PrintStatus!==5);
     document.getElementById("banner").style.display="none";
     initUI();
   }catch(e){
@@ -719,14 +719,14 @@ async function login(){
       {method:"POST",headers:{"apikey":CFG.key,"Content-Type":"application/json"},body:JSON.stringify({email,password:pw})});
     SESSION={access_token:r.access_token,refresh_token:r.refresh_token,email:email};
     localStorage.setItem("cfms_session",JSON.stringify(SESSION));
-    toast("로그인되었습니다.");renderAuthbar();await loadPapers(); // 토큰으로 재조회 → draft 포함
+    toast("로그인되었습니다.");renderAuthbar();await loadPapers(); // 다시 그려 ToDo·PDF·수정 버튼을 붙인다
   }catch(e){toast("로그인 실패: 이메일/비밀번호 확인");}
 }
-function logout(){SESSION=null;localStorage.removeItem("cfms_session");renderAuthbar();loadPapers();toast("로그아웃되었습니다.");} // 재조회로 메모리의 draft 제거
+function logout(){SESSION=null;localStorage.removeItem("cfms_session");renderAuthbar();loadPapers();toast("로그아웃되었습니다.");} // 다시 그려 ToDo·PDF·수정 버튼을 걷는다
 function renderAuthbar(){
   const bar=document.getElementById("authbar");
   if(isLoggedIn()){
-    bar.innerHTML=`<span class="pill">✔ ${esc(SESSION.email)} (draft 열람)</span>
+    bar.innerHTML=`<span class="pill">✔ ${esc(SESSION.email)} (ToDo·PDF 열람)</span>
       <button class="btn secondary sm" onclick="openUpload()" title="PDF 원문 업로드">PDF 업로드</button>
       <button class="btn secondary sm" onclick="logout()">로그아웃</button>`;
   }else{
