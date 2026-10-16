@@ -1313,8 +1313,8 @@ network.on('dragEnd', params => {
 // 파워포인트의 스마트 가이드처럼 이웃 노드와 나란한지 보고 싶다).
 //   ALIGN_GUIDES 가 그 상태이고, 실제로 그리는 곳은 아래쪽 afterDrawing 묶음이다
 //   (drawNodePie 다음). 안내선이 노드·훌 위에 오려면 그쪽에 늦게 붙어야 한다.
-// 중심끼리만 견준다 — 노드마다 지름이 다르므로(진도에 따라 14~34) 가장자리를 맞추는
-// 것은 뜻이 없다. 허용 오차는 격자(10)보다 작아야 한다. 그보다 크면 어느 자리에서나
+// 중심끼리만 견준다 — 노드 지름이 모두 같으므로(NODE_SIZE) 중심이 맞으면 가장자리도
+// 맞는다. 허용 오차는 격자(10)보다 작아야 한다. 그보다 크면 어느 자리에서나
 // 선이 떠서 「맞았다」는 신호가 아니게 된다.
 const ALIGN_TOL = 3;
 let ALIGN_GUIDES = null;
@@ -1618,7 +1618,7 @@ Object.entries(CURATED_HYPEREDGE_MEMBERS).forEach(([label, nodeIds]) => {
 
    곡률은 **제일 작은 노드의 반지름**이다(사용자 지시). vis 는 node.size 를 반지름으로
    쓰므로 보이는 노드의 최소 size 가 곧 그 값이다. 상수를 두 벌 두지 않으려고 숫자를
-   박지 않고 노드에서 읽는다 — 진도 사다리(SIZE_MIN 14 → SIZE_MAX 34)가 바뀌면 따라온다.
+   박지 않고 노드에서 읽는다 — 지금은 모두 NODE_SIZE(19)라 그 값이고, 지름 규칙이 바뀌면 따라온다.
 
    꼭짓점마다 arcTo 로 돌되 반지름을 그 모서리가 감당할 만큼으로 줄인다. 좁은 각이나 짧은
    변에서 그대로 쓰면 접점이 변 밖으로 나가 외곽선이 튄다. 멤버가 1~2 인 훌은 위에서 패딩
@@ -1763,28 +1763,27 @@ network.on('afterDrawing', function(ctx) {
         const fillAlpha = h.fillAlpha == null ? 0.12 : h.fillAlpha;
         const strokeAlpha = h.strokeAlpha == null ? 0.4 : h.strokeAlpha;
         const labelAlpha = h.labelAlpha == null ? 0.8 : h.labelAlpha;
-        const scale = h.scale == null ? 1.25 : h.scale;
         ctx.globalAlpha = fillAlpha;
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
         ctx.lineWidth = h.lineWidth == null ? 2 : h.lineWidth;
         ctx.setLineDash(h.dash || []);
         ctx.beginPath();
-        // CONVEX hull (Andrew monotone chain), then expand from centroid.
-        // 소집합(멤버<=2) hull은 선분으로 퇴화 — 멤버 주위 패딩 링을 합쳐
-        // 캡슐형 영역으로 부풀린다 (발견4·5·6 가독성, 2026-07-22).
-        let srcPts = positions;
-        const degen = positions.length <= 2;
-        if (degen) {
-            const PAD = 60, K = 16;
-            srcPts = [];
-            positions.forEach(p => {
-                for (let k = 0; k < K; k++) {
-                    const a = 2 * Math.PI * k / K;
-                    srcPts.push({x: p.x + PAD * Math.cos(a), y: p.y + PAD * Math.sin(a)});
-                }
-            });
-        }
+        // CONVEX hull (Andrew monotone chain) of a padding ring around every member.
+        // 여백은 모든 훌이 같다 (2026-10-16, 사용자 지시 — 「방대석 교수님」 훌처럼).
+        // 전에는 멤버가 셋 이상이면 노드 중심의 볼록껍질을 무게중심에서 h.scale 배(1.10~1.14)
+        // 키웠다. 그러면 여백이 무게중심까지의 거리에 비례해 바깥 꼭짓점은 넓고 안쪽 노드는
+        // 테두리에 거의 붙었다. 멤버 둘 이하에만 두르던 패딩 링(2026-07-22, 발견4·5·6 가독성)을
+        // 모든 멤버에 둘러, 노드 중심에서 테두리까지가 어디서나 HULL_PAD 다.
+        // h.scale 은 이제 2D 에서 쓰지 않는다(graph3d.html 은 아직 읽는다).
+        const HULL_PAD = 60, K = 16;
+        const srcPts = [];
+        positions.forEach(p => {
+            for (let k = 0; k < K; k++) {
+                const a = 2 * Math.PI * k / K;
+                srcPts.push({x: p.x + HULL_PAD * Math.cos(a), y: p.y + HULL_PAD * Math.sin(a)});
+            }
+        });
         const pts = srcPts.slice().sort((a, b) => a.x - b.x || a.y - b.y);
         const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
         const lower = [];
@@ -1801,10 +1800,7 @@ network.on('afterDrawing', function(ctx) {
         const hull = lower.slice(0, -1).concat(upper.slice(0, -1));
         const cx = hull.reduce((s, p) => s + p.x, 0) / hull.length;
         const cy = hull.reduce((s, p) => s + p.y, 0) / hull.length;
-        const expanded = hull.map(p => ({
-            x: cx + (p.x - cx) * (degen ? 1.0 : scale),
-            y: cy + (p.y - cy) * (degen ? 1.0 : scale)
-        }));
+        const expanded = hull;   // 여백은 링이 이미 줬다 — 아래 라벨 코드(생성기가 쓴다)가 이 이름을 읽는다
         _roundedPolyPath(ctx, expanded, cornerR);
         ctx.fill();
         ctx.globalAlpha = strokeAlpha;
@@ -1912,20 +1908,15 @@ const STAGE_PIE = {
    아래 오버라이드가 최신 값으로 덮는다. 표에도 볼트에도 없는 노드는 꽉 찬 원으로 남는다. */
 const NODE_STAGE = Object.assign({}, typeof VAULT_STAGES === 'object' ? VAULT_STAGES : {});
 
-/* 노드 지름 = 투고 진도 (2026-09-14).
-   전에는 graphify 가 실어 준 차수(degree) 비례였다. 화면에서 큰 노드는 「연결이 많은 것」이
-   아니라 「멀리 간 원고」여야 한다는 사용자 판단이다. 미정·보류·취소, 그리고 단계를 모르는
-   노드가 가장 작고 초고 → 투고 → 심사 수정 → 게재확정 → 인쇄중 → 출판 순으로 커진다.
-   비율은 파이가 쓰는 STAGE_PIE.frac 을 그대로 쓴다 — 채운 정도와 지름이 같은 사다리를 탄다
-   (초고 19 · 투고 24 · 심사 수정 26.5 · 게재확정 29 · 인쇄중 31.5 · 출판 34). */
-const SIZE_MIN = 14, SIZE_MAX = 34;
-function stageSize(nodeId) {
-  const stage = STAGE_PIE[NODE_STAGE[nodeId]];
-  return SIZE_MIN + (SIZE_MAX - SIZE_MIN) * (stage ? (stage.frac || 0) : 0);
-}
+/* 노드 지름은 모두 같다 (2026-10-16, 사용자 지시 — 노드가 많아져 진도별로 커지는 원이
+   자리를 너무 먹는다). 진도는 파이가 이미 보여 주므로 지름은 초고(draft) 칸 하나로 고정한다.
+   2026-09-14 부터는 지름이 투고 진도를 따랐다 — SIZE_MIN 14 + 20·STAGE_PIE.frac 사다리로
+   미정·보류 14 · 초고 19 · 투고 24 · … · 출판 34. 그 전에는 graphify 의 차수(degree) 비례였다.
+   RAW_NODES 의 size 는 아직 그 차수 값이라 여기서 덮어야 한다. */
+const NODE_SIZE = 19;   // 옛 사다리의 초고 칸
 function applyStageSizes() {
   // 부분 갱신(merge)이라 색·라벨 같은 다른 필드는 건드리지 않는다.
-  nodesDS.update(RAW_NODES.map(n => ({ id: n.id, size: stageSize(n.id) })));
+  nodesDS.update(RAW_NODES.map(n => ({ id: n.id, size: NODE_SIZE })));
 }
 applyStageSizes();
 
@@ -2427,7 +2418,7 @@ const STAGE_TO_PROG = {
       _intro: INDUSTRIAL_EFFECTS[n.id] || n._intro, _closed: n._closed,
     })));
     syncQualityBoard();
-    applyStageSizes();      // 표에서 온 stage 로 지름을 다시 잡는다 (2026-09-14)
+    applyStageSizes();      // 위 갱신 뒤에도 지름을 NODE_SIZE 로 맞춰 둔다
     network.redraw();
   } catch (e) { /* 오프라인/미설치 — 내장 데이터로 동작 */ }
 })();
