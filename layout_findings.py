@@ -607,7 +607,8 @@ QUALITY_ROWS = [
     ("Tomo_SFTFSoft", "Tomo_SFTFSoft", "상", "TDP v2.1·현대/legacy Cura·receiver 반례·조건부 first-hit 수렴"),
     ("SFTFSoft_GNN", "SFTFSoft_GNN", "상", "3,817 mesh·held-out·Cura 재라벨·Prusa 교차검증"),
     ("SFTF_Clustering", "SFTF_Clustering", "상", "SFTFCluster 계열 TDP 원고·cross-slicer/partition 자산; 독립성 게이트 잔여"),
-    ("PFTF", "PFTF", "중", "PFTF v0.9 이론·family synthesis; 삼형제 V2/V3/V4 synchronization TODO"),
+    # 2026-10-19: 보류 해제 → draft(사용자). 볼트 grade_note 와 같은 문구다 — 공개 파일이라 방법·제목은 특허 게이트 뒤에.
+    ("PFTF", "PFTF", "중", "2026-10-19 보류 해제 → draft (사용자) — 원고를 TDP 예정 단독 방법 논문으로 다시 써 사전 등록 실측 이득을 주 결과로 세웠다. 이전 판정: 2026-08-20 ⛔ 투고 보류(확실한 긍정적 효과 미확보)"),
     ("SFTF_DrapePrior", "SFTF_DrapePrior", "하", "**2026-10-31 한국섬유공학회지 63권 5호 출판(26M-08-029)** — 투고(2026-08-14) → 수정후 게재가(2026-09-03) → Rev1 당일 제출 → 게재확정(2026-09-17) → 교정쇄 회신(2026-10-08) → 발행. 드레이프 품질 평가의 재현성(노이즈 플로어·예산 일치·솔버 간 이득 부호 반전). 쪽·DOI 는 미정"),
     ("SFTF_Composite", "SFTF_Composite", "상", "한·영문 완성·191 tests·R9–R13 사전등록/독립감사; R11 합성 held-out 음성, 공식 CAD·물리 검증 잔여"),
     ("SFTF_InjMold", "SFTF_InjMold", "중", "B24·exact integration·set-cover·B-rep·blind protocol; 원고 조립 잔여"),
@@ -1213,6 +1214,9 @@ if preserve_extended_quality:
             # 2026-10-16: 한국섬유공학회지 투고. 원고번호는 접수 승인 메일이 와야 생기므로 TomoSh4 처럼
             # 날짜만 적고, 번호가 오면 고친다.  볼트 badge 와 같은 문구다.
             "SFTF_DrapeOverprint": "한국섬유공학회지 투고 완료 (2026-10-16, 원고번호 할당중)",
+            # 2026-10-19: 보류(⛔) 해제 → draft(사용자). 게재지 TDP 라 「저널,상태」 꼴이다(PFTF_VisCull_kDop 과 같다).
+            # 볼트 badge 와 같은 문구다.
+            "PFTF": "TDP,draft",
         },
         # 옛 노드 id 도 함께 지운다.  이 갱신기는 **병합**이라 적어 주지 않으면 옛 키가
         # 남아, 그래프에 없는 id 의 배지가 파일에 계속 실린다(2026-09-14 개명 때 실제로 그랬다).
@@ -1267,6 +1271,9 @@ if preserve_extended_quality:
             # PFTF_Mold 도 같은 공저자·같은 일정이지만 그 노트에는 bottleneck 필드가 없어
             # 여기 안 적는다(next_gate 에만 있다 — 포트폴리오 표가 그것을 싣는다).
             "SFTF_InjMold": "공저자 일정이다 — 원고를 방대석 교수에게 전달했고(2026-09-21) 내년 연구년에 볼 예정이라 투고가 2년 뒤로 밀릴 수 있다. 행정 둘(교신저자 ORCID·1저자 실명)은 그쪽이 채운다. 분량·형식·인용은 닫혀 우리 쪽에 남은 일이 없다",
+            # 2026-10-19: 보류(⛔) 해제 → draft(사용자). 볼트 bottleneck 과 같은 문구다. 옛 값(V2/V3/V4 동기화)은
+            # 이론편 원고의 병목이었고 그 원고는 다시 쓰였다. 공개 파일이라 원고의 방법·제목은 적지 않는다.
+            "PFTF": "특허 출원 여부 결정 — 출원하면 출원이 투고보다 먼저다. 원고는 2026-10-18 DOCX 까지 닫혔다",
         },
         # 2026-09-21: PFTF_Mold 를 걷는다. 파일에 구워져 있던 「solids4foam 사슬 IBOF
         # 재채점·외부 물리 검증」은 볼트가 이미 닫은 일이고(grade_note — 선언한 아홉 관문

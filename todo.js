@@ -66,7 +66,7 @@
     "cfmsAutoPlace_JCDE":   "영문 집필",
     "SFTF_SewerPOC":        "원고 수치 v2 갱신",
     "Tomo_DFSVR":           "원고 결함 4건 수정",
-    "PFTF":                 "이론 문서 V2–V4 동기화",
+    "PFTF":                 "특허 출원 여부 정하고 TDP 투고",  /* 보류 해제 → draft (2026-10-19). 원고는 닫혔고 커버레터가 남았다 */
     "PFTF_VisCull_kDop":    "GPU 경로 구현",
     "SFTF_HeatMethod":      "투고처 결정 필요",
     "ColdOndol_Positioning":"투고처 결정 필요",
