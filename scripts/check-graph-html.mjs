@@ -177,8 +177,9 @@ const expectedHulls = {
   // PFTF_VisCull_kDop 도 뺐다 — 넣으면 훌이 PFTF_Compression·cfmsDrapeSCAN 을 삼킨다.
   // 2026-09-22: 사용자 지시로 cfmsDrapeInverse ↔ cfmsAutoPlace_JCDE 를 이희란 훌과
   // 맞교환했다.
+  // 2026-10-19: cfmsAutoGrading 을 넣었다(사용자 지시). 10-18 에 세운 ToDo 노드로 다른 훌에 없었다.
   "Drape": ["cfmsMiindo", "cfmsDrape", "cfmsCIPC", "cfmsPINNDrape", "cfmsPINNCAD",
-    "cfmsAutoPlace_JCDE", "SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop"],
+    "cfmsAutoPlace_JCDE", "SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop", "cfmsAutoGrading"],
   // 2026-09-20: SFTF_Clustering 을 뺐다 — 유일하게 두 훌에 동시에 들던 노드다.
   // 이희란 교수 공저 관계 자체는 그대로이고 노드 정보의 공저자 줄에 남는다.
   // 2026-09-22: cfmsAutoPlace_JCDE ↔ cfmsDrapeInverse 맞교환(사용자 지시).

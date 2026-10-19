@@ -500,10 +500,14 @@ HYPEREDGES = [
     # 2026-09-22: 사용자 지시로 cfmsDrapeInverse 를 이희란 훌로 보내고, 대신
     # cfmsAutoPlace_JCDE 를 반대로 이희란 훌에서 이리로 받는다(맞교환, 한 노드는 한 훌
     # 규약 유지).
+    # 2026-10-19: cfmsAutoGrading 을 넣었다(사용자 지시). 10-18 에 graph.html 에 바로 세운 ToDo
+    # 노드로 어느 훌에도 없었다(한 노드는 한 훌 규약 그대로). 공유 배치 (70, 1430) 는 JCDE 바로
+    # 아래라 훌이 아래로 조금 늘 뿐 남의 노드를 새로 삼키지 않는다 — 이희란 훌과 11px 떨어진다.
     {"label": "Drape",
      "kind": "topic",
      "nodes": ["cfmsMiindo", "cfmsDrape", "cfmsCIPC", "cfmsPINNDrape", "cfmsPINNCAD",
-               "cfmsAutoPlace_JCDE", "SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop"],
+               "cfmsAutoPlace_JCDE", "SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop",
+               "cfmsAutoGrading"],
      "color": "#ea580c", "labelColor": "#c2410c",
      "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95,
      "lineWidth": 3, "dash": [12, 6], "scale": 1.10},
