@@ -359,6 +359,11 @@ POS = {
     # cfmsMiindo 다(볼트 depends_on 의 mhcore 가 그 모노레포 안에 있다). 후보라 훌에 넣지 않으므로
     # Drape 훌 왼쪽 바깥의 빈 칸, 부모와 같은 줄(y 720)에 둔다.
     "cfmsAnatomy": (-300, 720),
+    # 2026-10-18: 볼트에 cfmsAutoGrading 이 섰다(ToDo·undecided). 그날 graph.html 에 바로 세웠고(525e9ab)
+    # 2026-10-19 에 이리로 옮겼다 — 생성기에 없으니 전체 재생성이 좌표·엣지·단계·등급 행을 되돌렸다.
+    # 파일 씨앗은 그때 고른 Drape 훌 왼쪽 아래 바깥 그대로다. 웹 배치(graph_positions)에서는 사용자가
+    # JCDE 바로 아래 (70, 1430) 으로 옮겼고, 같은 날 Drape 훌에 들어갔다(HYPEREDGES).
+    "cfmsAutoGrading": (-400, 1360),
 }
 
 # 노드 id 가 노트 이름에서 규칙으로 나오지 않는 트랙 노드 → (볼트 노트 stem,
@@ -734,6 +739,9 @@ QUALITY_ROWS = [
     # 볼트 Rules §8 대로 grade_note 전문을 옮기지 않고 공개 가능한 한 줄만 싣는다.
     ("cfmsAnatomy", "cfmsAnatomy", "ToDo", "MakeHuman 아바타에 뼈점·연부조직 두께·장기 위치를 붙여 보호 장비를 착용자에 맞추는 설계선; 착수 게이트 통과(2026-09-28), 실측 전, 이희란 교수 공저 후보"),
     ("Cho_MoldWarpDIC", "Cho_MoldWarpDIC", "ToDo", "금형 온도별 휨 예측(자작 사슬·Moldflow)을 DIC 실측에 대조하는 검증선; 착수 게이트 조건부 통과(2026-09-22), 물성 확정 전, 조범곤 교수 공저 후보"),
+    # 2026-10-18 신설(graph.html 에 바로), 2026-10-19 생성기로 옮김. 볼트 grade: ToDo · stage: undecided.
+    # 볼트 Rules §8 대로 grade_note · next_gate · 시험 수치를 옮기지 않고 소개와 단계만 싣는다.
+    ("cfmsAutoGrading", "cfmsAutoGrading", "ToDo", "이미 그린 패턴을 몸 특징점 좌표로 다시 적어 치수에 불변인 스타일 코드를 만드는 설계선; 공개 데이터셋 짝 시험 단계, 실제 그레이딩 자료 검증 전"),
 ]
 QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
 
@@ -792,6 +800,7 @@ INTRODUCTIONS = {
     "Cho_MoldWarpDIC": "금형 온도를 바꿔 가며 찍은 사출 부품의 휨과 변형을 상용 해석과 자작 해석이 얼마나 맞히는지, 실제로 찍어서 잰 변형 사진에 대고 재는 연구다.",
     "TSE_SEM1_Bezier": "전자현미경 사진 한 장에서 섬유 한 올 한 올을 매끈한 곡선으로 따라가며 굵기와 방향을 재어내는 방법이다.",
     "TSE_SEM2_Tensor": "섬유를 하나씩 오려내지 않고 사진 전체에서 섬유가 어느 쪽으로 누워 있는지와 겹친 아래층까지 한꺼번에 재는 방법이다.",
+    "cfmsAutoGrading": "이미 그린 옷 패턴을 입는 사람의 몸 특징점 좌표로 다시 적어, 치수가 달라도 같은 값을 내는 스타일 코드와 그레이딩 불변 점수를 만드는 도구다.",
     "TSE_SEM3_AutoTune": "정답을 모르는 실제 사진에서도 측정기의 손잡이를 스스로 안전하게 맞추는 방법을 다루는 연구다.",
 }
 
@@ -1558,6 +1567,28 @@ CFMS_ANATOMY_NODE = {
 }
 
 
+# 2026-10-18: 볼트에 새로 선 cfmsAutoGrading(status active · grade ToDo · stage undecided, 리포
+# cfms-lab/cfmsAutoGrading_dev 비공개). 그날은 graph.html 에 바로 세웠고(525e9ab), 2026-10-19 에
+# 이리로 옮겼다 — 여기 없으면 전체 재생성이 이 노드의 좌표·엣지·단계·등급 행을 되돌린다.
+# 흰 바탕·검정 외곽선(community 4). 부모 둘은 AUTOGRADING_GOAL_EDGES, 훌은 Drape(2026-10-19).
+CFMS_AUTOGRADING_NODE = {
+    "id": "cfmsAutoGrading",
+    "label": "cfmsAutoGrading",
+    "color": {"background": "#ffffff", "border": "#000000",
+               "highlight": {"background": "#ffffff", "border": "#000000"}},
+    "size": 15.4,
+    "font": {"size": 13, "color": "#333333", "bold": False},
+    "title": "cfmsAutoGrading — ToDo: 패턴을 몸 특징점 좌표로 다시 적어 치수에 불변인 스타일 코드를 만든다",
+    "community": 4,
+    "community_name": "ToDo",
+    "source_file": "cfmsAutoGrading.md",
+    "file_type": "concept",
+    "degree": 2,
+    "_intro": INTRODUCTIONS["cfmsAutoGrading"],
+    "_project_path": PROJECT_PATHS.get("cfmsAutoGrading", r"D:\__CFMS_Projects\cfmsAutoGrading_dev"),
+}
+
+
 # 2026-09-23: 볼트에 새로 선 HMD(Harmonic Multiscale Dispersity). status: todo · grade: ToDo ·
 # stage: undecided 라 흰 바탕·검정 외곽선(community 4). 공저자는 볼트 coauthors: [은종현](2026-09-23 확정)이라
 # 은종현 훌에 넣는다. 투고지는 미정.
@@ -1676,6 +1707,7 @@ TODO_NODES = [
     CFMS_ANATOMY_NODE,
     HMD_DISPERSITY_NODE,
     DYNAMIC_DISPERSITY_NODE,
+    CFMS_AUTOGRADING_NODE,
 ]
 
 TODO_EDGES = [
@@ -2294,6 +2326,32 @@ ANATOMY_GOAL_EDGES = [
     },
 ]
 
+# ------------------------------------------------ cfmsAutoGrading 의 부모 (2026-10-18)
+# 볼트 depends_on 은 [cfmsGCData] 인데 그 노드는 공개 그래프에 없다. 그래서 그날 graph.html 에 바로 그은
+# 두 엣지(525e9ab)를 그대로 옮긴다 — JCDE 의 저장 스타일을 몸 치수로 옮기는 쓰임새와, cfmsPINNCAD 의
+# 특징점 묶기 구상(cfmsAutoSize)을 역방향 재좌표화로 잇는 쪽이다. 실제 그레이딩 자료 검증 전이라
+# Cho·Anatomy 와 같은 이유로 점선·잠정이다.
+AUTOGRADING_GOAL_EDGES = [
+    {
+        **_autoplace_goal_edge(
+            "cfmsAutoPlace_JCDE", "cfmsAutoGrading", "그레이딩 불변 기억",
+            "저장한 스타일을 입력 옷의 몸 치수로 옮겨 놓고 봉제 조합을 고른다",
+            "확장",
+        ),
+        "dashes": True,
+        "_tentative": True,
+    },
+    {
+        **_autoplace_goal_edge(
+            "cfmsPINNCAD", "cfmsAutoGrading", "특징점 좌표",
+            "패턴 좌표를 인체 특징점에 묶는 구상을 이미 그린 패턴의 역방향 재좌표화로 잇는다",
+            "확장",
+        ),
+        "dashes": True,
+        "_tentative": True,
+    },
+]
+
 # ------------------------------------------------------ 분산도 사슬 (2026-09-24 사용자 지시)
 #   dynamicDispersity → cfmsDispersityKNN → cfmsDispersityProp → cfmsHMDispersity
 # 가운데 한 칸(KNN → Prop, 「상관 검증」)은 위 JEON_GOAL_EDGES 에 이미 있다. 여기는 양 끝이다.
@@ -2644,7 +2702,7 @@ def _preserve_goal_edges(match):
         (str(edge["from"]), str(edge["to"]))
         for edge in DYNAMIC_TARGET_SEARCH_GOAL_EDGES + COAUTHOR_KIM_GOAL_EDGES
         + JEON_GOAL_EDGES + MOLD_GOAL_EDGES + CHO_GOAL_EDGES + DISPERSITY_GOAL_EDGES
-        + ANATOMY_GOAL_EDGES
+        + ANATOMY_GOAL_EDGES + AUTOGRADING_GOAL_EDGES
     }
     # 2026-09-24: 사슬이 바뀌면서 cfmsDispersityKNN → cfmsHMDispersity 가 없어졌다. 위 목록에서
     # 빼기만 하면 스냅샷에 남은 옛 사본이 살아남아 사슬이 둘로 갈려 보인다 — 그 짝도 지운다.
@@ -2671,6 +2729,7 @@ def _preserve_goal_edges(match):
     edges.extend(copy.deepcopy(MOLD_GOAL_EDGES))
     edges.extend(copy.deepcopy(CHO_GOAL_EDGES))
     edges.extend(copy.deepcopy(ANATOMY_GOAL_EDGES))
+    edges.extend(copy.deepcopy(AUTOGRADING_GOAL_EDGES))
     edges.extend(copy.deepcopy(DISPERSITY_GOAL_EDGES))
     edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
     edges.extend(copy.deepcopy(DRAPESCAN_EDGES))
