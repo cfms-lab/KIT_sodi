@@ -71,6 +71,7 @@
   .paper .body{flex:1;line-height:1.5}
   .authors{font-weight:700}.title{color:#0d47a1;cursor:pointer}.title:hover{text-decoration:underline}
   .journal{font-style:italic;font-weight:600}.vol{text-decoration:underline}
+  .doitxt{color:#1565c0;text-decoration:none;overflow-wrap:anywhere}.doitxt:hover{text-decoration:underline}
   .badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;color:#fff;margin-right:6px}
   /* 투고 진도 파이 (2026-09-22, 사용자 지시) — 저자 앞에 있던 Pub/Submit/Draft 배지를 대신한다.
      그 글자는 저널 뒤 「(Submitted)」로 이미 한 번 더 나오므로 배지는 중복이었다.
@@ -545,6 +546,10 @@ function rowClass(p){
   if(!g) return ' q-unknown';
   return ' q-'+g;
 }
+/* 표의 doi 칸은 지금 모두 「10.xxxx/…」 꼴이지만, 볼트에 URL·「doi:」 째로 적힌 값이 와도
+   같은 모양이 되도록 접두어를 벗긴다. */
+function doiOf(v){return String(v||"").trim().replace(/^(?:https?:\/\/(?:dx\.)?doi\.org\/|doi:\s*)/i,"");}
+function doiUrl(doi){return "https://doi.org/"+encodeURIComponent(doi).replace(/%2F/g,"/");}
 function renderPaper(p,i){const st=p.PrintStatus;let x=[];
   if(p.FUNDING)x.push(`<span class="funding">[${esc(p.FUNDING)}]</span>`);
   // 2026-09-22: Pub/Submit/Draft 배지 → 진도 파이. 글자 상태는 저널 뒤 PRINT_SUFFIX 가 이미 보여 준다.
@@ -555,17 +560,14 @@ function renderPaper(p,i){const st=p.PrintStatus;let x=[];
   if(p.CATEG==="IJ"||p.CATEG==="DJ"){
     if(p.VOLUME&&p.VOLUME!=="TAG_NO_VOLUME")x.push(`<span class="vol">${esc(p.VOLUME)}</span>, `);
     if(p.PAGE&&p.PAGE!=="TAG_NO_PAGE")x.push(`pp.${esc(p.PAGE)}, `);}
+  // 2026-10-19 사용자 지시: DOI 는 연도 바로 앞에 글자로 보이고, 누르면 새 창으로 열린다.
+  // 그래서 줄 끝에 따로 달던 「DOI」 버튼은 걷었다(같은 링크가 두 번 나온다).
+  const doi=doiOf(p.DOI);
+  if(doi)x.push(`<a class="doitxt" href="${esc(doiUrl(doi))}" target="_blank" rel="noopener">doi:${esc(doi)}</a>, `);
   x.push(`(${p.P_YEAR})`);
   if(p.CATEG==="IJ"&&p.SCIFACTOR)x.push(` <i>(IF=${esc(p.SCIFACTOR)})</i>`);
-  // 접근 링크: 로그인 시 PDF(원문), 비로그인 시 DOI 링크
-  const doiLink=p.DOI?`<a class="doi" href="https://dx.doi.org/${esc(p.DOI)}" target="_blank">DOI</a>`:"";
-  let access="";
-  if(isLoggedIn()){
-    if(p.PDF) access=`<button class="pdf" onclick="openPdf(${jsArg(pdfKeyIds(p).join(","))},${jsArg(p.PDF)})">PDF</button>`;
-    else if(p.DOI) access=doiLink;
-  }else{
-    access=doiLink; // 비로그인: DOI 링크만 (PDF 비공개)
-  }
+  // 원문 PDF 는 로그인한 사람에게만 (비공개)
+  const access=isLoggedIn()&&p.PDF?`<button class="pdf" onclick="openPdf(${jsArg(pdfKeyIds(p).join(","))},${jsArg(p.PDF)})">PDF</button>`:"";
   const edit=isLoggedIn()?`<div class="rowtools"><button onclick="openEdit(${jsArg(p.ID)})">수정</button></div>`:"";
   return `<div class="paper${rowClass(p)}"><div class="num">${i}.</div><div class="body">${x.join("")} ${access}</div>${edit}</div>`;
 }
