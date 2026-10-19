@@ -264,14 +264,14 @@ POS = {
     # SFTF_InjMold 와 같은 왼쪽 끝 열(x=-360), 한 칸 위인 y=190 행이다 — 그 행은
     # SFTFSoft_GNN_DFSVR·SFTF_QEM·Tomo_SFTF 가 쓰는 줄이라 격자에 맞는다.
     "PFTF_Mold": (1010, 100),
-    "PFTF_Compression": (200, 650),
+    "PFTF_Compression": (280, 710),
     "Tomo_DFSVR": (150, 60),
     "PFTF_VisCull_kDop": (40, 250),
-    "SFTF_SewerPOC": (1050, 510),
+    "SFTF_SewerPOC": (1060, 560),
     "SFTFSoft_GNN": (260, 190),
-    "SFTF_DrapePrior": (-70, 660),
+    "SFTF_DrapePrior": (-220, 680),
     "PFTF_AsymTensor": (600, 650),
-    "PFTF_DrapePrior_VisCull_kDop": (-100, 360),
+    "PFTF_DrapePrior_VisCull_kDop": (-270, 540),
     "PFTF_GFiberCT": (600, 850),
     "SFTF_QEM": (470, 190),
     # 2026-10-15 넷째: 사용자가 웹에서 AO 와 가로로 다시 놓았다 — 아래 둘째·셋째 판 설명은 그 전 자리의 것이다.
@@ -280,45 +280,45 @@ POS = {
     # 사이의 띠라 여유가 43~51px 뿐이다 — Tomo_SFTF 바로 아래가 PFTF 와 그 나가는 선들로 차 있어
     # 더 곧은 사슬은 다른 노드를 옮기지 않고는 안 된다. Tomo_SFTFSoft→DTS 점선은 SFTF_QEM 을 46px 로
     # 지난다(Soft 가 QEM 바로 위라 어디로 가도 가깝다). 셋째 판에서 AO 와 함께 「Physics-AI」 훌이 됐다.
-    "SFTF_DynamicTargetSearch": (350, 470),
+    "SFTF_DynamicTargetSearch": (270, 500),
     "DFSVR_VisCull": (-80, -150),
-    "SFTFSoft_GNN_DFSVR": (-80, 50),
+    "SFTFSoft_GNN_DFSVR": (-80, 60),
     # 2026-10-15: 다음 과제 주제. 첫 판은 Tomo_SFTF → AO 실선을 긋고 AO 를 (560,420)에 두었으나,
     # 둘째 판에서 AO 가 손자(Tomo_SFTF → DTS → AO)로 정리되며 실선을 걷고 사슬 맨 아래로 내렸다.
     # 셋째 판: AO 가 3D프린팅 훌을 떠나 DTS 와 「Physics-AI」 훌(과제 훌)이 됐다. DTS 를 훌 밖에 두던
     # 제약이 없어져 (340,510)으로 조금 올려 사슬 각을 146°→150° 로 폈다. 캡슐 훌은 SFTF_Clustering
     # 과 68px, 3D프린팅 훌(AO 없이)은 DTS 와 118px 떨어진다. PFTF→PFTF_Compression 선과는 65px.
     # 표(graph_positions)에는 tmp/graph-positions-2026-10-15-activeoverprint.sql 로 같은 값을 올린다.
-    "SFTF_ActiveOverprint": (150, 470),
+    "SFTF_ActiveOverprint": (40, 430),
     # 2026-10-15: AO 의 자식. 같은 날 사용자가 웹에서 DTS·AO 를 가로로 다시 놓았고(DTS 350,470 · AO 150,470,
     # 그 밖에 여덟 노드도 옮겼다 — 위 값은 그 표를 되받은 것이다), 그 배치에서 AO 바로 아래를 재서 골랐다.
     # Drape 훌의 SFTF_DrapePrior 와 이희란 훌의 PFTF_Compression 사이라 의복 쪽과 Physics-AI 쪽을 잇는다.
     # 모든 노드와 130px 이상, 새 선 둘은 다른 노드와 66px 이상, 훌 여유 55px 이상(tmp/ao/search_child.py).
-    "SFTF_DrapeOverprint": (70, 630),
-    "ColdOndol": (1190, 470),
-    "ColdOndol_Positioning": (1050, 700),
-    "cfmsCIPC": (-40, 910),
+    "SFTF_DrapeOverprint": (100, 630),
+    "ColdOndol": (1230, 460),
+    "ColdOndol_Positioning": (1050, 360),
+    "cfmsCIPC": (-110, 920),
     # 2026-09-11: TSE_SEM 을 논문 3편 트랙으로 나눴다.  ① 은 옛 TSE_SEM 자리를 잇고
     # ②·③ 은 SFTF_Composite → ① 방향을 따라 위쪽으로 한 칸씩 이어진다.
     "TSE_SEM1_Bezier": (940, 650),
     "TSE_SEM2_Tensor": (940, 850),
     "TSE_SEM3_AutoTune": (940, 1110),
     "SFTF_HeatMethod": (760, 850),
-    "cfmsPINNDrape": (-20, 1130),
-    "cfmsDrape": (-220, 970),
-    "cfmsMiindo": (-100, 770),
-    "cfmsPINNCAD": (110, 1070),
+    "cfmsPINNDrape": (-140, 1130),
+    "cfmsDrape": (-380, 1000),
+    "cfmsMiindo": (-170, 800),
+    "cfmsPINNCAD": (-10, 1060),
     "SFTFSoft_DFSVR": (160, -150),
     # Restored from the last pre-archive graph snapshot.
-    "SFTF_UrbanTraffic": (1190, 290),
+    "SFTF_UrbanTraffic": (1230, 240),
     "cfmsAutoSew": (460, 1280),
     "cfmsAutoPlace_IJCST": (170, 1280),
-    "cfmsAutoPlace_JCDE": (0, 1370),
+    "cfmsAutoPlace_JCDE": (-140, 1350),
     # 2026-09-01: ToDo DrapeSCAN onboarding from the Obsidian project note.
-    "cfmsDrapeSCAN": (360, 930),
+    "cfmsDrapeSCAN": (360, 980),
     # 2026-09-18: 93196cb 가 graph.html 에만 넣어 둔 노드를 여기로 들여왔다. 파일 씨앗이
     # 이 노드를 몰라서 전체 재생성이 좌표를 날려 버리고 있었다.
-    "cfmsDrapeInverse": (240, 800),
+    "cfmsDrapeInverse": (220, 840),
     # 2026-09-07: graph.html 의 큐레이션 노드(SFTF_HOLONOMY_NODE)와 짝을 이룬다.
     "SFTF_Holonomy": (760, 1050),
     # 2026-09-10: graph.html 의 큐레이션 노드(HIPDETECT_NODE)와 짝을 이룬다.
@@ -330,8 +330,8 @@ POS = {
     # 포트폴리오 표에는 두 트랙이 있는데 그래프에는 노드가 없었다(사용자 지적).
     # 자리는 이희란 교수님 묶음 왼쪽 아래의 빈 곳이다 — 파일 씨앗과 표(graph_positions)
     # 양쪽에서 가장 한산한 자리를 골랐다.
-    "TSE_TomoSh4": (450, 650),
-    "TSE_TomoSh5": (420, 850),
+    "TSE_TomoSh4": (460, 650),
+    "TSE_TomoSh5": (450, 850),
     # 2026-09-19: 전석진 교수님 후보 둘. 김우석 묶음(y<=470) 아래, 은종현 묶음(x<=914)
     # 오른쪽의 빈 자리다. 드래그 격자(10)에 맞춰 두었다 — 웹에서 옮기면 표가 정본이 된다.
     "Jeon_DLPOrient": (710, -80),
@@ -358,12 +358,12 @@ POS = {
     # 2026-09-28: 볼트에 cfmsAnatomy 가 섰다(ToDo·undecided, 이희란 교수 공저 **후보**). 부모는
     # cfmsMiindo 다(볼트 depends_on 의 mhcore 가 그 모노레포 안에 있다). 후보라 훌에 넣지 않으므로
     # Drape 훌 왼쪽 바깥의 빈 칸, 부모와 같은 줄(y 720)에 둔다.
-    "cfmsAnatomy": (-300, 720),
+    "cfmsAnatomy": (-330, 810),
     # 2026-10-18: 볼트에 cfmsAutoGrading 이 섰다(ToDo·undecided). 그날 graph.html 에 바로 세웠고(525e9ab)
     # 2026-10-19 에 이리로 옮겼다 — 생성기에 없으니 전체 재생성이 좌표·엣지·단계·등급 행을 되돌렸다.
-    # 파일 씨앗은 그때 고른 Drape 훌 왼쪽 아래 바깥 그대로다. 웹 배치(graph_positions)에서는 사용자가
-    # JCDE 바로 아래 (70, 1430) 으로 옮겼고, 같은 날 Drape 훌에 들어갔다(HYPEREDGES).
-    "cfmsAutoGrading": (-400, 1360),
+    # 처음 자리는 Drape 훌 왼쪽 아래 바깥 (-400, 1360) 이었다. 사용자가 웹에서 JCDE 바로 아래로 옮겼고
+    # 같은 날 Drape 훌에 들어갔다(HYPEREDGES). 2026-10-19 pull-graph-positions 로 그 웹 좌표를 받았다.
+    "cfmsAutoGrading": (70, 1430),
 }
 
 # 노드 id 가 노트 이름에서 규칙으로 나오지 않는 트랙 노드 → (볼트 노트 stem,
