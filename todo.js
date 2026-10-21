@@ -68,11 +68,11 @@
     "Tomo_DFSVR":           "원고 결함 4건 수정",
     "PFTF":                 "특허 출원 여부 정하고 TDP 투고",  /* 보류 해제 → draft (2026-10-19). 원고는 닫혔고 커버레터가 남았다 */
     "PFTF_VisCull_kDop":    "GPU 경로 구현",
-    "SFTF_HeatMethod":      "투고처 결정 필요",
+    "SFTF_HeatMethod":      "보류 — Holonomy 에 병합",  /* 단독 투고 포기, JCDE 통합 원고로 (2026-10-21) */
     "ColdOndol_Positioning":"투고처 결정 필요",
 
     /* ── 순서를 기다리는 것 ───────────────────────────────── */
-    "SFTF_Holonomy":        "HeatMethod 투고 후 진행",
+    "SFTF_Holonomy":        "HeatMethod 합쳐 JCDE 원고로",  /* 2026-10-21 — 선행 게이트(HeatMethod 투고)는 병합으로 사라졌다 */
     "TSE_SEM3_AutoTune":    "2027-3월투고/교내과제 단독사사",
     "DFSVR_VisCull":        "착수 전 — DFSVR 뒤",
     "SFTFSoft_GNN_DFSVR":   "착수 전 — GNN 뒤",

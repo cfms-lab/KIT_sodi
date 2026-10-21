@@ -681,11 +681,13 @@ QUALITY_ROWS = [
      "② 이진화 없는 배향 텐서장, 하부층 포함; 저배율 SEM 9장 observed fraction 0.86–0.93, **2026-10-09 한국섬유공학회지 투고 완료**(학문후속세대논문상 신청 트랙 · 분야 1 섬유고분자재료·공정 · 은종현 교수 교신, 저자 박명진·은종현*·설인환). 투고 제목 「섬유 배향 텐서장을 이용한 SEM 섬유 웹의 자동 정량화」. ⏳ 정식 논문 ID 는 접수 승인 메일 대기. 09-16 의 「①과 같은 복합재료학회지」 결정과 달리 TSE 로 나갔다"),
     ("TSE_SEM3_AutoTune", "TSE_SEM3_AutoTune", "하",
      "③ 증거 제약 기반 자동 파라미터 선택; 게이트 C1~C4 전부 처리(2026-09-14), 사전 등록한 확인 실험은 불통과여서 부정 결과·경계 설정 논문으로 주장이 좁아졌다. 투고처 한국섬유공학회지 확정. 저자는 대학원생·은종현·설인환*(09-14 단독 → 2026-09-22 공저로 되돌림)이고 사사만 금오공대 대학 연구과제비(2026-2027)로 ①② 와 갈렸고, 투고 시점이 2027-03-01 이후로 정해져 그때까지 보류(일정 사유)"),
-    ("SFTF_HeatMethod", "SFTF_HeatMethod", "중", "열전달 기반 복합재 설계 연구선"),
+    # 2026-10-21: 단독 투고를 접고 SFTF_Holonomy 에 합쳤다(보류, 사용자). 등급은 그대로다.
+    ("SFTF_HeatMethod", "SFTF_HeatMethod", "중", "열전달 기반 복합재 설계 연구선; 2026-10-21 보류 — 단독 투고를 접고 SFTF_Holonomy 에 합쳐 JCDE 로 낸다"),
     # 2026-09-07: SFTF_Holonomy 논문 트랙 편입.  graph.html 의 큐레이션 노드는
     # RAW_NODES 밖에 있어도 등급 행은 여기서 나가야 재생성 뒤에 살아남는다.
     ("SFTF_Holonomy", "SFTF_Holonomy", "상",
-     "전단각 항등식 논문 트랙; 적합 0개로 반구 실측 29점 MAE 0.57°, 원고 4종+표제지 완비. 앞 편 SFTF_HeatMethod 투고가 선행 게이트"),
+     # 2026-10-21: 「앞 편 HeatMethod 투고가 선행 게이트」를 걷었다 — HeatMethod 를 이 원고에 합쳐 JCDE 로 낸다(사용자).
+     "전단각 항등식 논문 트랙; 적합 0개로 반구 실측 29점 MAE 0.57°. 2026-10-21 SFTF_HeatMethod 를 합친 통합 원고로 JCDE 투고 준비 — 통합 원고 작성 전"),
     ("cfmsPINNDrape", "cfmsPINNDrape", "하", "PINN 기반 드레이프 실험"),
     ("cfmsDrape", "cfmsDrape", "등급 없음", "드레이프 엔진 기반 저장소; 독립 논문 등급 미적용"),
     ("cfmsMiindo", "cfmsMiindo", "등급 없음", "의복 CAD·드레이프 모노레포; 독립 논문 등급 미적용"),
@@ -1230,6 +1232,11 @@ if preserve_extended_quality:
             # 2026-10-19: 보류(⛔) 해제 → draft(사용자). 게재지 TDP 라 「저널,상태」 꼴이다(PFTF_VisCull_kDop 과 같다).
             # 볼트 badge 와 같은 문구다.
             "PFTF": "TDP,draft",
+            # 2026-10-21: HeatMethod 를 Holonomy 에 합쳐 JCDE 로 낸다(사용자). HeatMethod 는 보류, Holonomy 는
+            # 게재지가 JCDE 로 바뀌었다. 둘 다 볼트 badge 와 같은 문구다 — 옛 씨앗은 둘 다 「Composites Part A
+            # 초고 완성」이었고, Holonomy 는 볼트 badge 가 비어 있어 표가 덮지 못해 그 옛 값이 화면에 보였다.
+            "SFTF_HeatMethod": "보류(Holonomy 에 병합 · JCDE)",
+            "SFTF_Holonomy": "JCDE,draft",
         },
         # 옛 노드 id 도 함께 지운다.  이 갱신기는 **병합**이라 적어 주지 않으면 옛 키가
         # 남아, 그래프에 없는 id 의 배지가 파일에 계속 실린다(2026-09-14 개명 때 실제로 그랬다).
