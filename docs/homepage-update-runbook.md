@@ -6,11 +6,19 @@
 
 ## 한 줄 요약
 
-**볼트 노트를 먼저 고치고, SQL 두 파일을 만들어 사용자가 Supabase SQL Editor 에서 돌린다.**
+**볼트 노트를 먼저 고치고, SQL 을 만들어 클로드가 Supabase MCP 로 보낸다(사용자는 승인 창에서 허용).**
 화면 글자까지 바꾸려면 저장소 파일(그래프·마인드맵·todo)도 고쳐 푸시한다.
 
-클로드 셸에는 Supabase 로그인 자격이 없다. 그래서 쓰기는 늘 사용자가 SQL Editor 에서 한다
-(대시보드 세션이 곧 권한이라 비밀번호가 필요 없다). 클로드는 **공개 anon 키로 읽기만** 한다.
+**2026-10-21 부터 쓰기 경로가 바뀌었다.** 그전에는 클로드 셸에 쓰기 자격이 없어 사용자가 SQL 을
+SQL Editor 에 붙여넣었다. 이제 Claude Code 에 Supabase 공식 MCP 서버가 붙어 있다(사용자 범위 `-s user`,
+`--project-ref=ijutjirouxgqcldjyhma --features=database`, 토큰은 사용자 PAT). 클로드는 `execute_sql` 로
+SQL 을 직접 보내고, 사용자는 **승인 창에 뜬 SQL 전문을 보고 허용**한다. 읽기도 같은 도구로 한다 —
+anon 키로는 못 읽던 `portfolio_rows`(로그인 전용)까지 보인다.
+
+- 승인 창에서 읽을 수 있게 **부분 SQL** 을 보낸다: `node scripts/publish-portfolio.mjs --sql --only A,B`
+  (아래 ③ (나)). 전체 판(`--sql`, 약 140KB)은 승인 창으로 보내지 않고 예전처럼 SQL Editor 에 붙인다.
+- MCP 가 안 붙어 있으면(도구 목록에 `mcp__supabase__*` 가 없으면) 예전 길 — SQL 파일을 넘기고 사용자가
+  SQL Editor 에서 Run — 로 돌아간다. 다시 붙이는 명령은 맨 아래 「참고」.
 
 ## 1. 어느 화면이 어디서 읽나
 
@@ -46,7 +54,15 @@
 ### ② 표에 행이 있는지 읽어 본다
 
 있으면 UPDATE, 없으면 INSERT 다. **새 프로젝트는 노드 행도 업적 행도 없는 경우가 많다**
-(그래프 노드와 좌표만 세워 둔 상태). 읽기 전용 조회:
+(그래프 노드와 좌표만 세워 둔 상태). MCP 가 붙어 있으면 `execute_sql` 에 select 하나로 끝난다:
+
+```sql
+select id, kind, stage, mindmap_id, papers_id from public.research_outputs
+ where id = 'SFTF_X' or mindmap_id = 'SFTF_X' or project_id = 'SFTF_X';
+select max(papers_id) from public.research_outputs where kind = 'output';   -- 다음 빈 번호는 +1
+```
+
+MCP 가 없을 때의 anon 조회(`portfolio_rows` 는 못 읽는다):
 
 ```js
 // 저장소 밖 스크래치 폴더에 .mjs 로 저장해 `node 파일.mjs` 로 돌린다(SFTF_X 를 바꿔서).
@@ -99,10 +115,29 @@ node scripts/publish-portfolio.mjs --sql
 고쳐 둔 것도 함께 실린다 — 돌리기 전 사본을 떠 두고 행 id 를 비교해 의도하지 않은 추가·삭제가
 없는지 본다.
 
-### ④ 사용자가 SQL Editor 에서 돌린다
+**부분 판(평소에 쓰는 것)** — `tmp/portfolio-rows-partial.sql`
+
+```powershell
+node scripts/publish-portfolio.mjs --sql --only SFTF_HeatMethod,SFTF_Holonomy
+```
+
+사건이 건드린 프로젝트의 포트폴리오 행과 노드 행만 담는다(수 KB). 메타 행과 삭제는 없다.
+`--only` 에는 포트폴리오 행 id(분리 트랙은 `TSE_SEM1_Bezier` 꼴)나 노트 이름·`mindmap_id` 를 쓰고,
+어디에도 없는 id 는 오타로 보고 멈춘다. 보내기 전에 표의 지금 값과 볼트 값을 대조해, 바뀌는 칸이
+의도한 것뿐인지 본다 — **다른 세션이 같은 노트를 고치는 중이면 그 값도 함께 실린다**
+(2026-10-21 HeatMethod·Holonomy 저장소 개명이 그랬다).
+
+### ④ 보낸다
 
 **(가) → (나) 순서.** (나) 의 노드 UPDATE 는 행이 있어야 닿으므로 INSERT 가 먼저다.
-둘 다 통째로 붙여넣고 Run. 각 파일 끝의 확인 `select` 결과를 본다.
+
+- **MCP 가 있을 때**: 파일 내용을 그대로 `execute_sql` 로 보낸다. 사용자가 승인 창에서 허용한다.
+  보낸 뒤 확인 `select` 를 따로 한 번 돌려 값이 들어갔는지 본다(여러 문장을 한 번에 보내면 결과는
+  마지막 문장 것만 온다). 처음 쓰는 모양의 SQL 은 끝의 `commit;` 을 `rollback;` 으로 바꿔 한 번
+  시험해 보고 보낸다 — 부분 판은 2026-10-21 PFTF 로 그렇게 시험했고, 갱신 시각이 그대로인 것으로
+  rollback 을 확인했다.
+- **전체 판이나 MCP 가 없을 때**: 사용자가 SQL Editor 에 통째로 붙여넣고 Run. 파일 끝의 확인
+  `select` 결과를 본다.
 
 ### ⑤ (선택) 저장소의 구운 글자
 
@@ -144,3 +179,21 @@ SQL 만으로 바뀌지 않는 것들이다. 필요하면 고쳐서 커밋·푸�
   `node scripts/publish-research-outputs.mjs --push --allow-new` 로 넣는다(볼트 `Rules/새업적_등록절차.md`).
   진행 중 원고는 이 길이 아니라 위의 `p…` + `papers_ids` 다.
 - 볼트 `Projects/*.md` 와 `Dashboards/프로젝트현황.md` 는 사용자가 커밋한다.
+- MCP 의 `execute_sql` 은 RLS 를 거치지 않는 관리 권한으로 돈다(SQL Editor 와 같다). 그래서 `delete`·
+  `drop`·조건 없는 `update` 는 승인 창에서 한 번 더 본다. 스키마 변경은 `apply_migration` 이 따로 있다.
+
+## 5. 참고 — Supabase MCP 다시 붙이기
+
+토큰(PAT)이 만료됐거나 도구 목록에 `mcp__supabase__*` 가 없으면 사용자가 새 토큰을 만들어(Supabase
+대시보드 → Account preferences → Access Tokens, 만료일 지정) 직접 실행한다. 토큰은 채팅에 붙이지 않는다.
+
+```powershell
+claude mcp remove supabase -s user   # 옛 등록이 있으면
+claude mcp add supabase -s user -e SUPABASE_ACCESS_TOKEN=<토큰> '--' cmd /c npx -y @supabase/mcp-server-supabase@0.14.0 --project-ref=ijutjirouxgqcldjyhma --features=database
+```
+
+- PowerShell 에서는 `--` 를 **작은따옴표로 감싼다.** `claude` 가 `claude.ps1` 래퍼라 맨 `--` 가 지워져
+  `error: unknown option '-y'` 가 난다(2026-10-21). `claude.cmd --% mcp add …` 도 된다.
+- 범위는 `-s user` 다. 이 저장소는 `~/.claude.json` 에 `d:/…` 와 `D:/…` 두 경로로 따로 잡혀 있어
+  `-s local` 은 세션이 어느 쪽으로 열리느냐에 따라 안 보일 수 있다.
+- 등록 뒤 VS Code 에서 **Developer: Reload Window**. 토큰은 `~/.claude.json` 에 평문으로 남는다.

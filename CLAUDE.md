@@ -3,8 +3,10 @@
 ## 투고·게재 같은 사건을 홈페이지에 반영할 때
 
 [docs/homepage-update-runbook.md](docs/homepage-update-runbook.md) 를 따른다 — 볼트 노트를 먼저
-고치고, `tmp/research-outputs-{날짜}-{이름}.sql`(손으로) + `tmp/portfolio-rows.sql`(`--sql` 생성)
-두 파일을 사용자가 Supabase SQL Editor 에서 돌린다. 클로드 셸에는 쓰기 자격이 없다.
+고치고, `tmp/research-outputs-{날짜}-{이름}.sql`(손으로) + `tmp/portfolio-rows-partial.sql`
+(`node scripts/publish-portfolio.mjs --sql --only A,B`)를 만들어 **Supabase MCP 의 `execute_sql` 로 직접
+보낸다** — 사용자가 승인 창에서 SQL 을 보고 허용한다(2026-10-21~). 보낸 뒤 select 로 확인한다.
+전체 판 `tmp/portfolio-rows.sql`(`--sql`, 약 140KB)과 MCP 가 안 붙은 세션은 예전처럼 사용자가 SQL Editor 에서 돌린다.
 
 ## 연구 그래프 노드 좌표
 

@@ -5,6 +5,9 @@
 //   node scripts/publish-portfolio.mjs --push     발행 (REST + 로그인)
 //   node scripts/publish-portfolio.mjs --sql      Supabase SQL Editor 에 붙여넣을 SQL 을 만든다
 //   node scripts/publish-portfolio.mjs --dump     보낼 JSON 을 파일로 떠 놓는다
+//   node scripts/publish-portfolio.mjs --sql --only SFTF_HeatMethod,SFTF_Holonomy
+//                                                 그 프로젝트만 담은 부분 SQL(tmp/portfolio-rows-partial.sql).
+//                                                 클로드가 Supabase MCP execute_sql 로 보낼 때 쓴다(2026-10-21~)
 //
 // --sql 은 로그인이 안 될 때의 우회로다. SQL Editor 는 대시보드 세션 자체가 권한이라
 // 이 스크립트가 비밀번호를 알 필요가 없다. 결과는 --push 와 같다(같은 행을 넣고, 볼트에서
@@ -401,6 +404,7 @@ export function buildRows(vaultRoot) {
     const repository = String(page.repository ?? "").trim();
     nodeFields.push({
       mindmap_id: mindmapId,
+      name: page.file.name,   // --only 가 노트 이름으로 고를 때 쓴다(SQL 에는 나가지 않는다)
       data: {
         grade: GRADE_OUT2[text("grade")] ?? text("grade"),
         stage: text("stage"),
@@ -545,12 +549,78 @@ function toSql(payload, nodeFields) {
   ].join("\n");
 }
 
+// --sql --only a,b 가 만드는 부분 SQL (2026-10-21). 이제 클로드가 Supabase MCP 의 execute_sql 로
+// SQL 을 직접 보내는데(사용자가 승인 창에서 SQL 을 보고 허용), 전체 판은 86행 JSON 이라 138KB 다 —
+// 승인 창에서 읽을 수가 없다. 그래서 사건이 건드린 프로젝트의 포트폴리오 행과 노드 행만 담는다.
+// 메타 행과 「볼트에 없는 행 삭제」는 넣지 않는다: 부분 판이 지우면 나머지 행이 다 사라진다.
+// 정렬 순서(sort_index)도 전체 판의 값 그대로라 다른 행과 어긋나지 않는다.
+function toPartialSql(rows, nodes, only) {
+  const rowValues = rows.map((row) => {
+    const json = JSON.stringify(row.data);
+    if (json.includes("$json$")) throw new Error(`${row.id} 의 값에 $json$ 가 들어 있습니다`);
+    return `  ('${row.id.replace(/'/g, "''")}', '${row.kind}', ${row.sort_index}, $json$${json}$json$)`;
+  });
+  const nodeValues = nodes.map((node) => {
+    const json = JSON.stringify(node.data);
+    if (json.includes("$json$")) throw new Error(`${node.mindmap_id} 의 값에 $json$ 가 들어 있습니다`);
+    // ::jsonb 가 없으면 VALUES 의 이 열이 text 로 잡혀 아래 n.data->>'…' 가 「연산자 없음」으로 죽는다
+    // (전체 판은 임시 표 열을 jsonb 로 선언해서 필요 없었다).
+    return `  ('${node.mindmap_id.replace(/'/g, "''")}', $json$${json}$json$::jsonb)`;
+  });
+  const lines = [
+    "-- portfolio_rows · research_outputs 부분 발행 — scripts/publish-portfolio.mjs --sql --only 가 만든 파일이다.",
+    `-- 만든 날: ${new Date().toISOString().slice(0, 10)} · 대상: ${only.join(", ")}`,
+    `-- 포트폴리오 행 ${rows.length}개 · 노드 행 ${nodes.length}개. 메타 행과 삭제는 없다(전체 판은 --sql 만).`,
+    "",
+    "begin;",
+  ];
+  if (rowValues.length) {
+    lines.push(
+      "",
+      "insert into public.portfolio_rows (id, kind, sort_index, data, updated_at) values",
+      rowValues.map((v) => v.replace(/\)$/, ", now())")).join(",\n"),
+      "on conflict (id) do update set",
+      "  kind = excluded.kind, sort_index = excluded.sort_index,",
+      "  data = excluded.data, updated_at = now();",
+    );
+  }
+  if (nodeValues.length) {
+    lines.push(
+      "",
+      "update public.research_outputs r set",
+      "  grade        = n.data->>'grade',",
+      "  stage        = n.data->>'stage',",
+      "  badge        = n.data->>'badge',",
+      "  grade_note   = n.data->>'grade_note',",
+      "  bottleneck   = n.data->>'bottleneck',",
+      "  brief        = n.data->>'brief',",
+      "  note         = n.data->>'note',",
+      "  url          = n.data->>'url',",
+      "  project_path = n.data->>'project_path',",
+      "  updated_at   = now()",
+      "from (values",
+      nodeValues.join(",\n"),
+      ") as n(mindmap_id, data)",
+      "where r.kind = 'node' and r.mindmap_id = n.mindmap_id;",
+    );
+  }
+  lines.push("", "commit;", "");
+  return lines.join("\n");
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const push = args.includes("--push");
   const sql = args.includes("--sql");
   const dump = args.includes("--dump");
-  const positional = args.filter((arg) => !arg.startsWith("--"));
+  // --only a,b — 행 id(포트폴리오) 또는 노트 이름·mindmap_id(노드)로 고른다. 분리 트랙 행
+  // (TSE_SEM1_Bezier 등)은 행 id 로, 그 부모 노드는 노트 이름으로 적는다.
+  const onlyAt = args.indexOf("--only");
+  const only = onlyAt >= 0
+    ? String(args[onlyAt + 1] ?? "").split(",").map((s) => s.trim()).filter(Boolean)
+    : null;
+  if (only && !only.length) throw new Error("--only 뒤에 프로젝트 id 를 쉼표로 적으세요");
+  const positional = args.filter((arg, index) => !arg.startsWith("--") && !(onlyAt >= 0 && index === onlyAt + 1));
   const vaultRoot = path.resolve(
     positional[0] || process.env.CFMS_RESEARCH_VAULT || "D:\\cfms-research-vault",
   );
@@ -574,6 +644,20 @@ async function main() {
     mkdirSync(path.dirname(out), { recursive: true });
     writeFileSync(out, JSON.stringify(payload, null, 1), "utf8");
     console.log(`보낼 값을 ${path.relative(repoRoot, out)} 에 떠 놓았습니다.`);
+    return;
+  }
+  if (sql && only) {
+    const want = new Set(only);
+    const rowsOut = payload.filter((row) => row.kind === "row" && want.has(row.id));
+    const nodesOut = nodeFields.filter((node) => want.has(node.name) || want.has(node.mindmap_id));
+    const unknown = only.filter((id) => !rowsOut.some((row) => row.id === id)
+      && !nodesOut.some((node) => node.name === id || node.mindmap_id === id));
+    if (unknown.length) throw new Error(`--only 에 없는 id: ${unknown.join(", ")} (행 id·노트 이름·mindmap_id 중 하나여야 한다)`);
+    const out = path.join(repoRoot, "tmp", "portfolio-rows-partial.sql");
+    mkdirSync(path.dirname(out), { recursive: true });
+    writeFileSync(out, toPartialSql(rowsOut, nodesOut, only), "utf8");
+    const kb = (statSync(out).size / 1024).toFixed(1);
+    console.log(`${path.relative(repoRoot, out)} (${kb}KB) — 포트폴리오 행 ${rowsOut.length} · 노드 행 ${nodesOut.length}`);
     return;
   }
   if (sql) {
