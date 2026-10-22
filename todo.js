@@ -26,6 +26,7 @@
     "TSE_SEM2_Tensor":      "재심 대기",  /* 한국섬유공학회지 학문후속세대논문상 트랙 — 2026-10-22 수정본 제출, 26M-10-043 */
     "SFTF_DrapeOverprint":  "심사 대기",  /* 한국섬유공학회지 (2026-10-16, 설인환 단독), 원고번호 할당중 */
     "HIPDetect":            "심사 대기",  /* IJCST IJCST-09-2026-0266 (2026-09-22 ScholarOne 투고) */
+    "SFTF_Holonomy":        "심사 대기",  /* JCDE JCDE-2026-757 (2026-10-22 ScholarOne 투고, HeatMethod 를 합친 통합 원고) */
     "PFTF_GFiberCT":        "심사 대기",  /* 한국복합재료학회지 S-26-0084 (2026-09-22, 은종현 교수 측 투고) */
     "SFTF_DrapePrior":      "",  /* 출판 — 63권 5호 (2026-10-31). cfmsDispersityKNN 처럼 빈 칸으로 둔다 */
     "cfmsDispersityKNN":       "",  /* 게재 완료 — 빈 칸으로 둔다 */
@@ -72,7 +73,6 @@
     "ColdOndol_Positioning":"투고처 결정 필요",
 
     /* ── 순서를 기다리는 것 ───────────────────────────────── */
-    "SFTF_Holonomy":        "HeatMethod 합쳐 JCDE 원고로",  /* 2026-10-21 — 선행 게이트(HeatMethod 투고)는 병합으로 사라졌다 */
     "TSE_SEM3_AutoTune":    "2027-3월투고/교내과제 단독사사",
     "DFSVR_VisCull":        "착수 전 — DFSVR 뒤",
     "SFTFSoft_GNN_DFSVR":   "착수 전 — GNN 뒤",
