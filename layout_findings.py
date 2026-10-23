@@ -694,7 +694,8 @@ QUALITY_ROWS = [
     # RAW_NODES 밖에 있어도 등급 행은 여기서 나가야 재생성 뒤에 살아남는다.
     ("SFTF_Holonomy", "SFTF_Holonomy", "상",
      # 2026-10-21: 「앞 편 HeatMethod 투고가 선행 게이트」를 걷었다 — HeatMethod 를 이 원고에 합쳐 JCDE 로 낸다(사용자).
-     "전단각 항등식 논문 트랙; 적합 0개로 반구 실측 29점 MAE 0.57°. 2026-10-21 SFTF_HeatMethod 를 합친 통합 원고로 JCDE 투고 준비 — 통합 원고 작성 전"),
+     # 2026-10-23: 2026-10-22 JCDE 투고(JCDE-2026-757) — 「통합 원고 작성 전」을 걷었다.
+     "전단각 항등식 논문 트랙; 적합 0개로 반구 실측 29점 MAE 0.57°. SFTF_HeatMethod 를 합친 통합 원고로 **2026-10-22 JCDE 투고(원고번호 JCDE-2026-757)**, 심사 대기"),
     ("cfmsPINNDrape", "cfmsPINNDrape", "하", "PINN 기반 드레이프 실험"),
     ("cfmsDrape", "cfmsDrape", "등급 없음", "드레이프 엔진 기반 저장소; 독립 논문 등급 미적용"),
     ("cfmsMiindo", "cfmsMiindo", "등급 없음", "의복 CAD·드레이프 모노레포; 독립 논문 등급 미적용"),
@@ -1246,7 +1247,8 @@ if preserve_extended_quality:
             # 게재지가 JCDE 로 바뀌었다. 둘 다 볼트 badge 와 같은 문구다 — 옛 씨앗은 둘 다 「Composites Part A
             # 초고 완성」이었고, Holonomy 는 볼트 badge 가 비어 있어 표가 덮지 못해 그 옛 값이 화면에 보였다.
             "SFTF_HeatMethod": "보류(Holonomy 에 병합 · JCDE)",
-            "SFTF_Holonomy": "JCDE,draft",
+            # 2026-10-23: 2026-10-22 JCDE 투고(원고번호 JCDE-2026-757)로 볼트 badge 가 바뀌었다 — 같은 문구로 맞춘다.
+            "SFTF_Holonomy": "JCDE 투고 완료 (2026-10-22, 원고번호 JCDE-2026-757)",
         },
         # 옛 노드 id 도 함께 지운다.  이 갱신기는 **병합**이라 적어 주지 않으면 옛 키가
         # 남아, 그래프에 없는 id 의 배지가 파일에 계속 실린다(2026-09-14 개명 때 실제로 그랬다).
