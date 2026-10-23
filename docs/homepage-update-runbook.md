@@ -97,11 +97,11 @@ console.log(await q("research_outputs?kind=eq.output&select=id,papers_id&order=p
 | `categ` | `DJ` 국내저널 · `IJ` 해외저널 · `DC`/`IC` 학회 |
 | `authors` | 투고본 표제 순서. 교신이 여럿이면 `*` 표시(`강지언, 설인환*, 이희란*`), 단독이면 `설인환` |
 | `volume` · `page` · `doi` | 게재 전에는 빈 문자열 `''` |
-| `p_year` · `p_month` · `p_day` | **투고일이 아니라 예상 게재일.** TSE 는 짝수달 말 발행 |
+| `p_year` · `p_month` · `p_day` | **마지막 행동 날짜**(2026-10-23~) — 투고·수정본 제출·채택·교정쇄 제출 중 가장 최근. upjuk 은 현황판이라 예상 게재일을 쓰지 않는다. `published` 가 되면 게재일(학회는 발표일)로 바꾼다. draft 는 계획일 그대로. UPJUK 노트가 소유한 행은 볼트 `year`·`pub_month`·`pub_day` 도 함께 고친다(안 그러면 볼트 발행이 되돌린다). 선례: `research-outputs-2026-10-23-last-action-dates.sql` |
 | `memo` | 투고 사실 — 날짜 · 트랙 · 분야 · 교신 · 원고번호(없으면 「할당중」) · 영문 제목 |
 | `funding` | `중견과제2026년` 등 이웃 행과 같은 표기 |
 
-`stage` 가 `draft` 에서 벗어나면 비로그인 방문자에게도 upjuk 에 보인다 — 나간 원고는 그게 맞다.
+upjuk 은 비로그인 방문자에게 ToDo 만 감추고 draft 를 포함한 모든 업적 행을 보여 준다(2026-10-16~).
 
 **(나) 생성하는 것** — `tmp/portfolio-rows.sql`
 
