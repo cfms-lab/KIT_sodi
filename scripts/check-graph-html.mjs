@@ -123,6 +123,24 @@ for (const [from, to] of directionFixes) {
     throw new Error(`flipped edge ${to}->${from} is missing`);
   }
 }
+// 2026-10-23: 엇갈리는 점선을 화면에서 뺐다(graph.html EDGE_PRUNE_PAIRS, 사용자 지시). 아래의 관계 검사
+// (garment·계보)는 목록에 남아 있는 관계를 보므로 `edges` 는 그대로 두고, 그려지는 선은 `shownEdges` 로 본다.
+const prunePairs = readJsonConstant("EDGE_PRUNE_PAIRS", "[");
+const isPruned = (edge) => prunePairs.some(([from, to]) => edge.from === from && edge.to === to);
+for (const [from, to] of prunePairs) {
+  const edge = edges.find((item) => item.from === from && item.to === to);
+  if (!edge) throw new Error(`EDGE_PRUNE_PAIRS ${from}->${to} matches no edge — drop the stale pair`);
+  if (!edge.dashes) throw new Error(`EDGE_PRUNE_PAIRS ${from}->${to} is solid; only dashed edges are pruned`);
+}
+if (prunePairs.some(([from, to]) => from === "SFTF_DynamicTargetSearch" && to === "SFTF_ActiveOverprint")) {
+  throw new Error("SFTF_DynamicTargetSearch -> SFTF_ActiveOverprint must stay drawn (Tomo_SFTF -> DTS -> AO lineage)");
+}
+const shownEdges = edges.filter((edge) => !isPruned(edge));
+for (const id of new Set(edges.map((edge) => edge.to))) {
+  if (!shownEdges.some((edge) => edge.to === id)) {
+    throw new Error(`${id} lost its last drawn parent to EDGE_PRUNE_PAIRS`);
+  }
+}
 
 const positions = Object.assign(
   readJsonConstant("POS", "{"),
@@ -415,11 +433,14 @@ if (!html.includes("if (positions.length < 1) return;")) {
 }
 if (
   !html.includes("// EDGE_LABEL_LAYOUT_BEGIN")
-  || !html.includes("const midX = (from.x + to.x) / 2;")
+  // 2026-10-23: 캡션은 직선 가운데가 아니라 vis 가 그리는 곡선 위에 놓인다(사용자 보고 — 휜 화살표 옆에 떠 있었다).
+  || !html.includes("const centre = _edgeCurveFrame(id, from, to, 0.5);")
+  || !html.includes("const p = edgeType.getPoint(t);")
+  || html.includes("const midX = (from.x + to.x) / 2;")
   || !html.includes("_drawDynamicEdgeLabels(ctx);")
   || !html.includes("const POS_STORE_KEY = 'graphify_graph_positions_v5';")
 ) {
-  throw new Error("dynamic midpoint edge-label layout or fresh position-store key is missing");
+  throw new Error("on-curve edge-label layout or fresh position-store key is missing");
 }
 if (!/hidden: false,\s*label: '',/.test(html)) {
   throw new Error("vis-network built-in edge labels are still enabled");

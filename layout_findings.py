@@ -968,10 +968,15 @@ function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes, vi
 // HYPEREDGE_LABEL_HELPERS_END'''
 
 EDGE_LABEL_LAYOUT_JS = r'''// EDGE_LABEL_LAYOUT_BEGIN
-// Keep every edge caption at the lengthwise midpoint of its edge, turned to
-// run along that edge.  Only the perpendicular offset changes, so dragging a
-// node can resolve collisions without making the caption look attached to
-// either endpoint.
+// Keep every edge caption *on* the arrow it names, turned to run along it.
+// 2026-10-23 (user report): the arrows are curves — continuous by default,
+// curvedCW/CCW where the cfmsDrape fan bends them, cubicBezier in the
+// hierarchical layouts — but the captions sat at the midpoint of the straight
+// segment between the two nodes and could also be pushed sideways off the
+// line, so on the more strongly bent arrows they floated beside them.  Both
+// the position and the angle now come from the curve vis actually draws
+// (edgeType.getPoint), and collisions are resolved by sliding the caption
+// along its own curve near the middle, never off it.
 function _edgeLabelOverlapArea(a, b) {
   const width = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
   const height = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
@@ -993,6 +998,27 @@ function _edgeLabelViewportBounds() {
   };
 }
 
+// The point and unit tangent at parameter t of the curve vis draws for edge
+// `id`.  Falls back to the straight segment if vis has not built the edge
+// geometry yet (the first frame) or the curve degenerates.
+function _edgeCurveFrame(id, from, to, t) {
+  const visEdge = network.body.edges[id];
+  const edgeType = visEdge && visEdge.edgeType;
+  if (edgeType && typeof edgeType.getPoint === 'function') {
+    try {
+      const p = edgeType.getPoint(t);
+      const a = edgeType.getPoint(Math.max(0, t - 0.01));
+      const b = edgeType.getPoint(Math.min(1, t + 0.01));
+      const tx = b.x - a.x, ty = b.y - a.y, tl = Math.hypot(tx, ty);
+      if (p && Number.isFinite(p.x) && Number.isFinite(p.y) && tl > 1e-6) {
+        return {x: p.x, y: p.y, ux: tx / tl, uy: ty / tl};
+      }
+    } catch (err) { /* fall back to the straight segment */ }
+  }
+  const dx = to.x - from.x, dy = to.y - from.y, length = Math.hypot(dx, dy);
+  return {x: from.x + dx * t, y: from.y + dy * t, ux: dx / length, uy: dy / length};
+}
+
 function _drawDynamicEdgeLabels(ctx) {
   const visibleEdges = RAW_EDGES.map((edge, id) => ({edge, id, view: edgesDS.get(id)}))
     .filter(({edge, view}) => edge.label && view && view.hidden !== true);
@@ -1008,45 +1034,41 @@ function _drawDynamicEdgeLabels(ctx) {
     }));
   const viewport = _edgeLabelViewportBounds();
   const placedBoxes = [];
-  const offsets = [0, 18, -18, 34, -34, 52, -52, 72, -72];
+  // Curve parameters to try, nearest the middle first.  0.5 ± 0.18 keeps the
+  // caption clear of both ends, so it never looks attached to an endpoint.
+  const curveSteps = [0.5, 0.44, 0.56, 0.38, 0.62, 0.32, 0.68];
 
   ctx.save();
   ctx.font = '600 15px sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.lineJoin = 'round';
-  visibleEdges.forEach(({edge}) => {
+  visibleEdges.forEach(({edge, id}) => {
     const from = positions[edge.from];
     const to = positions[edge.to];
     if (!from || !to) return;
-    const dx = to.x - from.x;
-    const dy = to.y - from.y;
-    const length = Math.hypot(dx, dy);
-    if (length < 1) return;
+    if (Math.hypot(to.x - from.x, to.y - from.y) < 1) return;
 
-    // The along-edge coordinate is always 0.5 (the exact midpoint).
-    const midX = (from.x + to.x) / 2;
-    const midY = (from.y + to.y) / 2;
-    const normalX = -dy / length;
-    const normalY = dx / length;
-    // Turn the caption along its edge.  Folding the angle into [-90, +90]
-    // keeps the text left-to-right: without it, every edge that points
-    // leftwards would render its caption upside down.
-    let angle = Math.atan2(dy, dx);
-    if (angle > Math.PI / 2) angle -= Math.PI;
-    if (angle < -Math.PI / 2) angle += Math.PI;
-    // The collision box stays axis-aligned, so it has to cover the *rotated*
-    // text's extent — a tilted caption is wider and taller than the flat one.
     const textWidth = ctx.measureText(edge.label).width + 10;
     const textHeight = 22;
-    const ca = Math.abs(Math.cos(angle)), sa = Math.abs(Math.sin(angle));
-    const halfWidth = (ca * textWidth + sa * textHeight) / 2;
-    const halfHeight = (sa * textWidth + ca * textHeight) / 2;
+    const centre = _edgeCurveFrame(id, from, to, 0.5);
     let best = null;
 
-    offsets.forEach(offset => {
-      const x = midX + normalX * offset;
-      const y = midY + normalY * offset;
+    curveSteps.forEach(t => {
+      const frame = t === 0.5 ? centre : _edgeCurveFrame(id, from, to, t);
+      const x = frame.x;
+      const y = frame.y;
+      // Turn the caption along the curve's tangent at that point.  Folding
+      // the angle into [-90, +90] keeps the text left-to-right: without it,
+      // every edge that points leftwards would render its caption upside down.
+      let angle = Math.atan2(frame.uy, frame.ux);
+      if (angle > Math.PI / 2) angle -= Math.PI;
+      if (angle < -Math.PI / 2) angle += Math.PI;
+      // The collision box stays axis-aligned, so it has to cover the *rotated*
+      // text's extent — a tilted caption is wider and taller than the flat one.
+      const ca = Math.abs(Math.cos(angle)), sa = Math.abs(Math.sin(angle));
+      const halfWidth = (ca * textWidth + sa * textHeight) / 2;
+      const halfHeight = (sa * textWidth + ca * textHeight) / 2;
       const box = {
         left: x - halfWidth, right: x + halfWidth,
         top: y - halfHeight, bottom: y + halfHeight,
@@ -1061,16 +1083,18 @@ function _drawDynamicEdgeLabels(ctx) {
         + Math.max(0, box.right - viewport.right)
         + Math.max(0, viewport.top - box.top)
         + Math.max(0, box.bottom - viewport.bottom);
+      // How far the caption slid along its curve from the middle.
+      const shift = Math.hypot(x - centre.x, y - centre.y);
       const score = nodeOverlap * 2000 + labelOverlap * 1200
-        + overflow * overflow * 1000 + Math.abs(offset) * 20;
-      if (!best || score < best.score) best = {x, y, box, score};
+        + overflow * overflow * 1000 + shift * 20;
+      if (!best || score < best.score) best = {x, y, angle, box, score};
     });
 
     if (!best) return;
     placedBoxes.push(best.box);
     ctx.save();
     ctx.translate(best.x, best.y);
-    ctx.rotate(angle);
+    ctx.rotate(best.angle);
     ctx.globalAlpha = 0.96;
     ctx.lineWidth = 4;
     ctx.strokeStyle = 'rgba(255,255,255,0.94)';
