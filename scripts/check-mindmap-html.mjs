@@ -69,7 +69,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -689,6 +689,24 @@ if (bezierSeedHandNode.note !== "손으로 쓴 메모" || bezierSeedHandNode.pro
 const bezierSeedNoNode = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyBezierSeedFix(bezierSeedNoNode)) throw new Error("Bezier seed migration must still stamp its version without the node");
 if (childIds(bezierSeedNoNode.root) !== "n0llvuh1") throw new Error("Bezier seed migration touched a document that never had the node");
+
+// 2026-10-23: TSE_SEM3_AutoTune 경로만 정리. nggbas52 의 없는 폴더 경로만 고치고 메모·단계·제목은 그대로 둔다.
+const autoTuneSample = { root: mk("root", [
+  { id: "nggbas52", title: "TSE_SEM3_AutoTune", kind: "low", status: "draft", note: "2027-04월호(교내과제결과물)",
+    projectPath: "D:\\__AI_automatized\\TSE_SEM2026_dev\\draft3_AutoTune", children: [] },
+]), links: [] };
+if (!context.__applyAutoTunePathFix(autoTuneSample)) throw new Error("AutoTune path migration did not run");
+if (context.__applyAutoTunePathFix(autoTuneSample)) throw new Error("AutoTune path migration is not idempotent");
+const autoTuneNode = findIn(autoTuneSample.root, "nggbas52");
+if (autoTuneNode.projectPath !== "D:\\__KIT_projects\\TSE_SEM2026_dev\\draft3_AutoTune") throw new Error("AutoTune path migration did not fix the projectPath");
+if (autoTuneNode.note !== "2027-04월호(교내과제결과물)" || autoTuneNode.status !== "draft" || autoTuneNode.title !== "TSE_SEM3_AutoTune") throw new Error("AutoTune path migration touched the note, status or title");
+const autoTuneHand = { root: mk("root", [
+  { id: "nggbas52", title: "AutoTune", kind: "low", status: "draft", projectPath: "E:\\somewhere", children: [] },
+]), links: [] };
+context.__applyAutoTunePathFix(autoTuneHand);
+if (findIn(autoTuneHand.root, "nggbas52").projectPath !== "E:\\somewhere") throw new Error("AutoTune path migration overrode a hand-set path");
+const autoTuneNoNode = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyAutoTunePathFix(autoTuneNoNode)) throw new Error("AutoTune path migration must still stamp its version without the node");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);
