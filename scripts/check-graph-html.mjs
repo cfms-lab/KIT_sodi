@@ -298,6 +298,21 @@ for (const oldId of ["cfmsPINNCAD", "HIPDetect"]) {
   }
 }
 if (!ids.has("cfmsHipDetect")) throw new Error("cfmsHipDetect node is missing");
+// 2026-10-23: 합친 노드의 선은 TSE_TomoSh5 → cfmsHipDetect 점선 하나다 — 계측기의 여덟째 적격성 검사가
+// ⑤의 둘레선 검사(원점 포함 판정)를 옮겨 쓴 부품 채택이라 계보 실선이 아니다(사용자 지시).
+const hipDetectEdges = edges.filter(
+  (edge) => edge.from === "cfmsHipDetect" || edge.to === "cfmsHipDetect",
+);
+if (
+  hipDetectEdges.length !== 1
+  || hipDetectEdges[0].from !== "TSE_TomoSh5"
+  || hipDetectEdges[0].label !== "둘레선 원점 검사"
+  || hipDetectEdges[0]._rel !== "정확도"
+  || hipDetectEdges[0].dashes !== true
+  || hipDetectEdges[0]._tentative !== true
+) {
+  throw new Error("TSE_TomoSh5 -> cfmsHipDetect dashed edge is missing or incorrect");
+}
 // 2026-09-10: SFTF_DynamicTargetSearch 의 계보. 부모는 Tomo_SFTF 하나(볼트
 // Papers/SFTF_동적표적탐색_연구아이디어_2026-07-29.md §3·§6), 자식은 SFTF_ActiveOverprint 다.
 // 2026-08-28 개발 목표 전환 때 떨어졌던 부모 화살표가 다시 사라지면 막는다.

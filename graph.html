@@ -301,18 +301,19 @@ SFTF_HOLONOMY_EDGES.forEach(curated => {
 // 2026-10-23: 사용자 지시로 저장소를 논문 이름 cfmsHipDetect_dev 로 바꾸고 두 노드를 이 노드 하나(cfmsHipDetect)로
 // 합쳤다. cfmsPINNCAD 는 layout_findings.py 의 HIDDEN_NODE_IDS 로 내렸고(볼트 노트에만 남는다), 그래서 아래
 // HIPDETECT_EDGES(cfmsPINNCAD → 이 노드)도 비웠다. 변수 이름 HIPDETECT_* 는 그대로 둔다.
+// 같은 날 사용자 지시로 TSE_TomoSh5 → 이 노드 점선을 더했다(아래 HIPDETECT_EDGES 의 주석).
 const HIPDETECT_NODE = {
   "id": "cfmsHipDetect",
   "label": "cfmsHipDetect",
   "color": {"background": "#f28e2b", "border": "#f28e2b", "highlight": {"background": "#f28e2b", "border": "#f28e2b"}},
   "size": 15.6,
   "font": {"size": 12, "color": "#333333"},
-  "title": "cfmsHipDetect — 중\n차수 0 (in 0 / out 0) · L4 · near\n엉덩이높이 기준점 논문 트랙: 극값 대신 점수가 평탄한 구간의 중앙을 읽어 LOSO 잔차 RMS 1.285 → 0.358 cm, 9명 중 8명에서 표준 landmark 에 더 가깝다",
+  "title": "cfmsHipDetect — 중\n차수 1 (in 1 / out 0) · L4 · near\n엉덩이높이 기준점 논문 트랙: 극값 대신 점수가 평탄한 구간의 중앙을 읽어 LOSO 잔차 RMS 1.285 → 0.358 cm, 9명 중 8명에서 표준 landmark 에 더 가깝다",
   "community": 2,
   "community_name": "중",
   "source_file": "cfmsHipDetect.md",
   "file_type": "concept",
-  "degree": 0,
+  "degree": 1,
   "_intro": "엉덩이 높이는 몸을 가로로 자른 단면 가운데 가장 튀어나온 자리를 골라서는 찾히지 않는다. 점수가 고만고만하게 평평한 구간의 한가운데를 고르면 찾힌다.",
   "_project_path": "D:\\__CFMS_Projects\\cfmsHipDetect_dev",
   "_grade": "중",
@@ -320,7 +321,7 @@ const HIPDETECT_NODE = {
   "_horizon": "near",
   "_level": 4,
   "_family": "cfms",
-  "_in": 0,
+  "_in": 1,
   "_out": 0,
   "_quality": "중",
   "_quality_note": "엉덩이높이 기준점 논문 트랙; 평탄 구간 중앙 추정량이 LOSO 잔차 RMS 1.285 → 0.358 cm (9명 중 8명, 부호검정 p 0.0195), 2026-09-22 IJCST 투고(원고번호 IJCST-09-2026-0266). held-out 0건·N=10 한 조사가 남은 심사 위험",
@@ -426,12 +427,12 @@ const TOMO_SHELL_NODES = [
       "size": 13,
       "color": "#333333"
     },
-    "title": "TSE_TomoSh5 — 하\n차수 1 (in 1 / out 0) · L0 · near\n⑤ 계측 트랙: 허위 둘레선을 기각하고 실패를 격리해 계측 실패가 사용자에게 드러나게 한다",
+    "title": "TSE_TomoSh5 — 하\n차수 2 (in 1 / out 1) · L0 · near\n⑤ 계측 트랙: 허위 둘레선을 기각하고 실패를 격리해 계측 실패가 사용자에게 드러나게 한다",
     "community": 3,
     "community_name": "하",
     "source_file": "Tomo_Shell2026.md",
     "file_type": "concept",
-    "degree": 1,
+    "degree": 2,
     "_intro": "몸의 둘레를 재다가 엉뚱한 값이 나오면 그것을 조용히 넘기지 않고 드러내 주는 계측 방법이다.",
     "_project_path": "D:\\__SFTF_Projects(2026)\\Tomo_Shell2026-dev",
     "_grade": "하",
@@ -440,7 +441,7 @@ const TOMO_SHELL_NODES = [
     "_level": 0,
     "_family": "TSE",
     "_in": 1,
-    "_out": 0,
+    "_out": 1,
     "_quality": "하",
     "_quality_note": "계측 트랙 — 허위 둘레선을 기각하고 실패를 격리해 계측 실패가 사용자에게 드러나게 한다; TomoSh4 선행 투고(익명 companion) 뒤 접수",
     "_bottleneck": null,
@@ -453,6 +454,7 @@ TOMO_SHELL_NODES.forEach(node => {
 });
 // 화살표는 한 줄뿐이다.  ④가 먼저 서고 ⑤가 그 위에서 갈라져 나왔다(투고 순서도 같다).
 // 두 편의 앞 사슬(TomoSh1~3)은 그래프에 노드가 없어 이 묶음은 따로 선다.
+// ⑤ → cfmsHipDetect 점선(2026-10-23)은 아래 HIPDETECT_EDGES 에 있다.
 const TOMO_SHELL_EDGES = [{"from": "TSE_TomoSh4", "to": "TSE_TomoSh5", "label": "강건 계측", "title": "TSE_TomoSh4 → TSE_TomoSh5\n개발 목표: 강건 계측 (확장)\n분할이 안정된 뒤에야 둘레 계측이 의미를 갖는다. ④의 연속 가중 분할을 받아 ⑤가 허위 둘레선을 기각하고 실패를 격리한다 — 투고도 ④가 먼저이고 서로를 익명 companion 으로 인용한다", "dashes": false, "width": 2, "color": {"opacity": 0.65}, "confidence": "GOAL", "_rel": "확장", "_detail": "분할이 안정된 뒤에야 둘레 계측이 의미를 갖는다. ④의 연속 가중 분할을 받아 ⑤가 허위 둘레선을 기각하고 실패를 격리한다 — 투고도 ④가 먼저이고 서로를 익명 companion 으로 인용한다", "_goal": "강건 계측", "_tentative": false}];
 TOMO_SHELL_EDGES.forEach(curated => {
   const index = RAW_EDGES.findIndex(edge => edge.from === curated.from && edge.to === curated.to);
@@ -461,9 +463,13 @@ TOMO_SHELL_EDGES.forEach(curated => {
 });
 // TOMO_SHELL_TRACKS_END
 
-// 저장소가 먼저 서고 그 위에서 계측기 결과가 갈라져 나왔다.  화살표는 아래 EDGE_DIRECTION
-// 규칙대로 «먼저 선 것 → 갈라져 나온 것» 으로 그린다.
-const HIPDETECT_EDGES = [];   // 2026-10-23 비움 — cfmsPINNCAD 를 내리고 이 노드로 합쳤다
+// 2026-10-23: cfmsPINNCAD → 이 노드 화살표는 PINNCAD 를 내리며 걷었다. 대신 사용자 지시로
+// TSE_TomoSh5 → 이 노드를 단다. 계측기의 여덟째 적격성 검사(Supplement 8 「each named section
+// encircles the measurement axis」)가 ⑤의 둘레선 검사(원점 포함 판정)를 옮겨 쓴 것이다 —
+// cfmsHipDetect_dev docs/G1B_ADOPTED_MEASUREMENT_PACKAGE.md(P310~P312, 2026-09-05). 코드는 import 하지
+// 않고 식만 다시 적었으며 원고도 ⑤를 인용하지 않는다. 계보가 아니라 부품 채택이라 점선(_tentative)으로 둔다.
+// 그 문서는 출처를 게재본 TomoSh3(TSE 62권, 2025)로 적었지만 검사는 ⑤의 것이다(당시 폴더 draft_sh3, 09-10 sh5 로 개명).
+const HIPDETECT_EDGES = [{"from": "TSE_TomoSh5", "to": "cfmsHipDetect", "label": "둘레선 원점 검사", "title": "TSE_TomoSh5 → cfmsHipDetect\n개발 목표: 둘레선 원점 검사 (정확도)\n⑤의 둘레선 검사(단면 고리가 측정 축을 감싸는지 보는 원점 포함 판정 |c − a| < r)를 엉덩이높이 계측기의 여덟째 적격성 검사로 옮겨 썼다. 코드는 가져오지 않고 식만 다시 적은 부품 채택이라 점선이다", "dashes": true, "width": 2, "color": {"opacity": 0.65}, "confidence": "GOAL", "_rel": "정확도", "_detail": "⑤의 둘레선 검사(단면 고리가 측정 축을 감싸는지 보는 원점 포함 판정 |c − a| < r)를 엉덩이높이 계측기의 여덟째 적격성 검사로 옮겨 썼다. 코드는 가져오지 않고 식만 다시 적은 부품 채택이라 점선이다", "_goal": "둘레선 원점 검사", "_tentative": true}];
 HIPDETECT_EDGES.forEach(curated => {
   const index = RAW_EDGES.findIndex(edge => edge.from === curated.from && edge.to === curated.to);
   if (index >= 0) RAW_EDGES[index] = curated;
