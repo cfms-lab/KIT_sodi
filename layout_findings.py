@@ -35,7 +35,10 @@ DSTS = [HERE / "graph.html"]
 # 남으므로, 여기에 적어야 재생성이 노드와 그 엣지를 함께 걷어낸다.
 # 2026-09-24: cfmsDispersity → cfmsDispersityKNN 개명. 옛 id 가 스냅샷에서 되살아나면 같은 논문이
 # 두 번 서므로 옛 id 를 여기 적어 재생성이 걷어내게 한다(런북 「노드 id 를 바꾸면」 2번).
-HIDDEN_NODE_IDS = {"PFTF_subMarine", "PFTF_Terrain", "PFTF_ResearchOptimize", "cfmsDispersity"}
+# 2026-10-23: cfmsPINNCAD 를 내렸다(사용자 지시). 저장소를 논문 이름 cfmsHipDetect_dev 로 바꾸면서 홈페이지의
+# 두 노드(cfmsPINNCAD · HIPDetect)를 cfmsHipDetect 하나로 합쳤다. PINNCAD 연구선(보류)은 볼트 노트에만 남는다.
+# 되살리려면 여기서 빼고 POS 에 좌표를 돌려 놓는다(옛 자리 (-10, 1060)).
+HIDDEN_NODE_IDS = {"PFTF_subMarine", "PFTF_Terrain", "PFTF_ResearchOptimize", "cfmsDispersity", "cfmsPINNCAD"}
 
 # Project notes are the single source of truth for local VS Code paths.  The
 # graph node id normally matches the Obsidian project-note stem, so the button
@@ -307,7 +310,6 @@ POS = {
     "cfmsPINNDrape": (-140, 1130),
     "cfmsDrape": (-380, 1000),
     "cfmsMiindo": (-170, 800),
-    "cfmsPINNCAD": (-10, 1060),
     "SFTFSoft_DFSVR": (160, -150),
     # Restored from the last pre-archive graph snapshot.
     "SFTF_UrbanTraffic": (1230, 240),
@@ -322,7 +324,8 @@ POS = {
     # 2026-09-07: graph.html 의 큐레이션 노드(SFTF_HOLONOMY_NODE)와 짝을 이룬다.
     "SFTF_Holonomy": (760, 1050),
     # 2026-09-10: graph.html 의 큐레이션 노드(HIPDETECT_NODE)와 짝을 이룬다.
-    "HIPDetect": (460, 1090),
+    # 2026-10-23: 노드 id HIPDetect → cfmsHipDetect (저장소·볼트 노트와 같은 이름, cfmsPINNCAD 를 흡수).
+    "cfmsHipDetect": (460, 1090),
     # 2026-09-14: graph.html 의 큐레이션 노드(CFMSDISPERSITY_NODE)와 짝을 이룬다.
     # 이미 나온 논문인데 그래프에 없었다. 자리는 은종현 교수님 묶음 오른쪽의 빈 곳이다.
     "cfmsDispersityKNN": (600, 1050),
@@ -529,7 +532,7 @@ HYPEREDGES = [
      "kind": "coauthor",
      "nodes": ["PFTF_Compression", "cfmsAutoSew",
                "cfmsAutoPlace_IJCST", "cfmsDrapeInverse", "cfmsDrapeSCAN",
-               "HIPDetect", "TSE_TomoSh4", "TSE_TomoSh5"],
+               "cfmsHipDetect", "TSE_TomoSh4", "TSE_TomoSh5"],   # 2026-10-23 HIPDetect → cfmsHipDetect
      "color": "#7c3aed", "labelColor": "#6d28d9",
      "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
@@ -700,7 +703,8 @@ QUALITY_ROWS = [
     # graph.html 의 큐레이션 노드는 RAW_NODES 밖에 있어도 등급 행은 여기서 나가야 한다.
     # 2026-09-22: IJCST 투고 완료(사용자). 등급은 그대로 중 — 볼트 grade 와 같다.
     # 2026-09-22 저녁: 편집부 접수 확인 메일 — 원고번호 IJCST-09-2026-0266 (볼트 HipDetect.md submission·badge).
-    ("HIPDetect", "HIPDetect", "중",
+    # 2026-10-23: 노드 id HIPDetect → cfmsHipDetect, 볼트 노트도 cfmsHipDetect.md(위 cfmsPINNCAD 행은 HIDDEN 으로 걸러진다).
+    ("cfmsHipDetect", "cfmsHipDetect", "중",
      "엉덩이높이 기준점 논문 트랙; 평탄 구간 중앙 추정량이 LOSO 잔차 RMS 1.285 → 0.358 cm (9명 중 8명, 부호검정 p 0.0195), **2026-09-22 IJCST 투고 완료(원고번호 IJCST-09-2026-0266)**. held-out 0건·N=10 한 조사가 남은 심사 위험"),
     # 2026-09-24: 분산도 네 편의 첫 편(2013). 사용자 지시로 그래프에 올린다. 등급은 **상** —
     # 투고 뒤에는 투고한 저널의 급이 등급인데(2026-09-14 규칙) Journal of Applied Polymer
@@ -2572,6 +2576,13 @@ def _replace_curated_garment_edges(match):
     ]
     edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
     edges.extend(copy.deepcopy(DRAPESCAN_EDGES))
+    # 2026-10-23: 숨긴 노드로 가는 큐레이션 엣지도 걷는다. 이 목록은 페이지가 런타임에 RAW_EDGES 로 밀어 넣어서,
+    # 아래 RAW_EDGES 의 HIDDEN 필터를 거치지 않는다 — cfmsPINNCAD 를 숨기자 끝점 없는 화살표 셋이 남을 뻔했다.
+    edges = [
+        edge for edge in edges
+        if str(edge.get("from")) not in HIDDEN_NODE_IDS
+        and str(edge.get("to")) not in HIDDEN_NODE_IDS
+    ]
     return "const CURATED_GARMENT_EDGES = " + json.dumps(edges, ensure_ascii=False) + ";"
 
 
@@ -2682,7 +2693,7 @@ s, nraw = re.subn(r"const RAW_NODES = (\[.*?\]);", _preserve_raw_nodes,
 # 2026-09-19 에 cfmsDispersityKNN 로 들어가는 엣지가 조용히 걸러졌다.
 RUNTIME_CURATED_NODE_IDS = (
     "cfmsAutoSew", "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "cfmsDrapeSCAN",
-    "SFTF_Holonomy", "HIPDetect", "cfmsDispersityKNN",
+    "SFTF_Holonomy", "cfmsHipDetect", "cfmsDispersityKNN",   # 2026-10-23 HIPDetect → cfmsHipDetect
     "TSE_TomoSh4", "TSE_TomoSh5",
 )
 
@@ -2957,7 +2968,7 @@ assert ncompleteness == 1, "PAPER_COMPLETENESS block not written"
 # 노드별 투고 단계.  한 노트가 논문 둘을 담는 트랙 노드(cfmsAutoPlace_IJCST·TSE_TomoSh4 …)는
 # 부모 노트의 단계를 물려받는다 — 볼트 대시보드의 분리트랙이 그렇게 적혀 있다.
 stage_by_id = {}
-# 노드 id 와 노트 이름의 대소문자가 어긋난 짝이 있다(HIPDetect 노드 ↔ HipDetect.md).
+# 노드 id 와 노트 이름의 대소문자가 어긋난 짝이 있었다(HIPDetect 노드 ↔ HipDetect.md — 2026-10-23 둘 다 cfmsHipDetect 로 맞췄다).
 _stage_ci = {stem.lower(): stage for stem, stage in NOTE_STAGES.items()}
 for _node_id in POS:
     # 부모 노트와 단계가 갈린 트랙은 물려받기 전에 덮는다(TRACK_STAGES 주석 참고).

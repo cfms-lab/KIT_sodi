@@ -69,9 +69,8 @@ const expectedVaultGrades = {
   cfmsCIPC: "하",   // 2026-09-14 투고 뒤 저널 등급(TSE 국내)
   cfmsDrape: "등급 없음",
   cfmsMiindo: "등급 없음",
-  cfmsPINNCAD: "하",
   cfmsPINNDrape: "하",
-  HIPDetect: "중",
+  cfmsHipDetect: "중",   // 2026-10-23 HIPDetect → cfmsHipDetect, cfmsPINNCAD 는 내렸다(HIDDEN)
   PFTF_GFiberCT: "하",   // 2026-09-22 中 → 下: 투고 뒤에는 투고한 저널의 급(국내지)
   PFTF_AsymTensor: "중",
   PFTF_Compression: "중",
@@ -130,7 +129,7 @@ const positions = Object.assign(
   readJsonConstant("CURATED_POSITIONS", "{"),
 );
 // 2026-09-10: graph.html 의 POS + CURATED_POSITIONS 병합 결과 전체를 그대로 적는다.
-const expectedPositions = {"Tomo_SFTF":{"x":760,"y":190},"Tomo_SFTFSoft":{"x":480,"y":60},"SFTF_Clustering":{"x":460,"y":320},"PFTF":{"x":760,"y":380},"SFTF_Composite":{"x":760,"y":650},"SFTF_InjMold":{"x":910,"y":0},"PFTF_Mold":{"x":1010,"y":100},"PFTF_Compression":{"x":280,"y":710},"Tomo_DFSVR":{"x":150,"y":60},"PFTF_VisCull_kDop":{"x":40,"y":250},"SFTF_SewerPOC":{"x":1060,"y":560},"SFTFSoft_GNN":{"x":260,"y":190},"SFTF_DrapePrior":{"x":-220,"y":680},"PFTF_AsymTensor":{"x":600,"y":650},"PFTF_DrapePrior_VisCull_kDop":{"x":-270,"y":540},"PFTF_GFiberCT":{"x":600,"y":850},"SFTF_QEM":{"x":470,"y":190},"SFTF_DynamicTargetSearch":{"x":270,"y":500},"DFSVR_VisCull":{"x":-80,"y":-150},"SFTFSoft_GNN_DFSVR":{"x":-80,"y":60},"SFTF_ActiveOverprint":{"x":40,"y":430},"SFTF_DrapeOverprint":{"x":100,"y":630},"ColdOndol":{"x":1230,"y":460},"ColdOndol_Positioning":{"x":1050,"y":360},"cfmsCIPC":{"x":-110,"y":920},"TSE_SEM1_Bezier":{"x":940,"y":650},"TSE_SEM2_Tensor":{"x":940,"y":850},"TSE_SEM3_AutoTune":{"x":940,"y":1110},"SFTF_HeatMethod":{"x":760,"y":850},"cfmsPINNDrape":{"x":-140,"y":1130},"cfmsDrape":{"x":-380,"y":1000},"cfmsMiindo":{"x":-170,"y":800},"cfmsPINNCAD":{"x":-10,"y":1060},"SFTFSoft_DFSVR":{"x":160,"y":-150},"SFTF_UrbanTraffic":{"x":1230,"y":240},"cfmsAutoSew":{"x":460,"y":1280},"cfmsAutoPlace_IJCST":{"x":170,"y":1280},"cfmsAutoPlace_JCDE":{"x":-140,"y":1350},"cfmsDrapeSCAN":{"x":360,"y":980},"cfmsDrapeInverse":{"x":220,"y":840},"SFTF_Holonomy":{"x":760,"y":1050},"HIPDetect":{"x":460,"y":1090},"cfmsDispersityKNN":{"x":600,"y":1050},"TSE_TomoSh4":{"x":460,"y":650},"TSE_TomoSh5":{"x":450,"y":850},"Jeon_DLPOrient":{"x":710,"y":-80},"cfmsDispersityProp":{"x":950,"y":1220},"Cho_MoldWarpDIC":{"x":1140,"y":130},"cfmsHMDispersity":{"x":670,"y":1270},"dynamicDispersity":{"x":600,"y":1370},"cfmsAnatomy":{"x":-330,"y":810},"cfmsAutoGrading":{"x":70,"y":1430}};
+const expectedPositions = {"Tomo_SFTF":{"x":760,"y":190},"Tomo_SFTFSoft":{"x":480,"y":60},"SFTF_Clustering":{"x":460,"y":320},"PFTF":{"x":760,"y":380},"SFTF_Composite":{"x":760,"y":650},"SFTF_InjMold":{"x":910,"y":0},"PFTF_Mold":{"x":1010,"y":100},"PFTF_Compression":{"x":280,"y":710},"Tomo_DFSVR":{"x":150,"y":60},"PFTF_VisCull_kDop":{"x":40,"y":250},"SFTF_SewerPOC":{"x":1060,"y":560},"SFTFSoft_GNN":{"x":260,"y":190},"SFTF_DrapePrior":{"x":-220,"y":680},"PFTF_AsymTensor":{"x":600,"y":650},"PFTF_DrapePrior_VisCull_kDop":{"x":-270,"y":540},"PFTF_GFiberCT":{"x":600,"y":850},"SFTF_QEM":{"x":470,"y":190},"SFTF_DynamicTargetSearch":{"x":270,"y":500},"DFSVR_VisCull":{"x":-80,"y":-150},"SFTFSoft_GNN_DFSVR":{"x":-80,"y":60},"SFTF_ActiveOverprint":{"x":40,"y":430},"SFTF_DrapeOverprint":{"x":100,"y":630},"ColdOndol":{"x":1230,"y":460},"ColdOndol_Positioning":{"x":1050,"y":360},"cfmsCIPC":{"x":-110,"y":920},"TSE_SEM1_Bezier":{"x":940,"y":650},"TSE_SEM2_Tensor":{"x":940,"y":850},"TSE_SEM3_AutoTune":{"x":940,"y":1110},"SFTF_HeatMethod":{"x":760,"y":850},"cfmsPINNDrape":{"x":-140,"y":1130},"cfmsDrape":{"x":-380,"y":1000},"cfmsMiindo":{"x":-170,"y":800},"SFTFSoft_DFSVR":{"x":160,"y":-150},"SFTF_UrbanTraffic":{"x":1230,"y":240},"cfmsAutoSew":{"x":460,"y":1280},"cfmsAutoPlace_IJCST":{"x":170,"y":1280},"cfmsAutoPlace_JCDE":{"x":-140,"y":1350},"cfmsDrapeSCAN":{"x":360,"y":980},"cfmsDrapeInverse":{"x":220,"y":840},"SFTF_Holonomy":{"x":760,"y":1050},"cfmsHipDetect":{"x":460,"y":1090},"cfmsDispersityKNN":{"x":600,"y":1050},"TSE_TomoSh4":{"x":460,"y":650},"TSE_TomoSh5":{"x":450,"y":850},"Jeon_DLPOrient":{"x":710,"y":-80},"cfmsDispersityProp":{"x":950,"y":1220},"Cho_MoldWarpDIC":{"x":1140,"y":130},"cfmsHMDispersity":{"x":670,"y":1270},"dynamicDispersity":{"x":600,"y":1370},"cfmsAnatomy":{"x":-330,"y":810},"cfmsAutoGrading":{"x":70,"y":1430}};
 const hyperedges = readJsonConstant("hyperedges", "[");
 const curatedHyperedgeMembers = readJsonConstant("CURATED_HYPEREDGE_MEMBERS", "{");
 for (const [label, nodeIds] of Object.entries(curatedHyperedgeMembers)) {
@@ -178,13 +177,14 @@ const expectedHulls = {
   // 2026-09-22: 사용자 지시로 cfmsDrapeInverse ↔ cfmsAutoPlace_JCDE 를 이희란 훌과
   // 맞교환했다.
   // 2026-10-19: cfmsAutoGrading 을 넣었다(사용자 지시). 10-18 에 세운 ToDo 노드로 다른 훌에 없었다.
-  "Drape": ["cfmsMiindo", "cfmsDrape", "cfmsCIPC", "cfmsPINNDrape", "cfmsPINNCAD",
+  // 2026-10-23: cfmsPINNCAD 가 빠졌다 — 노드를 내리고 cfmsHipDetect(이희란 훌)로 합쳤다(사용자 지시).
+  "Drape": ["cfmsMiindo", "cfmsDrape", "cfmsCIPC", "cfmsPINNDrape",
     "cfmsAutoPlace_JCDE", "SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop", "cfmsAutoGrading"],
   // 2026-09-20: SFTF_Clustering 을 뺐다 — 유일하게 두 훌에 동시에 들던 노드다.
   // 이희란 교수 공저 관계 자체는 그대로이고 노드 정보의 공저자 줄에 남는다.
   // 2026-09-22: cfmsAutoPlace_JCDE ↔ cfmsDrapeInverse 맞교환(사용자 지시).
   "이희란 교수님": ["PFTF_Compression", "cfmsAutoSew",
-    "cfmsAutoPlace_IJCST", "cfmsDrapeInverse", "cfmsDrapeSCAN", "HIPDetect",
+    "cfmsAutoPlace_IJCST", "cfmsDrapeInverse", "cfmsDrapeSCAN", "cfmsHipDetect",   // 2026-10-23 HIPDetect → cfmsHipDetect
     "TSE_TomoSh4", "TSE_TomoSh5"],
   // 2026-09-14: TSE_SEM3_AutoTune 이 빠졌다 — ③ 만 설인환 단독 저자로 바뀌었다.
   // 2026-09-16: PFTF_AsymTensor 가 들어왔다 — 은종현 교수 공저 확정.
@@ -259,14 +259,12 @@ const expectedGarmentEdges = [
   ["cfmsDrape", "cfmsAutoPlace_IJCST", "패턴 물리 검증", "정확도", false],
   ["cfmsDrape", "cfmsDrapeSCAN", "실행 기반", "통합", false],
   ["cfmsMiindo", "cfmsDrapeSCAN", "구현 호스트", "통합", false],
-  ["cfmsPINNCAD", "cfmsDrapeSCAN", "body atlas", "확장", false],
+  // 2026-10-23: cfmsPINNCAD 를 내리면서 그 노드의 큐레이션 엣지 셋(body atlas · 봉제 대응 · 저차원 예측)이 빠졌다.
   ["cfmsCIPC", "cfmsDrapeSCAN", "검증 오라클", "정확도", false],
   ["SFTF_DrapePrior", "cfmsDrapeSCAN", "부분 재사용", "확장", false],
   ["PFTF_GFiberCT", "cfmsDrapeSCAN", "조건부 QA", "정확도", false],
   ["cfmsDrapeSCAN", "PFTF_Compression", "후속 응용", "확장", false],
-  ["cfmsAutoSew", "cfmsPINNCAD", "봉제 대응", "통합", false],
   ["cfmsAutoSew", "cfmsPINNDrape", "봉제 실험", "정확도", false],
-  ["cfmsDrape", "cfmsPINNCAD", "저차원 예측", "가속", true],
 ];
 for (const [from, to, label, relation, tentative] of expectedGarmentEdges) {
   const matches = edges.filter((edge) => edge.from === from && edge.to === to);
@@ -291,18 +289,15 @@ if (
 ) {
   throw new Error("SFTF_HeatMethod -> SFTF_Holonomy split edge is missing or incorrect");
 }
-// 2026-09-10: cfmsPINNCAD 에서 갈라져 나온 HIPDetect 도 같은 분리 규칙을 따른다.
-const hipDetectEdges = edges.filter(
-  (edge) => edge.from === "HIPDetect" || edge.to === "HIPDetect",
-);
-if (
-  hipDetectEdges.length !== 1
-  || hipDetectEdges[0].from !== "cfmsPINNCAD"
-  || hipDetectEdges[0].label !== "엉덩이높이 기준점"
-  || hipDetectEdges[0]._rel !== "정확도"
-) {
-  throw new Error("cfmsPINNCAD -> HIPDetect split edge is missing or incorrect");
+// 2026-09-10 ~ 2026-10-22: cfmsPINNCAD → HIPDetect 분리 화살표를 지켰다.
+// 2026-10-23: 사용자 지시로 저장소를 cfmsHipDetect_dev 로 바꾸고 두 노드를 cfmsHipDetect 하나로 합쳤다.
+// 옛 이름 둘 중 어느 것도 되살아나면 안 되고(HIDDEN·노드 id 개명), 합친 노드는 있어야 한다.
+for (const oldId of ["cfmsPINNCAD", "HIPDetect"]) {
+  if (ids.has(oldId) || edges.some((edge) => edge.from === oldId || edge.to === oldId)) {
+    throw new Error(`${oldId} is back on the graph — it was merged into cfmsHipDetect on 2026-10-23`);
+  }
 }
+if (!ids.has("cfmsHipDetect")) throw new Error("cfmsHipDetect node is missing");
 // 2026-09-10: SFTF_DynamicTargetSearch 의 계보. 부모는 Tomo_SFTF 하나(볼트
 // Papers/SFTF_동적표적탐색_연구아이디어_2026-07-29.md §3·§6), 자식은 SFTF_ActiveOverprint 다.
 // 2026-08-28 개발 목표 전환 때 떨어졌던 부모 화살표가 다시 사라지면 막는다.

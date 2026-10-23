@@ -69,7 +69,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -573,6 +573,50 @@ if (findIn(tensorHandSample.root, "nuzx6yz7").status !== "revision") throw new E
 const tensorNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyTensorSubmitted(tensorNoNodeSample)) throw new Error("Tensor submitted migration must still stamp its version without the nodes");
 if (childIds(tensorNoNodeSample.root) !== "n0llvuh1") throw new Error("Tensor submitted migration touched a document that never had the nodes");
+
+// 2026-10-23: cfmsPINNCAD(npp8yov2)·HIPDetect 를 cfmsHipDetect 하나로 합친다(사용자 지시, 저장소 cfmsHipDetect_dev 로 개명).
+const hipMergeSample = {
+  root: mk("root", [
+    mk("nptj5211"),
+    mk("nf18t2n5", [
+      { id: "npp8yov2", title: "cfmsPINNCAD", kind: "low", status: "blocked",
+        url: "https://github.com/cfms-lab/cfmsPINNCAD_dev", projectPath: "D:\\__CFMS_Projects\\cfmsPINNCAD_dev",
+        children: [mk("orphanChild")] },
+    ]),
+    mk("nkrb7xj2", [
+      { id: "HIPDetect", title: "HIPDetect", kind: "medium", status: "submitted",
+        url: "https://github.com/cfms-lab/cfmsPINNCAD_dev", projectPath: "D:\\__VSCode_Projects\\cfmsPINNCAD_dev",
+        children: [mk("nokpy3z1")] },
+    ]),
+  ]),
+  links: [
+    { from: "nptj5211", to: "npp8yov2", label: "trusted verifier" },
+    { from: "npp8yov2", to: "HIPDetect", label: "엉덩이높이 기준점" },
+    { from: "nptj5211", to: "nf18t2n5", label: "warm-start hook" },
+  ],
+};
+if (!context.__applyHipDetectMerge(hipMergeSample)) throw new Error("HipDetect merge migration did not run");
+if (context.__applyHipDetectMerge(hipMergeSample)) throw new Error("HipDetect merge migration is not idempotent");
+if (findIn(hipMergeSample.root, "npp8yov2")) throw new Error("HipDetect merge migration left cfmsPINNCAD (npp8yov2) in the tree");
+if (childIds(findIn(hipMergeSample.root, "nf18t2n5")) !== "orphanChild") throw new Error("HipDetect merge migration lost npp8yov2's child");
+const hipMerged = findIn(hipMergeSample.root, "HIPDetect");
+if (!hipMerged || hipMerged.title !== "cfmsHipDetect" || hipMerged.status !== "submitted" || childIds(hipMerged) !== "nokpy3z1") {
+  throw new Error("HipDetect merge migration did not rename HIPDetect or touched its status/children");
+}
+if (hipMerged.url !== "https://github.com/cfms-lab/cfmsHipDetect_dev" || hipMerged.projectPath !== "D:\\__CFMS_Projects\\cfmsHipDetect_dev") {
+  throw new Error("HipDetect merge migration did not move the repository address/path");
+}
+if (hipMergeSample.links.some((l) => l.from === "npp8yov2" || l.to === "npp8yov2") || hipMergeSample.links.length !== 1) {
+  throw new Error("HipDetect merge migration left a link on npp8yov2 or dropped an unrelated one");
+}
+const hipMergeValidation = context.__validate(hipMergeSample);
+if (!hipMergeValidation.ok) throw new Error("HipDetect merge sample is invalid: " + hipMergeValidation.errors[0]);
+const hipHandSample = { root: mk("root", [{ id: "HIPDetect", title: "엉덩이높이 논문", kind: "medium", children: [] }]), links: [] };
+context.__applyHipDetectMerge(hipHandSample);
+if (findIn(hipHandSample.root, "HIPDetect").title !== "엉덩이높이 논문") throw new Error("HipDetect merge migration overwrote a hand-edited title");
+const hipNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyHipDetectMerge(hipNoNodeSample)) throw new Error("HipDetect merge migration must still stamp its version without the nodes");
+if (childIds(hipNoNodeSample.root) !== "n0llvuh1") throw new Error("HipDetect merge migration touched a document that never had the nodes");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);
