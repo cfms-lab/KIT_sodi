@@ -136,6 +136,13 @@ if (prunePairs.some(([from, to]) => from === "SFTF_DynamicTargetSearch" && to ==
   throw new Error("SFTF_DynamicTargetSearch -> SFTF_ActiveOverprint must stay drawn (Tomo_SFTF -> DTS -> AO lineage)");
 }
 const shownEdges = edges.filter((edge) => !isPruned(edge));
+// 2026-10-23: PFTF → PFTF_VisCull_kDop 은 사용자 지시로 기본(continuous)과 반대쪽으로 휜다(EDGE_SMOOTH_OVERRIDES).
+if (
+  !html.includes(`["PFTF", "PFTF_VisCull_kDop", { type: 'curvedCW', roundness: 0.165 }]`)
+  || !html.includes("const edgeSmooth = i => FAN_SMOOTH[i] || _edgeSmoothOverride(i) || DEFAULT_EDGE_SMOOTH;")
+) {
+  throw new Error("PFTF -> PFTF_VisCull_kDop curvature override is missing");
+}
 for (const id of new Set(edges.map((edge) => edge.to))) {
   if (!shownEdges.some((edge) => edge.to === id)) {
     throw new Error(`${id} lost its last drawn parent to EDGE_PRUNE_PAIRS`);

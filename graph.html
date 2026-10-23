@@ -905,7 +905,20 @@ function computeFanSmooth() {
 }
 
 let FAN_SMOOTH = {};
-const edgeSmooth = i => FAN_SMOOTH[i] || DEFAULT_EDGE_SMOOTH;
+/* 2026-10-23: 사용자 지시로 휘는 방향을 손으로 정한 엣지(자유 배치에서만 쓴다, 부채꼴이 먼저다).
+   기본값 continuous 는 vis 가 두 노드의 좌표를 보고 휘는 쪽을 정하므로, 반대로 휘게 하려면
+   curvedCW/CCW 를 직접 줘야 한다. roundness 는 원래 휨과 같은 크기가 되게 vis 곡선으로 재서 골랐다 —
+   PFTF → PFTF_VisCull_kDop: continuous 0.2 가 733px 엣지에서 −55px(진행 방향 오른쪽)으로 휘었고,
+   curvedCW 0.165 가 +55px 이다. 값은 «from, to, smooth». */
+const EDGE_SMOOTH_OVERRIDES = [
+  ["PFTF", "PFTF_VisCull_kDop", { type: 'curvedCW', roundness: 0.165 }],
+];
+function _edgeSmoothOverride(i) {
+  const e = RAW_EDGES[i];
+  const hit = e && EDGE_SMOOTH_OVERRIDES.find(([from, to]) => e.from === from && e.to === to);
+  return hit ? hit[2] : null;
+}
+const edgeSmooth = i => FAN_SMOOTH[i] || _edgeSmoothOverride(i) || DEFAULT_EDGE_SMOOTH;
 
 /* 부채꼴을 지금 좌표로 다시 고르고 화면에 반영한다. 계층 배치에서는 전역 cubicBezier 가
    맞으므로 아무것도 하지 않는다 — 자유 배치로 돌아올 때 applyLayout 이 다시 부른다. */
