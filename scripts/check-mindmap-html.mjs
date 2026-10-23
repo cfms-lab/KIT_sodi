@@ -69,7 +69,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -617,6 +617,44 @@ if (findIn(hipHandSample.root, "HIPDetect").title !== "엉덩이높이 논문") 
 const hipNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyHipDetectMerge(hipNoNodeSample)) throw new Error("HipDetect merge migration must still stamp its version without the nodes");
 if (childIds(hipNoNodeSample.root) !== "n0llvuh1") throw new Error("HipDetect merge migration touched a document that never had the nodes");
+
+// 2026-10-23: TSE_SEM2_Tensor 게재가. n9ccnpv1(②)만 accepted 로 올리고, 표가 되덮어 남아 있던 옛 씨앗 메모·
+// 복사된 projectPath 를 고친다. ①(nuzx6yz7)·③(nggbas52)·제목·자식과 손으로 둔 값은 건드리지 않는다.
+const tensorAcceptedSample = {
+  root: mk("root", [
+    mk("nffg4ou5", [
+      { id: "nuzx6yz7", title: "TSE_SEM1_Bezier", kind: "low", status: "submitted", note: "선빈. 2026-10",
+        projectPath: "D:\\__AI_automatized\\TSE_SEM2026_dev\\draft1_Bezier", children: [
+        { id: "n9ccnpv1", title: "TSE_SEM2_Tensor", kind: "low", status: "submitted", note: "선빈. 2026-12",
+          projectPath: "D:\\__AI_automatized\\TSE_SEM2026_dev\\draft1_Bezier", children: [
+          { id: "nggbas52", title: "TSE_SEM3_AutoTune", kind: "low", status: "blocked", children: [] },
+        ] },
+      ] },
+    ]),
+  ]),
+  links: [],
+};
+if (!context.__applyTensorAccepted(tensorAcceptedSample)) throw new Error("Tensor accepted migration did not run");
+if (context.__applyTensorAccepted(tensorAcceptedSample)) throw new Error("Tensor accepted migration is not idempotent");
+const tensorAccepted = findIn(tensorAcceptedSample.root, "n9ccnpv1");
+if (tensorAccepted.status !== "accepted") throw new Error(`Tensor accepted migration left n9ccnpv1 at ${tensorAccepted.status}`);
+if (!tensorAccepted.note.includes("2026-10-23 게재가")) throw new Error("Tensor accepted migration did not replace the seed note");
+if (tensorAccepted.projectPath !== "D:\\__KIT_projects\\TSE_SEM2026_dev\\draft2_Tensor") throw new Error("Tensor accepted migration did not fix the copied projectPath");
+if (tensorAccepted.title !== "TSE_SEM2_Tensor" || childIds(tensorAccepted) !== "nggbas52") throw new Error("Tensor accepted migration touched the title or children");
+const tensorAcceptedBezier = findIn(tensorAcceptedSample.root, "nuzx6yz7");
+if (tensorAcceptedBezier.status !== "submitted" || tensorAcceptedBezier.note !== "선빈. 2026-10") throw new Error("Tensor accepted migration touched TSE_SEM1_Bezier");
+if (findIn(tensorAcceptedSample.root, "nggbas52").status !== "blocked") throw new Error("Tensor accepted migration touched TSE_SEM3_AutoTune");
+const tensorAcceptedValidation = context.__validate(tensorAcceptedSample);
+if (!tensorAcceptedValidation.ok) throw new Error(`Tensor accepted sample is invalid: ${tensorAcceptedValidation.errors[0]}`);
+const tensorAcceptedHand = { root: mk("root", [
+  { id: "n9ccnpv1", title: "Tensor", kind: "low", status: "published", note: "손으로 쓴 메모", projectPath: "E:\\somewhere", children: [] },
+]), links: [] };
+context.__applyTensorAccepted(tensorAcceptedHand);
+const tensorAcceptedHandNode = findIn(tensorAcceptedHand.root, "n9ccnpv1");
+if (tensorAcceptedHandNode.status !== "published" || tensorAcceptedHandNode.note !== "손으로 쓴 메모" || tensorAcceptedHandNode.projectPath !== "E:\\somewhere") throw new Error("Tensor accepted migration overrode a hand-set field");
+const tensorAcceptedNoNode = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyTensorAccepted(tensorAcceptedNoNode)) throw new Error("Tensor accepted migration must still stamp its version without the node");
+if (childIds(tensorAcceptedNoNode.root) !== "n0llvuh1") throw new Error("Tensor accepted migration touched a document that never had the node");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);
