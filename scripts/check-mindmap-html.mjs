@@ -69,7 +69,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -655,6 +655,40 @@ if (tensorAcceptedHandNode.status !== "published" || tensorAcceptedHandNode.note
 const tensorAcceptedNoNode = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyTensorAccepted(tensorAcceptedNoNode)) throw new Error("Tensor accepted migration must still stamp its version without the node");
 if (childIds(tensorAcceptedNoNode.root) !== "n0llvuh1") throw new Error("Tensor accepted migration touched a document that never had the node");
+
+// 2026-10-23: TSE_SEM1_Bezier 옛 씨앗 정리. nuzx6yz7 의 메모 「선빈. 2026-10」·없는 폴더 경로만 고치고,
+// 단계·제목·자식과 ②(n9ccnpv1), 손으로 둔 값은 건드리지 않는다.
+const bezierSeedSample = {
+  root: mk("root", [
+    mk("nffg4ou5", [
+      { id: "nuzx6yz7", title: "TSE_SEM1_Bezier", kind: "low", status: "submitted", note: "선빈. 2026-10",
+        projectPath: "D:\\__AI_automatized\\TSE_SEM2026_dev\\draft1_Bezier", children: [
+        { id: "n9ccnpv1", title: "TSE_SEM2_Tensor", kind: "low", status: "accepted", note: "② 메모",
+          projectPath: "D:\\__KIT_projects\\TSE_SEM2026_dev\\draft2_Tensor", children: [] },
+      ] },
+    ]),
+  ]),
+  links: [],
+};
+if (!context.__applyBezierSeedFix(bezierSeedSample)) throw new Error("Bezier seed migration did not run");
+if (context.__applyBezierSeedFix(bezierSeedSample)) throw new Error("Bezier seed migration is not idempotent");
+const bezierSeed = findIn(bezierSeedSample.root, "nuzx6yz7");
+if (!bezierSeed.note.includes("S-26-0085")) throw new Error("Bezier seed migration did not replace the seed note");
+if (bezierSeed.projectPath !== "D:\\__KIT_projects\\TSE_SEM2026_dev\\draft1_Bezier") throw new Error("Bezier seed migration did not fix the projectPath");
+if (bezierSeed.status !== "submitted" || bezierSeed.title !== "TSE_SEM1_Bezier" || childIds(bezierSeed) !== "n9ccnpv1") throw new Error("Bezier seed migration touched the status, title or children");
+const bezierSeedTensor = findIn(bezierSeedSample.root, "n9ccnpv1");
+if (bezierSeedTensor.note !== "② 메모" || bezierSeedTensor.status !== "accepted") throw new Error("Bezier seed migration touched TSE_SEM2_Tensor");
+const bezierSeedValidation = context.__validate(bezierSeedSample);
+if (!bezierSeedValidation.ok) throw new Error(`Bezier seed sample is invalid: ${bezierSeedValidation.errors[0]}`);
+const bezierSeedHand = { root: mk("root", [
+  { id: "nuzx6yz7", title: "Bezier", kind: "low", status: "submitted", note: "손으로 쓴 메모", projectPath: "E:\\somewhere", children: [] },
+]), links: [] };
+context.__applyBezierSeedFix(bezierSeedHand);
+const bezierSeedHandNode = findIn(bezierSeedHand.root, "nuzx6yz7");
+if (bezierSeedHandNode.note !== "손으로 쓴 메모" || bezierSeedHandNode.projectPath !== "E:\\somewhere") throw new Error("Bezier seed migration overrode a hand-set field");
+const bezierSeedNoNode = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyBezierSeedFix(bezierSeedNoNode)) throw new Error("Bezier seed migration must still stamp its version without the node");
+if (childIds(bezierSeedNoNode.root) !== "n0llvuh1") throw new Error("Bezier seed migration touched a document that never had the node");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);
