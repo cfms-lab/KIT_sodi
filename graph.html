@@ -934,7 +934,8 @@ let FAN_SMOOTH = {};
      - SFTF_DynamicTargetSearch → SFTF_ActiveOverprint · SFTFSoft_GNN → SFTFSoft_GNN_DFSVR 를 직선 목록에 더했다(22개).
    2026-10-24 셋째(사용자 「곡률을 줄여 줘」 — 앞 지시처럼 절반으로, 15:50 웹 배치에서 잼):
      - cfmsAutoSew → cfmsPINNDrape: curvedCW 0.165(+58.6px) → curvedCW 0.09(+30.1px).
-     - cfmsDrape → cfmsDrapeSCAN: 부채꼴이 고른 curvedCW 0.2(+63.1px) → 덮어쓰기 curvedCW 0.105(+30.9px). */
+     - cfmsDrape → cfmsDrapeSCAN: 부채꼴이 고른 curvedCW 0.2(+63.1px) → 덮어쓰기 curvedCW 0.105(+30.9px).
+   2026-10-24 넷째(사용자): Tomo_SFTF → SFTF_UrbanTraffic 를 직선 목록에 더했다(23개). */
 const STRAIGHT_EDGE_SMOOTH = { enabled: false };
 const STRAIGHT_EDGES = [
   ["Tomo_DFSVR", "DFSVR_VisCull"],
@@ -958,7 +959,8 @@ const STRAIGHT_EDGES = [
   ["ColdOndol", "ColdOndol_Positioning"],
   ["Tomo_SFTFSoft", "Jeon_DLPOrient"],
   ["SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint"],
-  ["SFTFSoft_GNN", "SFTFSoft_GNN_DFSVR"]
+  ["SFTFSoft_GNN", "SFTFSoft_GNN_DFSVR"],
+  ["Tomo_SFTF", "SFTF_UrbanTraffic"]
 ];
 const EDGE_SMOOTH_OVERRIDES = [
   ["PFTF", "PFTF_VisCull_kDop", { type: 'curvedCW', roundness: 0.165 }],

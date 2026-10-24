@@ -155,10 +155,10 @@ for (const [from, to] of [["cfmsAutoSew", "cfmsPINNDrape"], ["cfmsDrape", "cfmsA
 }
 // 2026-10-24: 사용자가 고른 스무 개는 직선이다(STRAIGHT_EDGES). 목록의 쌍이 화면에 실제로 그려지는 선이어야 한다 —
 // 이름이 바뀌거나 걷힌 선을 가리키면 조용히 아무 일도 안 하므로 멈춘다. 같은 날 둘째 지시로 둘(DTS → AO ·
-// SFTFSoft_GNN → SFTFSoft_GNN_DFSVR)을 더해 스물둘이다.
+// SFTFSoft_GNN → SFTFSoft_GNN_DFSVR)을 더해 스물둘, 넷째 지시로 Tomo_SFTF → SFTF_UrbanTraffic 을 더해 스물셋이다.
 const straightEdges = readJsonConstant("STRAIGHT_EDGES", "[");
-if (straightEdges.length !== 22 || new Set(straightEdges.map(([from, to]) => `${from}>${to}`)).size !== 22) {
-  throw new Error(`STRAIGHT_EDGES should list 22 distinct edges, has ${straightEdges.length}`);
+if (straightEdges.length !== 23 || new Set(straightEdges.map(([from, to]) => `${from}>${to}`)).size !== 23) {
+  throw new Error(`STRAIGHT_EDGES should list 23 distinct edges, has ${straightEdges.length}`);
 }
 // 2026-10-24: cfmsMiindo → cfmsDrapeSCAN 「구현 호스트」는 사용자 지시로 걷었다(생성기 DRAPESCAN_EDGES). 되살아나면 멈춘다.
 if (edges.some((edge) => (edge.from === "cfmsMiindo" && edge.to === "cfmsDrapeSCAN") || (edge.from === "cfmsDrapeSCAN" && edge.to === "cfmsMiindo"))) {
