@@ -69,7 +69,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__applyOrientCert=applyOrientCert20261024;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -734,6 +734,29 @@ if (childIds(pcHandPftf) !== "PartialCost" || findIn(partialCostHand.root, "Part
 const partialCostNoNode = { root: mk("root", [mk("n0llvuh2")]), links: [] };
 if (!context.__applyPartialCost(partialCostNoNode)) throw new Error("PartialCost migration must still stamp its version without PFTF");
 if (childIds(partialCostNoNode.root) !== "n0llvuh2") throw new Error("PartialCost migration added a node to a document without PFTF");
+
+// 2026-10-24: PFTF_AsymTensor(nongkxm5) 밑에 2편 PFTF_OrientCert 노드 신설. 부모는 그대로, 다시 돌리면 아무것도 안 한다.
+const orientCertSample = { root: mk("root", [
+  { id: "nongkxm5", title: "PFTF_AsymTensor", kind: "medium", status: "draft", note: "손으로 쓴 메모", children: [] },
+]), links: [] };
+if (!context.__applyOrientCert(orientCertSample)) throw new Error("OrientCert migration did not run");
+if (context.__applyOrientCert(orientCertSample)) throw new Error("OrientCert migration is not idempotent");
+const ocParent = findIn(orientCertSample.root, "nongkxm5");
+if (ocParent.status !== "draft" || ocParent.kind !== "medium" || ocParent.note !== "손으로 쓴 메모" || ocParent.title !== "PFTF_AsymTensor") throw new Error("OrientCert migration changed the parent");
+if (childIds(ocParent) !== "PFTF_OrientCert") throw new Error(`OrientCert migration put the node in the wrong place: ${childIds(ocParent)}`);
+const ocNode = findIn(orientCertSample.root, "PFTF_OrientCert");
+if (ocNode.kind !== "medium" || ocNode.status !== "draft" || ocNode.projectPath !== "D:\\__PFTF_Projects(2026)\\PFTF_AsymTensor_dev" || ocNode.url !== "https://github.com/cfms-lab/PFTF_AsymTensor_dev") throw new Error("OrientCert node has the wrong fields");
+const orientCertValidation = context.__validate(orientCertSample);
+if (!orientCertValidation.ok) throw new Error(`OrientCert sample is invalid: ${orientCertValidation.errors[0]}`);
+const orientCertHand = { root: mk("root", [
+  { id: "nongkxm5", title: "PFTF_AsymTensor", kind: "medium", status: "draft",
+    children: [{ id: "PFTF_OrientCert", title: "내가 만든 OrientCert", kind: "low", status: "submitted", children: [] }] },
+]), links: [] };
+context.__applyOrientCert(orientCertHand);
+if (childIds(findIn(orientCertHand.root, "nongkxm5")) !== "PFTF_OrientCert" || findIn(orientCertHand.root, "PFTF_OrientCert").title !== "내가 만든 OrientCert") throw new Error("OrientCert migration touched an existing PFTF_OrientCert node");
+const orientCertNoNode = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyOrientCert(orientCertNoNode)) throw new Error("OrientCert migration must still stamp its version without PFTF_AsymTensor");
+if (childIds(orientCertNoNode.root) !== "n0llvuh1") throw new Error("OrientCert migration added a node to a document without PFTF_AsymTensor");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);

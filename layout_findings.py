@@ -278,6 +278,11 @@ POS = {
     "SFTFSoft_GNN": (260, 190),
     "SFTF_DrapePrior": (-220, 680),
     "PFTF_AsymTensor": (600, 650),
+    # 2026-10-24: PFTF_AsymTensor 의 2편(OrientCert, Computer-Aided Design 예정)을 자식 노드로 세웠다(사용자). 자리는 같은 날 21:10 에
+    # 저장된 웹 배치(PFTF 610,430 · AsymTensor 610,680)에서 잰 부모 위-왼쪽 빈 칸 — 가장 가까운 노드 상자 59px(TSE_TomoSh4) · 엣지 57px,
+    # 은종현 훌 밖 74px(2편은 설인환 단독이라 훌에 넣지 않는다), 부모까지의 직선이 다른 선과 엇갈리지 않는다. 파일 씨앗의 부모 자리
+    # (600,650)와는 맞춰 두지 않았다 — 웹 배치가 정본이고 표(graph_positions)에도 같은 값을 넣었다(PartialCost 와 같다).
+    "PFTF_OrientCert": (550, 560),
     "PFTF_DrapePrior_VisCull_kDop": (-270, 540),
     "PFTF_GFiberCT": (600, 850),
     "SFTF_QEM": (470, 190),
@@ -387,6 +392,11 @@ TRACK_NOTES = {
     "TSE_SEM3_AutoTune": ("TSE_SEM", "AutoTune"),
     "TSE_TomoSh4": ("Tomo_Shell2026", "TomoSh4"),
     "TSE_TomoSh5": ("Tomo_Shell2026", "TomoSh5"),
+    # 2026-10-24: PFTF_AsymTensor 노트가 논문 둘(1편 AsymTensor · 2편 OrientCert)을 담게 되어 paper_completeness 가 중첩 맵이 됐다.
+    # 1편 노드는 노트 이름 그대로라 여기 적어야 «PFTF_AsymTensor_AsymTensor» 키가 그 노드로 옮겨 실린다. 2편 노드는 PFTF_ 가족
+    # 이름(PFTF_OrientCert)이라 접두어 규칙으로 풀리지 않는다. 단계는 둘 다 부모 노트의 stage(draft)를 물려받는다.
+    "PFTF_AsymTensor": ("PFTF_AsymTensor", "AsymTensor"),
+    "PFTF_OrientCert": ("PFTF_AsymTensor", "OrientCert"),
 }
 
 # 트랙 노드의 **단계만** 부모 노트와 다를 때 적는다.  트랙 노드는 부모 노트의 `stage:` 를
@@ -638,6 +648,8 @@ QUALITY_ROWS = [
     ("SFTF_Composite", "SFTF_Composite", "상", "한·영문 완성·191 tests·R9–R13 사전등록/독립감사; R11 합성 held-out 음성, 공식 CAD·물리 검증 잔여"),
     ("SFTF_InjMold", "SFTF_InjMold", "중", "B24·exact integration·set-cover·B-rep·blind protocol; 원고 조립 잔여"),
     ("Tomo_DiffSupport", "Tomo_DiffSupport", "중", "claim–evidence matrix·JAX gradient·fail-closed; utility/print gate 미실행"),
+    # 2026-10-24 신설(사용자): PFTF_AsymTensor 의 2편. 등급은 부모 노트의 中 을 이어받았다(트랙 노드 관례 — TSE_TomoSh5 와 같다).
+    ("PFTF_OrientCert", "PFTF_OrientCert", "중", "PFTF_AsymTensor 의 2편(2026-10-24 신설) — 구면 분기한정으로 비볼록 부품 배향 점수의 전역 최솟값을 인증한다. 153 메쉬 패널 306 실행 중 299 가 30분 안에 점수 척도의 1e-6 으로 닫혔고, 조밀 표본은 닫힌 146 메쉬 중 144 에서 인증 최솟값 위였다. Computer-Aided Design 예정, 설인환 단독, 이중 익명 — 2·3절 초안"),
     ("PFTF_AsymTensor", "PFTF_AsymTensor", "중", "사전 동료심사 2라운드(2026-09-13)로 인증·성분 귀속 철회, 주 결론이 부정만 남아 ⛔ 주 기여 축 교체 전 투고 보류(RPJ). 축 교체 후보는 복합재 순서 뒤집기(은종현 교수 실측, 09-15 보완안). **2026-09-16 은종현 교수 공저 확정** — 저자 대학원생·설인환†·은종현†"),
     ("PFTF_Compression", "PFTF_Compression", "중", "역설계·orthotropic contact·friction·held-out 원고; 임상 cohort 잔여"),
     ("PFTF_Mold", "PFTF_Mold", "중", "IBOF 통일·사독 1차 대응 완료. melt-front 완화를 구현해 수반 경사를 1.0e-8 로 검증. held-out 은 사독 지적에 따라 '크기 전이 시험'으로 축소했다(옛 '일반화 0%' 는 철회). 투고 저널 미정"),
@@ -802,6 +814,8 @@ INTRODUCTIONS = {
     "SFTFSoft_GNN": "물체의 면을 그래프로 보고 제작 방향의 품질을 학습해 예측하는 방법이다.",
     "SFTF_DrapePrior": "옷감이 몸과 바닥에 어떻게 닿을지 미리 예측해 천 시뮬레이션을 빠르게 시작하는 방법이다.",
     "PFTF_AsymTensor": "방향에 따라 다르게 반응하는 재료나 문제를 표현하기 위한 비대칭 텐서 이론이다.",
+    # 2026-10-24: 2편 OrientCert — 가장 좋은 출력 방향을 어림잡는 대신 더 좋은 방향이 없음을 증명한다.
+    "PFTF_OrientCert": "3D 프린팅에서 가장 좋은 출력 방향을 어림잡는 대신, 더 좋은 방향이 없다는 것을 수학적으로 증명해 보이는 방법이다.",
     "PFTF_DrapePrior_VisCull_kDop": "옷감의 좋은 시작 상태와 안전한 충돌 필터를 결합해 천 계산을 빠르게 하려는 새 연구선이다.",
     "PFTF_GFiberCT": "서로 떨어진 두 표면을 먼저 구분해 각 층을 따로 복원함으로써 alpha 방법의 잘못된 연결과 위상 오류를 줄이는 연구다.",
     # 2026-09-20 볼트 동기화(intro). 배포본 RAW_NODES 는 이미 이 값이고 씨앗만 낡아 있었다.
@@ -1282,6 +1296,8 @@ if preserve_extended_quality:
             # 2026-10-24: 보류(성과 없음, 사용자) — 원고와 「TDP,draft」 배지는 PartialCost 가 이어받았다.
             "PFTF": "보류(성과 없음 · 원고는 PartialCost)",
             "PartialCost": "TDP,draft",
+            # 2026-10-24: PFTF_AsymTensor 의 2편 — 게재지 CAD(Computer-Aided Design) 라 「저널,상태」 꼴이다.
+            "PFTF_OrientCert": "CAD,draft",
             # 2026-10-21: HeatMethod 를 Holonomy 에 합쳐 JCDE 로 낸다(사용자). HeatMethod 는 보류, Holonomy 는
             # 게재지가 JCDE 로 바뀌었다. 둘 다 볼트 badge 와 같은 문구다 — 옛 씨앗은 둘 다 「Composites Part A
             # 초고 완성」이었고, Holonomy 는 볼트 badge 가 비어 있어 표가 덮지 못해 그 옛 값이 화면에 보였다.
@@ -1349,6 +1365,8 @@ if preserve_extended_quality:
             # 2026-10-24: 원고의 병목은 PartialCost 로 옮겼다. PFTF 는 보류 사유만 남는다(볼트 bottleneck 과 같은 문구).
             "PFTF": "성과 없음 — 보류(2026-10-24). 원고는 PartialCost 로 갈랐다",
             "PartialCost": "특허 출원 여부 결정 — 출원하면 출원이 투고보다 먼저다. 원고는 2026-10-18 DOCX 까지 닫혔다",
+            # 2026-10-24: PFTF_AsymTensor 의 2편. 볼트 프로젝트현황 분리트랙의 게이트와 같은 문구다.
+            "PFTF_OrientCert": "3단계(부동소수 엄밀화·독립 인증서 검사·성분 제거 비교) 뒤 4·5절, 그다음 6·7·1절·초록. 투고는 1편 3DP 투고 뒤 — Computer-Aided Design(이중 익명·Highlights·데이터 Option C)",
         },
         # 2026-09-21: PFTF_Mold 를 걷는다. 파일에 구워져 있던 「solids4foam 사슬 IBOF
         # 재채점·외부 물리 검증」은 볼트가 이미 닫은 일이고(grade_note — 선언한 아홉 관문
@@ -1673,6 +1691,28 @@ PARTIALCOST_NODE = {
 }
 
 
+# 2026-10-24: PFTF_AsymTensor 노트의 2편 OrientCert(사용자 지시). 1편(AsymTensor, 3DP 투고 준비)과 같은 저장소의 OrientCert/draft/ 에서
+# 따로 쓰는 인증 논문 — Computer-Aided Design 예정, 설인환 단독, 이중 익명. 등급은 부모 노트의 中 을 이어받고 단계는 TRACK_NOTES 로 부모
+# 노트의 draft 를 읽는다. 색·community 는 quality_lookup 이 QUALITY_ROWS 로 덮으므로 여기 값은 씨앗이다. 부모 화살표는 ORIENTCERT_GOAL_EDGES.
+# 단독 저자라 훌(은종현 교수님)에는 넣지 않는다 — 부모는 그 훌 안에 있다.
+ORIENTCERT_NODE = {
+    "id": "PFTF_OrientCert",
+    "label": "PFTF_OrientCert",
+    "color": {"background": "#f28e2b", "border": "#f28e2b",
+               "highlight": {"background": "#f28e2b", "border": "#f28e2b"}},
+    "size": 13.7,
+    "font": {"size": 13, "color": "#333333", "bold": False},
+    "title": "PFTF_OrientCert — 중: PFTF_AsymTensor 의 2편, 배향 점수 전역 최솟값의 인증(Computer-Aided Design 예정)",
+    "community": 2,
+    "community_name": "중",
+    "source_file": "PFTF_AsymTensor.md",
+    "file_type": "concept",
+    "degree": 1,
+    "_intro": INTRODUCTIONS["PFTF_OrientCert"],
+    "_project_path": PROJECT_PATHS.get("PFTF_AsymTensor", r"D:\__PFTF_Projects(2026)\PFTF_AsymTensor_dev"),
+}
+
+
 # 2026-09-23: 볼트에 새로 선 HMD(Harmonic Multiscale Dispersity). status: todo · grade: ToDo ·
 # stage: undecided 라 흰 바탕·검정 외곽선(community 4). 공저자는 볼트 coauthors: [은종현](2026-09-23 확정)이라
 # 은종현 훌에 넣는다. 투고지는 미정.
@@ -1793,6 +1833,7 @@ TODO_NODES = [
     DYNAMIC_DISPERSITY_NODE,
     CFMS_AUTOGRADING_NODE,
     PARTIALCOST_NODE,
+    ORIENTCERT_NODE,
 ]
 
 TODO_EDGES = [
@@ -2446,6 +2487,17 @@ PARTIALCOST_GOAL_EDGES = [
     ),
 ]
 
+# ------------------------------------------------ PFTF_OrientCert 의 부모 (2026-10-24 사용자 지시)
+# PFTF_AsymTensor 노트의 2편 — 1편이 best-found 로 찾은 탐색 결과에 전역 하한을 증명해 간극을 인증한다(1편을 companion 으로 인용).
+# 같은 저장소에서 갈라진 원고라 계보가 분명하다 — 실선이다(PFTF → PartialCost 와 같은 꼴). 특허와 무관(표제지)이라 방법을 적어도 된다.
+ORIENTCERT_GOAL_EDGES = [
+    _autoplace_goal_edge(
+        "PFTF_AsymTensor", "PFTF_OrientCert", "전역 인증",
+        "1편의 층 분할 탐색이 찾은 배향에 구면 분기한정으로 전역 하한을 세워, 더 좋은 방향이 없음을 증명한다",
+        "정확도",   # 가드의 개발 목표 범주(확장·가속·정확도·통합) 중 인증은 최적성의 보증이라 정확도다
+    ),
+]
+
 # ------------------------------------------------------ 분산도 사슬 (2026-09-24 사용자 지시)
 #   dynamicDispersity → cfmsDispersityKNN → cfmsDispersityProp → cfmsHMDispersity
 # 가운데 한 칸(KNN → Prop, 「상관 검증」)은 위 JEON_GOAL_EDGES 에 이미 있다. 여기는 양 끝이다.
@@ -2805,7 +2857,7 @@ def _preserve_goal_edges(match):
         (str(edge["from"]), str(edge["to"]))
         for edge in DYNAMIC_TARGET_SEARCH_GOAL_EDGES + COAUTHOR_KIM_GOAL_EDGES
         + JEON_GOAL_EDGES + MOLD_GOAL_EDGES + CHO_GOAL_EDGES + DISPERSITY_GOAL_EDGES
-        + ANATOMY_GOAL_EDGES + AUTOGRADING_GOAL_EDGES + PARTIALCOST_GOAL_EDGES
+        + ANATOMY_GOAL_EDGES + AUTOGRADING_GOAL_EDGES + PARTIALCOST_GOAL_EDGES + ORIENTCERT_GOAL_EDGES
     }
     # 2026-09-24: 사슬이 바뀌면서 cfmsDispersityKNN → cfmsHMDispersity 가 없어졌다. 위 목록에서
     # 빼기만 하면 스냅샷에 남은 옛 사본이 살아남아 사슬이 둘로 갈려 보인다 — 그 짝도 지운다.
@@ -2834,6 +2886,7 @@ def _preserve_goal_edges(match):
     edges.extend(copy.deepcopy(ANATOMY_GOAL_EDGES))
     edges.extend(copy.deepcopy(AUTOGRADING_GOAL_EDGES))
     edges.extend(copy.deepcopy(PARTIALCOST_GOAL_EDGES))
+    edges.extend(copy.deepcopy(ORIENTCERT_GOAL_EDGES))
     edges.extend(copy.deepcopy(DISPERSITY_GOAL_EDGES))
     edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
     edges.extend(copy.deepcopy(DRAPESCAN_EDGES))

@@ -68,6 +68,7 @@
     "Tomo_DFSVR":           "원고 결함 4건 수정",
     "PFTF":                 "보류 — 원고는 PartialCost 로",  /* 성과 없음, ToDo·보류 (2026-10-24 사용자) */
     "PartialCost":          "특허 출원 여부 정하고 TDP 투고",  /* PFTF 저장소에서 갈라진 원고(2026-10-24 신설). 원고는 10-19 에 닫혔고 커버레터가 남았다 */
+    "PFTF_OrientCert":      "3단계 실험 뒤 4·5절 집필",  /* PFTF_AsymTensor 의 2편(2026-10-24 신설, Computer-Aided Design 예정, 설인환 단독). 2·3절 초안 */
     "PFTF_VisCull_kDop":    "GPU 경로 구현",
     "SFTF_HeatMethod":      "보류 — Holonomy 에 병합",  /* 단독 투고 포기, JCDE 통합 원고로 (2026-10-21) */
     "ColdOndol_Positioning":"투고처 결정 필요",
