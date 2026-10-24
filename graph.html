@@ -951,7 +951,9 @@ let FAN_SMOOTH = {};
    2026-10-24 열둘째(사용자 「SFTF_DynamicTargetSearch → SFTF_ActiveOverprint, cfmsAutoPlace_JCDE → cfmsAutoGrading 을 곧게, 점선은
    그대로」): JCDE → AutoGrading(그레이딩 불변 기억, 점선)을 더했다(32개). 기본 continuous 라 22:45 웹 배치처럼 두 노드가 같은 높이일
    때만 곧았다. DTS → AO 는 둘째 지시부터 이미 목록에 있다 — 수동 배치에서는 늘 곧고, 계층 배치(LR·UD)만 모든 선을 cubicBezier 로 휜다.
-   직선은 smooth 만 끄므로 점선(dashes)은 그대로다. */
+   직선은 smooth 만 끄므로 점선(dashes)은 그대로다.
+   2026-10-24 열셋째(사용자 「곡률을 반대로 뒤집어」, 22:53 웹 배치에서 vis 곡선으로 잼): PFTF_VisCull_kDop → SFTF_DrapePrior(충돌 축약)
+   — continuous 0.2 가 715px 엣지에서 −39.3px(서쪽, PFTF_DrapePrior_VisCull_kDop 쪽)으로 휘었고, curvedCW 0.125 가 +39.2px(동쪽)이다. */
 const STRAIGHT_EDGE_SMOOTH = { enabled: false };
 const STRAIGHT_EDGES = [
   ["Tomo_DFSVR", "DFSVR_VisCull"],
@@ -993,6 +995,7 @@ const EDGE_SMOOTH_OVERRIDES = [
   ["cfmsDrape", "cfmsAutoPlace_IJCST", { type: 'curvedCCW', roundness: 0.165 }],
   ["cfmsDrape", "cfmsDrapeSCAN", { type: 'curvedCW', roundness: 0.105 }],
   ["PFTF_VisCull_kDop", "PFTF_Compression", { type: 'curvedCW', roundness: 0.165 }],
+  ["PFTF_VisCull_kDop", "SFTF_DrapePrior", { type: 'curvedCW', roundness: 0.125 }],
   ...STRAIGHT_EDGES.map(([from, to]) => [from, to, STRAIGHT_EDGE_SMOOTH]),
 ];
 function _edgeSmoothOverride(i) {

@@ -141,18 +141,20 @@ const shownEdges = edges.filter((edge) => !isPruned(edge));
 // 2026-10-24 둘째: cfmsAutoSew → cfmsPINNDrape 반대로, cfmsDrape → cfmsAutoPlace_IJCST 곡률 절반(curvedCCW 0.165).
 // 2026-10-24 셋째: cfmsAutoSew → cfmsPINNDrape 곡률 절반(curvedCW 0.09), cfmsDrape → cfmsDrapeSCAN 곡률 절반(curvedCW 0.105).
 // 2026-10-24 여덟째: PFTF_VisCull_kDop → PFTF_Compression 은 Physics-AI 훌 밖(동쪽)으로 휜다(curvedCW 0.165, 훌 테두리 밖 14px).
+// 2026-10-24 열셋째: PFTF_VisCull_kDop → SFTF_DrapePrior 휨 반대로(continuous −39.3px → curvedCW 0.125 +39.2px).
 if (
   !html.includes(`["PFTF", "PFTF_VisCull_kDop", { type: 'curvedCW', roundness: 0.165 }]`)
   || !html.includes(`["cfmsAutoSew", "cfmsPINNDrape", { type: 'curvedCW', roundness: 0.09 }]`)
   || !html.includes(`["cfmsDrape", "cfmsAutoPlace_IJCST", { type: 'curvedCCW', roundness: 0.165 }]`)
   || !html.includes(`["cfmsDrape", "cfmsDrapeSCAN", { type: 'curvedCW', roundness: 0.105 }]`)
   || !html.includes(`["PFTF_VisCull_kDop", "PFTF_Compression", { type: 'curvedCW', roundness: 0.165 }]`)
+  || !html.includes(`["PFTF_VisCull_kDop", "SFTF_DrapePrior", { type: 'curvedCW', roundness: 0.125 }]`)
   || !html.includes("const edgeSmooth = i => _edgeSmoothOverride(i) || FAN_SMOOTH[i] || DEFAULT_EDGE_SMOOTH;")
   || !html.includes("const candsOf = i => { const o = _edgeSmoothOverride(i); return o ? [o] : FAN_CANDIDATES; };")
 ) {
-  throw new Error("edge curvature overrides (PFTF -> PFTF_VisCull_kDop, AutoSew -> PINNDrape, Drape -> AutoPlace_IJCST, VisCull_kDop -> Compression, fan-fixed) are missing");
+  throw new Error("edge curvature overrides (PFTF -> PFTF_VisCull_kDop, AutoSew -> PINNDrape, Drape -> AutoPlace_IJCST, VisCull_kDop -> Compression, VisCull_kDop -> DrapePrior, fan-fixed) are missing");
 }
-for (const [from, to] of [["cfmsAutoSew", "cfmsPINNDrape"], ["cfmsDrape", "cfmsAutoPlace_IJCST"], ["cfmsDrape", "cfmsDrapeSCAN"], ["PFTF_VisCull_kDop", "PFTF_Compression"]]) {
+for (const [from, to] of [["cfmsAutoSew", "cfmsPINNDrape"], ["cfmsDrape", "cfmsAutoPlace_IJCST"], ["cfmsDrape", "cfmsDrapeSCAN"], ["PFTF_VisCull_kDop", "PFTF_Compression"], ["PFTF_VisCull_kDop", "SFTF_DrapePrior"]]) {
   if (!shownEdges.some((edge) => edge.from === from && edge.to === to)) throw new Error(`curvature override ${from}->${to} is not a drawn edge`);
 }
 // 2026-10-24: 사용자가 고른 스무 개는 직선이다(STRAIGHT_EDGES). 목록의 쌍이 화면에 실제로 그려지는 선이어야 한다 —
