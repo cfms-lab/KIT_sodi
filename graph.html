@@ -936,7 +936,9 @@ let FAN_SMOOTH = {};
      - cfmsAutoSew → cfmsPINNDrape: curvedCW 0.165(+58.6px) → curvedCW 0.09(+30.1px).
      - cfmsDrape → cfmsDrapeSCAN: 부채꼴이 고른 curvedCW 0.2(+63.1px) → 덮어쓰기 curvedCW 0.105(+30.9px).
    2026-10-24 넷째(사용자): Tomo_SFTF → SFTF_UrbanTraffic 를 직선 목록에 더했다(23개).
-   2026-10-24 다섯째(사용자): TSE_TomoSh4 → TSE_TomoSh5 → cfmsHipDetect 사슬 둘을 더했다(25개). */
+   2026-10-24 다섯째(사용자): TSE_TomoSh4 → TSE_TomoSh5 → cfmsHipDetect 사슬 둘을 더했다(25개).
+   2026-10-24 여섯째(사용자 「SFTF_Composite ~ SFTF_HeatMethod ~ SFTF_Holonomy 간」): 그 사이의 두 엣지 —
+   SFTF_HeatMethod → SFTF_Composite(측지 거리) · SFTF_HeatMethod → SFTF_Holonomy(전단각 항등식) — 를 더했다(27개). */
 const STRAIGHT_EDGE_SMOOTH = { enabled: false };
 const STRAIGHT_EDGES = [
   ["Tomo_DFSVR", "DFSVR_VisCull"],
@@ -963,7 +965,9 @@ const STRAIGHT_EDGES = [
   ["SFTFSoft_GNN", "SFTFSoft_GNN_DFSVR"],
   ["Tomo_SFTF", "SFTF_UrbanTraffic"],
   ["TSE_TomoSh4", "TSE_TomoSh5"],
-  ["TSE_TomoSh5", "cfmsHipDetect"]
+  ["TSE_TomoSh5", "cfmsHipDetect"],
+  ["SFTF_HeatMethod", "SFTF_Composite"],
+  ["SFTF_HeatMethod", "SFTF_Holonomy"]
 ];
 const EDGE_SMOOTH_OVERRIDES = [
   ["PFTF", "PFTF_VisCull_kDop", { type: 'curvedCW', roundness: 0.165 }],
