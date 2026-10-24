@@ -1045,6 +1045,56 @@ function _edgeCurveFrame(id, from, to, t) {
   return {x: from.x + dx * t, y: from.y + dy * t, ux: dx / length, uy: dy / length};
 }
 
+// 2026-10-24 (user report): on the curved arrows the caption sat ~35–37 % of
+// the way along, nearer the source node, not in the middle.  The arrows that
+// keep vis's default 'continuous' smoothing are quadratic Béziers whose control
+// point vis puts close to the *source* node (roundness × the larger of |dx|,
+// |dy| away from it, not from the midpoint), so the curve parameter t = 0.5 —
+// ¼·start + ½·control + ¼·end — is pulled toward the start.  It even happens on
+// continuous arrows that look straight because their two nodes line up.  The
+// caption now goes by arc length instead: _edgeArcMap samples the curve once
+// per edge and returns a function from a fraction of the *visible* arc (node
+// border to node border) to the curve parameter vis uses.
+const EDGE_LABEL_ARC_SAMPLES = 64;
+function _edgeArcMap(id, edge) {
+  const identity = fraction => fraction;   // straight fallback, as in _edgeCurveFrame
+  const visEdge = network.body.edges[id];
+  const edgeType = visEdge && visEdge.edgeType;
+  if (!edgeType || typeof edgeType.getPoint !== 'function') return identity;
+  const n = EDGE_LABEL_ARC_SAMPLES;
+  const cumulative = [0];
+  try {
+    let previous = edgeType.getPoint(0);
+    if (!previous || !Number.isFinite(previous.x) || !Number.isFinite(previous.y)) return identity;
+    for (let k = 1; k <= n; k++) {
+      const point = edgeType.getPoint(k / n);
+      if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return identity;
+      cumulative.push(cumulative[k - 1] + Math.hypot(point.x - previous.x, point.y - previous.y));
+      previous = point;
+    }
+  } catch (err) { return identity; }
+  const total = cumulative[n];
+  if (!(total > 1e-6)) return identity;
+  // The line vis draws starts at the source node's border and the arrow ends at
+  // the target's.  Near the nodes the curve runs almost radially, so the arc
+  // hidden under each node is about its radius.
+  const radiusOf = nodeId => {
+    const node = network.body.nodes[nodeId];
+    const radius = node && node.shape && node.shape.radius;
+    return Number.isFinite(radius) ? radius : 0;
+  };
+  const start = Math.min(radiusOf(edge.from), total / 2);
+  const end = Math.max(total - radiusOf(edge.to), start);
+  return fraction => {
+    const target = start + (end - start) * fraction;
+    let k = 1;
+    while (k < n && cumulative[k] < target) k++;
+    const span = cumulative[k] - cumulative[k - 1];
+    const within = span > 1e-9 ? (target - cumulative[k - 1]) / span : 0;
+    return Math.min(1, Math.max(0, (k - 1 + within) / n));
+  };
+}
+
 function _drawDynamicEdgeLabels(ctx) {
   const visibleEdges = RAW_EDGES.map((edge, id) => ({edge, id, view: edgesDS.get(id)}))
     .filter(({edge, view}) => edge.label && view && view.hidden !== true);
@@ -1060,8 +1110,9 @@ function _drawDynamicEdgeLabels(ctx) {
     }));
   const viewport = _edgeLabelViewportBounds();
   const placedBoxes = [];
-  // Curve parameters to try, nearest the middle first.  0.5 ± 0.18 keeps the
-  // caption clear of both ends, so it never looks attached to an endpoint.
+  // Fractions of the visible arc length to try, nearest the middle first.
+  // 0.5 ± 0.18 keeps the caption clear of both ends, so it never looks
+  // attached to an endpoint.  _edgeArcMap turns each into the curve t.
   const curveSteps = [0.5, 0.44, 0.56, 0.38, 0.62, 0.32, 0.68];
 
   ctx.save();
@@ -1077,11 +1128,12 @@ function _drawDynamicEdgeLabels(ctx) {
 
     const textWidth = ctx.measureText(edge.label).width + 10;
     const textHeight = 22;
-    const centre = _edgeCurveFrame(id, from, to, 0.5);
+    const arcT = _edgeArcMap(id, edge);
+    const centre = _edgeCurveFrame(id, from, to, arcT(0.5));
     let best = null;
 
-    curveSteps.forEach(t => {
-      const frame = t === 0.5 ? centre : _edgeCurveFrame(id, from, to, t);
+    curveSteps.forEach(fraction => {
+      const frame = fraction === 0.5 ? centre : _edgeCurveFrame(id, from, to, arcT(fraction));
       const x = frame.x;
       const y = frame.y;
       // Turn the caption along the curve's tangent at that point.  Folding

@@ -473,7 +473,9 @@ if (!html.includes("if (positions.length < 1) return;")) {
 if (
   !html.includes("// EDGE_LABEL_LAYOUT_BEGIN")
   // 2026-10-23: 캡션은 직선 가운데가 아니라 vis 가 그리는 곡선 위에 놓인다(사용자 보고 — 휜 화살표 옆에 떠 있었다).
-  || !html.includes("const centre = _edgeCurveFrame(id, from, to, 0.5);")
+  // 2026-10-24: 자리는 곡선 매개변수 t 가 아니라 보이는 호 길이의 비율이다(사용자 보고 — 기본 continuous 곡선에서 캡션이 출발점 쪽 35~37 % 에 있었다).
+  || !html.includes("const centre = _edgeCurveFrame(id, from, to, arcT(0.5));")
+  || !html.includes("function _edgeArcMap(id, edge) {")
   || !html.includes("const p = edgeType.getPoint(t);")
   || html.includes("const midX = (from.x + to.x) / 2;")
   || !html.includes("_drawDynamicEdgeLabels(ctx);")
