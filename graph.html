@@ -743,9 +743,29 @@ let savedPos = {};
 try { savedPos = JSON.parse(localStorage.getItem(POS_STORE_KEY) || '{}') || {}; } catch (e) { savedPos = {}; }
 
 const INDUSTRIAL_EFFECTS = {"Tomo_SFTF": "복셀·광선 계산의 안정화로 CT/적층 제조 형상 처리 시간을 줄이고, 재구성 실패에 따른 재작업을 줄일 수 있다.", "Tomo_SFTFSoft": "미분가능한 슬라이싱·지지대 최적화로 시제품 출력 전의 파라미터 시행착수를 줄일 수 있다.", "SFTF_Clustering": "형상·공정 군집별로 적합한 solver를 선택해 대규모 배치 계산과 튜닝 시간을 줄일 수 있다.", "PFTF": "서로 다른 산업 문제에 같은 typed-router 규칙을 적용해 알고리즘 통합·유지보수 비용을 낮출 수 있다.", "SFTF_Composite": "복합재 적층·성형 조건의 초기 후보를 줄여 금형·적층 시험 횟수와 재료 낭비를 줄일 수 있다.", "SFTF_InjMold": "사출 금형의 die-lock·충전 위험을 제작 전에 찾아 금형 수정과 납기 지연을 줄일 수 있다.", "PFTF_Compression": "압축 성형 파라미터와 변형을 빠르게 선별해 실험 설계와 불량품 반복을 줄일 수 있다.", "SFTF_ThermalChip": "칩·패키지의 열 hotspot을 설계 초기에 찾아 열 신뢰성 문제와 재설계 비용을 줄일 수 있다.", "PFTF_Mold": "비등방 수축 보정과 금형 조건 탐색으로 치수 오차, 재가공, 금형 재제작 횟수를 줄일 수 있다.", "Tomo_DFSVR": "지지대 배치의 민감도를 이용해 출력 시간·지지대 재료를 줄일 수 있으나, 현재 utility 게이트 통과가 선행되어야 한다.", "PFTF_VisCull_kDop": "가시성·접촉 gate를 같은 계약으로 관리해 조건이 맞는 장면에서 exact narrow phase 호출과 계산비를 줄일 수 있다. GPU 전체 경로는 아직 미완성이다.", "SFTF_SewerPOC": "SWMM 기반 관망 병목·월류 위험을 찾아 점검·보수 우선순위를 정하고 침수 대응 시간을 줄일 수 있다.", "PFTF_FXShock": "환율·금융 충격 시나리오를 이용해 자본·유동성 배분과 스트레스 테스트를 더 빠르게 수행할 수 있다. 실제 시장 검증 전에는 의사결정 보조로만 사용해야 한다.", "SFTF_BatteryThermal": "배터리 모듈 배치의 열 집중 후보를 초기에 걸러 냉각 설계 반복과 과열 위험을 줄일 수 있다.", "SFTF_PDNElectric": "전력·전자 설계 후보를 빠르게 선별해 초기 EDA/배치 검토 시간을 줄일 수 있다.", "PFTF_Inspection": "검사 시점·후보 영역을 우선순위화해 스캔 시간은 줄이고 결함 검출 범위는 유지하는 데 도움을 줄 수 있다.", "PFTF_RainNowcast": "강우·홍수 위험을 더 일찍 알려 배수펌프·대피·도로 통제 자원을 선제 배치할 수 있다.", "PFTF_Terrain": "지형·경사 기반 경로/토공 계획으로 장비 이동거리와 연료·공사 시간을 줄일 수 있다.", "PFTF_Solar": "일사·배치 후보를 비교해 태양광 발전량과 유지보수 접근성을 높이는 설계안을 빠르게 고를 수 있다.", "PFTF_subMarine": "수중 경로와 기동 계획을 보수적으로 선택해 에너지 사용과 운항 위험을 줄일 수 있다. 현장 데이터가 필요하다.", "PFTF_Assembly": "조립 순서와 충돌 가능성을 사전에 검사해 작업 중 간섭, 재배치, takt-time 손실을 줄일 수 있다.", "PFTF_CNC": "공구 자세·undercut 가능성을 먼저 판정해 재고정 횟수와 도달 불가능한 가공 경로를 줄일 수 있다.", "PFTF_Radiotherapy": "환자별 빔·계획 후보를 보수적으로 선별해 계획 계산 시간을 줄이고 선량 제약 위반을 조기에 발견할 수 있다. 비임상 연구 단계다.", "SFTF_DataCenterTraffic": "warm-start와 국소 탐색으로 장애 복구·트래픽 재배치 시간을 줄여 서비스 중단을 완화할 수 있다.", "SFTF_UrbanTraffic": "교통 흐름·신호 후보를 빠르게 비교해 혼잡과 통행시간을 줄일 수 있으나, 강한 운영 solver에서 warm-start 이득이 사라질 수 있다.", "SFTF_WarehouseAGV": "AGV 순환·배차 규칙으로 교착과 공차 이동을 줄여 물류 처리량과 납기 안정성을 높일 수 있다.", "PFTF_AssetShock": "자산 충격별 downside/CVaR를 계산해 위험 한도와 현금성 자산 배분을 점검할 수 있으나, 실제 provider 데이터와 대조군이 필요하다.", "SFTFSoft_GNN": "과거 메시에서 품질·지지대 후보를 빠르게 예측해 슬라이서 탐색 시간을 줄일 수 있으나, 슬라이서 간 일반화가 관건이다.", "SFTF_DrapePrior": "직물 초기 형상 추정으로 drape 최적화 반복과 실제 시편 시행착수를 줄일 수 있다.", "PFTF_AsymTensor": "비대칭 방향 정보를 보존한 텐서 근사로 방향성 있는 형상·공정 탐색을 줄일 가능성이 있으나, 산업 벤치마크가 선행되어야 한다.", "PFTF_DrapePrior_VisCull_kDop": "독립 논문으로 확장하지 않고, 백업 검증 결과를 SFTF_DrapePrior와 PFTF_VisCull_kDop에 흡수한 뒤 연구 역할을 종료했다.", "PFTF_GFiberCT": "X선 CT로 촬영한 적층 섬유구조(복합재 적층체·스페이서 패브릭)에서 층 간격과 두께를 층간 오연결 없이 계산할 수 있고, 표본이 부족하면 필요한 관측 밀도를 스스로 알려 준다. 맞닿은 계면과 자동 객체 탐지는 미지원이다.", "SFTF_QEM": "메시 품질 평가의 기준 불일치와 허위 성능 향상을 조기에 찾아 산업 시뮬레이션의 잘못된 의사결정을 줄일 수 있다.", "DFSVR_VisCull": "정확한 first-hit 결과를 유지하면서 불필요한 교차 후보를 안전하게 줄이면 미분가능 지지 구조 계산의 확장성을 높일 수 있다.", "SFTFSoft_GNN_DFSVR": "GNN의 빠른 후보 제안과 DFSVR의 정밀 보정을 결합해 출력 방향 탐색 시간과 검증 비용을 함께 줄이는 것을 목표로 한다.", "ColdOndol": "기존 온돌배관과 중앙 히트펌프의 제한된 냉방 용량을 세대별 온·습도 관측에 따라 배분해 피크 설비를 줄일 가능성을 검증한다.", "SFTFSoft_DFSVR": "슬라이서의 실제 청구 기준(임계각)을 정확 지지부피 계산에 결합해, 슬라이서를 돌리지 않고도 출력 방향별 지지대 비용을 더 정확히 예측하는 것을 목표로 한다."};
+/* 2026-10-24 (사용자): 노드 이름이 길어 서로 겹친다 — 화면 캡션만 낱말마다 줄을 바꾼다.
+   'SFTF_DynamicTargetSearch' → 'SFTF_\nDynamic\nTarget\nSearch'. 밑줄 뒤와 대소문자 경계(카멜·약어 뒤 새 낱말)에서
+   자르고 밑줄은 앞 줄 끝에 남긴다. 10자 이하 이름은 한 줄 그대로, 한 글자 조각(kDop 의 k)은 다음 조각에 붙인다.
+   RAW_NODES 의 label(검색·정보창·3D 뷰가 읽는다)은 그대로 두고 vis 로 넘기는 캡션만 바꾼다(아래 두 곳). */
+const NODE_LABEL_WRAP_MIN = 11;
+function wrapNodeLabel(label) {
+  const s = String(label || '');
+  if (s.length < NODE_LABEL_WRAP_MIN || /\s/.test(s)) return s;
+  const parts = [];
+  s.split(/(?<=_)/).forEach(chunk => {
+    chunk.split(/(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/).forEach(p => { if (p) parts.push(p); });
+  });
+  const lines = [];
+  for (let i = 0; i < parts.length; i++) {
+    if (parts[i].length === 1 && i + 1 < parts.length) { parts[i + 1] = parts[i] + parts[i + 1]; continue; }
+    lines.push(parts[i]);
+  }
+  return lines.join('\n');
+}
+
 const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
   ...((savedPos[n.id] || POS[n.id]) ? { x: (savedPos[n.id] || POS[n.id]).x, y: (savedPos[n.id] || POS[n.id]).y } : {}),
-  id: n.id, label: n.label, shape: n.shape || 'dot', color: n.color, size: n.size, borderWidth: n.borderWidth || 1,
+  id: n.id, label: wrapNodeLabel(n.label), shape: n.shape || 'dot', color: n.color, size: n.size, borderWidth: n.borderWidth || 1,
   font: { ...(n.font || {}), size: Math.max(18.7, (n.font && n.font.size) || 0), bold: false },
   // title 을 넘기지 않는다 = 노드 hover 툴팁 없음 (2026-09-20 사용자 지시).
   // 같은 내용이 오른쪽 NODE INFO 패널과 mindmap.html 에 있어서 필요가 없어졌다.
@@ -2542,7 +2562,7 @@ const STAGE_TO_PROG = {
     decorateNodes();
     // vis DataSet.update 는 부분 갱신(merge)이라, 장식이 손대는 필드만 넘긴다.
     nodesDS.update(RAW_NODES.map(n => ({
-      id: n.id, label: n.label, shape: n.shape || 'dot', color: n.color,
+      id: n.id, label: wrapNodeLabel(n.label), shape: n.shape || 'dot', color: n.color,
       borderWidth: n.borderWidth || 1,
       font: { ...(n.font || {}), size: Math.max(18.7, (n.font && n.font.size) || 0), bold: false },
       // title 은 일부러 뺀다 — 위 nodesDS 와 같은 이유다. 여기서 넘기면

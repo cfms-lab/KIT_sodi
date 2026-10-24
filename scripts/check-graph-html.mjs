@@ -160,6 +160,16 @@ const straightEdges = readJsonConstant("STRAIGHT_EDGES", "[");
 if (straightEdges.length !== 23 || new Set(straightEdges.map(([from, to]) => `${from}>${to}`)).size !== 23) {
   throw new Error(`STRAIGHT_EDGES should list 23 distinct edges, has ${straightEdges.length}`);
 }
+// 2026-10-24: 긴 노드 이름은 화면 캡션만 낱말마다 줄을 바꾼다(사용자). 두 곳(처음 만들 때 · 표 오버라이드 뒤)이
+// 모두 wrapNodeLabel 을 거쳐야 하고, 사용자가 든 예시가 그대로 나와야 한다.
+{
+  const wrapSrc = html.match(/const NODE_LABEL_WRAP_MIN = \d+;\nfunction wrapNodeLabel[\s\S]*?\n}\n/);
+  if (!wrapSrc) throw new Error("wrapNodeLabel is missing");
+  const wrapNodeLabel = Function(`${wrapSrc[0]}return wrapNodeLabel;`)();
+  if (wrapNodeLabel("SFTF_DynamicTargetSearch") !== "SFTF_\nDynamic\nTarget\nSearch") throw new Error("wrapNodeLabel no longer matches the user's example");
+  if (wrapNodeLabel("Tomo_SFTF") !== "Tomo_SFTF") throw new Error("wrapNodeLabel wraps short labels");
+  if ((html.match(/label: wrapNodeLabel\(n\.label\)/g) || []).length !== 2) throw new Error("both node-label sites must use wrapNodeLabel");
+}
 // 2026-10-24: cfmsMiindo → cfmsDrapeSCAN 「구현 호스트」는 사용자 지시로 걷었다(생성기 DRAPESCAN_EDGES). 되살아나면 멈춘다.
 if (edges.some((edge) => (edge.from === "cfmsMiindo" && edge.to === "cfmsDrapeSCAN") || (edge.from === "cfmsDrapeSCAN" && edge.to === "cfmsMiindo"))) {
   throw new Error("cfmsMiindo -> cfmsDrapeSCAN edge is back — removed on 2026-10-24");
