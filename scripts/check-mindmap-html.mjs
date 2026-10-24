@@ -69,7 +69,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -707,6 +707,33 @@ context.__applyAutoTunePathFix(autoTuneHand);
 if (findIn(autoTuneHand.root, "nggbas52").projectPath !== "E:\\somewhere") throw new Error("AutoTune path migration overrode a hand-set path");
 const autoTuneNoNode = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyAutoTunePathFix(autoTuneNoNode)) throw new Error("AutoTune path migration must still stamp its version without the node");
+
+// 2026-10-24: PFTF 보류·ToDo, PartialCost 를 PFTF(n0llvuh1) 밑에 신설. 기존 자식·제목은 그대로, 다시 돌리면 아무것도 안 한다.
+const partialCostSample = { root: mk("root", [
+  { id: "n0llvuh1", title: "PFTF framework", kind: "medium", status: "draft",
+    note: "TDP 단독 투고 준비 완료(2026-10-19). 원고 주제가 바뀌어 이론편·cross-domain synthesis 는 P592 에서 원고에서 뺐다(legacy 보존).",
+    children: [{ id: "nece2i15", title: "PFTF_Compression", kind: "medium", status: "draft", children: [] }] },
+]), links: [] };
+if (!context.__applyPartialCost(partialCostSample)) throw new Error("PartialCost migration did not run");
+if (context.__applyPartialCost(partialCostSample)) throw new Error("PartialCost migration is not idempotent");
+const pcPftf = findIn(partialCostSample.root, "n0llvuh1");
+if (pcPftf.status !== "blocked" || pcPftf.kind !== "todo" || !pcPftf.note.startsWith("2026-10-24 보류")) throw new Error("PartialCost migration did not block PFTF");
+if (pcPftf.title !== "PFTF framework" || childIds(pcPftf) !== "nece2i15,PartialCost") throw new Error(`PartialCost migration put the node in the wrong place: ${childIds(pcPftf)}`);
+const pcNode = findIn(partialCostSample.root, "PartialCost");
+if (pcNode.kind !== "medium" || pcNode.status !== "draft" || pcNode.projectPath !== "D:\\__PFTF_Projects(2026)\\PFTF_dev") throw new Error("PartialCost node has the wrong fields");
+const partialCostValidation = context.__validate(partialCostSample);
+if (!partialCostValidation.ok) throw new Error(`PartialCost sample is invalid: ${partialCostValidation.errors[0]}`);
+const partialCostHand = { root: mk("root", [
+  { id: "n0llvuh1", title: "PFTF", kind: "high", status: "submitted", note: "손으로 쓴 메모",
+    children: [{ id: "PartialCost", title: "내가 만든 PartialCost", kind: "low", status: "submitted", children: [] }] },
+]), links: [] };
+context.__applyPartialCost(partialCostHand);
+const pcHandPftf = findIn(partialCostHand.root, "n0llvuh1");
+if (pcHandPftf.status !== "submitted" || pcHandPftf.kind !== "high" || pcHandPftf.note !== "손으로 쓴 메모") throw new Error("PartialCost migration overrode a hand-set PFTF field");
+if (childIds(pcHandPftf) !== "PartialCost" || findIn(partialCostHand.root, "PartialCost").title !== "내가 만든 PartialCost") throw new Error("PartialCost migration touched an existing PartialCost node");
+const partialCostNoNode = { root: mk("root", [mk("n0llvuh2")]), links: [] };
+if (!context.__applyPartialCost(partialCostNoNode)) throw new Error("PartialCost migration must still stamp its version without PFTF");
+if (childIds(partialCostNoNode.root) !== "n0llvuh2") throw new Error("PartialCost migration added a node to a document without PFTF");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);

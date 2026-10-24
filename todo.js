@@ -66,7 +66,8 @@
     "cfmsAutoPlace_JCDE":   "영문 집필",
     "SFTF_SewerPOC":        "원고 수치 v2 갱신",
     "Tomo_DFSVR":           "원고 결함 4건 수정",
-    "PFTF":                 "특허 출원 여부 정하고 TDP 투고",  /* 보류 해제 → draft (2026-10-19). 원고는 닫혔고 커버레터가 남았다 */
+    "PFTF":                 "보류 — 원고는 PartialCost 로",  /* 성과 없음, ToDo·보류 (2026-10-24 사용자) */
+    "PartialCost":          "특허 출원 여부 정하고 TDP 투고",  /* PFTF 저장소에서 갈라진 원고(2026-10-24 신설). 원고는 10-19 에 닫혔고 커버레터가 남았다 */
     "PFTF_VisCull_kDop":    "GPU 경로 구현",
     "SFTF_HeatMethod":      "보류 — Holonomy 에 병합",  /* 단독 투고 포기, JCDE 통합 원고로 (2026-10-21) */
     "ColdOndol_Positioning":"투고처 결정 필요",

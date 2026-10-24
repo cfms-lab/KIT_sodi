@@ -137,11 +137,24 @@ if (prunePairs.some(([from, to]) => from === "SFTF_DynamicTargetSearch" && to ==
 }
 const shownEdges = edges.filter((edge) => !isPruned(edge));
 // 2026-10-23: PFTF → PFTF_VisCull_kDop 은 사용자 지시로 기본(continuous)과 반대쪽으로 휜다(EDGE_SMOOTH_OVERRIDES).
+// 2026-10-24: 덮어쓰기가 부채꼴보다 먼저다(직선으로 정한 cfmsDrape → SFTF_DrapePrior 가 부채꼴 허브에 닿는다).
 if (
   !html.includes(`["PFTF", "PFTF_VisCull_kDop", { type: 'curvedCW', roundness: 0.165 }]`)
-  || !html.includes("const edgeSmooth = i => FAN_SMOOTH[i] || _edgeSmoothOverride(i) || DEFAULT_EDGE_SMOOTH;")
+  || !html.includes("const edgeSmooth = i => _edgeSmoothOverride(i) || FAN_SMOOTH[i] || DEFAULT_EDGE_SMOOTH;")
+  || !html.includes("const candsOf = i => { const o = _edgeSmoothOverride(i); return o ? [o] : FAN_CANDIDATES; };")
 ) {
-  throw new Error("PFTF -> PFTF_VisCull_kDop curvature override is missing");
+  throw new Error("edge curvature overrides (PFTF -> PFTF_VisCull_kDop, fan-fixed overrides) are missing");
+}
+// 2026-10-24: 사용자가 고른 스무 개는 직선이다(STRAIGHT_EDGES). 목록의 쌍이 화면에 실제로 그려지는 선이어야 한다 —
+// 이름이 바뀌거나 걷힌 선을 가리키면 조용히 아무 일도 안 하므로 멈춘다.
+const straightEdges = readJsonConstant("STRAIGHT_EDGES", "[");
+if (straightEdges.length !== 20 || new Set(straightEdges.map(([from, to]) => `${from}>${to}`)).size !== 20) {
+  throw new Error(`STRAIGHT_EDGES should list 20 distinct edges, has ${straightEdges.length}`);
+}
+for (const [from, to] of straightEdges) {
+  if (!shownEdges.some((edge) => edge.from === from && edge.to === to)) {
+    throw new Error(`STRAIGHT_EDGES ${from}->${to} is not a drawn edge`);
+  }
 }
 for (const id of new Set(edges.map((edge) => edge.to))) {
   if (!shownEdges.some((edge) => edge.to === id)) {
@@ -154,7 +167,7 @@ const positions = Object.assign(
   readJsonConstant("CURATED_POSITIONS", "{"),
 );
 // 2026-09-10: graph.html 의 POS + CURATED_POSITIONS 병합 결과 전체를 그대로 적는다.
-const expectedPositions = {"Tomo_SFTF":{"x":760,"y":190},"Tomo_SFTFSoft":{"x":480,"y":60},"SFTF_Clustering":{"x":460,"y":320},"PFTF":{"x":760,"y":380},"SFTF_Composite":{"x":760,"y":650},"SFTF_InjMold":{"x":910,"y":0},"PFTF_Mold":{"x":1010,"y":100},"PFTF_Compression":{"x":280,"y":710},"Tomo_DFSVR":{"x":150,"y":60},"PFTF_VisCull_kDop":{"x":40,"y":250},"SFTF_SewerPOC":{"x":1060,"y":560},"SFTFSoft_GNN":{"x":260,"y":190},"SFTF_DrapePrior":{"x":-220,"y":680},"PFTF_AsymTensor":{"x":600,"y":650},"PFTF_DrapePrior_VisCull_kDop":{"x":-270,"y":540},"PFTF_GFiberCT":{"x":600,"y":850},"SFTF_QEM":{"x":470,"y":190},"SFTF_DynamicTargetSearch":{"x":270,"y":500},"DFSVR_VisCull":{"x":-80,"y":-150},"SFTFSoft_GNN_DFSVR":{"x":-80,"y":60},"SFTF_ActiveOverprint":{"x":40,"y":430},"SFTF_DrapeOverprint":{"x":100,"y":630},"ColdOndol":{"x":1230,"y":460},"ColdOndol_Positioning":{"x":1050,"y":360},"cfmsCIPC":{"x":-110,"y":920},"TSE_SEM1_Bezier":{"x":940,"y":650},"TSE_SEM2_Tensor":{"x":940,"y":850},"TSE_SEM3_AutoTune":{"x":940,"y":1110},"SFTF_HeatMethod":{"x":760,"y":850},"cfmsPINNDrape":{"x":-140,"y":1130},"cfmsDrape":{"x":-380,"y":1000},"cfmsMiindo":{"x":-170,"y":800},"SFTFSoft_DFSVR":{"x":160,"y":-150},"SFTF_UrbanTraffic":{"x":1230,"y":240},"cfmsAutoSew":{"x":460,"y":1280},"cfmsAutoPlace_IJCST":{"x":170,"y":1280},"cfmsAutoPlace_JCDE":{"x":-140,"y":1350},"cfmsDrapeSCAN":{"x":360,"y":980},"cfmsDrapeInverse":{"x":220,"y":840},"SFTF_Holonomy":{"x":760,"y":1050},"cfmsHipDetect":{"x":460,"y":1090},"cfmsDispersityKNN":{"x":600,"y":1050},"TSE_TomoSh4":{"x":460,"y":650},"TSE_TomoSh5":{"x":450,"y":850},"Jeon_DLPOrient":{"x":710,"y":-80},"cfmsDispersityProp":{"x":950,"y":1220},"Cho_MoldWarpDIC":{"x":1140,"y":130},"cfmsHMDispersity":{"x":670,"y":1270},"dynamicDispersity":{"x":600,"y":1370},"cfmsAnatomy":{"x":-330,"y":810},"cfmsAutoGrading":{"x":70,"y":1430}};
+const expectedPositions = {"Tomo_SFTF":{"x":760,"y":190},"Tomo_SFTFSoft":{"x":480,"y":60},"SFTF_Clustering":{"x":460,"y":320},"PFTF":{"x":760,"y":380},"PartialCost":{"x":480,"y":460},"SFTF_Composite":{"x":760,"y":650},"SFTF_InjMold":{"x":910,"y":0},"PFTF_Mold":{"x":1010,"y":100},"PFTF_Compression":{"x":280,"y":710},"Tomo_DFSVR":{"x":150,"y":60},"PFTF_VisCull_kDop":{"x":40,"y":250},"SFTF_SewerPOC":{"x":1060,"y":560},"SFTFSoft_GNN":{"x":260,"y":190},"SFTF_DrapePrior":{"x":-220,"y":680},"PFTF_AsymTensor":{"x":600,"y":650},"PFTF_DrapePrior_VisCull_kDop":{"x":-270,"y":540},"PFTF_GFiberCT":{"x":600,"y":850},"SFTF_QEM":{"x":470,"y":190},"SFTF_DynamicTargetSearch":{"x":270,"y":500},"DFSVR_VisCull":{"x":-80,"y":-150},"SFTFSoft_GNN_DFSVR":{"x":-80,"y":60},"SFTF_ActiveOverprint":{"x":40,"y":430},"SFTF_DrapeOverprint":{"x":100,"y":630},"ColdOndol":{"x":1230,"y":460},"ColdOndol_Positioning":{"x":1050,"y":360},"cfmsCIPC":{"x":-110,"y":920},"TSE_SEM1_Bezier":{"x":940,"y":650},"TSE_SEM2_Tensor":{"x":940,"y":850},"TSE_SEM3_AutoTune":{"x":940,"y":1110},"SFTF_HeatMethod":{"x":760,"y":850},"cfmsPINNDrape":{"x":-140,"y":1130},"cfmsDrape":{"x":-380,"y":1000},"cfmsMiindo":{"x":-170,"y":800},"SFTFSoft_DFSVR":{"x":160,"y":-150},"SFTF_UrbanTraffic":{"x":1230,"y":240},"cfmsAutoSew":{"x":460,"y":1280},"cfmsAutoPlace_IJCST":{"x":170,"y":1280},"cfmsAutoPlace_JCDE":{"x":-140,"y":1350},"cfmsDrapeSCAN":{"x":360,"y":980},"cfmsDrapeInverse":{"x":220,"y":840},"SFTF_Holonomy":{"x":760,"y":1050},"cfmsHipDetect":{"x":460,"y":1090},"cfmsDispersityKNN":{"x":600,"y":1050},"TSE_TomoSh4":{"x":460,"y":650},"TSE_TomoSh5":{"x":450,"y":850},"Jeon_DLPOrient":{"x":710,"y":-80},"cfmsDispersityProp":{"x":950,"y":1220},"Cho_MoldWarpDIC":{"x":1140,"y":130},"cfmsHMDispersity":{"x":670,"y":1270},"dynamicDispersity":{"x":600,"y":1370},"cfmsAnatomy":{"x":-330,"y":810},"cfmsAutoGrading":{"x":70,"y":1430}};
 const hyperedges = readJsonConstant("hyperedges", "[");
 const curatedHyperedgeMembers = readJsonConstant("CURATED_HYPEREDGE_MEMBERS", "{");
 for (const [label, nodeIds] of Object.entries(curatedHyperedgeMembers)) {

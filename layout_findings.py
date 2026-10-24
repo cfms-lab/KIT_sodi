@@ -261,6 +261,10 @@ POS = {
     "Tomo_SFTFSoft": (480, 60),
     "SFTF_Clustering": (460, 320),
     "PFTF": (760, 380),
+    # 2026-10-24: PFTF 의 자식 PartialCost 를 세웠다(사용자). 자리는 같은 날 14:54 에 저장된 웹 배치(PFTF 620,420)
+    # 에서 잰 PFTF 왼쪽 아래 빈 칸이다 — 부모까지의 선이 엇갈리는 곡선 0, 가장 가까운 노드 221 · 곡선 63px, 훌 밖.
+    # 파일 씨앗의 PFTF 자리(760,380)와는 맞춰 두지 않았다 — 웹 배치가 정본이고 표(graph_positions)에도 같은 값을 넣었다.
+    "PartialCost": (480, 460),
     "SFTF_Composite": (760, 650),
     "SFTF_InjMold": (910, 0),
     # 2026-09-20: 방대석 교수님 훌을 세우면서 PFTF_Mold 가 그래프에 처음 들어왔다.
@@ -624,7 +628,12 @@ QUALITY_ROWS = [
     ("SFTFSoft_GNN", "SFTFSoft_GNN", "상", "3,817 mesh·held-out·Cura 재라벨·Prusa 교차검증"),
     ("SFTF_Clustering", "SFTF_Clustering", "상", "SFTFCluster 계열 TDP 원고·cross-slicer/partition 자산; 독립성 게이트 잔여"),
     # 2026-10-19: 보류 해제 → draft(사용자). 볼트 grade_note 와 같은 문구다 — 공개 파일이라 방법·제목은 특허 게이트 뒤에.
-    ("PFTF", "PFTF", "중", "2026-10-19 보류 해제 → draft (사용자) — 원고를 TDP 예정 단독 방법 논문으로 다시 써 사전 등록 실측 이득을 주 결과로 세웠다. 이전 판정: 2026-08-20 ⛔ 투고 보류(확실한 긍정적 효과 미확보)"),
+    # 2026-10-24: 中 → ToDo · draft → 보류(사용자) — 프레임워크 자체는 성과가 없었고, 그 원고는 PartialCost 로 갈랐다.
+    # ToDo(흰 바탕·검정 테두리)에 보류가 겹쳐 파이가 검정 ⛔ 로 칠해진다(SFTF_HeatMethod 10-21 과 같다).
+    ("PFTF", "PFTF", "ToDo", "2026-10-24 中 → ToDo · 보류 (사용자) — 프레임워크 자체는 성과가 없었다. 일부 내용을 원고로 따로 준비해 PartialCost 노드로 갈랐다"),
+    # 2026-10-24 신설(사용자): PFTF 저장소의 원고(10-19 에 닫힘)를 PFTF 의 자식 노드로. 등급은 그 원고에 매겨 있던 PFTF 의
+    # 中 을 이어받았다. 볼트 grade_note 를 줄인 공개 문구다 — 방법·제목은 특허 게이트 뒤에.
+    ("PartialCost", "PartialCost", "중", "PFTF 저장소에서 갈라진 TDP 예정 단독 방법 논문(2026-10-24 신설); 원고는 2026-10-19 에 닫혔고 사전 등록 실측 이득이 주 결과. 투고 전 특허 출원 여부 결정이 남았다"),
     ("SFTF_DrapePrior", "SFTF_DrapePrior", "하", "**2026-10-31 한국섬유공학회지 63권 5호 출판(26M-08-029)** — 투고(2026-08-14) → 수정후 게재가(2026-09-03) → Rev1 당일 제출 → 게재확정(2026-09-17) → 교정쇄 회신(2026-10-08) → 발행. 드레이프 품질 평가의 재현성(노이즈 플로어·예산 일치·솔버 간 이득 부호 반전). 쪽·DOI 는 미정"),
     ("SFTF_Composite", "SFTF_Composite", "상", "한·영문 완성·191 tests·R9–R13 사전등록/독립감사; R11 합성 held-out 음성, 공식 CAD·물리 검증 잔여"),
     ("SFTF_InjMold", "SFTF_InjMold", "중", "B24·exact integration·set-cover·B-rep·blind protocol; 원고 조립 잔여"),
@@ -765,6 +774,8 @@ INTRODUCTIONS = {
     "Tomo_SFTFSoft": "딱 잘라 판단하지 않고 부드러운 점수로 가장 좋은 출력 방향을 찾는 방법이다.",
     "SFTF_Clustering": "비슷한 면들을 묶어 복잡한 물체의 지지 구조를 빠르게 분석하는 방법이다.",
     "PFTF": "방향 정보를 행렬로 정리해 여러 응용 문제에 재사용하는 일반 이론이다.",
+    # 2026-10-24: 볼트 PartialCost.md intro 와 같은 문구다 — 목적만 적고 방법은 적지 않는다(특허 게이트 전).
+    "PartialCost": "부품을 여러 조각으로 나눠 3D 프린팅할 때, 지지대가 생기는지 슬라이서로 확인하는 데 드는 시간을 줄이는 방법이다.",
     "SFTF_Composite": "복합재 부품의 섬유 방향과 지지 조건을 함께 고려해 좋은 제작 방향을 찾는다.",
     "SFTF_InjMold": "사출 금형에서 재료가 흐르는 방향을 보고 결함이 적은 설계를 고르는 방법이다.",
     "PFTF_Compression": "압박 의류가 몸을 누르는 정도를 방향별로 예측해 설계를 돕는다.",
@@ -1268,7 +1279,9 @@ if preserve_extended_quality:
             "SFTF_DrapeOverprint": "한국섬유공학회지 투고 완료 (2026-10-16, 원고번호 할당중)",
             # 2026-10-19: 보류(⛔) 해제 → draft(사용자). 게재지 TDP 라 「저널,상태」 꼴이다(PFTF_VisCull_kDop 과 같다).
             # 볼트 badge 와 같은 문구다.
-            "PFTF": "TDP,draft",
+            # 2026-10-24: 보류(성과 없음, 사용자) — 원고와 「TDP,draft」 배지는 PartialCost 가 이어받았다.
+            "PFTF": "보류(성과 없음 · 원고는 PartialCost)",
+            "PartialCost": "TDP,draft",
             # 2026-10-21: HeatMethod 를 Holonomy 에 합쳐 JCDE 로 낸다(사용자). HeatMethod 는 보류, Holonomy 는
             # 게재지가 JCDE 로 바뀌었다. 둘 다 볼트 badge 와 같은 문구다 — 옛 씨앗은 둘 다 「Composites Part A
             # 초고 완성」이었고, Holonomy 는 볼트 badge 가 비어 있어 표가 덮지 못해 그 옛 값이 화면에 보였다.
@@ -1333,7 +1346,9 @@ if preserve_extended_quality:
             "SFTF_InjMold": "공저자 일정이다 — 원고를 방대석 교수에게 전달했고(2026-09-21) 내년 연구년에 볼 예정이라 투고가 2년 뒤로 밀릴 수 있다. 행정 둘(교신저자 ORCID·1저자 실명)은 그쪽이 채운다. 분량·형식·인용은 닫혀 우리 쪽에 남은 일이 없다",
             # 2026-10-19: 보류(⛔) 해제 → draft(사용자). 볼트 bottleneck 과 같은 문구다. 옛 값(V2/V3/V4 동기화)은
             # 이론편 원고의 병목이었고 그 원고는 다시 쓰였다. 공개 파일이라 원고의 방법·제목은 적지 않는다.
-            "PFTF": "특허 출원 여부 결정 — 출원하면 출원이 투고보다 먼저다. 원고는 2026-10-18 DOCX 까지 닫혔다",
+            # 2026-10-24: 원고의 병목은 PartialCost 로 옮겼다. PFTF 는 보류 사유만 남는다(볼트 bottleneck 과 같은 문구).
+            "PFTF": "성과 없음 — 보류(2026-10-24). 원고는 PartialCost 로 갈랐다",
+            "PartialCost": "특허 출원 여부 결정 — 출원하면 출원이 투고보다 먼저다. 원고는 2026-10-18 DOCX 까지 닫혔다",
         },
         # 2026-09-21: PFTF_Mold 를 걷는다. 파일에 구워져 있던 「solids4foam 사슬 IBOF
         # 재채점·외부 물리 검증」은 볼트가 이미 닫은 일이고(grade_note — 선언한 아홉 관문
@@ -1636,6 +1651,28 @@ CFMS_AUTOGRADING_NODE = {
 }
 
 
+# 2026-10-24: 볼트에 새로 선 PartialCost(사용자 지시). PFTF 프레임워크가 성과 없이 보류되면서, 같은 저장소
+# (PFTF_dev, draft_keyword PartialCost)에서 따로 준비한 TDP 예정 원고를 PFTF 의 자식 노드로 세웠다. 등급 中 ·
+# stage draft 는 둘 다 볼트 값이고, 색·community 는 quality_lookup 이 QUALITY_ROWS 로 덮으므로 여기 적은 값은
+# 씨앗이다. 단계는 NOTE_STAGES 가 볼트에서 읽는다. 부모 화살표는 PARTIALCOST_GOAL_EDGES. PFTF 처럼 훌에는 넣지 않는다.
+PARTIALCOST_NODE = {
+    "id": "PartialCost",
+    "label": "PartialCost",
+    "color": {"background": "#f28e2b", "border": "#f28e2b",
+               "highlight": {"background": "#f28e2b", "border": "#f28e2b"}},
+    "size": 13.7,
+    "font": {"size": 13, "color": "#333333", "bold": False},
+    "title": "PartialCost — 중: PFTF 저장소에서 갈라진 TDP 예정 단독 방법 논문",
+    "community": 2,
+    "community_name": "중",
+    "source_file": "PartialCost.md",
+    "file_type": "concept",
+    "degree": 1,
+    "_intro": INTRODUCTIONS["PartialCost"],
+    "_project_path": PROJECT_PATHS.get("PartialCost", r"D:\__PFTF_Projects(2026)\PFTF_dev"),
+}
+
+
 # 2026-09-23: 볼트에 새로 선 HMD(Harmonic Multiscale Dispersity). status: todo · grade: ToDo ·
 # stage: undecided 라 흰 바탕·검정 외곽선(community 4). 공저자는 볼트 coauthors: [은종현](2026-09-23 확정)이라
 # 은종현 훌에 넣는다. 투고지는 미정.
@@ -1755,6 +1792,7 @@ TODO_NODES = [
     HMD_DISPERSITY_NODE,
     DYNAMIC_DISPERSITY_NODE,
     CFMS_AUTOGRADING_NODE,
+    PARTIALCOST_NODE,
 ]
 
 TODO_EDGES = [
@@ -2399,6 +2437,17 @@ AUTOGRADING_GOAL_EDGES = [
     },
 ]
 
+# ------------------------------------------------ PartialCost 의 부모 (2026-10-24 사용자 지시)
+# 볼트 depends_on = [PFTF] 이고 같은 저장소·같은 draft/ 에서 갈라진 원고라(cfmsPINNCAD → cfmsHipDetect 와 같은 형태)
+# 계보가 분명하다 — 실선이다. 공개 툴팁이라 방법은 적지 않는다(특허 게이트 전).
+PARTIALCOST_GOAL_EDGES = [
+    _autoplace_goal_edge(
+        "PFTF", "PartialCost", "검증 가속",
+        "PFTF 저장소에서 갈라진 원고 — 조각 출력 후보를 슬라이서로 확인하는 시간을 줄이는 쪽으로 따로 섰다",
+        "가속",
+    ),
+]
+
 # ------------------------------------------------------ 분산도 사슬 (2026-09-24 사용자 지시)
 #   dynamicDispersity → cfmsDispersityKNN → cfmsDispersityProp → cfmsHMDispersity
 # 가운데 한 칸(KNN → Prop, 「상관 검증」)은 위 JEON_GOAL_EDGES 에 이미 있다. 여기는 양 끝이다.
@@ -2758,7 +2807,7 @@ def _preserve_goal_edges(match):
         (str(edge["from"]), str(edge["to"]))
         for edge in DYNAMIC_TARGET_SEARCH_GOAL_EDGES + COAUTHOR_KIM_GOAL_EDGES
         + JEON_GOAL_EDGES + MOLD_GOAL_EDGES + CHO_GOAL_EDGES + DISPERSITY_GOAL_EDGES
-        + ANATOMY_GOAL_EDGES + AUTOGRADING_GOAL_EDGES
+        + ANATOMY_GOAL_EDGES + AUTOGRADING_GOAL_EDGES + PARTIALCOST_GOAL_EDGES
     }
     # 2026-09-24: 사슬이 바뀌면서 cfmsDispersityKNN → cfmsHMDispersity 가 없어졌다. 위 목록에서
     # 빼기만 하면 스냅샷에 남은 옛 사본이 살아남아 사슬이 둘로 갈려 보인다 — 그 짝도 지운다.
@@ -2786,6 +2835,7 @@ def _preserve_goal_edges(match):
     edges.extend(copy.deepcopy(CHO_GOAL_EDGES))
     edges.extend(copy.deepcopy(ANATOMY_GOAL_EDGES))
     edges.extend(copy.deepcopy(AUTOGRADING_GOAL_EDGES))
+    edges.extend(copy.deepcopy(PARTIALCOST_GOAL_EDGES))
     edges.extend(copy.deepcopy(DISPERSITY_GOAL_EDGES))
     edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
     edges.extend(copy.deepcopy(DRAPESCAN_EDGES))
