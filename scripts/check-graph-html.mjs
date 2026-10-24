@@ -138,18 +138,29 @@ if (prunePairs.some(([from, to]) => from === "SFTF_DynamicTargetSearch" && to ==
 const shownEdges = edges.filter((edge) => !isPruned(edge));
 // 2026-10-23: PFTF → PFTF_VisCull_kDop 은 사용자 지시로 기본(continuous)과 반대쪽으로 휜다(EDGE_SMOOTH_OVERRIDES).
 // 2026-10-24: 덮어쓰기가 부채꼴보다 먼저다(직선으로 정한 cfmsDrape → SFTF_DrapePrior 가 부채꼴 허브에 닿는다).
+// 2026-10-24 둘째: cfmsAutoSew → cfmsPINNDrape 반대로(curvedCW 0.165), cfmsDrape → cfmsAutoPlace_IJCST 곡률 절반(curvedCCW 0.165).
 if (
   !html.includes(`["PFTF", "PFTF_VisCull_kDop", { type: 'curvedCW', roundness: 0.165 }]`)
+  || !html.includes(`["cfmsAutoSew", "cfmsPINNDrape", { type: 'curvedCW', roundness: 0.165 }]`)
+  || !html.includes(`["cfmsDrape", "cfmsAutoPlace_IJCST", { type: 'curvedCCW', roundness: 0.165 }]`)
   || !html.includes("const edgeSmooth = i => _edgeSmoothOverride(i) || FAN_SMOOTH[i] || DEFAULT_EDGE_SMOOTH;")
   || !html.includes("const candsOf = i => { const o = _edgeSmoothOverride(i); return o ? [o] : FAN_CANDIDATES; };")
 ) {
-  throw new Error("edge curvature overrides (PFTF -> PFTF_VisCull_kDop, fan-fixed overrides) are missing");
+  throw new Error("edge curvature overrides (PFTF -> PFTF_VisCull_kDop, AutoSew -> PINNDrape, Drape -> AutoPlace_IJCST, fan-fixed) are missing");
+}
+for (const [from, to] of [["cfmsAutoSew", "cfmsPINNDrape"], ["cfmsDrape", "cfmsAutoPlace_IJCST"]]) {
+  if (!shownEdges.some((edge) => edge.from === from && edge.to === to)) throw new Error(`curvature override ${from}->${to} is not a drawn edge`);
 }
 // 2026-10-24: 사용자가 고른 스무 개는 직선이다(STRAIGHT_EDGES). 목록의 쌍이 화면에 실제로 그려지는 선이어야 한다 —
-// 이름이 바뀌거나 걷힌 선을 가리키면 조용히 아무 일도 안 하므로 멈춘다.
+// 이름이 바뀌거나 걷힌 선을 가리키면 조용히 아무 일도 안 하므로 멈춘다. 같은 날 둘째 지시로 둘(DTS → AO ·
+// SFTFSoft_GNN → SFTFSoft_GNN_DFSVR)을 더해 스물둘이다.
 const straightEdges = readJsonConstant("STRAIGHT_EDGES", "[");
-if (straightEdges.length !== 20 || new Set(straightEdges.map(([from, to]) => `${from}>${to}`)).size !== 20) {
-  throw new Error(`STRAIGHT_EDGES should list 20 distinct edges, has ${straightEdges.length}`);
+if (straightEdges.length !== 22 || new Set(straightEdges.map(([from, to]) => `${from}>${to}`)).size !== 22) {
+  throw new Error(`STRAIGHT_EDGES should list 22 distinct edges, has ${straightEdges.length}`);
+}
+// 2026-10-24: cfmsMiindo → cfmsDrapeSCAN 「구현 호스트」는 사용자 지시로 걷었다(생성기 DRAPESCAN_EDGES). 되살아나면 멈춘다.
+if (edges.some((edge) => (edge.from === "cfmsMiindo" && edge.to === "cfmsDrapeSCAN") || (edge.from === "cfmsDrapeSCAN" && edge.to === "cfmsMiindo"))) {
+  throw new Error("cfmsMiindo -> cfmsDrapeSCAN edge is back — removed on 2026-10-24");
 }
 for (const [from, to] of straightEdges) {
   if (!shownEdges.some((edge) => edge.from === from && edge.to === to)) {
@@ -296,7 +307,6 @@ const expectedGarmentEdges = [
   ["cfmsAutoSew", "cfmsAutoPlace_IJCST", "패턴 배치", "통합", false],
   ["cfmsDrape", "cfmsAutoPlace_IJCST", "패턴 물리 검증", "정확도", false],
   ["cfmsDrape", "cfmsDrapeSCAN", "실행 기반", "통합", false],
-  ["cfmsMiindo", "cfmsDrapeSCAN", "구현 호스트", "통합", false],
   // 2026-10-23: cfmsPINNCAD 를 내리면서 그 노드의 큐레이션 엣지 셋(body atlas · 봉제 대응 · 저차원 예측)이 빠졌다.
   ["cfmsCIPC", "cfmsDrapeSCAN", "검증 오라클", "정확도", false],
   ["SFTF_DrapePrior", "cfmsDrapeSCAN", "부분 재사용", "확장", false],

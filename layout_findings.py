@@ -2119,11 +2119,9 @@ DRAPESCAN_EDGES = [
         "cfmsDrape의 shell 물리·정적 평형·body contact·soft tether를 핵심 실행 기반으로 사용",
         "통합",
     ),
-    _drapescan_goal_edge(
-        "cfmsDrapeSCAN", "cfmsMiindo", "구현 호스트",
-        "첫 실측 전까지 cfmsMiindo의 drape/ 위에 얇은 실험 모듈로 배양",
-        "통합",
-    ),
+    # 2026-10-24: cfmsDrapeSCAN ↔ cfmsMiindo 「구현 호스트」(화면 방향 cfmsMiindo → cfmsDrapeSCAN)를 걷었다 — 사용자
+    # 「필요없겠어. 삭제해줘」. 볼트 cfmsDrapeSCAN.md 의 관계(첫 실측 전까지 cfmsMiindo 의 drape/ 위에 실험 모듈로 배양)는
+    # 그대로이고 그래프에서만 뺀다. graph.html EDGE_DIRECTION_FIXES 의 짝도 같이 걷었다.
     _drapescan_goal_edge(
         "cfmsDrapeSCAN", "cfmsPINNCAD", "body atlas",
         "저차원 body atlas·canonical 치수 schema와 단면·둘레·폭·깊이 평가를 보조 입력으로 사용",
