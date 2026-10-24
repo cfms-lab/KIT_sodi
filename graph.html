@@ -947,7 +947,11 @@ let FAN_SMOOTH = {};
    2026-10-24 아홉째(사용자): SFTF_DrapePrior → PFTF_DrapePrior_VisCull_kDop(초기값 결합, 세로 260px 짧은 화살표)을 직선 목록에 더했다(29개).
    2026-10-24 열째(사용자): PFTF_Mold → Cho_MoldWarpDIC(휨 실측 대조)을 직선 목록에 더했다(30개).
    2026-10-24 열한째(사용자): cfmsDrape → cfmsAutoPlace_JCDE(화면 방향 — EDGE_DIRECTION_FIXES 로 뒤집힌 쪽)를 더했다(31개). 부채꼴 허브
-   cfmsDrape 에 닿는 선이라 부채꼴은 이것을 직선으로 고정한 채 나머지(cfmsAutoGrading·cfmsPINNDrape 등)를 고른다. */
+   cfmsDrape 에 닿는 선이라 부채꼴은 이것을 직선으로 고정한 채 나머지(cfmsAutoGrading·cfmsPINNDrape 등)를 고른다.
+   2026-10-24 열둘째(사용자 「SFTF_DynamicTargetSearch → SFTF_ActiveOverprint, cfmsAutoPlace_JCDE → cfmsAutoGrading 을 곧게, 점선은
+   그대로」): JCDE → AutoGrading(그레이딩 불변 기억, 점선)을 더했다(32개). 기본 continuous 라 22:45 웹 배치처럼 두 노드가 같은 높이일
+   때만 곧았다. DTS → AO 는 둘째 지시부터 이미 목록에 있다 — 수동 배치에서는 늘 곧고, 계층 배치(LR·UD)만 모든 선을 cubicBezier 로 휜다.
+   직선은 smooth 만 끄므로 점선(dashes)은 그대로다. */
 const STRAIGHT_EDGE_SMOOTH = { enabled: false };
 const STRAIGHT_EDGES = [
   ["Tomo_DFSVR", "DFSVR_VisCull"],
@@ -980,7 +984,8 @@ const STRAIGHT_EDGES = [
   ["cfmsDrapeInverse", "cfmsDrapeSCAN"],
   ["SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop"],
   ["PFTF_Mold", "Cho_MoldWarpDIC"],
-  ["cfmsDrape", "cfmsAutoPlace_JCDE"]
+  ["cfmsDrape", "cfmsAutoPlace_JCDE"],
+  ["cfmsAutoPlace_JCDE", "cfmsAutoGrading"]
 ];
 const EDGE_SMOOTH_OVERRIDES = [
   ["PFTF", "PFTF_VisCull_kDop", { type: 'curvedCW', roundness: 0.165 }],

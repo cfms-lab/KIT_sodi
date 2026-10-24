@@ -160,10 +160,10 @@ for (const [from, to] of [["cfmsAutoSew", "cfmsPINNDrape"], ["cfmsDrape", "cfmsA
 // SFTFSoft_GNN → SFTFSoft_GNN_DFSVR)을 더해 스물둘, 넷째 지시로 Tomo_SFTF → SFTF_UrbanTraffic 을 더해 스물셋,
 // 다섯째 지시로 TSE_TomoSh4 → TSE_TomoSh5 → cfmsHipDetect 둘을 더해 스물다섯, 여섯째 지시로
 // SFTF_HeatMethod → SFTF_Composite · SFTF_HeatMethod → SFTF_Holonomy 둘을 더해 스물일곱, 일곱째 지시로
-// cfmsDrapeInverse → cfmsDrapeSCAN 을 더해 스물여덟, 아홉째 지시로 SFTF_DrapePrior → PFTF_DrapePrior_VisCull_kDop 을 더해 스물아홉, 열째 지시로 PFTF_Mold → Cho_MoldWarpDIC 을 더해 서른, 열한째 지시로 cfmsDrape → cfmsAutoPlace_JCDE 를 더해 서른하나다.
+// cfmsDrapeInverse → cfmsDrapeSCAN 을 더해 스물여덟, 아홉째 지시로 SFTF_DrapePrior → PFTF_DrapePrior_VisCull_kDop 을 더해 스물아홉, 열째 지시로 PFTF_Mold → Cho_MoldWarpDIC 을 더해 서른, 열한째 지시로 cfmsDrape → cfmsAutoPlace_JCDE 를 더해 서른하나, 열둘째 지시로 cfmsAutoPlace_JCDE → cfmsAutoGrading 을 더해 서른둘이다.
 const straightEdges = readJsonConstant("STRAIGHT_EDGES", "[");
-if (straightEdges.length !== 31 || new Set(straightEdges.map(([from, to]) => `${from}>${to}`)).size !== 31) {
-  throw new Error(`STRAIGHT_EDGES should list 31 distinct edges, has ${straightEdges.length}`);
+if (straightEdges.length !== 32 || new Set(straightEdges.map(([from, to]) => `${from}>${to}`)).size !== 32) {
+  throw new Error(`STRAIGHT_EDGES should list 32 distinct edges, has ${straightEdges.length}`);
 }
 // 2026-10-24: cfmsMiindo → cfmsDrapeSCAN 「구현 호스트」는 사용자 지시로 걷었다(생성기 DRAPESCAN_EDGES). 되살아나면 멈춘다.
 if (edges.some((edge) => (edge.from === "cfmsMiindo" && edge.to === "cfmsDrapeSCAN") || (edge.from === "cfmsDrapeSCAN" && edge.to === "cfmsMiindo"))) {
