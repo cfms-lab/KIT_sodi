@@ -943,7 +943,8 @@ let FAN_SMOOTH = {};
    2026-10-24 여덟째(사용자 「Physics-AI 그룹을 침범하지 않도록 곡선으로」, 16:32 웹 배치에서 잼): PFTF_VisCull_kDop → PFTF_Compression
    (접촉 가속, 780px). continuous 0.2 는 +23px 밖에 안 휘어 Physics-AI 훌(멤버 중심 60px 패딩) 안으로 23.5px 들어갔다(DTS 중심 36px).
    curvedCW 0.165 = +58px(동쪽) 이면 훌 테두리 밖 14px(DTS 중심 74px) — 이웃 PFTF → PFTF_VisCull_kDop 와 같은 크기다. DTS 캡션 상자
-   (오른끝 x≈170)는 훌보다 60px 더 나와 있어 선이 그 끝을 지나는데, 상자까지 피하려면 0.28(+106px, SFTF_QEM 캡션에 닿을 듯)이라 두지 않았다. */
+   (오른끝 x≈170)는 훌보다 60px 더 나와 있어 선이 그 끝을 지나는데, 상자까지 피하려면 0.28(+106px, SFTF_QEM 캡션에 닿을 듯)이라 두지 않았다.
+   2026-10-24 아홉째(사용자): SFTF_DrapePrior → PFTF_DrapePrior_VisCull_kDop(초기값 결합, 세로 260px 짧은 화살표)을 직선 목록에 더했다(29개). */
 const STRAIGHT_EDGE_SMOOTH = { enabled: false };
 const STRAIGHT_EDGES = [
   ["Tomo_DFSVR", "DFSVR_VisCull"],
@@ -973,7 +974,8 @@ const STRAIGHT_EDGES = [
   ["TSE_TomoSh5", "cfmsHipDetect"],
   ["SFTF_HeatMethod", "SFTF_Composite"],
   ["SFTF_HeatMethod", "SFTF_Holonomy"],
-  ["cfmsDrapeInverse", "cfmsDrapeSCAN"]
+  ["cfmsDrapeInverse", "cfmsDrapeSCAN"],
+  ["SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop"]
 ];
 const EDGE_SMOOTH_OVERRIDES = [
   ["PFTF", "PFTF_VisCull_kDop", { type: 'curvedCW', roundness: 0.165 }],
