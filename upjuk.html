@@ -372,6 +372,8 @@ async function loadNodes(){
   catch(e){ NODES=[]; }
 }
 /* 2026-10-16 사용자 지시: 비로그인 방문자에게서 감추는 것은 ToDo 하나다(draft 업적은 보인다).
+   2026-10-26 사용자 지시로 바뀌었다 — 비로그인 방문자에게는 **출판(published)된 업적만** 보인다(아래 loadPapers).
+   내년 과제 제안서를 준비하는 동안 진행 중인 원고(draft·submitted·accepted…)의 수와 제목이 바깥에 드러나지 않게 한다.
    여기서 비우면 종류 목록의 TODO 와 할일 목록이 함께 빠진다. */
 function todoNodes(){ return isLoggedIn()?NODES.filter(n=>n.grade==="ToDo"):[]; }
 function nodeById(id){ return id?NODES.find(n=>n.id===id):null; }
@@ -388,12 +390,17 @@ async function loadPapers(){
     /* 2026-09-12: `papers` 대신 `research_outputs` 의 kind='output' 을 읽는다.
        한 표에서 mindmap 은 kind='node' 를, 이 페이지는 kind='output' 을 본다.
        정본은 옵시디언 볼트이고 이 페이지는 **읽기 전용**이다(볼트 Rules/업적통합_설계안.md 7절).
-       2026-10-16: draft 도 방문자에게 보인다(사용자 지시). 로그인은 ToDo·PDF·수정에만 쓰인다. */
-    const data=await api('/rest/v1/research_outputs?kind=eq.output&select=*',
+       2026-10-16: draft 도 방문자에게 보인다(사용자 지시). 로그인은 ToDo·PDF·수정에만 쓰인다.
+       2026-10-26: 되돌렸다 — 비로그인은 출판된 것만(사용자 지시). 요청에 조건을 붙여 진행 중 행이 응답에도 안 실리게 하고,
+       화면에서 한 번 더 거른다. stage 가 빈 행은 출판으로 친다(파이와 같은 규칙). ⚠️ 표의 anon 읽기 정책은 그대로라
+       API 를 직접 부르면 여전히 보인다 — 막으려면 RLS 를 바꿔야 한다. */
+    const publishedOnly=isLoggedIn()?'':'&or=(stage.eq.published,stage.is.null)';
+    const data=await api('/rest/v1/research_outputs?kind=eq.output&select=*'+publishedOnly,
       {headers:authHeaders(true)});
     HAS_PROJECT_COL=true;                     // research_outputs 는 project_id 를 늘 가진다
     PAPERS=data.map(normalizePaper);
     PAPERS=PAPERS.filter(p=>!HIDDEN_IDS.has(p.ID)&&!HIDDEN_CATEGS.has(p.CATEG));   // 감춘 기록·분류 (위 HIDDEN_*)
+    if(!isLoggedIn()) PAPERS=PAPERS.filter(p=>(p.STAGE||'published')==='published');   // 2026-10-26: 비로그인은 출판된 것만
     document.getElementById("banner").style.display="none";
     initUI();
   }catch(e){
@@ -728,7 +735,7 @@ function logout(){SESSION=null;localStorage.removeItem("cfms_session");renderAut
 function renderAuthbar(){
   const bar=document.getElementById("authbar");
   if(isLoggedIn()){
-    bar.innerHTML=`<span class="pill">✔ ${esc(SESSION.email)} (ToDo·PDF 열람)</span>
+    bar.innerHTML=`<span class="pill">✔ ${esc(SESSION.email)} (진행 중 업적·ToDo·PDF 열람)</span>
       <button class="btn secondary sm" onclick="openUpload()" title="PDF 원문 업로드">PDF 업로드</button>
       <button class="btn secondary sm" onclick="logout()">로그아웃</button>`;
   }else{
