@@ -70,7 +70,7 @@
     "PartialCost":          "특허 출원 여부 정하고 TDP 투고",  /* PFTF 저장소에서 갈라진 원고(2026-10-24 신설). 원고는 10-19 에 닫혔고 커버레터가 남았다 */
     "PFTF_OrientCert":      "3단계 실험 뒤 4·5절 집필",  /* PFTF_AsymTensor 의 2편(2026-10-24 신설, Computer-Aided Design 예정, 설인환 단독). 2·3절 초안 */
     "PFTF_VisCull_kDop":    "GPU 경로 구현",
-    "SFTF_HeatMethod":      "보류 — Holonomy 에 병합",  /* 단독 투고 포기, JCDE 통합 원고로 (2026-10-21) */
+    "SFTF_HeatMethod":      "보류 — Holonomy 에서 다시 분리, 실을 원고 없음",  /* 2026-10-21 Holonomy 에 병합 → 2026-10-26 JCDE 리젝 사유 ②로 통제 실험을 다시 뺐다. 단독으로 낼지 사용자 결정 전 */
     "ColdOndol_Positioning":"투고처 결정 필요",
 
     /* ── 순서를 기다리는 것 ───────────────────────────────── */
