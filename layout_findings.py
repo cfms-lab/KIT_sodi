@@ -38,7 +38,11 @@ DSTS = [HERE / "graph.html"]
 # 2026-10-23: cfmsPINNCAD 를 내렸다(사용자 지시). 저장소를 논문 이름 cfmsHipDetect_dev 로 바꾸면서 홈페이지의
 # 두 노드(cfmsPINNCAD · HIPDetect)를 cfmsHipDetect 하나로 합쳤다. PINNCAD 연구선(보류)은 볼트 노트에만 남는다.
 # 되살리려면 여기서 빼고 POS 에 좌표를 돌려 놓는다(옛 자리 (-10, 1060)).
-HIDDEN_NODE_IDS = {"PFTF_subMarine", "PFTF_Terrain", "PFTF_ResearchOptimize", "cfmsDispersity", "cfmsPINNCAD"}
+# 2026-10-27: Cho_MoldWarpDIC 를 내렸다(사용자 「진행할 계획이 없으니 안보이게 정리해 줘」). 볼트 노트는 stage: cancelled ·
+# homepage: hidden 으로 남는다. 정의(CHO_MOLDWARPDIC_NODE · CHO_GOAL_EDGES)는 그대로 두고 여기서 걸러 노드와 PFTF_Mold 점선을
+# 함께 걷는다. 되살리려면 여기서 빼고 POS 에 좌표를 돌려 놓는다(옛 자리: 파일 (1140, 130), 웹 저장 (60, 560)).
+HIDDEN_NODE_IDS = {"PFTF_subMarine", "PFTF_Terrain", "PFTF_ResearchOptimize", "cfmsDispersity", "cfmsPINNCAD",
+                   "Cho_MoldWarpDIC"}
 
 # Project notes are the single source of truth for local VS Code paths.  The
 # graph node id normally matches the Obsidian project-note stem, so the button
@@ -354,7 +358,7 @@ POS = {
     # 2026-09-22: 볼트에 Cho_MoldWarpDIC 가 섰다(조범곤 교수 공저 **후보**, ToDo·undecided). 자리는
     # 방대석 훌(SFTF_InjMold 860 · PFTF_Mold 980, y −150) 바로 오른쪽 빈 칸 — 부모가 PFTF_Mold 라
     # 같은 줄에 둔다. 후보라 훌에는 넣지 않는다(노드 정보의 「공저 후보」 줄로만 보인다).
-    "Cho_MoldWarpDIC": (1140, 130),
+    # 2026-10-27: 노드를 내리며(HIDDEN_NODE_IDS) 좌표 (1140, 130) 도 뺐다.
     # 2026-09-23: 볼트에 cfmsHMDispersity 가 섰다(ToDo·undecided, 공저 은종현). 부모는
     # cfmsDispersityKNN 이고 cfmsDispersityProp 과는 형제지만 「별도 보존 연구선」이라 둘 사이엔
     # 선을 긋지 않는다(사용자: 4촌처럼). 자리는 Prop 와 같은 줄. 같은 날 사용자 지시로 은종현 훌에
@@ -1663,6 +1667,7 @@ DISPERSITYPROP_NODE = {
 # 2026-09-22: 볼트에 새로 선 조범곤 교수 공저 후보. status: todo · grade: ToDo · stage: undecided 라
 # 흰 바탕·검정 외곽선(community 4)에 빈 원으로 그려진다. 단계는 NOTE_STAGES 가 볼트에서 읽어 온다.
 # 부모는 볼트 depends_on 의 PFTF_Mold 다(CHO_GOAL_EDGES). 후보라 훌에는 넣지 않는다.
+# 2026-10-27: 진행 계획이 없어 내렸다 — HIDDEN_NODE_IDS 가 이 노드와 CHO_GOAL_EDGES 를 거른다. 되살릴 때를 위해 정의는 남긴다.
 CHO_MOLDWARPDIC_NODE = {
     "id": "Cho_MoldWarpDIC",
     "label": "Cho_MoldWarpDIC",

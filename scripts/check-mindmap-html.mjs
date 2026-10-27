@@ -69,7 +69,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__applyOrientCert=applyOrientCert20261024;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__applyOrientCert=applyOrientCert20261024;globalThis.__applyChoMoldWarpRetire=applyChoMoldWarpRetire20261027;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -757,6 +757,30 @@ if (childIds(findIn(orientCertHand.root, "nongkxm5")) !== "PFTF_OrientCert" || f
 const orientCertNoNode = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyOrientCert(orientCertNoNode)) throw new Error("OrientCert migration must still stamp its version without PFTF_AsymTensor");
 if (childIds(orientCertNoNode.root) !== "n0llvuh1") throw new Error("OrientCert migration added a node to a document without PFTF_AsymTensor");
+
+// 2026-10-27: Cho_MoldWarpDIC 내림(진행 계획 없음). 노드만 빼고 자식은 그 자리로, 그 노드의 관계선만 걷는다. 형제·부모는 그대로.
+const choRetireSample = { root: mk("root", [
+  mk("pftf_mold_submission", [
+    mk("n8t2x7d2", [
+      mk("sibBefore"),
+      { id: "Cho_MoldWarpDIC", title: "Cho_MoldWarpDIC", kind: "todo", status: "draft", children: [mk("choChild")] },
+      mk("sibAfter"),
+    ]),
+  ]),
+]), links: [
+  { from: "n8t2x7d2", to: "Cho_MoldWarpDIC", label: "휨 실측 대조" },
+  { from: "sibBefore", to: "sibAfter", label: "남는 선" },
+] };
+if (!context.__applyChoMoldWarpRetire(choRetireSample)) throw new Error("Cho_MoldWarpDIC retire migration did not run");
+if (context.__applyChoMoldWarpRetire(choRetireSample)) throw new Error("Cho_MoldWarpDIC retire migration is not idempotent");
+if (findIn(choRetireSample.root, "Cho_MoldWarpDIC")) throw new Error("Cho_MoldWarpDIC retire migration left the node in the tree");
+if (childIds(findIn(choRetireSample.root, "n8t2x7d2")) !== "sibBefore,choChild,sibAfter") throw new Error(`Cho_MoldWarpDIC retire migration misplaced the children: ${childIds(findIn(choRetireSample.root, "n8t2x7d2"))}`);
+if (choRetireSample.links.length !== 1 || choRetireSample.links[0].label !== "남는 선") throw new Error("Cho_MoldWarpDIC retire migration left its link or dropped an unrelated one");
+const choRetireValidation = context.__validate(choRetireSample);
+if (!choRetireValidation.ok) throw new Error(`Cho_MoldWarpDIC retire sample is invalid: ${choRetireValidation.errors[0]}`);
+const choRetireNoNode = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyChoMoldWarpRetire(choRetireNoNode)) throw new Error("Cho_MoldWarpDIC retire migration must still stamp its version without the node");
+if (childIds(choRetireNoNode.root) !== "n0llvuh1") throw new Error("Cho_MoldWarpDIC retire migration touched a document without the node");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);
