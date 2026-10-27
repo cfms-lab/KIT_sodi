@@ -2923,6 +2923,10 @@ def _preserve_goal_edges(match):
     # (check-graph-html.mjs 의 직접 자식 금지)에 걸린다 — 그 짝도 지운다. 스냅샷에서 사라진 게
     # 확인되면 걷어도 된다.
     lineage_pairs |= {("Tomo_SFTF", "SFTF_ActiveOverprint")}
+    # 2026-10-27: cfmsDrapeInverse → cfmsMiindo 「구현 호스트」(스냅샷의 추출 엣지)를 걷었다 — 사용자 「다른 화살표와 교차하고
+    # 있어서 헷갈려. 삭제해줘」(cfmsDrape → cfmsDrapeSCAN 과 엇갈렸다). cfmsMiindo 로 들어오는 유일한 선이라 graph.html 의
+    # EDGE_PRUNE_PAIRS(화면 제외)로는 「노드마다 부모 하나는 남긴다」 가드에 걸려 관계째 뺀다. 볼트 노트의 관계는 그대로다.
+    lineage_pairs |= {("cfmsDrapeInverse", "cfmsMiindo")}
     edges = [
         edge for edge in edges
         if (str(edge.get("from")), str(edge.get("to"))) not in lineage_pairs

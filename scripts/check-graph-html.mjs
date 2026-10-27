@@ -142,13 +142,14 @@ const shownEdges = edges.filter((edge) => !isPruned(edge));
 // 2026-10-24 셋째: cfmsAutoSew → cfmsPINNDrape 곡률 절반(curvedCW 0.09), cfmsDrape → cfmsDrapeSCAN 곡률 절반(curvedCW 0.105).
 // 2026-10-24 여덟째: PFTF_VisCull_kDop → PFTF_Compression 은 Physics-AI 훌 밖(동쪽)으로 휜다(curvedCW 0.165, 훌 테두리 밖 14px).
 // 2026-10-24 열셋째: PFTF_VisCull_kDop → SFTF_DrapePrior 휨 반대로(continuous −39.3px → curvedCW 0.125 +39.2px).
+// 2026-10-27: 사용자 지시로 VisCull_kDop 의 두 선을 다시 뒤집었다 — 같은 roundness 의 curvedCCW(크기 그대로).
 if (
   !html.includes(`["PFTF", "PFTF_VisCull_kDop", { type: 'curvedCW', roundness: 0.165 }]`)
   || !html.includes(`["cfmsAutoSew", "cfmsPINNDrape", { type: 'curvedCW', roundness: 0.09 }]`)
   || !html.includes(`["cfmsDrape", "cfmsAutoPlace_IJCST", { type: 'curvedCCW', roundness: 0.165 }]`)
   || !html.includes(`["cfmsDrape", "cfmsDrapeSCAN", { type: 'curvedCW', roundness: 0.105 }]`)
-  || !html.includes(`["PFTF_VisCull_kDop", "PFTF_Compression", { type: 'curvedCW', roundness: 0.165 }]`)
-  || !html.includes(`["PFTF_VisCull_kDop", "SFTF_DrapePrior", { type: 'curvedCW', roundness: 0.125 }]`)
+  || !html.includes(`["PFTF_VisCull_kDop", "PFTF_Compression", { type: 'curvedCCW', roundness: 0.165 }]`)
+  || !html.includes(`["PFTF_VisCull_kDop", "SFTF_DrapePrior", { type: 'curvedCCW', roundness: 0.125 }]`)
   || !html.includes("const edgeSmooth = i => _edgeSmoothOverride(i) || FAN_SMOOTH[i] || DEFAULT_EDGE_SMOOTH;")
   || !html.includes("const candsOf = i => { const o = _edgeSmoothOverride(i); return o ? [o] : FAN_CANDIDATES; };")
 ) {
@@ -163,6 +164,7 @@ for (const [from, to] of [["cfmsAutoSew", "cfmsPINNDrape"], ["cfmsDrape", "cfmsA
 // 다섯째 지시로 TSE_TomoSh4 → TSE_TomoSh5 → cfmsHipDetect 둘을 더해 스물다섯, 여섯째 지시로
 // SFTF_HeatMethod → SFTF_Composite · SFTF_HeatMethod → SFTF_Holonomy 둘을 더해 스물일곱, 일곱째 지시로
 // cfmsDrapeInverse → cfmsDrapeSCAN 을 더해 스물여덟, 아홉째 지시로 SFTF_DrapePrior → PFTF_DrapePrior_VisCull_kDop 을 더해 스물아홉, 열째 지시로 PFTF_Mold → Cho_MoldWarpDIC 을 더해 서른, 열한째 지시로 cfmsDrape → cfmsAutoPlace_JCDE 를 더해 서른하나, 열둘째 지시로 cfmsAutoPlace_JCDE → cfmsAutoGrading 을 더해 서른둘이다.
+// 2026-10-27: cfmsDrapeInverse → cfmsMiindo 를 관계째 걷고(아래 가드) SFTF_ActiveOverprint → SFTF_DrapeOverprint 를 더해 그대로 서른둘이다.
 const straightEdges = readJsonConstant("STRAIGHT_EDGES", "[");
 if (straightEdges.length !== 32 || new Set(straightEdges.map(([from, to]) => `${from}>${to}`)).size !== 32) {
   throw new Error(`STRAIGHT_EDGES should list 32 distinct edges, has ${straightEdges.length}`);
@@ -170,6 +172,10 @@ if (straightEdges.length !== 32 || new Set(straightEdges.map(([from, to]) => `${
 // 2026-10-24: cfmsMiindo → cfmsDrapeSCAN 「구현 호스트」는 사용자 지시로 걷었다(생성기 DRAPESCAN_EDGES). 되살아나면 멈춘다.
 if (edges.some((edge) => (edge.from === "cfmsMiindo" && edge.to === "cfmsDrapeSCAN") || (edge.from === "cfmsDrapeSCAN" && edge.to === "cfmsMiindo"))) {
   throw new Error("cfmsMiindo -> cfmsDrapeSCAN edge is back — removed on 2026-10-24");
+}
+// 2026-10-27: cfmsDrapeInverse → cfmsMiindo 「구현 호스트」(스냅샷의 추출 엣지)도 사용자 지시로 걷었다(생성기 _preserve_goal_edges). 되살아나면 멈춘다.
+if (edges.some((edge) => (edge.from === "cfmsDrapeInverse" && edge.to === "cfmsMiindo") || (edge.from === "cfmsMiindo" && edge.to === "cfmsDrapeInverse"))) {
+  throw new Error("cfmsDrapeInverse -> cfmsMiindo edge is back — removed on 2026-10-27");
 }
 for (const [from, to] of straightEdges) {
   if (!shownEdges.some((edge) => edge.from === from && edge.to === to)) {
