@@ -143,19 +143,21 @@ const shownEdges = edges.filter((edge) => !isPruned(edge));
 // 2026-10-24 여덟째: PFTF_VisCull_kDop → PFTF_Compression 은 Physics-AI 훌 밖(동쪽)으로 휜다(curvedCW 0.165, 훌 테두리 밖 14px).
 // 2026-10-24 열셋째: PFTF_VisCull_kDop → SFTF_DrapePrior 휨 반대로(continuous −39.3px → curvedCW 0.125 +39.2px).
 // 2026-10-27: 사용자 지시로 VisCull_kDop 의 두 선을 다시 뒤집었다 — 같은 roundness 의 curvedCCW(크기 그대로).
+// 2026-10-31: 화살표를 투고 순서로(EDGE_DIRECTION_FIXES 열한 개). PFTF ↔ PFTF_VisCull_kDop · PFTF_VisCull_kDop ↔ SFTF_DrapePrior 덮어쓰기는
+// 화면 방향을 뒤집고 CW↔CCW 를 바꿨다(같은 곡선, 화살촉만 반대 끝).
 if (
-  !html.includes(`["PFTF", "PFTF_VisCull_kDop", { type: 'curvedCW', roundness: 0.165 }]`)
+  !html.includes(`["PFTF_VisCull_kDop", "PFTF", { type: 'curvedCCW', roundness: 0.165 }]`)
   || !html.includes(`["cfmsAutoSew", "cfmsPINNDrape", { type: 'curvedCW', roundness: 0.09 }]`)
   || !html.includes(`["cfmsDrape", "cfmsAutoPlace_IJCST", { type: 'curvedCCW', roundness: 0.165 }]`)
   || !html.includes(`["cfmsDrape", "cfmsDrapeSCAN", { type: 'curvedCW', roundness: 0.105 }]`)
   || !html.includes(`["PFTF_VisCull_kDop", "PFTF_Compression", { type: 'curvedCCW', roundness: 0.165 }]`)
-  || !html.includes(`["PFTF_VisCull_kDop", "SFTF_DrapePrior", { type: 'curvedCCW', roundness: 0.125 }]`)
+  || !html.includes(`["SFTF_DrapePrior", "PFTF_VisCull_kDop", { type: 'curvedCW', roundness: 0.125 }]`)
   || !html.includes("const edgeSmooth = i => _edgeSmoothOverride(i) || FAN_SMOOTH[i] || DEFAULT_EDGE_SMOOTH;")
   || !html.includes("const candsOf = i => { const o = _edgeSmoothOverride(i); return o ? [o] : FAN_CANDIDATES; };")
 ) {
-  throw new Error("edge curvature overrides (PFTF -> PFTF_VisCull_kDop, AutoSew -> PINNDrape, Drape -> AutoPlace_IJCST, VisCull_kDop -> Compression, VisCull_kDop -> DrapePrior, fan-fixed) are missing");
+  throw new Error("edge curvature overrides (VisCull_kDop -> PFTF, AutoSew -> PINNDrape, Drape -> AutoPlace_IJCST, VisCull_kDop -> Compression, DrapePrior -> VisCull_kDop, fan-fixed) are missing");
 }
-for (const [from, to] of [["cfmsAutoSew", "cfmsPINNDrape"], ["cfmsDrape", "cfmsAutoPlace_IJCST"], ["cfmsDrape", "cfmsDrapeSCAN"], ["PFTF_VisCull_kDop", "PFTF_Compression"], ["PFTF_VisCull_kDop", "SFTF_DrapePrior"]]) {
+for (const [from, to] of [["cfmsAutoSew", "cfmsPINNDrape"], ["cfmsDrape", "cfmsAutoPlace_IJCST"], ["cfmsDrape", "cfmsDrapeSCAN"], ["PFTF_VisCull_kDop", "PFTF_Compression"], ["SFTF_DrapePrior", "PFTF_VisCull_kDop"], ["PFTF_VisCull_kDop", "PFTF"]]) {
   if (!shownEdges.some((edge) => edge.from === from && edge.to === to)) throw new Error(`curvature override ${from}->${to} is not a drawn edge`);
 }
 // 2026-10-24: 사용자가 고른 스무 개는 직선이다(STRAIGHT_EDGES). 목록의 쌍이 화면에 실제로 그려지는 선이어야 한다 —
@@ -348,16 +350,19 @@ for (const [from, to, label, relation, tentative] of expectedGarmentEdges) {
     throw new Error(`garment edge ${from}->${to} is missing, duplicated, or incorrect`);
   }
 }
+// 2026-10-31: 화살표를 투고 순서로 — SFTF_Holonomy(3) 가 보류된 SFTF_HeatMethod(4) 보다 먼저 나가므로 분리선은
+// SFTF_Holonomy → SFTF_HeatMethod 로 그린다(EDGE_DIRECTION_FIXES). 라벨·관계는 그대로다.
 const holonomyEdges = edges.filter(
   (edge) => edge.from === "SFTF_Holonomy" || edge.to === "SFTF_Holonomy",
 );
 if (
   holonomyEdges.length !== 1
-  || holonomyEdges[0].from !== "SFTF_HeatMethod"
+  || holonomyEdges[0].from !== "SFTF_Holonomy"
+  || holonomyEdges[0].to !== "SFTF_HeatMethod"
   || holonomyEdges[0].label !== "전단각 항등식"
   || holonomyEdges[0]._rel !== "정확도"
 ) {
-  throw new Error("SFTF_HeatMethod -> SFTF_Holonomy split edge is missing or incorrect");
+  throw new Error("SFTF_Holonomy -> SFTF_HeatMethod split edge (flipped 2026-10-31) is missing or incorrect");
 }
 // 2026-09-10 ~ 2026-10-22: cfmsPINNCAD → HIPDetect 분리 화살표를 지켰다.
 // 2026-10-23: 사용자 지시로 저장소를 cfmsHipDetect_dev 로 바꾸고 두 노드를 cfmsHipDetect 하나로 합쳤다.
@@ -430,6 +435,8 @@ if (lineageTouchingEdges.length !== expectedLineageEdges.length) {
 }
 // 2026-09-11: TSE_SEM 한 저장소의 논문 3편이 세 노드로 갈라졌다. 옛 노드는 사라지고,
 // 화살표는 SFTF_Composite → ① → ② → ③ 한 줄뿐이다.
+// 2026-10-31: 화살표를 투고 순서로 — ①Bezier(투고, 1)가 SFTF_Composite(3) 보다 먼저라 첫 선만 ① → SFTF_Composite 로 뒤집혔다
+// (EDGE_DIRECTION_FIXES). ② → ③ 은 순서(2 → 3)와 같아 그대로다.
 // 2026-09-14: 이름을 TSE_SEM1_Bezier 꼴로 통일했다 — 포트폴리오 표·그래프·캡션이 모두
 // 같은 낱말을 쓴다. 옛 이름 셋도 함께 막는다. 생성기가 걷어내기 전에는 재생성이 옛 노드를
 // 남긴 채 새 노드를 더해 같은 논문이 두 번 서고, 좌표도 바깥 고리로 튀었다.
@@ -459,7 +466,7 @@ for (const [nodeId, label] of Object.entries(expectedSemLabels)) {
   }
 }
 const expectedSemChain = [
-  ["SFTF_Composite", "TSE_SEM1_Bezier", "섬유 계측", "확장"],
+  ["TSE_SEM1_Bezier", "SFTF_Composite", "섬유 계측", "확장"],
   ["TSE_SEM1_Bezier", "TSE_SEM2_Tensor", "배향 텐서장", "확장"],
   ["TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "자동 파라미터 선택", "정확도"],
 ];
@@ -468,7 +475,7 @@ const semEdges = edges.filter(
 );
 if (semEdges.length !== expectedSemChain.length) {
   throw new Error(
-    "SEM track edges must be exactly the SFTF_Composite -> Bezier -> Tensor -> AutoTune chain: "
+    "SEM track edges must be exactly the Bezier -> SFTF_Composite (flipped 2026-10-31), Bezier -> Tensor -> AutoTune chain: "
     + semEdges.map((edge) => `${edge.from}->${edge.to}`).join(", "),
   );
 }

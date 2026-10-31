@@ -496,13 +496,33 @@ CURATED_GARMENT_EDGES.forEach(curated => {
 // 배열 안에는 주석을 두지 않는다(엄격한 JSON 으로 파싱된다).
 // 2026-10-23: ["cfmsDrapeSCAN", "cfmsPINNCAD"] 를 뺐다 — cfmsPINNCAD 를 내리고 cfmsHipDetect 로 합쳤다(사용자 지시).
 // 2026-10-24: ["cfmsDrapeSCAN", "cfmsMiindo"] 를 뺐다 — 그 엣지(구현 호스트)를 생성기 DRAPESCAN_EDGES 에서 걷었다(사용자 지시).
+// 2026-10-31(사용자 「화살표를 부모·자식의 상대적 투고 순서로」): 먼저 나가는(나간) 편 → 나중 편으로 그린다 — 마인드맵의
+//   «관계선 방향 통일»(앞 편 → 뒷 편)과 같은 뜻이다. 순서의 정본은 볼트 Dashboards/프로젝트현황.md 의 투고순서(portfolio_rows.order 로
+//   발행)이고, 이미 나간 원고(published·accepted·submitted)는 1 로 본다. **양끝 모두 순서가 있는 쌍만** 비교했다 — 엔진·미정 노드
+//   (cfmsDrape·cfmsMiindo·cfmsDrapeInverse·SFTF_ActiveOverprint 등 순서 없음)가 낀 선과 동률(TSE_TomoSh4 → TSE_TomoSh5 등)은 그대로다.
+//   뒤집은 열한 개: 보류(순서 4)인 PFTF 가 앞선 자식 일곱을 가리키던 선 — PFTF_VisCull_kDop(2) · PFTF_AsymTensor(2) · PFTF_GFiberCT(1) ·
+//   SFTF_Composite(3) · ColdOndol(2) · PFTF_Mold(2) · PartialCost(2) — 과 PFTF_VisCull_kDop(2) → SFTF_DrapePrior(출판) ·
+//   SFTF_HeatMethod(4) → SFTF_Composite(3) · SFTF_HeatMethod(4) → SFTF_Holonomy(3) · SFTF_Composite(3) → TSE_SEM1_Bezier(투고).
+//   값은 «옛 from, 옛 to»(RAW 방향)다. 큐레이션 배열(SFTF_HOLONOMY_EDGES 등)의 선도 같은 규칙이다(가드가 합쳐서 본다).
+//   직선 목록(STRAIGHT_EDGES)과 곡률 덮어쓰기(EDGE_SMOOTH_OVERRIDES)는 화면 방향 키라 같이 뒤집었다(그쪽 주석).
 const EDGE_DIRECTION_FIXES = [
   ["cfmsAutoPlace_JCDE", "cfmsDrape"],
   ["cfmsAutoPlace_IJCST", "cfmsDrape"],
   ["cfmsDrapeSCAN", "cfmsDrape"],
   ["cfmsDrapeSCAN", "cfmsCIPC"],
   ["cfmsDrapeSCAN", "SFTF_DrapePrior"],
-  ["cfmsDrapeSCAN", "PFTF_GFiberCT"]
+  ["cfmsDrapeSCAN", "PFTF_GFiberCT"],
+  ["PFTF", "PFTF_VisCull_kDop"],
+  ["PFTF", "PFTF_AsymTensor"],
+  ["PFTF", "PFTF_GFiberCT"],
+  ["PFTF", "SFTF_Composite"],
+  ["PFTF", "ColdOndol"],
+  ["PFTF", "PFTF_Mold"],
+  ["PFTF", "PartialCost"],
+  ["PFTF_VisCull_kDop", "SFTF_DrapePrior"],
+  ["SFTF_HeatMethod", "SFTF_Composite"],
+  ["SFTF_HeatMethod", "SFTF_Holonomy"],
+  ["SFTF_Composite", "TSE_SEM1_Bezier"]
 ];
 EDGE_DIRECTION_FIXES.forEach(([from, to]) => {
   const index = RAW_EDGES.findIndex(edge => edge.from === from && edge.to === to);
@@ -964,7 +984,12 @@ let FAN_SMOOTH = {};
    (의복 접촉 상태) · cfmsDrape → cfmsCIPC(관통 검증) · cfmsDrape → cfmsPINNDrape(봉제 생략) · cfmsMiindo → cfmsDrape(드레이프 엔진).
    뒤의 셋은 부채꼴 허브 cfmsDrape 에 닿는 선이라 부채꼴은 이것들을 직선으로 고정한 채 나머지를 고른다. 점선은 그대로다.
    10-30 09:53 웹 배치에서 헤드리스 크롬으로 잼: 다섯 모두 휨 0, 선분에서 가장 가까운 다른 노드 137px 이상(cfmsDrape → cfmsCIPC 와
-   → cfmsPINNDrape 가 서로 137~139px), 직선끼리 교차 0, 전체 엇갈림 3 그대로, 캡션 62개 모두 선 위. */
+   → cfmsPINNDrape 가 서로 137~139px), 직선끼리 교차 0, 전체 엇갈림 3 그대로, 캡션 62개 모두 선 위.
+   2026-10-31 둘째(사용자 「화살표를 투고 순서로」, EDGE_DIRECTION_FIXES 열한 개): 이 목록과 아래 EDGE_SMOOTH_OVERRIDES 는 화면 방향
+   «from, to» 가 키라 뒤집힌 선은 같이 뒤집는다 — SFTF_HeatMethod → SFTF_Composite 는 SFTF_Composite → SFTF_HeatMethod 로,
+   SFTF_HeatMethod → SFTF_Holonomy 는 SFTF_Holonomy → SFTF_HeatMethod 로(37개 그대로),
+   PFTF → PFTF_VisCull_kDop(curvedCW 0.165) 은 PFTF_VisCull_kDop → PFTF(curvedCCW 0.165), PFTF_VisCull_kDop → SFTF_DrapePrior(curvedCCW 0.125)
+   는 SFTF_DrapePrior → PFTF_VisCull_kDop(curvedCW 0.125). 방향을 뒤집으면서 CW↔CCW 를 바꾸면 vis 가 같은 곡선을 그린다(화살촉만 반대 끝). */
 const STRAIGHT_EDGE_SMOOTH = { enabled: false };
 const STRAIGHT_EDGES = [
   ["Tomo_DFSVR", "DFSVR_VisCull"],
@@ -991,8 +1016,8 @@ const STRAIGHT_EDGES = [
   ["Tomo_SFTF", "SFTF_UrbanTraffic"],
   ["TSE_TomoSh4", "TSE_TomoSh5"],
   ["TSE_TomoSh5", "cfmsHipDetect"],
-  ["SFTF_HeatMethod", "SFTF_Composite"],
-  ["SFTF_HeatMethod", "SFTF_Holonomy"],
+  ["SFTF_Composite", "SFTF_HeatMethod"],
+  ["SFTF_Holonomy", "SFTF_HeatMethod"],
   ["cfmsDrapeInverse", "cfmsDrapeSCAN"],
   ["SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop"],
   ["cfmsDrape", "cfmsAutoPlace_JCDE"],
@@ -1006,12 +1031,12 @@ const STRAIGHT_EDGES = [
   ["cfmsMiindo", "cfmsDrape"]
 ];
 const EDGE_SMOOTH_OVERRIDES = [
-  ["PFTF", "PFTF_VisCull_kDop", { type: 'curvedCW', roundness: 0.165 }],
+  ["PFTF_VisCull_kDop", "PFTF", { type: 'curvedCCW', roundness: 0.165 }],
   ["cfmsAutoSew", "cfmsPINNDrape", { type: 'curvedCW', roundness: 0.09 }],
   ["cfmsDrape", "cfmsAutoPlace_IJCST", { type: 'curvedCCW', roundness: 0.165 }],
   ["cfmsDrape", "cfmsDrapeSCAN", { type: 'curvedCW', roundness: 0.105 }],
   ["PFTF_VisCull_kDop", "PFTF_Compression", { type: 'curvedCCW', roundness: 0.165 }],
-  ["PFTF_VisCull_kDop", "SFTF_DrapePrior", { type: 'curvedCCW', roundness: 0.125 }],
+  ["SFTF_DrapePrior", "PFTF_VisCull_kDop", { type: 'curvedCW', roundness: 0.125 }],
   ...STRAIGHT_EDGES.map(([from, to]) => [from, to, STRAIGHT_EDGE_SMOOTH]),
 ];
 function _edgeSmoothOverride(i) {
