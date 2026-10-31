@@ -6,23 +6,19 @@
 <title>KIT CFMS 논문 리스트 (읽기 전용 · 볼트 정본)</title>
 <style>
   :root{--green:#2e7d32;--green-d:#1b5e20;--bg:#f4f6f4;--line:#cfd8cf;
-    /* ── 등급 색 (2026-09-12) ────────────────────────────────────────────────
-       graph.html 의 QUALITY_COLORS · mindmap.html 의 KIND.fill 을 **흰 바탕에 50% 섞은**
-       값이다. 같은 색을 쓰되, 그래프의 작은 사각형과 달리 여기는 줄 전체를 덮어서
-       원색 그대로는 너무 셌다. 색상(hue)은 같으므로 세 페이지가 여전히 같은 언어를 쓴다.
-       **아직 안 나간 원고에만** 쓴다 — 출판된 것은 흰색(기본)이다.
+    /* ── 공저 교수 색 (2026-10-31, 사용자 지시) ──────────────────────────────
+       행 배경은 투고 단계·등급이 아니라 **저자 칸의 공저 교수**로 칠한다(rowPaint 참조).
+       이희란·은종현은 timetable.html 의 교수 색 — Supabase tt_professors.sProfColor,
+       학기마다 같은 값 — 을 **그대로** 쓴다. 김우석은 시간표에 없어 옅은 회색이다.
+       2026-09-12 의 등급 색(--q-high 등, 안 나간 원고를 연결 프로젝트 등급으로 칠하던 것)은
+       걷어냈다. 등급은 이제 파이 색(QUALITY_PIE)으로만 보인다.
 
-         등급        원색       여기(50%)
-         상          #e02020    #f09090
-         중          #f28e2b    #f9c795
-         하          #2a78d6    #95bceb
-         Closed      #6b7280    #b5b9c0
-         그룹        #c8c8c8    #e4e4e4
-         등급 없음   #94a3b8    #cad1dc                                        */
-    --q-high:#f09090; --q-medium:#f9c795; --q-low:#95bceb;
-    --q-todo:#ffffff; --q-closed:#b5b9c0; --q-group:#e4e4e4; --q-none:#cad1dc;
-    /* 진행 중이지만 연결된 프로젝트가 없어 등급을 모르는 것 */
-    --q-unknown:#f3f4f5;}
+         교수      색        어디서
+         이희란    #937FCB   timetable 교수 색
+         은종현    #5B9BD5   timetable 교수 색
+         김우석    #e0e0e0   옅은 회색(시간표에 없음)                           */
+    --au-lee:#937FCB; --au-eun:#5B9BD5; --au-kim:#e0e0e0;
+    --q-todo:#ffffff;}
   *{box-sizing:border-box}
   body{margin:0;font-family:"Segoe UI","Malgun Gothic",sans-serif;background:var(--bg);color:#222;font-size:14px}
   header{background:linear-gradient(135deg,var(--green),var(--green-d));color:#fff;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -50,23 +46,17 @@
   .yearsep{display:flex;align-items:center;gap:10px;margin:18px 0 8px}
   .yearsep .y{font-size:20px;font-weight:700;color:var(--green-d)} .yearsep .ln{flex:1;height:2px;background:var(--line)}
   .paper{display:flex;gap:10px;padding:8px 10px;border-radius:6px;margin-bottom:6px;border:1px solid #eee}
-  /* 행 배경 — 아직 안 나간 원고만 연결된 프로젝트의 **등급 색**으로 칠한다.
-     출판된 것은 흰색이라 목록의 대부분은 전과 같아 보이고, 진행 중인 것만 눈에 띈다. */
+  /* 행 배경 — 공저 교수 색. 색은 rowPaint() 가 style 로 박는다(둘 이상이면 세로 띠).
+     공저 교수가 없는 줄은 흰색, ToDo 노드 줄은 흰색 점선(q-todo)이다. */
   .paper{background:#fff}
-  .paper.q-high{background:var(--q-high)}
-  .paper.q-medium{background:var(--q-medium)}
-  .paper.q-low{background:var(--q-low)}
   .paper.q-todo{background:var(--q-todo)}
-  .paper.q-closed{background:var(--q-closed)}
-  .paper.q-group{background:var(--q-group)}
-  .paper.q-none{background:var(--q-none)}
-  .paper.q-unknown{background:var(--q-unknown)}
-  /* 50% 로 옅어진 뒤로는 여섯 색 모두 **검은 글자**가 잘 읽혀서, 전에 있던 흰 글자 반전
-     (.ink-light)을 걷어냈다. 본문 대비는 전부 6.9:1 이상이다.
-     다만 제목 파랑(#0d47a1)만 상(3.7:1)·하(4.4:1)에서 WCAG AA(4.5:1)에 조금 못 미쳐,
-     색칠된 줄에서만 한 톤 낮춘다(#0b3a85 → 4.7:1·5.5:1). 흰 줄은 그대로다. */
-  .paper[class*="q-"] .title{color:#0b3a85}
-  .paper.q-todo .title,.paper.q-unknown .title{color:#0d47a1}   /* 거의 흰 바탕은 원래 색 */
+  /* 교수 색은 시간표 원색 그대로라 바탕이 짙다. 본문 검정은 보라 6.1:1·파랑 7.1:1 로 읽히지만
+     제목 파랑(#0d47a1)은 2.5:1·2.9:1, DOI 파랑(#1565c0)은 1.7:1·1.9:1, 연구비 초록(#2e7d32)은
+     1.5:1·1.7:1 이라 WCAG AA(4.5:1)에 한참 못 미친다. 그래서 색칠된 줄(.au)에서만 제목·DOI 는
+     진한 남색(#061e4a → 4.8:1·5.5:1), 연구비는 진한 초록(#062809 → 4.7:1·5.4:1)으로 낮춘다.
+     회색 줄은 어느 글자색이든 6.5:1 이상이라 같은 규칙으로 충분하다. 흰 줄은 그대로다. */
+  .paper.au .title,.paper.au .doitxt{color:#061e4a}
+  .paper.au .funding{color:#062809}
   .paper .num{font-weight:700;color:#888;min-width:34px;text-align:right}
   .paper .body{flex:1;line-height:1.5}
   .authors{font-weight:700}.title{color:#0d47a1;cursor:pointer}.title:hover{text-decoration:underline}
@@ -250,8 +240,8 @@ const STAGE_PIE={
   cancelled:{frac:0,xx:true,label:'취소(cancelled)'},
   idea:{frac:0,label:'아이디어(idea)'},
 };
-/* 색 = 논문 등급. graph.html QUALITY_COLORS · portfolio.html QUALITY_PIE 와 같은 원색이다
-   (행 배경의 --q-* 는 이것을 흰색에 50% 섞은 값). 연결된 프로젝트가 없으면 회색이다. */
+/* 색 = 논문 등급. graph.html QUALITY_COLORS · portfolio.html QUALITY_PIE 와 같은 원색이다.
+   연결된 프로젝트가 없으면 회색이다. (2026-10-31 부터 행 배경은 등급이 아니라 공저 교수 색이다.) */
 const QUALITY_PIE={"상":"#e02020","중":"#f28e2b","하":"#2a78d6","ToDo":"#9ca3af","Closed":"#6b7280","그룹":"#c8c8c8","등급 없음":"#94a3b8"};
 const 파이색=g=>QUALITY_PIE[g]||"#94a3b8";
 /* 크기 사다리는 frac 을 그대로 탄다(portfolio 14~28, graph 14~34). 여기는 글줄 안에 놓이므로
@@ -306,13 +296,17 @@ const BLINK_KEY="cfms_upjuk_blink_v1";
 /* ===== 저자(드물게 변경 → 내장) =====
    2026-10-09 사용자 지시: 대학원생 강지언을 빼고 공저자 이희란·은종현 교수를 넣는다.
    영문 표기는 표의 authors 칸 그대로다 — 「Heeran Lee」(p25·p27·v-IC-2026-01 등),
-   「Jonghyun Eun」(p63·p64). 둘 다 이름이 한 단어라 ENGNAME_SECOND 는 비운다. */
+   「Jonghyun Eun」(p63·p64). 둘 다 이름이 한 단어라 ENGNAME_SECOND 는 비운다.
+   2026-10-31 사용자 지시: 공저자 김우석 교수를 넣는다 — 표에는 「김우석*」(p261·v-DC-2026-01·02·
+   v-AW-2026-01)과 「Woosuk Kim」(p72) 두 표기가 있다. 한글은 checkName 의 부분 일치로, 영문은
+   Woosuk/Kim 으로 잡힌다. 「Sung min Kim」(p134)·「Jae Ryoung Kim」은 이름이 달라 안 잡힌다. */
 const PEOPLE=[
  {NAME:"설인환",ENGNAME_FIRST:"In",ENGNAME_SECOND:"Hwan",ENGNAME_LAST:"Sul"},
  {NAME:"정진영",ENGNAME_FIRST:"Jin",ENGNAME_SECOND:"Young",ENGNAME_LAST:"Jung"},
  {NAME:"김재룡",ENGNAME_FIRST:"Jae",ENGNAME_SECOND:"Ryoung",ENGNAME_LAST:"Kim"},
  {NAME:"이희란",ENGNAME_FIRST:"Heeran",ENGNAME_SECOND:"",ENGNAME_LAST:"Lee"},
  {NAME:"은종현",ENGNAME_FIRST:"Jonghyun",ENGNAME_SECOND:"",ENGNAME_LAST:"Eun"},
+ {NAME:"김우석",ENGNAME_FIRST:"Woosuk",ENGNAME_SECOND:"",ENGNAME_LAST:"Kim"},
  {NAME:"문선희",ENGNAME_FIRST:"Sun",ENGNAME_SECOND:"Hee",ENGNAME_LAST:"Moon"}
 ];
 
@@ -539,19 +533,27 @@ function renderTodoNode(n,i){
   // ToDo 노드 줄은 그 노드 자신의 등급(항상 ToDo=흰색)이라 점선 테두리로만 구분한다.
   return `<div class="paper q-todo" style="border-style:dashed"><div class="num">${i}.</div><div class="body">${x.join("")} ${link} ${mm}</div></div>`;
 }
-/* 등급 → 행 배경 클래스. graph.html 의 QUALITY_COLORS 와 같은 이름표를 쓴다. */
-const GRADE_CLASS={'상':'high','중':'medium','하':'low','ToDo':'todo','Closed':'closed','그룹':'group','등급 없음':'none'};
-
-/* 행 배경을 정한다.
-   · 출판된 것은 흰색(기본) — 목록의 대부분이라 전과 같아 보인다
-   · 아직 안 나간 것은 **연결된 프로젝트 노드의 등급 색**. graph.html 의 사각형과 같은 색이다
-   · 진행 중인데 연결 프로젝트가 없으면 옅은 회색(등급을 모른다는 뜻) */
-function rowClass(p){
-  if((p.STAGE||'published')==='published') return '';
-  const n=nodeById(p.PROJECT_ID);
-  const g=n&&GRADE_CLASS[n.grade];
-  if(!g) return ' q-unknown';
-  return ' q-'+g;
+/* ===== 행 배경 = 공저 교수 (2026-10-31, 사용자 지시) =====
+   전에는 아직 안 나간 원고를 연결 프로젝트의 등급 색으로 칠했다(2026-09-12, rowClass).
+   이제는 투고 단계와 무관하게 **저자 칸에 든 공저 교수**로 칠한다. 색의 정본은 :root 의 --au-* 다.
+   저자 판정은 저자 필터와 같은 checkName 이라, 필터에서 그 교수를 고르면 나오는 줄과 색칠된
+   줄이 같다. 둘 이상이 함께 쓴 줄은 이 순서대로 왼쪽부터 세로 띠로 나눠 칠한다
+   (2026-10-31 현재 표에는 그런 줄이 없다). */
+const AUTHOR_COLORS=[
+  {NAME:"이희란",COLOR:"var(--au-lee)"},
+  {NAME:"은종현",COLOR:"var(--au-eun)"},
+  {NAME:"김우석",COLOR:"var(--au-kim)"},
+];
+function authorColors(p){
+  return AUTHOR_COLORS.filter(a=>{const e=authorEng(a.NAME);return checkName(p.AUTHORS,a.NAME,e.f,e.s,e.l);}).map(a=>a.COLOR);
+}
+/* 한 줄의 class·style 조각. 공저 교수가 없으면 둘 다 빈 문자열(흰 줄). */
+function rowPaint(p){
+  const cs=authorColors(p);
+  if(!cs.length) return {cls:"",style:""};
+  const n=cs.length,pct=i=>(100*i/n).toFixed(1)+"%";
+  const bg=n===1?cs[0]:`linear-gradient(90deg,${cs.map((c,i)=>`${c} ${pct(i)} ${pct(i+1)}`).join(",")})`;
+  return {cls:" au",style:` style="background:${bg}"`};
 }
 /* 표의 doi 칸은 지금 모두 「10.xxxx/…」 꼴이지만, 볼트에 URL·「doi:」 째로 적힌 값이 와도
    같은 모양이 되도록 접두어를 벗긴다. */
@@ -576,7 +578,8 @@ function renderPaper(p,i){const st=p.PrintStatus;let x=[];
   // 원문 PDF 는 로그인한 사람에게만 (비공개)
   const access=isLoggedIn()&&p.PDF?`<button class="pdf" onclick="openPdf(${jsArg(pdfKeyIds(p).join(","))},${jsArg(p.PDF)})">PDF</button>`:"";
   const edit=isLoggedIn()?`<div class="rowtools"><button onclick="openEdit(${jsArg(p.ID)})">수정</button></div>`:"";
-  return `<div class="paper${rowClass(p)}"><div class="num">${i}.</div><div class="body">${x.join("")} ${access}</div>${edit}</div>`;
+  const paint=rowPaint(p);
+  return `<div class="paper${paint.cls}"${paint.style}><div class="num">${i}.</div><div class="body">${x.join("")} ${access}</div>${edit}</div>`;
 }
 function publicationCounts(items){
   return items.reduce((n,p)=>{p.PrintStatus===1?n.published++:n.other++;return n;},{published:0,other:0});
