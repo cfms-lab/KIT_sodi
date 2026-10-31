@@ -69,7 +69,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__applyOrientCert=applyOrientCert20261024;globalThis.__applyChoMoldWarpRetire=applyChoMoldWarpRetire20261027;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__applyOrientCert=applyOrientCert20261024;globalThis.__applyChoMoldWarpRetire=applyChoMoldWarpRetire20261027;globalThis.__applyHullRegroup=applyHullRegroup20261031;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -781,6 +781,78 @@ if (!choRetireValidation.ok) throw new Error(`Cho_MoldWarpDIC retire sample is i
 const choRetireNoNode = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyChoMoldWarpRetire(choRetireNoNode)) throw new Error("Cho_MoldWarpDIC retire migration must still stamp its version without the node");
 if (childIds(choRetireNoNode.root) !== "n0llvuh1") throw new Error("Cho_MoldWarpDIC retire migration touched a document without the node");
+
+// 2026-10-31: graph.html 훌 기준 재편. 구성원은 자기 훌 가지로 가되, 가장 가까운 훌 조상(구성원 또는 가지)이
+// 같은 훌이면 그 밑에 남아 계보를 지킨다. 훌에 없는 노드는 부모를 따라가고, 끊긴 계보는 관계선 「계보」로
+// 남긴다(부모가 그룹이면 안 긋고, 이미 선이 있으면 안 겹친다). 기존 방은 그대로 가지가 되고 옛 제목만
+// 바꾸며, 주제 훌은 구성원이 문서에 있을 때만 새로 선다. 샘플은 2026-10-31 실제 문서의 축소판이다.
+const hullCount = (n) => 1 + (n.children || []).reduce((s, c) => s + hullCount(c), 0);
+const hullSample = {
+  root: mk("root", [
+    mk("sftf", [                                                        // Tomo_SFTF (3D프린팅)
+      mk("ny0tqz74", [mk("nf7nopp2"), mk("nkytwti1", [mk("nu3n7ge9")])]),  // SFTFsoft(3D) → GNN(3D) · Tomo_DFSVR(Rendering) → DFSVR_VisCull(Rendering)
+      mk("tomo_sftf", [mk("nio1pg21")]),                                // SFTF_Clustering(3D) → cfmsDrapeInverse(이희란)
+      { id: "pftf_submission_lane_20260806", title: "PFTF", kind: "group", children: [
+        mk("nh2ivjs1", [mk("gx_pftf_drapeprior_viscull_kdop")]),        // VisCull_kDop(Rendering) → DrapePrior_VisCull(Drape)
+        mk("n0llvuh1", [mk("PartialCost")]),                             // PFTF framework(훌 없음) — 부모를 따라 남는다
+        mk("nkbfa3m1", [mk("nvospyb8"), mk("n7hixqe5")]),                // DTS(Physics-AI) → Earthquake(없음) · AO(Physics-AI)
+      ] },
+    ]),
+    mk("cfmsdrape", [mk("nptj5211", [mk("njkskwe4")])]),                // 미인도(Drape) → cfmsDrape(Drape) → DrapePrior(Drape)
+    { id: "nkrb7xj2", title: "이희란 교수님방", kind: "group", children: [
+      mk("HIPDetect", [mk("nokpy3z1")]),                                 // 둘 다 이희란 — 계보 유지
+      mk("cfmsAutoPlace_IJCST", [mk("nq1owe91", [mk("nf18t2n5")])]),     // AutoSew(이희란) → cfmsPINNDrape(Drape)
+    ] },
+    { id: "nu2cia21", title: "건축/토목", kind: "group", children: [mk("nv1x2vl2", [mk("n01wecm2")])] },
+    { id: "n1078rc1", title: "방대석 교수님", kind: "group", children: [mk("pftf_mold_submission")] },
+    { id: "np282z71", title: "기타", kind: "group", children: [mk("nd8ctbq4")] },
+  ]),
+  links: [{ from: "nq1owe91", to: "nf18t2n5", label: "초기배치 이완", type: "engine" }],
+};
+const hullCountBefore = hullCount(hullSample.root);
+if (!context.__applyHullRegroup(hullSample)) throw new Error("hull regroup migration did not run");
+if (context.__applyHullRegroup(hullSample)) throw new Error("hull regroup migration is not idempotent");
+const hr = (id) => findIn(hullSample.root, id);
+if (childIds(hullSample.root) !== "hull_3dprint,hull_physics_ai,hull_rendering,hull_drape,nkrb7xj2,nu2cia21,n1078rc1,np282z71") {
+  throw new Error(`hull regroup root order wrong: ${childIds(hullSample.root)}`);
+}
+if (hr("nffg4ou5") || hr("jeon_room")) throw new Error("hull regroup created a room that has no member in the document");
+for (const id of ["hull_3dprint", "hull_physics_ai", "hull_rendering", "hull_drape"]) {
+  if (hr(id).kind !== "group") throw new Error(`hull regroup group ${id} is not kind group`);
+}
+if (childIds(hr("hull_3dprint")) !== "sftf") throw new Error(`3D프린팅 children wrong: ${childIds(hr("hull_3dprint"))}`);
+if (childIds(hr("sftf")) !== "ny0tqz74,tomo_sftf,pftf_submission_lane_20260806") throw new Error(`Tomo_SFTF children wrong: ${childIds(hr("sftf"))}`);
+if (childIds(hr("ny0tqz74")) !== "nf7nopp2") throw new Error("hull regroup left Tomo_DFSVR under SFTFsoft");
+if (childIds(hr("tomo_sftf")) !== "") throw new Error("hull regroup left cfmsDrapeInverse under SFTF_Clustering");
+if (childIds(hr("pftf_submission_lane_20260806")) !== "n0llvuh1") throw new Error(`PFTF lane children wrong: ${childIds(hr("pftf_submission_lane_20260806"))}`);
+if (childIds(hr("n0llvuh1")) !== "PartialCost") throw new Error("hull regroup touched a non-hull subtree");
+if (childIds(hr("hull_rendering")) !== "nkytwti1,nh2ivjs1") throw new Error(`Rendering children wrong: ${childIds(hr("hull_rendering"))}`);
+if (childIds(hr("nkytwti1")) !== "nu3n7ge9") throw new Error("hull regroup pulled DFSVR_VisCull out from under Tomo_DFSVR (same hull)");
+if (childIds(hr("nh2ivjs1")) !== "") throw new Error("hull regroup left DrapePrior_VisCull under VisCull_kDop");
+if (childIds(hr("hull_physics_ai")) !== "nkbfa3m1") throw new Error(`Physics-AI children wrong: ${childIds(hr("hull_physics_ai"))}`);
+if (childIds(hr("nkbfa3m1")) !== "nvospyb8,n7hixqe5") throw new Error(`DTS children wrong: ${childIds(hr("nkbfa3m1"))}`);
+if (childIds(hr("hull_drape")) !== "cfmsdrape,nf18t2n5,gx_pftf_drapeprior_viscull_kdop") throw new Error(`Drape children wrong: ${childIds(hr("hull_drape"))}`);
+if (childIds(hr("nptj5211")) !== "njkskwe4") throw new Error("hull regroup broke the Drape lineage");
+if (childIds(hr("nkrb7xj2")) !== "HIPDetect,cfmsAutoPlace_IJCST,nio1pg21") throw new Error(`이희란 room children wrong: ${childIds(hr("nkrb7xj2"))}`);
+if (childIds(hr("HIPDetect")) !== "nokpy3z1") throw new Error("hull regroup pulled PFTF_Compression out from under HIPDetect (same hull)");
+if (childIds(hr("nq1owe91")) !== "") throw new Error("hull regroup left cfmsPINNDrape under cfmsAutoSew");
+if (hr("nu2cia21").title !== "김우석 교수님방" || hr("n1078rc1").title !== "방대석 교수님방") throw new Error("hull regroup did not rename the old room titles");
+if (childIds(hr("nu2cia21")) !== "nv1x2vl2" || childIds(hr("nv1x2vl2")) !== "n01wecm2") throw new Error("hull regroup disturbed the 김우석 room");
+if (childIds(hr("np282z71")) !== "nd8ctbq4") throw new Error("hull regroup disturbed 기타");
+const hullLinkKeys = hullSample.links.map((l) => `${l.from}>${l.to}:${l.label}`).sort().join(" ");
+if (hullLinkKeys !== "nh2ivjs1>gx_pftf_drapeprior_viscull_kdop:계보 nq1owe91>nf18t2n5:초기배치 이완 ny0tqz74>nkytwti1:계보 tomo_sftf>nio1pg21:계보") {
+  throw new Error(`hull regroup links wrong: ${hullLinkKeys}`);
+}
+if (hullCount(hullSample.root) !== hullCountBefore + 4) throw new Error(`hull regroup changed the node count: ${hullCount(hullSample.root)} vs ${hullCountBefore} + 4`);
+const hullValidation = context.__validate(hullSample);
+if (!hullValidation.ok) throw new Error(`hull regroup sample is invalid: ${hullValidation.errors[0]}`);
+const hullRoomSample = { root: mk("root", [mk("sftf", [{ id: "nkrb7xj2", title: "내 방", kind: "group", children: [mk("HIPDetect")] }])]), links: [] };
+context.__applyHullRegroup(hullRoomSample);
+if (childIds(hullRoomSample.root) !== "hull_3dprint,nkrb7xj2") throw new Error(`hull regroup did not lift a nested room to root: ${childIds(hullRoomSample.root)}`);
+if (findIn(hullRoomSample.root, "nkrb7xj2").title !== "내 방") throw new Error("hull regroup overwrote a hand-written room title");
+const hullNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyHullRegroup(hullNoNodeSample)) throw new Error("hull regroup migration must still stamp its version on a document without the nodes");
+if (childIds(hullNoNodeSample.root) !== "n0llvuh1") throw new Error("hull regroup touched a document that never had the nodes");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);

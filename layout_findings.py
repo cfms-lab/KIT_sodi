@@ -441,6 +441,25 @@ TRACK_STAGES = {
 # 구성원 정본은 볼트 Projects/*.md 의 coauthors / coauthor 다(부모 노트를 쓰는 트랙 노드는
 # 그 값을 물려받는다). 여기 적힌 목록은 그 스냅샷이고, 볼트에서 공저자가 바뀌면 이 목록도
 # 같이 고친다 — 등급·단계와 달리 hyperedge 는 아직 발행 경로가 없다.
+#
+# ── 색 (2026-10-31, 사용자 지시) ────────────────────────────────────────────
+# 훌의 면(fill)은 **공저자 파스텔**이다. upjuk.html 의 행 배경·mindmap.html 의 가지 색(GROUP_FILLS)과
+# 같은 값을 쓴다 — 이희란 #c9bfe5 · 은종현 #adcdea · 김우석 #e0e0e0 는 사용자가 지정했고(timetable 의
+# 교수 색을 흰색에 50% 섞은 것), 나머지 여섯은 서로 겹치지 않는 부드러운 파스텔로 골랐다.
+# color(테두리·점선)와 labelColor 는 같은 색상의 한두 톤 진한 값이다. fillAlpha 1.0 — graph.html 은
+# 2026-10-31 부터 면을 beforeDrawing(노드 뒤)에 그리므로 불투명해도 노드를 덮지 않는다(graph3d.html
+# 은 0.24 로 자른다). 아래 개별 훌 주석의 「색은 이웃을 피해 …」 문구는 이 날 이전의 선택 기록이다.
+#
+#   훌           fill      color     labelColor
+#   3D프린팅     #bfe6d6   #2f8f7a   #1f6b5a   (민트)
+#   Physics-AI   #f6e7a9   #c9a227   #8a6d0f   (버터)
+#   Rendering    #f5c6d5   #d4789a   #9d3f63   (로즈)
+#   Drape        #f9d3b4   #e8955a   #b35f24   (피치)
+#   이희란       #c9bfe5   #937fcb   #5b45a3   (라벤더, 지정)
+#   은종현       #adcdea   #5b9bd5   #2f6ea8   (하늘, 지정)
+#   김우석       #e0e0e0   #9e9e9e   #616161   (회색, 지정)
+#   전석진       #d3e8b5   #8ab65a   #4f7a24   (연두)
+#   방대석       #d9cdb4   #a89470   #6e5a35   (모래)
 HYPEREDGES = [
     # 2026-09-14: BASE(네 방법론 기반)를 내리고 주제 훌 하나를 세웠다. BASE 는 PFTF 를
     # 기둥으로 세운 묶음이었는데 그 일반화가 아직 논문이 아니라서, 화면에서 자리만 차지하고
@@ -460,8 +479,8 @@ HYPEREDGES = [
      "kind": "topic",
      "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering",
                "SFTFSoft_GNN", "SFTF_QEM"],
-     "color": "#0f766e", "labelColor": "#115e59",
-     "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95,
+     "fill": "#bfe6d6", "color": "#2f8f7a", "labelColor": "#1f6b5a",
+     "fillAlpha": 1.0, "strokeAlpha": 0.85, "labelAlpha": 0.95,
      "lineWidth": 3, "dash": [12, 6], "scale": 1.14},
     # 2026-10-15: 「Physics-AI」 — 2027 연구재단 핵심연구(구 중견) 신규 과제의 훌(사용자 지시, 제목도 지정).
     # 과제명(안) 「G-code를 넘어서: 로컬 Physics-AI 기반 자율 적응형(Autonomous Adaptive) 3D프린팅」.
@@ -480,8 +499,8 @@ HYPEREDGES = [
      "kind": "grant",
      # 2026-10-15: SFTF_DrapeOverprint 추가 — 이 과제의 예비 실험 논문(국내지 투고 목표)이다.
      "nodes": ["SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint", "SFTF_DrapeOverprint"],
-     "color": "#ca8a04", "labelColor": "#a16207",
-     "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95,
+     "fill": "#f6e7a9", "color": "#c9a227", "labelColor": "#8a6d0f",
+     "fillAlpha": 1.0, "strokeAlpha": 0.85, "labelAlpha": 0.95,
      "lineWidth": 3, "dash": [12, 6], "scale": 1.10},
     # 2026-09-21: 세 번째 주제 훌(사용자 지시). 묶는 축은 **렌더링**이다.
     # 근거는 방법 이름 자체다 — 볼트 Tomo_DFSVR.md 의 정의가
@@ -503,8 +522,8 @@ HYPEREDGES = [
      "kind": "topic",
      "nodes": ["Tomo_DFSVR", "SFTFSoft_DFSVR", "SFTFSoft_GNN_DFSVR",
                "DFSVR_VisCull", "PFTF_VisCull_kDop"],
-     "color": "#4338ca", "labelColor": "#3730a3",
-     "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95,
+     "fill": "#f5c6d5", "color": "#d4789a", "labelColor": "#9d3f63",
+     "fillAlpha": 1.0, "strokeAlpha": 0.85, "labelAlpha": 0.95,
      "lineWidth": 3, "dash": [12, 6], "scale": 1.10},
     # 2026-09-21: 두 번째 주제 훌. 사용자 지시로 드레이프(옷감 늘어뜨림) 시뮬레이션을
     # 한 묶음으로 모은다. 그전까지 이 여덟은 어느 훌에도 안 들어 화면에서 흩어져 있었는데,
@@ -538,8 +557,8 @@ HYPEREDGES = [
      "nodes": ["cfmsMiindo", "cfmsDrape", "cfmsCIPC", "cfmsPINNDrape", "cfmsPINNCAD",
                "cfmsAutoPlace_JCDE", "SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop",
                "cfmsAutoGrading"],
-     "color": "#ea580c", "labelColor": "#c2410c",
-     "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95,
+     "fill": "#f9d3b4", "color": "#e8955a", "labelColor": "#b35f24",
+     "fillAlpha": 1.0, "strokeAlpha": 0.85, "labelAlpha": 0.95,
      "lineWidth": 3, "dash": [12, 6], "scale": 1.10},
     # 2026-09-20: SFTF_Clustering 을 뺐다(사용자 지시). 이희란 교수는 여전히 공저자지만
     # (볼트 coauthors: [이희란, 강지언]), 그 노드는 3D프린팅 훌의 구성원이기도 해서
@@ -552,8 +571,8 @@ HYPEREDGES = [
      "nodes": ["PFTF_Compression", "cfmsAutoSew",
                "cfmsAutoPlace_IJCST", "cfmsDrapeInverse", "cfmsDrapeSCAN",
                "cfmsHipDetect", "TSE_TomoSh4", "TSE_TomoSh5"],   # 2026-10-23 HIPDetect → cfmsHipDetect
-     "color": "#7c3aed", "labelColor": "#6d28d9",
-     "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
+     "fill": "#c9bfe5", "color": "#937fcb", "labelColor": "#5b45a3",
+     "fillAlpha": 1.0, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
     # 2026-09-14: TSE_SEM3_AutoTune 을 뺐다.  ③ 만 **설인환 단독 저자**로 바뀌었다
     # (볼트 TSE_SEM.md 2026-09-14 「③ 단독 저자 전환」 — authors_ko·authors_en·corresp 를
@@ -579,8 +598,8 @@ HYPEREDGES = [
                "TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "SFTF_HeatMethod",
                "SFTF_Holonomy", "cfmsDispersityKNN", "PFTF_AsymTensor",
                "cfmsDispersityProp", "cfmsHMDispersity"],
-     "color": "#db2777", "labelColor": "#be185d",
-     "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
+     "fill": "#adcdea", "color": "#5b9bd5", "labelColor": "#2f6ea8",
+     "fillAlpha": 1.0, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
     # ColdOndol_Positioning 은 2026-09-14 에 볼트 노트에 coauthor 가 적히면서 들어왔다
     # (ColdOndol 과 같은 저장소·같은 draft/ 이고 공저자도 같다).
@@ -588,8 +607,8 @@ HYPEREDGES = [
      "kind": "coauthor",
      "nodes": ["SFTF_SewerPOC", "ColdOndol", "ColdOndol_Positioning",
                "SFTF_UrbanTraffic"],
-     "color": "#65a30d", "labelColor": "#4d7c0f",
-     "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
+     "fill": "#e0e0e0", "color": "#9e9e9e", "labelColor": "#616161",
+     "fillAlpha": 1.0, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
     # 2026-09-19: 사용자 지시로 세운다. ⚠️ 앞의 넷과 성격이 다르다 — 두 노트가 가진 것은
     # `coauthor_candidate` 이지 `coauthors` 가 아니다(공저 **후보**, 확정이 아니다).
@@ -606,8 +625,8 @@ HYPEREDGES = [
     {"label": "전석진 교수님",
      "kind": "coauthor",
      "nodes": ["Jeon_DLPOrient"],
-     "color": "#b45309", "labelColor": "#92400e",
-     "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
+     "fill": "#d3e8b5", "color": "#8ab65a", "labelColor": "#4f7a24",
+     "fillAlpha": 1.0, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
     # 2026-09-20: 사용자 지시로 세운다. 처음에는 전석진 훌과 같은 「후보」 예외였는데,
     # 같은 날 볼트가 두 노트를 coauthors: [방대석] 으로 **확정**해서 예외가 아니게 됐다
@@ -618,8 +637,8 @@ HYPEREDGES = [
     {"label": "방대석 교수님",
      "kind": "coauthor",
      "nodes": ["PFTF_Mold", "SFTF_InjMold"],
-     "color": "#0284c7", "labelColor": "#0369a1",
-     "fillAlpha": 0.035, "strokeAlpha": 0.80, "labelAlpha": 0.95,
+     "fill": "#d9cdb4", "color": "#a89470", "labelColor": "#6e5a35",
+     "fillAlpha": 1.0, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
 ]
 HYPEREDGES = [

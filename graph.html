@@ -1750,7 +1750,7 @@ LEGEND.forEach(c => {
 </script>
 <script>
 // Render hyperedges as shaded regions
-const hyperedges = [{"label": "3D프린팅", "kind": "topic", "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering", "SFTFSoft_GNN", "SFTF_QEM"], "color": "#0f766e", "labelColor": "#115e59", "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.14}, {"label": "Physics-AI", "kind": "grant", "nodes": ["SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint", "SFTF_DrapeOverprint"], "color": "#ca8a04", "labelColor": "#a16207", "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.1}, {"label": "Rendering", "kind": "topic", "nodes": ["Tomo_DFSVR", "SFTFSoft_DFSVR", "SFTFSoft_GNN_DFSVR", "DFSVR_VisCull", "PFTF_VisCull_kDop"], "color": "#4338ca", "labelColor": "#3730a3", "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.1}, {"label": "Drape", "kind": "topic", "nodes": ["cfmsMiindo", "cfmsDrape", "cfmsCIPC", "cfmsPINNDrape", "cfmsAutoPlace_JCDE", "SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop", "cfmsAutoGrading"], "color": "#ea580c", "labelColor": "#c2410c", "fillAlpha": 0.06, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.1}, {"label": "이희란 교수님", "kind": "coauthor", "nodes": ["PFTF_Compression", "cfmsAutoPlace_IJCST", "cfmsDrapeInverse", "cfmsDrapeSCAN"], "color": "#7c3aed", "labelColor": "#6d28d9", "fillAlpha": 0.035, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}, {"label": "은종현 교수님", "kind": "coauthor", "nodes": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier", "TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "SFTF_HeatMethod", "PFTF_AsymTensor", "cfmsDispersityProp", "cfmsHMDispersity"], "color": "#db2777", "labelColor": "#be185d", "fillAlpha": 0.035, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}, {"label": "김우석 교수님", "kind": "coauthor", "nodes": ["SFTF_SewerPOC", "ColdOndol", "ColdOndol_Positioning", "SFTF_UrbanTraffic"], "color": "#65a30d", "labelColor": "#4d7c0f", "fillAlpha": 0.035, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}, {"label": "전석진 교수님", "kind": "coauthor", "nodes": ["Jeon_DLPOrient"], "color": "#b45309", "labelColor": "#92400e", "fillAlpha": 0.035, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}, {"label": "방대석 교수님", "kind": "coauthor", "nodes": ["PFTF_Mold", "SFTF_InjMold"], "color": "#0284c7", "labelColor": "#0369a1", "fillAlpha": 0.035, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}];
+const hyperedges = [{"label": "3D프린팅", "kind": "topic", "nodes": ["Tomo_SFTF", "Tomo_SFTFSoft", "SFTF_Clustering", "SFTFSoft_GNN", "SFTF_QEM"], "fill": "#bfe6d6", "color": "#2f8f7a", "labelColor": "#1f6b5a", "fillAlpha": 1.0, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.14}, {"label": "Physics-AI", "kind": "grant", "nodes": ["SFTF_DynamicTargetSearch", "SFTF_ActiveOverprint", "SFTF_DrapeOverprint"], "fill": "#f6e7a9", "color": "#c9a227", "labelColor": "#8a6d0f", "fillAlpha": 1.0, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.1}, {"label": "Rendering", "kind": "topic", "nodes": ["Tomo_DFSVR", "SFTFSoft_DFSVR", "SFTFSoft_GNN_DFSVR", "DFSVR_VisCull", "PFTF_VisCull_kDop"], "fill": "#f5c6d5", "color": "#d4789a", "labelColor": "#9d3f63", "fillAlpha": 1.0, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.1}, {"label": "Drape", "kind": "topic", "nodes": ["cfmsMiindo", "cfmsDrape", "cfmsCIPC", "cfmsPINNDrape", "cfmsAutoPlace_JCDE", "SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop", "cfmsAutoGrading"], "fill": "#f9d3b4", "color": "#e8955a", "labelColor": "#b35f24", "fillAlpha": 1.0, "strokeAlpha": 0.85, "labelAlpha": 0.95, "lineWidth": 3, "dash": [12, 6], "scale": 1.1}, {"label": "이희란 교수님", "kind": "coauthor", "nodes": ["PFTF_Compression", "cfmsAutoPlace_IJCST", "cfmsDrapeInverse", "cfmsDrapeSCAN"], "fill": "#c9bfe5", "color": "#937fcb", "labelColor": "#5b45a3", "fillAlpha": 1.0, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}, {"label": "은종현 교수님", "kind": "coauthor", "nodes": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier", "TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "SFTF_HeatMethod", "PFTF_AsymTensor", "cfmsDispersityProp", "cfmsHMDispersity"], "fill": "#adcdea", "color": "#5b9bd5", "labelColor": "#2f6ea8", "fillAlpha": 1.0, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}, {"label": "김우석 교수님", "kind": "coauthor", "nodes": ["SFTF_SewerPOC", "ColdOndol", "ColdOndol_Positioning", "SFTF_UrbanTraffic"], "fill": "#e0e0e0", "color": "#9e9e9e", "labelColor": "#616161", "fillAlpha": 1.0, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}, {"label": "전석진 교수님", "kind": "coauthor", "nodes": ["Jeon_DLPOrient"], "fill": "#d3e8b5", "color": "#8ab65a", "labelColor": "#4f7a24", "fillAlpha": 1.0, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}, {"label": "방대석 교수님", "kind": "coauthor", "nodes": ["PFTF_Mold", "SFTF_InjMold"], "fill": "#d9cdb4", "color": "#a89470", "labelColor": "#6e5a35", "fillAlpha": 1.0, "strokeAlpha": 0.8, "labelAlpha": 0.95, "lineWidth": 2.5, "dash": [8, 5], "scale": 1.1}];
 const CURATED_HYPEREDGE_MEMBERS = {"이희란 교수님": ["cfmsAutoSew", "cfmsHipDetect", "TSE_TomoSh4", "TSE_TomoSh5"], "은종현 교수님": ["SFTF_Holonomy", "cfmsDispersityKNN"]};
 Object.entries(CURATED_HYPEREDGE_MEMBERS).forEach(([label, nodeIds]) => {
   const hyperedge = hyperedges.find(item => item.label === label);
@@ -1810,6 +1810,73 @@ function _roundedPolyPath(ctx, pts, radius) {
   }
   ctx.closePath();
 }
+
+/* 훌 면(채움)은 노드·엣지 **뒤**에 그린다 (2026-10-31, 사용자 지시 — 공저자 파스텔 원색을 그대로
+   칠하므로 노드 위에 그리면 노드를 덮는다). vis 의 beforeDrawing 이 볼록껍질을 계산해 채우고
+   _hullFrame 에 다각형을 남기면, 아래 afterDrawing 이 같은 다각형으로 테두리·라벨만 노드 위에
+   그린다. 한 프레임에 껍질 계산은 한 번이다. 면색은 HYPEREDGES 의 fill(layout_findings.py 팔레트 표),
+   없으면 color 다.
+   ⚠️ 생성기(layout_findings.py)는 afterDrawing 쪽의 첫 두 줄과 「// Label …」 블록을 정규식으로
+   다시 쓰므로 그 문구는 그대로 두고, 이 블록은 라벨 헬퍼 마커(HYPEREDGE_LABEL_HELPERS) 앞에 둔다. */
+let _hullFrame = [];
+network.on('beforeDrawing', function(ctx) {
+    _hullFrame = [];
+    if (!showHyper) return;   // 'hyperedge' 체크박스 — 면·테두리·라벨을 함께 끈다
+    const cornerR = _smallestNodeRadius();   // 훌 모서리의 곡률 — 한 프레임에 한 번만 잰다
+    // Draw the base hull first so application-region hulls remain readable
+    // where the two sets overlap.  Array order is preserved for the finding
+    // dependency indices below.
+    const hyperedgesForDrawing = hyperedges.slice().sort((a, b) => {
+        const rank = h => h.kind === 'base' ? 0 : (h.kind === 'role' ? 1 : 2);
+        return rank(a) - rank(b);
+    });
+    hyperedgesForDrawing.forEach(h => {
+        const positions = h.nodes
+            .map(nid => network.getPositions([nid])[nid])
+            .filter(p => p !== undefined);
+        if (positions.length < 1) return;
+        // CONVEX hull (Andrew monotone chain) of a padding ring around every member.
+        // 여백은 모든 훌이 같다 (2026-10-16, 사용자 지시 — 「방대석 교수님」 훌처럼).
+        // 전에는 멤버가 셋 이상이면 노드 중심의 볼록껍질을 무게중심에서 h.scale 배(1.10~1.14)
+        // 키웠다. 그러면 여백이 무게중심까지의 거리에 비례해 바깥 꼭짓점은 넓고 안쪽 노드는
+        // 테두리에 거의 붙었다. 멤버 둘 이하에만 두르던 패딩 링(2026-07-22, 발견4·5·6 가독성)을
+        // 모든 멤버에 둘러, 노드 중심에서 테두리까지가 어디서나 HULL_PAD 다.
+        // h.scale 은 이제 2D 에서 쓰지 않는다(graph3d.html 은 아직 읽는다).
+        const HULL_PAD = 60, K = 16;
+        const srcPts = [];
+        positions.forEach(p => {
+            for (let k = 0; k < K; k++) {
+                const a = 2 * Math.PI * k / K;
+                srcPts.push({x: p.x + HULL_PAD * Math.cos(a), y: p.y + HULL_PAD * Math.sin(a)});
+            }
+        });
+        const pts = srcPts.slice().sort((a, b) => a.x - b.x || a.y - b.y);
+        const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+        const lower = [];
+        for (const p of pts) {
+            while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop();
+            lower.push(p);
+        }
+        const upper = [];
+        for (let i = pts.length - 1; i >= 0; i--) {
+            const p = pts[i];
+            while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop();
+            upper.push(p);
+        }
+        const hull = lower.slice(0, -1).concat(upper.slice(0, -1));
+        const cx = hull.reduce((s, p) => s + p.x, 0) / hull.length;
+        const cy = hull.reduce((s, p) => s + p.y, 0) / hull.length;
+        const expanded = hull;   // 여백은 링이 이미 줬다 — afterDrawing 의 라벨 코드(생성기가 쓴다)가 이 이름을 읽는다
+        ctx.save();
+        ctx.globalAlpha = h.fillAlpha == null ? 0.12 : h.fillAlpha;
+        ctx.fillStyle = h.fill || h.color || '#6366f1';
+        ctx.beginPath();
+        _roundedPolyPath(ctx, expanded, cornerR);
+        ctx.fill();
+        ctx.restore();
+        _hullFrame.push({h, expanded, cx, cy});
+    });
+});
 
 // HYPEREDGE_LABEL_HELPERS_BEGIN
 function _boxOverlapArea(a, b) {
@@ -1891,64 +1958,18 @@ network.on('afterDrawing', function(ctx) {
     const nodeLabelBoxes = _nodeLabelBoxes();
     const placedHyperedgeLabelBoxes = [];
     const hyperedgeViewport = _hyperedgeViewportBounds();
-    const cornerR = _smallestNodeRadius();   // 훌 모서리의 곡률 — 한 프레임에 한 번만 잰다
-    // Draw the base hull first so application-region hulls remain readable
-    // where the two sets overlap.  Array order is preserved for the finding
-    // dependency indices below.
-    const hyperedgesForDrawing = hyperedges.slice().sort((a, b) => {
-        const rank = h => h.kind === 'base' ? 0 : (h.kind === 'role' ? 1 : 2);
-        return rank(a) - rank(b);
-    });
-    hyperedgesForDrawing.forEach(h => {
-        const positions = h.nodes
-            .map(nid => network.getPositions([nid])[nid])
-            .filter(p => p !== undefined);
-        if (positions.length < 1) return;
+    const cornerR = _smallestNodeRadius();   // 훌 모서리의 곡률 — beforeDrawing 과 같은 값
+    // 면은 beforeDrawing 이 이미 칠했다(_hullFrame, 2026-10-31). 여기서는 같은 다각형에
+    // 테두리와 라벨만 노드 위에 올린다.
+    _hullFrame.forEach(({h, expanded, cx, cy}) => {
         ctx.save();
         const color = h.color || '#6366f1';
-        const fillAlpha = h.fillAlpha == null ? 0.12 : h.fillAlpha;
         const strokeAlpha = h.strokeAlpha == null ? 0.4 : h.strokeAlpha;
-        const labelAlpha = h.labelAlpha == null ? 0.8 : h.labelAlpha;
-        ctx.globalAlpha = fillAlpha;
-        ctx.fillStyle = color;
         ctx.strokeStyle = color;
         ctx.lineWidth = h.lineWidth == null ? 2 : h.lineWidth;
         ctx.setLineDash(h.dash || []);
         ctx.beginPath();
-        // CONVEX hull (Andrew monotone chain) of a padding ring around every member.
-        // 여백은 모든 훌이 같다 (2026-10-16, 사용자 지시 — 「방대석 교수님」 훌처럼).
-        // 전에는 멤버가 셋 이상이면 노드 중심의 볼록껍질을 무게중심에서 h.scale 배(1.10~1.14)
-        // 키웠다. 그러면 여백이 무게중심까지의 거리에 비례해 바깥 꼭짓점은 넓고 안쪽 노드는
-        // 테두리에 거의 붙었다. 멤버 둘 이하에만 두르던 패딩 링(2026-07-22, 발견4·5·6 가독성)을
-        // 모든 멤버에 둘러, 노드 중심에서 테두리까지가 어디서나 HULL_PAD 다.
-        // h.scale 은 이제 2D 에서 쓰지 않는다(graph3d.html 은 아직 읽는다).
-        const HULL_PAD = 60, K = 16;
-        const srcPts = [];
-        positions.forEach(p => {
-            for (let k = 0; k < K; k++) {
-                const a = 2 * Math.PI * k / K;
-                srcPts.push({x: p.x + HULL_PAD * Math.cos(a), y: p.y + HULL_PAD * Math.sin(a)});
-            }
-        });
-        const pts = srcPts.slice().sort((a, b) => a.x - b.x || a.y - b.y);
-        const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
-        const lower = [];
-        for (const p of pts) {
-            while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop();
-            lower.push(p);
-        }
-        const upper = [];
-        for (let i = pts.length - 1; i >= 0; i--) {
-            const p = pts[i];
-            while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop();
-            upper.push(p);
-        }
-        const hull = lower.slice(0, -1).concat(upper.slice(0, -1));
-        const cx = hull.reduce((s, p) => s + p.x, 0) / hull.length;
-        const cy = hull.reduce((s, p) => s + p.y, 0) / hull.length;
-        const expanded = hull;   // 여백은 링이 이미 줬다 — 아래 라벨 코드(생성기가 쓴다)가 이 이름을 읽는다
         _roundedPolyPath(ctx, expanded, cornerR);
-        ctx.fill();
         ctx.globalAlpha = strokeAlpha;
         ctx.stroke();
         // Label: choose a hull edge and follow its direction while avoiding nodes.
