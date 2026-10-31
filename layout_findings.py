@@ -2581,6 +2581,42 @@ ORIENTCERT_GOAL_EDGES = [
     ),
 ]
 
+# ------------------------------------------------ 투고 의존 (2026-10-31 사용자 지시)
+# 「화살표를 볼트에 적힌 submit dependency 로 재구성」 — 먼저 나가야 하는 편 → 그것을 기다리는 편. 미투고 논문끼리만 보고
+# 이미 투고된 논문에 닿는 선은 손대지 않는다(사용자). 사용자가 고른 범위는 **의존 선 추가만** — 기존 계보 선은 그대로다.
+# 정본은 각 노트의 next_gate·submission 과 Papers/SFTF_4편_투고순서_2026-09-22.md 다(frontmatter depends_on 은 코드·저장소
+# 의존이라 쓰지 않는다). 아직 안 닫힌 게이트라 **점선·잠정**이다 — 선행 편이 나가면 실선으로 올리거나 걷는다. 범주는 가드
+# 어휘(확장·가속·정확도·통합) 중 「통합」(동반 원고 인용으로 묶인다). 이미 있던 의존 선(Tomo_SFTFSoft → SFTFSoft_GNN ·
+# cfmsDispersityProp → cfmsHMDispersity · PFTF_AsymTensor → PFTF_OrientCert · Tomo_DFSVR → DFSVR_VisCull ·
+# SFTFSoft_GNN → SFTFSoft_GNN_DFSVR)은 그대로다. 그려지는 모양(곡률)은 graph.html EDGE_SMOOTH_OVERRIDES — Holonomy → Composite 는
+# HeatMethod 와, SFTFSoft → QEM 은 SFTFSoft_GNN 과 일직선이라 비켜 가게 휜다.
+def _submit_dependency_edge(source, target, label, detail):
+    edge = _autoplace_goal_edge(source, target, label, detail, "통합")
+    edge["title"] = f"{source} → {target}\n투고 의존: {label} (통합)\n{detail}"
+    edge["dashes"] = True
+    edge["_tentative"] = True
+    return edge
+
+
+SUBMIT_DEPENDENCY_EDGES = [
+    _submit_dependency_edge(
+        "Tomo_SFTFSoft", "PartialCost", "preprint DOI 선행",
+        "PartialCost 투고의 선행 조건은 Tomo_SFTFSoft 투고와 preprint DOI 다 — 동반 원고 sftfsoft 를 그 DOI 로 인용한다(PartialCost.md next_gate, 2026-10-26)",
+    ),
+    _submit_dependency_edge(
+        "Tomo_SFTFSoft", "SFTF_QEM", "며칠 먼저 투고",
+        "SFTFSoft 제출(+preprint) 며칠 뒤 QEM 을 낸다 — companionsoft 표기가 「투고 예정」에서 preprint DOI 로 바뀐다(SFTF_4편_투고순서 판정 ④)",
+    ),
+    _submit_dependency_edge(
+        "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "A 투고 뒤 B",
+        "B(JCDE)는 A(IJCST) 투고 뒤에 낸다 — companion 인용(cfmsAutoPlace.md next_gate, 2026-09-25)",
+    ),
+    _submit_dependency_edge(
+        "SFTF_Holonomy", "SFTF_Composite", "앞 편 accept 뒤",
+        "Composite 의 투고 게이트는 앞 편의 accept 다 — HeatMethod 가 보류돼 앞 편은 Holonomy(IJMF 재투고)다(SFTF_Holonomy.md 2026-10-26; 사용자: 필요하면 Composite 는 포기해도 된다)",
+    ),
+]
+
 # ------------------------------------------------------ 분산도 사슬 (2026-09-24 사용자 지시)
 #   dynamicDispersity → cfmsDispersityKNN → cfmsDispersityProp → cfmsHMDispersity
 # 가운데 한 칸(KNN → Prop, 「상관 검증」)은 위 JEON_GOAL_EDGES 에 이미 있다. 여기는 양 끝이다.
@@ -2941,6 +2977,7 @@ def _preserve_goal_edges(match):
         for edge in DYNAMIC_TARGET_SEARCH_GOAL_EDGES + COAUTHOR_KIM_GOAL_EDGES
         + JEON_GOAL_EDGES + MOLD_GOAL_EDGES + CHO_GOAL_EDGES + DISPERSITY_GOAL_EDGES
         + ANATOMY_GOAL_EDGES + AUTOGRADING_GOAL_EDGES + PARTIALCOST_GOAL_EDGES + ORIENTCERT_GOAL_EDGES
+        + SUBMIT_DEPENDENCY_EDGES
     }
     # 2026-09-24: 사슬이 바뀌면서 cfmsDispersityKNN → cfmsHMDispersity 가 없어졌다. 위 목록에서
     # 빼기만 하면 스냅샷에 남은 옛 사본이 살아남아 사슬이 둘로 갈려 보인다 — 그 짝도 지운다.
@@ -2974,6 +3011,7 @@ def _preserve_goal_edges(match):
     edges.extend(copy.deepcopy(AUTOGRADING_GOAL_EDGES))
     edges.extend(copy.deepcopy(PARTIALCOST_GOAL_EDGES))
     edges.extend(copy.deepcopy(ORIENTCERT_GOAL_EDGES))
+    edges.extend(copy.deepcopy(SUBMIT_DEPENDENCY_EDGES))
     edges.extend(copy.deepcopy(DISPERSITY_GOAL_EDGES))
     edges.extend(copy.deepcopy(AUTOPLACE_GOAL_EDGES))
     edges.extend(copy.deepcopy(DRAPESCAN_EDGES))

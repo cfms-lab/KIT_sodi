@@ -152,12 +152,16 @@ if (
   || !html.includes(`["cfmsDrape", "cfmsDrapeSCAN", { type: 'curvedCW', roundness: 0.105 }]`)
   || !html.includes(`["PFTF_VisCull_kDop", "PFTF_Compression", { type: 'curvedCCW', roundness: 0.165 }]`)
   || !html.includes(`["SFTF_DrapePrior", "PFTF_VisCull_kDop", { type: 'curvedCW', roundness: 0.125 }]`)
+  // 2026-10-31 셋째: 투고 의존 선 셋은 일직선 노드(HeatMethod·SFTFSoft_GNN)·UrbanTraffic 캡션을 비켜 CCW 로 휜다(graph.html 주석의 측정값).
+  || !html.includes(`["SFTF_Holonomy", "SFTF_Composite", { type: 'curvedCCW', roundness: 0.4 }]`)
+  || !html.includes(`["Tomo_SFTFSoft", "SFTF_QEM", { type: 'curvedCW', roundness: 0.35 }]`)
+  || !html.includes(`["Tomo_SFTFSoft", "PartialCost", { type: 'curvedCCW', roundness: 0.2 }]`)
   || !html.includes("const edgeSmooth = i => _edgeSmoothOverride(i) || FAN_SMOOTH[i] || DEFAULT_EDGE_SMOOTH;")
   || !html.includes("const candsOf = i => { const o = _edgeSmoothOverride(i); return o ? [o] : FAN_CANDIDATES; };")
 ) {
   throw new Error("edge curvature overrides (VisCull_kDop -> PFTF, AutoSew -> PINNDrape, Drape -> AutoPlace_IJCST, VisCull_kDop -> Compression, DrapePrior -> VisCull_kDop, fan-fixed) are missing");
 }
-for (const [from, to] of [["cfmsAutoSew", "cfmsPINNDrape"], ["cfmsDrape", "cfmsAutoPlace_IJCST"], ["cfmsDrape", "cfmsDrapeSCAN"], ["PFTF_VisCull_kDop", "PFTF_Compression"], ["SFTF_DrapePrior", "PFTF_VisCull_kDop"], ["PFTF_VisCull_kDop", "PFTF"]]) {
+for (const [from, to] of [["cfmsAutoSew", "cfmsPINNDrape"], ["cfmsDrape", "cfmsAutoPlace_IJCST"], ["cfmsDrape", "cfmsDrapeSCAN"], ["PFTF_VisCull_kDop", "PFTF_Compression"], ["SFTF_DrapePrior", "PFTF_VisCull_kDop"], ["PFTF_VisCull_kDop", "PFTF"], ["SFTF_Holonomy", "SFTF_Composite"], ["Tomo_SFTFSoft", "SFTF_QEM"], ["Tomo_SFTFSoft", "PartialCost"]]) {
   if (!shownEdges.some((edge) => edge.from === from && edge.to === to)) throw new Error(`curvature override ${from}->${to} is not a drawn edge`);
 }
 // 2026-10-24: 사용자가 고른 스무 개는 직선이다(STRAIGHT_EDGES). 목록의 쌍이 화면에 실제로 그려지는 선이어야 한다 —
@@ -352,8 +356,9 @@ for (const [from, to, label, relation, tentative] of expectedGarmentEdges) {
 }
 // 2026-10-31: 화살표를 투고 순서로 — SFTF_Holonomy(3) 가 보류된 SFTF_HeatMethod(4) 보다 먼저 나가므로 분리선은
 // SFTF_Holonomy → SFTF_HeatMethod 로 그린다(EDGE_DIRECTION_FIXES). 라벨·관계는 그대로다.
+// 2026-10-31 둘째: 투고 의존 선 SFTF_Holonomy → SFTF_Composite(점선, 아래)가 더해져 Holonomy 에 닿는 선이 둘이다 — 분리선만 고른다.
 const holonomyEdges = edges.filter(
-  (edge) => edge.from === "SFTF_Holonomy" || edge.to === "SFTF_Holonomy",
+  (edge) => (edge.from === "SFTF_Holonomy" && edge.to === "SFTF_HeatMethod") || (edge.from === "SFTF_HeatMethod" && edge.to === "SFTF_Holonomy"),
 );
 if (
   holonomyEdges.length !== 1
@@ -363,6 +368,20 @@ if (
   || holonomyEdges[0]._rel !== "정확도"
 ) {
   throw new Error("SFTF_Holonomy -> SFTF_HeatMethod split edge (flipped 2026-10-31) is missing or incorrect");
+}
+// 2026-10-31 둘째(사용자 「볼트의 submit dependency 로 화살표를」, 범위는 「의존 선 추가만」): 미투고 논문 간 투고 의존 선 넷 —
+// 생성기 SUBMIT_DEPENDENCY_EDGES(점선·잠정, 범주 통합). 먼저 나가야 하는 편 → 기다리는 편. 선행 편이 나가면 실선으로 올리거나 걷는다.
+const expectedSubmitDependencyEdges = [
+  ["Tomo_SFTFSoft", "PartialCost", "preprint DOI 선행"],
+  ["Tomo_SFTFSoft", "SFTF_QEM", "며칠 먼저 투고"],
+  ["cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "A 투고 뒤 B"],
+  ["SFTF_Holonomy", "SFTF_Composite", "앞 편 accept 뒤"],
+];
+for (const [from, to, label] of expectedSubmitDependencyEdges) {
+  const matches = shownEdges.filter((edge) => edge.from === from && edge.to === to);
+  if (matches.length !== 1 || matches[0].label !== label || !matches[0].dashes || matches[0]._rel !== "통합") {
+    throw new Error(`submit-dependency edge ${from}->${to} is missing, duplicated, or not a dashed 통합 edge`);
+  }
 }
 // 2026-09-10 ~ 2026-10-22: cfmsPINNCAD → HIPDetect 분리 화살표를 지켰다.
 // 2026-10-23: 사용자 지시로 저장소를 cfmsHipDetect_dev 로 바꾸고 두 노드를 cfmsHipDetect 하나로 합쳤다.
