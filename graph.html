@@ -959,7 +959,12 @@ let FAN_SMOOTH = {};
    SFTF_DrapeOverprint(의복 가상 재관측)를 직선 목록에 더하고, cfmsDrapeInverse → cfmsMiindo 는 관계째 걷어 목록에서 뺐다(32개 그대로).
    후자는 cfmsDrape → cfmsDrapeSCAN 과 엇갈려 헷갈린다는 사용자 지시로 지웠다 — 생성기 _preserve_goal_edges 가 스냅샷 사본을 걷는다.
    2026-10-27 둘째(사용자): cfmsDrapeInverse → cfmsDrape(실행 기반)를 직선 목록에 더하고, Cho_MoldWarpDIC 를 내리며(생성기
-   HIDDEN_NODE_IDS — 진행 계획 없음) 그 노드로 가던 PFTF_Mold → Cho_MoldWarpDIC 을 목록에서 뺐다(32개 그대로). */
+   HIDDEN_NODE_IDS — 진행 계획 없음) 그 노드로 가던 PFTF_Mold → Cho_MoldWarpDIC 을 목록에서 뺐다(32개 그대로).
+   2026-10-31(사용자): 다섯을 더했다(37개) — Tomo_SFTFSoft → SFTFSoft_DFSVR(슬라이서 정합) · SFTF_DrapePrior → SFTF_ActiveOverprint
+   (의복 접촉 상태) · cfmsDrape → cfmsCIPC(관통 검증) · cfmsDrape → cfmsPINNDrape(봉제 생략) · cfmsMiindo → cfmsDrape(드레이프 엔진).
+   뒤의 셋은 부채꼴 허브 cfmsDrape 에 닿는 선이라 부채꼴은 이것들을 직선으로 고정한 채 나머지를 고른다. 점선은 그대로다.
+   10-30 09:53 웹 배치에서 헤드리스 크롬으로 잼: 다섯 모두 휨 0, 선분에서 가장 가까운 다른 노드 137px 이상(cfmsDrape → cfmsCIPC 와
+   → cfmsPINNDrape 가 서로 137~139px), 직선끼리 교차 0, 전체 엇갈림 3 그대로, 캡션 62개 모두 선 위. */
 const STRAIGHT_EDGE_SMOOTH = { enabled: false };
 const STRAIGHT_EDGES = [
   ["Tomo_DFSVR", "DFSVR_VisCull"],
@@ -993,7 +998,12 @@ const STRAIGHT_EDGES = [
   ["cfmsDrape", "cfmsAutoPlace_JCDE"],
   ["cfmsAutoPlace_JCDE", "cfmsAutoGrading"],
   ["SFTF_ActiveOverprint", "SFTF_DrapeOverprint"],
-  ["cfmsDrapeInverse", "cfmsDrape"]
+  ["cfmsDrapeInverse", "cfmsDrape"],
+  ["Tomo_SFTFSoft", "SFTFSoft_DFSVR"],
+  ["SFTF_DrapePrior", "SFTF_ActiveOverprint"],
+  ["cfmsDrape", "cfmsCIPC"],
+  ["cfmsDrape", "cfmsPINNDrape"],
+  ["cfmsMiindo", "cfmsDrape"]
 ];
 const EDGE_SMOOTH_OVERRIDES = [
   ["PFTF", "PFTF_VisCull_kDop", { type: 'curvedCW', roundness: 0.165 }],
