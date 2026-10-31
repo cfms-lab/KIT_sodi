@@ -9,15 +9,17 @@
     /* ── 공저 교수 색 (2026-10-31, 사용자 지시) ──────────────────────────────
        행 배경은 투고 단계·등급이 아니라 **저자 칸의 공저 교수**로 칠한다(rowPaint 참조).
        이희란·은종현은 timetable.html 의 교수 색 — Supabase tt_professors.sProfColor,
-       학기마다 같은 값 — 을 **그대로** 쓴다. 김우석은 시간표에 없어 옅은 회색이다.
+       학기마다 같은 값 — 을 **흰색에 50% 섞어** 쓴다. 원색 그대로는 줄 전체를 덮기에 너무
+       짙었다(같은 날 사용자 지시로 밝혔다). 색상(hue)은 같아 시간표와 같은 언어다.
+       김우석은 시간표에 없어 옅은 회색이다.
        2026-09-12 의 등급 색(--q-high 등, 안 나간 원고를 연결 프로젝트 등급으로 칠하던 것)은
        걷어냈다. 등급은 이제 파이 색(QUALITY_PIE)으로만 보인다.
 
-         교수      색        어디서
-         이희란    #937FCB   timetable 교수 색
-         은종현    #5B9BD5   timetable 교수 색
-         김우석    #e0e0e0   옅은 회색(시간표에 없음)                           */
-    --au-lee:#937FCB; --au-eun:#5B9BD5; --au-kim:#e0e0e0;
+         교수      원색       여기(50%)   어디서
+         이희란    #937FCB    #c9bfe5     timetable 교수 색
+         은종현    #5B9BD5    #adcdea     timetable 교수 색
+         김우석    #e0e0e0    #f0f0f0     옅은 회색(시간표에 없음)               */
+    --au-lee:#c9bfe5; --au-eun:#adcdea; --au-kim:#f0f0f0;
     --q-todo:#ffffff;}
   *{box-sizing:border-box}
   body{margin:0;font-family:"Segoe UI","Malgun Gothic",sans-serif;background:var(--bg);color:#222;font-size:14px}
@@ -50,13 +52,13 @@
      공저 교수가 없는 줄은 흰색, ToDo 노드 줄은 흰색 점선(q-todo)이다. */
   .paper{background:#fff}
   .paper.q-todo{background:var(--q-todo)}
-  /* 교수 색은 시간표 원색 그대로라 바탕이 짙다. 본문 검정은 보라 6.1:1·파랑 7.1:1 로 읽히지만
-     제목 파랑(#0d47a1)은 2.5:1·2.9:1, DOI 파랑(#1565c0)은 1.7:1·1.9:1, 연구비 초록(#2e7d32)은
-     1.5:1·1.7:1 이라 WCAG AA(4.5:1)에 한참 못 미친다. 그래서 색칠된 줄(.au)에서만 제목·DOI 는
-     진한 남색(#061e4a → 4.8:1·5.5:1), 연구비는 진한 초록(#062809 → 4.7:1·5.4:1)으로 낮춘다.
-     회색 줄은 어느 글자색이든 6.5:1 이상이라 같은 규칙으로 충분하다. 흰 줄은 그대로다. */
-  .paper.au .title,.paper.au .doitxt{color:#061e4a}
-  .paper.au .funding{color:#062809}
+  /* 50% 로 옅어진 보라·파랑 바탕에서 본문 검정은 12:1, 제목 파랑(#0d47a1)은 5.0:1·5.2:1 로
+     WCAG AA(4.5:1)를 넘는다. 다만 DOI 파랑(#1565c0)은 3.3:1·3.5:1, 연구비 초록(#2e7d32)은
+     3.0:1·3.1:1 로 못 미쳐, 색칠된 줄(.au)에서만 DOI 는 제목 파랑(→ 5.0:1·5.2:1), 연구비는
+     --green-d(#1b5e20 → 4.5:1·4.8:1)로 한 톤 낮춘다. 회색 줄은 더 밝아 같은 규칙으로 충분하다.
+     흰 줄은 그대로다. */
+  .paper.au .doitxt{color:#0d47a1}
+  .paper.au .funding{color:var(--green-d)}
   .paper .num{font-weight:700;color:#888;min-width:34px;text-align:right}
   .paper .body{flex:1;line-height:1.5}
   .authors{font-weight:700}.title{color:#0d47a1;cursor:pointer}.title:hover{text-decoration:underline}
