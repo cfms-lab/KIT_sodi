@@ -13,15 +13,18 @@
  *
  * 2026-09-21 사용자 지시로 신설.
  * 2026-10-09 사용자 지시로 투고분 정리 — HipDetect·PFTF_GFiberCT 는 09-22 에 나갔는데 옛 줄이 남아 있었다.
+ * 2026-10-31 사용자 지시로 볼트 대조 갱신(10-21 발행 이후 바뀐 노트) — CIPC Rev2 · TomoSh4/5 Rev1 · SFTFSoft·PartialCost
+ *   12월 계획서 전 투고 · Clustering 보류 · AsymTensor 3DP · OrientCert 3단계 완료 · Tomo_SFTF 게재 대기 · DFSVR 투고 준비 ·
+ *   HMDispersity·AutoGrading 줄 신설. 같은 날 portfolio_rows 도 그 노트들만 --only 로 다시 발행했다.
  */
 (function () {
   const TODO = {
     /* ── 저널 손에 가 있는 것 ─────────────────────────────── */
-    "Tomo_SFTF":            "게재확정 — 라이선스 서명",  /* TDP 3DP-2026-0119.R1 (2026-10-07) */
-    "cfmsCIPC":             "2차 심사 대기",  /* TSE 26M-08-030 — Rev1 제출 2026-09-22 */
+    "Tomo_SFTF":            "게재 대기 — 게재비 선발행 회신 대기",  /* TDP 3DP-2026-0119.R1 게재확정(2026-10-07) · 라이선스 서명 10-10 · 교정쇄 10-15 · 선발행 청구 요청 10-19 */
+    "cfmsCIPC":             "Rev2 판정 대기",  /* TSE 26M-08-030 — Rev1 제출 2026-09-22 → Rev2 제출 2026-10-30 */
     "SFTF_UrbanTraffic":    "심사 대기",
-    "TSE_TomoSh4":          "심사 대기",
-    "TSE_TomoSh5":          "심사 대기",
+    "TSE_TomoSh4":          "Rev1 제출 — 2차 판정 대기",  /* 26M-09-038 — 1차 수정후 게재가 10-20, Rev1 제출 2026-10-29(이희란 교수) */
+    "TSE_TomoSh5":          "Rev1 재투고 — 기한 11-13",  /* 26M-09-036 — 1차 수정후 게재가 2026-10-14 */
     "TSE_SEM1_Bezier":      "심사 대기",  /* 한국복합재료학회지 S-26-0085 (2026-09-22) */
     "TSE_SEM2_Tensor":      "최종본 제출",  /* 한국섬유공학회지 학문후속세대논문상 트랙 — 2026-10-23 게재가, 26M-10-043 */
     "SFTF_DrapeOverprint":  "심사 대기",  /* 한국섬유공학회지 (2026-10-16, 설인환 단독), 원고번호 할당중 */
@@ -34,16 +37,16 @@
     /* ── Tomo_SFTF accept 가 열어 준 것 (2026-10-07) ─────────
        순서 정본은 볼트 Papers/SFTF_4편_투고순서_2026-09-22.md — SFTFSoft 를 먼저
        내고 preprint 를 같이 올려야 QEM 의 자매 인용과 GNN 의 게이트가 풀린다. */
-    "Tomo_SFTFSoft":        "투고 — 넷 중 먼저, preprint 같이",
+    "Tomo_SFTFSoft":        "12월 계획서 전 IJAMT 투고 — DOCX 재빌드, preprint 같이",  /* 2026-10-26 결정(「새 과제 결과 뒤」 전략의 예외) */
     "SFTF_QEM":             "투고 — SFTFSoft 며칠 뒤",
-    "SFTF_Clustering":      "APC 유보·공저자 동의 먼저",
+    "SFTF_Clustering":      "새 과제 결과까지 보류 — 이희란·강지언 RPJ 예비 동의",  /* 2026-10-25 결정: F&T 1순위, 미수주면 RPJ */
     "SFTFSoft_GNN":         "SFTFSoft preprint DOI 뒤",
 
     /* ── 공저자 손에 가 있는 것 ───────────────────────────── */
     "SFTF_InjMold":         "공저자 작업 중",
     "PFTF_Mold":            "공저자 작업 중",
     "ColdOndol_Materials":  "공저자 작업 중",  /* 김우석 교수님께 넘어갔다 (2026-09-21) */
-    "PFTF_AsymTensor":      "은종현 교수님 실측 회신 대기",
+    "PFTF_AsymTensor":      "3DP 투고 준비 — 최종 빌드·은종현 교수 확인",  /* 2026-10-23 RPJ → 3DP 로, 주 기여 = 탐색 방법. 투고는 2027 과제 결과 뒤 */
 
     /* ── 남의 눈이 필요한 것 ──────────────────────────────── */
     "cfmsAutoPlace_IJCST":  "제2 전문가 의견 대기 중",
@@ -51,6 +54,7 @@
     /* ── 내가 실측·촬영을 해야 하는 것 ────────────────────── */
     "cfmsDrapeInverse":     "직물 촬영 필요",
     "cfmsDispersityProp":   "은종현 교수님에게 분산도 샘플 협조받기",
+    "cfmsHMDispersity":     "두 시편 복수 시야 촬영 · 측정방법론으로 전향",  /* 2026-10-30 사용자 ToDo. 10-31 보류(blocked) */
     "Jeon_DLPOrient":       "DLP 실물 출력 시편 확보",
     "cfmsDrapeSCAN":        "마네킹 스캔 촬영 필요",
     "SFTF_ActiveOverprint": "RGB-D 촬영 필요",
@@ -65,10 +69,10 @@
     /* ── 내가 원고·문서를 써야 하는 것 ────────────────────── */
     "cfmsAutoPlace_JCDE":   "영문 집필",
     "SFTF_SewerPOC":        "원고 수치 v2 갱신",
-    "Tomo_DFSVR":           "원고 결함 4건 수정",
+    "Tomo_DFSVR":           "투고 준비 — Tomo_SFTF 게재 뒤 서지 갱신",  /* JCDE. 2026-10-16 세 번째 사전등록에서 확증 통과 */
     "PFTF":                 "보류 — 원고는 PartialCost 로",  /* 성과 없음, ToDo·보류 (2026-10-24 사용자) */
-    "PartialCost":          "특허 출원 여부 정하고 TDP 투고",  /* PFTF 저장소에서 갈라진 원고(2026-10-24 신설). 원고는 10-19 에 닫혔고 커버레터가 남았다 */
-    "PFTF_OrientCert":      "3단계 실험 뒤 4·5절 집필",  /* PFTF_AsymTensor 의 2편(2026-10-24 신설, Computer-Aided Design 예정, 설인환 단독). 2·3절 초안 */
+    "PartialCost":          "12월 계획서 전 TDP 투고 — SFTFSoft preprint DOI 뒤, 커버레터",  /* PFTF 저장소에서 갈라진 원고(2026-10-24 신설). 특허 출원 안 함(10-24). 10-26 결정 */
+    "PFTF_OrientCert":      "검토용 한글 /ko-polish · 인증서 공개처",  /* PFTF_AsymTensor 의 2편(CAD, 설인환 단독). 3단계(독립 인증서 검사) 10-24~26 완료, 3.8·4.4·5절 반영 */
     "PFTF_VisCull_kDop":    "GPU 경로 구현",
     "SFTF_HeatMethod":      "보류 — Holonomy 에서 다시 분리, 실을 원고 없음",  /* 2026-10-21 Holonomy 에 병합 → 2026-10-26 JCDE 리젝 사유 ②로 통제 실험을 다시 뺐다. 단독으로 낼지 사용자 결정 전 */
     "ColdOndol_Positioning":"투고처 결정 필요",
@@ -78,6 +82,7 @@
     "DFSVR_VisCull":        "착수 전 — DFSVR 뒤",
     "SFTFSoft_GNN_DFSVR":   "착수 전 — GNN 뒤",
     "SFTF_DynamicTargetSearch": "상수관망 현장 확보 전까지 보류",
+    "cfmsAutoGrading":      "사용자 결정 뒤 시험 3 사전 기록",  /* GCD 묶음 1–3 의 남은 7,951 디자인 · 그 뒤 m* 추정 */
 
     /* ── 응용선 — 남의 데이터가 있어야 움직이는 것 ────────── */
     "PFTF_FXShock":         "데이터 확장 필요",
