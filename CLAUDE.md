@@ -41,3 +41,9 @@ upjuk 행 배경·graph 훌 면색·mindmap 노드 면색은 **공저자 파스�
 공저자를 넣거나, 훌 색·구성원을 바꾸거나, 마인드맵을 다시 묶을 때는
 [docs/coauthor-color-runbook.md](docs/coauthor-color-runbook.md) 를 따른다 — 팔레트 정본은 `layout_findings.py`
 `HYPEREDGES` 앞 주석, 마인드맵 재편은 `applyXxx` 마이그레이션(실제 문서로 시뮬레이션한 뒤 커밋).
+
+## graph.html 화살표 (방향 · 투고 의존 선 · 곡률)
+
+화살표는 **먼저 투고하는 편 → 나중 편**이고, 미투고 논문 간 투고 의존은 생성기 `SUBMIT_DEPENDENCY_EDGES`(점선)다.
+방향을 다시 맞추거나 의존 선을 더할 때는 [docs/graph-arrows-runbook.md](docs/graph-arrows-runbook.md) 를 따른다 — 정본은 볼트의
+투고순서·`next_gate`(frontmatter `depends_on` 은 코드 의존이라 아님), 곡률은 헤드리스 크롬으로 재서 고른다.
