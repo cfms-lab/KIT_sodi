@@ -72,7 +72,7 @@ const expectedVaultGrades = {
   cfmsPINNDrape: "하",
   cfmsHipDetect: "중",   // 2026-10-23 HIPDetect → cfmsHipDetect, cfmsPINNCAD 는 내렸다(HIDDEN)
   PFTF_GFiberCT: "하",   // 2026-09-22 中 → 下: 투고 뒤에는 투고한 저널의 급(국내지)
-  PFTF_AsymTensor: "중",
+  PFTF_OrientCert: "중",   // 2026-11-01 노트 개명(옛 PFTF_AsymTensor 는 내렸다)
   PFTF_Compression: "중",
   PFTF_DrapePrior_VisCull_kDop: "등급 없음",
   SFTF_DrapePrior: "하",
@@ -205,8 +205,12 @@ const positions = Object.assign(
   readJsonConstant("POS", "{"),
   readJsonConstant("CURATED_POSITIONS", "{"),
 );
+// 2026-11-01: PFTF_AsymTensor 노드를 내렸다(1편 병합·노트 개명 → PFTF_OrientCert, 생성기 HIDDEN_NODE_IDS). 노드·선·좌표로 되살아나면 멈춘다.
+if (nodes.some((node) => node.id === "PFTF_AsymTensor") || edges.some((edge) => edge.from === "PFTF_AsymTensor" || edge.to === "PFTF_AsymTensor") || positions["PFTF_AsymTensor"]) {
+  throw new Error("PFTF_AsymTensor is back on the graph — retired on 2026-11-01 (renamed to PFTF_OrientCert)");
+}
 // 2026-09-10: graph.html 의 POS + CURATED_POSITIONS 병합 결과 전체를 그대로 적는다.
-const expectedPositions = {"Tomo_SFTF":{"x":760,"y":190},"Tomo_SFTFSoft":{"x":480,"y":60},"SFTF_Clustering":{"x":460,"y":320},"PFTF":{"x":760,"y":380},"PartialCost":{"x":480,"y":460},"SFTF_Composite":{"x":760,"y":650},"SFTF_InjMold":{"x":910,"y":0},"PFTF_Mold":{"x":1010,"y":100},"PFTF_Compression":{"x":280,"y":710},"Tomo_DFSVR":{"x":150,"y":60},"PFTF_VisCull_kDop":{"x":40,"y":250},"SFTF_SewerPOC":{"x":1060,"y":560},"SFTFSoft_GNN":{"x":260,"y":190},"SFTF_DrapePrior":{"x":-220,"y":680},"PFTF_AsymTensor":{"x":600,"y":650},"PFTF_OrientCert":{"x":550,"y":560},"PFTF_DrapePrior_VisCull_kDop":{"x":-270,"y":540},"PFTF_GFiberCT":{"x":600,"y":850},"SFTF_QEM":{"x":470,"y":190},"SFTF_DynamicTargetSearch":{"x":270,"y":500},"DFSVR_VisCull":{"x":-80,"y":-150},"SFTFSoft_GNN_DFSVR":{"x":-80,"y":60},"SFTF_ActiveOverprint":{"x":40,"y":430},"SFTF_DrapeOverprint":{"x":100,"y":630},"ColdOndol":{"x":1230,"y":460},"ColdOndol_Positioning":{"x":1050,"y":360},"cfmsCIPC":{"x":-110,"y":920},"TSE_SEM1_Bezier":{"x":940,"y":650},"TSE_SEM2_Tensor":{"x":940,"y":850},"TSE_SEM3_AutoTune":{"x":940,"y":1110},"SFTF_HeatMethod":{"x":760,"y":850},"cfmsPINNDrape":{"x":-140,"y":1130},"cfmsDrape":{"x":-380,"y":1000},"cfmsMiindo":{"x":-170,"y":800},"SFTFSoft_DFSVR":{"x":160,"y":-150},"SFTF_UrbanTraffic":{"x":1230,"y":240},"cfmsAutoSew":{"x":460,"y":1280},"cfmsAutoPlace_IJCST":{"x":170,"y":1280},"cfmsAutoPlace_JCDE":{"x":-140,"y":1350},"cfmsDrapeSCAN":{"x":360,"y":980},"cfmsDrapeInverse":{"x":220,"y":840},"SFTF_Holonomy":{"x":760,"y":1050},"cfmsHipDetect":{"x":460,"y":1090},"cfmsDispersityKNN":{"x":600,"y":1050},"TSE_TomoSh4":{"x":460,"y":650},"TSE_TomoSh5":{"x":450,"y":850},"Jeon_DLPOrient":{"x":710,"y":-80},"cfmsDispersityProp":{"x":950,"y":1220},"cfmsHMDispersity":{"x":670,"y":1270},"dynamicDispersity":{"x":600,"y":1370},"cfmsAnatomy":{"x":-330,"y":810},"cfmsAutoGrading":{"x":70,"y":1430}};
+const expectedPositions = {"Tomo_SFTF":{"x":760,"y":190},"Tomo_SFTFSoft":{"x":480,"y":60},"SFTF_Clustering":{"x":460,"y":320},"PFTF":{"x":760,"y":380},"PartialCost":{"x":480,"y":460},"SFTF_Composite":{"x":760,"y":650},"SFTF_InjMold":{"x":910,"y":0},"PFTF_Mold":{"x":1010,"y":100},"PFTF_Compression":{"x":280,"y":710},"Tomo_DFSVR":{"x":150,"y":60},"PFTF_VisCull_kDop":{"x":40,"y":250},"SFTF_SewerPOC":{"x":1060,"y":560},"SFTFSoft_GNN":{"x":260,"y":190},"SFTF_DrapePrior":{"x":-220,"y":680},"PFTF_OrientCert":{"x":600,"y":650},"PFTF_DrapePrior_VisCull_kDop":{"x":-270,"y":540},"PFTF_GFiberCT":{"x":600,"y":850},"SFTF_QEM":{"x":470,"y":190},"SFTF_DynamicTargetSearch":{"x":270,"y":500},"DFSVR_VisCull":{"x":-80,"y":-150},"SFTFSoft_GNN_DFSVR":{"x":-80,"y":60},"SFTF_ActiveOverprint":{"x":40,"y":430},"SFTF_DrapeOverprint":{"x":100,"y":630},"ColdOndol":{"x":1230,"y":460},"ColdOndol_Positioning":{"x":1050,"y":360},"cfmsCIPC":{"x":-110,"y":920},"TSE_SEM1_Bezier":{"x":940,"y":650},"TSE_SEM2_Tensor":{"x":940,"y":850},"TSE_SEM3_AutoTune":{"x":940,"y":1110},"SFTF_HeatMethod":{"x":760,"y":850},"cfmsPINNDrape":{"x":-140,"y":1130},"cfmsDrape":{"x":-380,"y":1000},"cfmsMiindo":{"x":-170,"y":800},"SFTFSoft_DFSVR":{"x":160,"y":-150},"SFTF_UrbanTraffic":{"x":1230,"y":240},"cfmsAutoSew":{"x":460,"y":1280},"cfmsAutoPlace_IJCST":{"x":170,"y":1280},"cfmsAutoPlace_JCDE":{"x":-140,"y":1350},"cfmsDrapeSCAN":{"x":360,"y":980},"cfmsDrapeInverse":{"x":220,"y":840},"SFTF_Holonomy":{"x":760,"y":1050},"cfmsHipDetect":{"x":460,"y":1090},"cfmsDispersityKNN":{"x":600,"y":1050},"TSE_TomoSh4":{"x":460,"y":650},"TSE_TomoSh5":{"x":450,"y":850},"Jeon_DLPOrient":{"x":710,"y":-80},"cfmsDispersityProp":{"x":950,"y":1220},"cfmsHMDispersity":{"x":670,"y":1270},"dynamicDispersity":{"x":600,"y":1370},"cfmsAnatomy":{"x":-330,"y":810},"cfmsAutoGrading":{"x":70,"y":1430}};
 const hyperedges = readJsonConstant("hyperedges", "[");
 const curatedHyperedgeMembers = readJsonConstant("CURATED_HYPEREDGE_MEMBERS", "{");
 for (const [label, nodeIds] of Object.entries(curatedHyperedgeMembers)) {
@@ -272,7 +276,7 @@ const expectedHulls = {
   // 2026-09-23: cfmsHMDispersity 를 넣었다(사용자 지시) — 볼트 coauthors: [은종현] 확정.
   "은종현 교수님": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier",
     "TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "SFTF_HeatMethod", "SFTF_Holonomy",
-    "cfmsDispersityKNN", "PFTF_AsymTensor", "cfmsDispersityProp", "cfmsHMDispersity",
+    "cfmsDispersityKNN", "cfmsDispersityProp", "cfmsHMDispersity",
     // 2026-11-01: 통합편(1편 병합) 저자 확정 박명진 · 은종현 · 설인환* — OrientCert 를 넣었다(10-24 단독이라 밖에 둔 것을 되돌림).
     "PFTF_OrientCert"],
   "김우석 교수님": ["SFTF_SewerPOC", "ColdOndol", "ColdOndol_Positioning", "SFTF_UrbanTraffic"],

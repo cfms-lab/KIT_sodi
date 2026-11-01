@@ -69,7 +69,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__applyOrientCert=applyOrientCert20261024;globalThis.__applyChoMoldWarpRetire=applyChoMoldWarpRetire20261027;globalThis.__applyHullRegroup=applyHullRegroup20261031;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__applyOrientCert=applyOrientCert20261024;globalThis.__applyChoMoldWarpRetire=applyChoMoldWarpRetire20261027;globalThis.__applyHullRegroup=applyHullRegroup20261031;globalThis.__applyAsymTensorRetire=applyAsymTensorRetire20261101;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -853,6 +853,43 @@ if (findIn(hullRoomSample.root, "nkrb7xj2").title !== "내 방") throw new Error
 const hullNoNodeSample = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyHullRegroup(hullNoNodeSample)) throw new Error("hull regroup migration must still stamp its version on a document without the nodes");
 if (childIds(hullNoNodeSample.root) !== "n0llvuh1") throw new Error("hull regroup touched a document that never had the nodes");
+
+// 2026-11-01: PFTF_AsymTensor(nongkxm5) 내림 — 1편을 2편 OrientCert 에 병합하고 노트·폴더가 PFTF_OrientCert 로 개명됐다. 노드만 빼고 자식은
+// 그 자리로, 그 노드에 걸린 관계선은 PFTF_OrientCert 로 승계(자기 선·중복 제거), 상속자의 폴더 경로·10-24 메모는 새 이름으로. 상속자가 없는
+// 문서에서는 그 관계선을 걷고, 노드가 없는 문서에서는 도장만 찍는다.
+const asymRetireSample = { root: mk("root", [
+  mk("nafefnc3"),
+  mk("nffg4ou5", [
+    mk("nc593kj6"),
+    { id: "nongkxm5", title: "PFTF_AsymTensor", kind: "medium", status: "blocked", children: [
+      { id: "PFTF_OrientCert", title: "PFTF_OrientCert", kind: "medium", status: "draft", note: "PFTF_AsymTensor 의 2편(2026-10-24 착수). …", projectPath: "D:\\__PFTF_Projects(2026)\\PFTF_AsymTensor_dev", url: "https://github.com/cfms-lab/PFTF_AsymTensor_dev", children: [] },
+      mk("asymOtherChild"),
+    ] },
+    mk("nzyk4gd6"),
+  ]),
+]), links: [
+  { from: "nafefnc3", to: "nongkxm5", label: "지지 점수 시험", type: "engine" },
+  { from: "nc593kj6", to: "nongkxm5", label: "이미 상속자에게 있는 선", type: "engine" },
+  { from: "PFTF_OrientCert", to: "nc593kj6", label: "상속자의 기존 선", type: "engine" },
+  { from: "nongkxm5", to: "PFTF_OrientCert", label: "자기 선이 될 것", type: "engine" },
+  { from: "nzyk4gd6", to: "nc593kj6", label: "남는 선", type: "engine" },
+] };
+if (!context.__applyAsymTensorRetire(asymRetireSample)) throw new Error("AsymTensor retire migration did not run");
+if (context.__applyAsymTensorRetire(asymRetireSample)) throw new Error("AsymTensor retire migration is not idempotent");
+if (findIn(asymRetireSample.root, "nongkxm5")) throw new Error("AsymTensor retire left nongkxm5 in the tree");
+if (childIds(findIn(asymRetireSample.root, "nffg4ou5")) !== "nc593kj6,PFTF_OrientCert,asymOtherChild,nzyk4gd6") throw new Error(`AsymTensor retire misplaced the children: ${childIds(findIn(asymRetireSample.root, "nffg4ou5"))}`);
+const asymLinks = asymRetireSample.links.map((l) => `${l.from}>${l.to}:${l.label}`).sort().join(" ");
+if (asymLinks !== "PFTF_OrientCert>nc593kj6:상속자의 기존 선 nafefnc3>PFTF_OrientCert:지지 점수 시험 nzyk4gd6>nc593kj6:남는 선") throw new Error(`AsymTensor retire links wrong: ${asymLinks}`);
+const asymHeir = findIn(asymRetireSample.root, "PFTF_OrientCert");
+if (asymHeir.projectPath !== "D:\\__PFTF_Projects(2026)\\PFTF_OrientCert_dev" || asymHeir.url !== "https://github.com/cfms-lab/PFTF_OrientCert_dev" || !asymHeir.note.startsWith("2026-11-01 통합편")) throw new Error("AsymTensor retire did not rename the heir's path/url/note");
+const asymRetireValidation = context.__validate(asymRetireSample);
+if (!asymRetireValidation.ok) throw new Error(`AsymTensor retire sample is invalid: ${asymRetireValidation.errors[0]}`);
+const asymNoHeir = { root: mk("root", [mk("nafefnc3"), mk("nongkxm5", [mk("x1")])]), links: [{ from: "nafefnc3", to: "nongkxm5", label: "지지 점수 시험", type: "engine" }] };
+context.__applyAsymTensorRetire(asymNoHeir);
+if (childIds(asymNoHeir.root) !== "nafefnc3,x1" || asymNoHeir.links.length !== 0) throw new Error("AsymTensor retire without an heir must drop the node's links and lift its children");
+const asymNoNode = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyAsymTensorRetire(asymNoNode)) throw new Error("AsymTensor retire migration must still stamp its version without the node");
+if (childIds(asymNoNode.root) !== "n0llvuh1") throw new Error("AsymTensor retire touched a document without the node");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);
