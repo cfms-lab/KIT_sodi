@@ -72,7 +72,7 @@
     "Tomo_DFSVR":           "투고 준비 — Tomo_SFTF 게재 뒤 서지 갱신",  /* JCDE. 2026-10-16 세 번째 사전등록에서 확증 통과 */
     "PFTF":                 "보류 — 원고는 PartialCost 로",  /* 성과 없음, ToDo·보류 (2026-10-24 사용자) */
     "PartialCost":          "12월 계획서 전 TDP 투고 — SFTFSoft preprint DOI 뒤, 커버레터",  /* PFTF 저장소에서 갈라진 원고(2026-10-24 신설). 특허 출원 안 함(10-24). 10-26 결정 */
-    "PFTF_OrientCert":      "1편 내용 병합 · 4·5절 집필 · 저자 구성 확정 뒤 CAD",  /* 2026-11-01 1편(AsymTensor) 병합 — 통합편. 3단계(독립 인증서 검사) 10-24~26 완료. 저자(1편 박명진·은종현 ↔ 단독)는 사용자 재확정 */
+    "PFTF_OrientCert":      "1편 내용 병합 · 4·5절 집필 → CAD",  /* 2026-11-01 1편(AsymTensor) 병합 — 통합편. 저자 확정 박명진 · 은종현 · 설인환*(같은 날). 3단계(독립 인증서 검사) 10-24~26 완료 */
     "PFTF_VisCull_kDop":    "GPU 경로 구현",
     "SFTF_HeatMethod":      "보류 — Holonomy 에서 다시 분리, 실을 원고 없음",  /* 2026-10-21 Holonomy 에 병합 → 2026-10-26 JCDE 리젝 사유 ②로 통제 실험을 다시 뺐다. 단독으로 낼지 사용자 결정 전 */
     "ColdOndol_Positioning":"투고처 결정 필요",

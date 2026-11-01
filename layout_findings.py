@@ -602,7 +602,9 @@ HYPEREDGES = [
      "nodes": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier",
                "TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "SFTF_HeatMethod",
                "SFTF_Holonomy", "cfmsDispersityKNN", "PFTF_AsymTensor",
-               "cfmsDispersityProp", "cfmsHMDispersity"],
+               "cfmsDispersityProp", "cfmsHMDispersity",
+               # 2026-11-01: 통합편(1편 병합) 저자 확정 「박명진 · 은종현 · 설인환*」 — 10-24 「단독이라 훌 밖」을 되돌려 넣는다(사용자).
+               "PFTF_OrientCert"],
      "fill": "#adcdea", "color": "#5b9bd5", "labelColor": "#2f6ea8",
      "fillAlpha": 1.0, "strokeAlpha": 0.80, "labelAlpha": 0.95,
      "lineWidth": 2.5, "dash": [8, 5], "scale": 1.10},
@@ -677,7 +679,7 @@ QUALITY_ROWS = [
     ("SFTF_InjMold", "SFTF_InjMold", "중", "B24·exact integration·set-cover·B-rep·blind protocol; 원고 조립 잔여"),
     ("Tomo_DiffSupport", "Tomo_DiffSupport", "중", "claim–evidence matrix·JAX gradient·fail-closed; utility/print gate 미실행"),
     # 2026-10-24 신설(사용자): PFTF_AsymTensor 의 2편. 등급은 부모 노트의 中 을 이어받았다(트랙 노드 관례 — TSE_TomoSh5 와 같다).
-    ("PFTF_OrientCert", "PFTF_OrientCert", "중", "PFTF_AsymTensor 의 2편(2026-10-24 신설; 2026-11-01 1편 AsymTensor 를 병합해 한 편으로) — 구면 분기한정으로 비볼록 부품 배향 점수의 전역 최솟값을 인증한다. 153 메쉬 패널 306 실행 중 299 가 30분 안에 점수 척도의 1e-6 으로 닫혔고, 조밀 표본은 닫힌 146 메쉬 중 144 에서 인증 최솟값 위였다. Computer-Aided Design 예정, 설인환 단독, 이중 익명 — 2·3절 초안"),
+    ("PFTF_OrientCert", "PFTF_OrientCert", "중", "PFTF_AsymTensor 의 2편(2026-10-24 신설; 2026-11-01 1편 AsymTensor 를 병합해 한 편으로) — 구면 분기한정으로 비볼록 부품 배향 점수의 전역 최솟값을 인증한다. 153 메쉬 패널 306 실행 중 299 가 30분 안에 점수 척도의 1e-6 으로 닫혔고, 조밀 표본은 닫힌 146 메쉬 중 144 에서 인증 최솟값 위였다. Computer-Aided Design 예정, 저자 박명진·은종현·설인환*(2026-11-01 확정; 10-24 에는 단독), 이중 익명 — 2·3절 초안"),
     ("PFTF_AsymTensor", "PFTF_AsymTensor", "중", "사전 동료심사 2라운드(2026-09-13)로 인증·성분 귀속 철회, 주 결론이 부정만 남아 ⛔ 주 기여 축 교체 전 투고 보류(RPJ). 축 교체 후보는 복합재 순서 뒤집기(은종현 교수 실측, 09-15 보완안). **2026-09-16 은종현 교수 공저 확정** — 저자 대학원생·설인환†·은종현†"),
     ("PFTF_Compression", "PFTF_Compression", "중", "역설계·orthotropic contact·friction·held-out 원고; 임상 cohort 잔여"),
     ("PFTF_Mold", "PFTF_Mold", "중", "IBOF 통일·사독 1차 대응 완료. melt-front 완화를 구현해 수반 경사를 1.0e-8 로 검증. held-out 은 사독 지적에 따라 '크기 전이 시험'으로 축소했다(옛 '일반화 0%' 는 철회). 투고 저널 미정"),
@@ -1456,8 +1458,8 @@ if preserve_extended_quality:
             "PartialCost": "특허 출원 여부 결정 — 출원하면 출원이 투고보다 먼저다. 원고는 2026-10-18 DOCX 까지 닫혔다",
             # 2026-10-24: PFTF_AsymTensor 의 2편. 볼트 프로젝트현황 분리트랙의 게이트와 같은 문구다.
             # 2026-11-01: 1편을 병합해 한 편으로(사용자) — 3단계는 10-24~26 에 끝났고 1편 투고 게이트는 사라졌다. 분리트랙 게이트와 같은 문구다.
-            "PFTF_OrientCert": "1편 내용(층 분할 탐색·동결 하이브리드·60° 반증) 병합(2026-11-01) → 4·5절 → 6·7·1절·초록 → 저자 구성 확정(1편 박명진·은종현 ↔ 2편 단독) → CAD 투고(이중 익명·Highlights·데이터 Option C)",
-            "PFTF_AsymTensor": "1편 단독 투고 접음(2026-11-01) — 내용은 OrientCert 통합편으로. 저자 구성 재확정이 남는다",
+            "PFTF_OrientCert": "1편 내용(층 분할 탐색·동결 하이브리드·60° 반증) 병합(2026-11-01) → 4·5절 → 6·7·1절·초록 → CRediT 분담 기록 → CAD 투고(이중 익명·Highlights·데이터 Option C)",
+            "PFTF_AsymTensor": "1편 단독 투고 접음(2026-11-01) — 내용은 OrientCert 통합편으로. 저자는 11-01 확정(박명진 · 은종현 · 설인환*)",
         },
         # 2026-09-21: PFTF_Mold 를 걷는다. 파일에 구워져 있던 「solids4foam 사슬 IBOF
         # 재채점·외부 물리 검증」은 볼트가 이미 닫은 일이고(grade_note — 선언한 아홉 관문
@@ -1786,7 +1788,7 @@ PARTIALCOST_NODE = {
 # 2026-10-24: PFTF_AsymTensor 노트의 2편 OrientCert(사용자 지시). 1편(AsymTensor, 3DP 투고 준비)과 같은 저장소의 OrientCert/draft/ 에서
 # 따로 쓰는 인증 논문 — Computer-Aided Design 예정, 설인환 단독, 이중 익명. 등급은 부모 노트의 中 을 이어받고 단계는 TRACK_NOTES 로 부모
 # 노트의 draft 를 읽는다. 색·community 는 quality_lookup 이 QUALITY_ROWS 로 덮으므로 여기 값은 씨앗이다. 부모 화살표는 ORIENTCERT_GOAL_EDGES.
-# 단독 저자라 훌(은종현 교수님)에는 넣지 않는다 — 부모는 그 훌 안에 있다.
+# 2026-11-01 통합편 저자 확정(박명진 · 은종현 · 설인환*, 사용자) — 은종현 교수님 훌에 넣었다. 10-24 에는 단독 저자라 훌 밖에 두었다.
 ORIENTCERT_NODE = {
     "id": "PFTF_OrientCert",
     "label": "PFTF_OrientCert",

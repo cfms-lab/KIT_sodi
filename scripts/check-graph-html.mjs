@@ -272,7 +272,9 @@ const expectedHulls = {
   // 2026-09-23: cfmsHMDispersity 를 넣었다(사용자 지시) — 볼트 coauthors: [은종현] 확정.
   "은종현 교수님": ["SFTF_Composite", "PFTF_GFiberCT", "TSE_SEM1_Bezier",
     "TSE_SEM2_Tensor", "TSE_SEM3_AutoTune", "SFTF_HeatMethod", "SFTF_Holonomy",
-    "cfmsDispersityKNN", "PFTF_AsymTensor", "cfmsDispersityProp", "cfmsHMDispersity"],
+    "cfmsDispersityKNN", "PFTF_AsymTensor", "cfmsDispersityProp", "cfmsHMDispersity",
+    // 2026-11-01: 통합편(1편 병합) 저자 확정 박명진 · 은종현 · 설인환* — OrientCert 를 넣었다(10-24 단독이라 밖에 둔 것을 되돌림).
+    "PFTF_OrientCert"],
   "김우석 교수님": ["SFTF_SewerPOC", "ColdOndol", "ColdOndol_Positioning", "SFTF_UrbanTraffic"],
   // 2026-09-19: 사용자 지시로 세웠다. 두 노트가 가진 것은 coauthor_candidate(공저 후보)라
   // 「후보는 훌에 넣지 않는다」는 규약의 예외다 — layout_findings.py 의 HYPEREDGES 주석 참고.
