@@ -168,6 +168,8 @@ SQL 만으로 바뀌지 않는 것들이다. 필요하면 고쳐서 커밋·푸�
 | 게재확정 | stage `accepted` | stage `accepted` | `badge` |
 | 출판 | stage `published`, badge 「… 출판 (날짜, 권호)」 | `published`, volume `63(5)` 꼴, 쪽·DOI, 실제 발행일 | `todo.js` 는 빈 칸으로 |
 | 등급 변경 | grade · grade_note | — | `grade` 와 `grade_note` 첫머리(「날짜 A → B (사용자 지정)」), 노트 머리 콜아웃. 저장소는 `QUALITY_ROWS` 등급 · `NODE_TITLES` 접두어(+ 본문을 바꾸면 `TITLE_REFRESH_IDS`). 등급은 사용자가 정한다 |
+| 보류(blocked) | stage `blocked`(노드 행이 없으면 INSERT — 노트에 `mindmap_id` 가 없으면 넣는다). 날짜는 그대로 | — | `stage: blocked`(+날짜 주석). 그다음 `--only` + 전체 재생성(VAULT_STAGES 씨앗). graph 파이 ⛔ · mindmap 은 표 덮어쓰기. 선례 10-31 넷 |
+| 논문 트랙 병합(A 편을 B 편에) | 접은 트랙(노드 = 노트 이름이면 노트 `stage`): `blocked` + badge 「보류(B 에 병합 · 저널)」. 살아남은 2편 노드 행은 볼트 발행이 못 덮으니 bottleneck·note 는 손 SQL | B 의 업적 행 authors·memo(저자가 바뀌면 같이) | 노트 `paper_stage`(A blocked · B draft)·`badge`·`submission`/`next_gate`/`bottleneck` 앞머리·본문 절; 프로젝트현황 분리트랙(A 순서 4 · B 가 A 의 순서 승계 · `공저자`). 저장소 `TRACK_STAGES[B]="draft"`(부모가 blocked 라 덮는다)·STATUS_BADGES·REMAINING_BOTTLENECKS·QUALITY_ROWS 메모·todo.js. 공저자가 생기면 HYPEREDGES 훌 + 가드 expectedHulls. 선례 HeatMethod→Holonomy(10-21) · AsymTensor→OrientCert(11-01) |
 
 ## 4. 함정
 
