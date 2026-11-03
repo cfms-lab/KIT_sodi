@@ -29,7 +29,7 @@
     "TSE_SEM2_Tensor":      "최종본 제출",  /* 한국섬유공학회지 학문후속세대논문상 트랙 — 2026-10-23 게재가, 26M-10-043 */
     "SFTF_DrapeOverprint":  "심사 대기",  /* 한국섬유공학회지 (2026-10-16, 설인환 단독), 원고번호 할당중 */
     "cfmsHipDetect":        "심사 대기",  /* IJCST IJCST-09-2026-0266 (2026-09-22 ScholarOne 투고). 2026-10-23 HIPDetect → cfmsHipDetect */
-    "SFTF_Holonomy":        "심사 대기",  /* IJMF 2026-11-02 투고(SNAPP Submission ID a1f53585-…), 원고번호 할당중. 이전: JCDE-2026-757 2026-10-22 투고 → 10-25 데스크 리젝 */
+    "SFTF_Holonomy":        "심사 대기",  /* FnP 2026-11-03 투고(FIPO-D-26-01939). 이전: IJMF 2026-11-02 투고 → 11-03 데스크 리젝, JCDE-2026-757 2026-10-22 투고 → 10-25 데스크 리젝 */
     "PFTF_GFiberCT":        "심사 대기",  /* 한국복합재료학회지 S-26-0084 (2026-09-22, 은종현 교수 측 투고) */
     "SFTF_DrapePrior":      "",  /* 출판 — 63권 5호 (2026-10-31). cfmsDispersityKNN 처럼 빈 칸으로 둔다 */
     "cfmsDispersityKNN":       "",  /* 게재 완료 — 빈 칸으로 둔다 */
