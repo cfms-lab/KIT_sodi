@@ -67,6 +67,12 @@
   /* 기본은 켜짐이다(사용자 지시). 멈추고 싶으면 툴바의 「진도 깜빡임」 스위치를 끈다 —
      WCAG 2.2.2 의 「멈출 수 있을 것」은 그 스위치가 만족시킨다. */
   .hint{margin-left:auto;font-size:11.5px;color:var(--dim)}
+  /* 로그인 뒤에만 채워지는 지도·문서 링크. 목록은 Supabase portfolio_links 에서 온다 —
+     이 파일에는 주소가 한 줄도 없다(schema_portfolio_links.sql, 2026-11-03). */
+  .maps{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .maps a{font-size:12px;color:#334155;text-decoration:none;background:#eef6f8;border:1px solid #cfe0e6;
+    border-radius:999px;padding:3px 10px;white-space:nowrap}
+  .maps a:hover{background:#dfeef3}
   main{padding:14px 16px 40px}
   /* 로그인 전 화면. 표·검색·범례는 통째로 숨는다 — 받아 온 데이터도 없다. */
   #gate{max-width:430px;margin:9vh auto 0;background:#fff;border:1px solid var(--line);
@@ -150,6 +156,7 @@
     <input type="checkbox" id="blink"> 진도 깜빡임
   </label>
   <span class="count" id="count"></span>
+  <span class="maps" id="maps"></span>
   <span class="hint">읽기 전용 · 고치는 곳은 볼트의 <code>Projects/*.md</code> 와 <code>Dashboards/프로젝트현황.md</code></span>
 </div>
 
@@ -250,6 +257,27 @@ async function loadRows(){
   META.columns=(META.columns||[]).map(c=>c==="다음 게이트"?"ToDo":c);
   ALL_ROWS=data.filter(r=>r.kind==='row').map(r=>r.data);
   적용완성도필터();
+}
+
+/* 지도·문서 링크 — portfolio_links 표(authenticated 만 읽는다). 표를 못 읽어도 본표는 그대로 둔다;
+   링크가 없는 것은 오류가 아니다. 주소를 이 파일에 적지 않는 이유는 맨 위 주석과 같다 (2026-11-03). */
+async function loadLinks(){
+  const box=document.getElementById('maps');
+  box.innerHTML='';
+  if(!isLoggedIn()) return;
+  let links=[];
+  try{
+    links=await api('/rest/v1/portfolio_links?select=id,label,url,note,sort_index&order=sort_index',
+      {headers:{apikey:CFG.key,Authorization:"Bearer "+SESSION.access_token}}) || [];
+  }catch(e){ return; }
+  for(const l of links){
+    if(!l||!String(l.url||'').toLowerCase().startsWith('https://')) continue;   // https 주소만 그린다
+    const a=document.createElement('a');
+    a.href=l.url; a.target='_blank'; a.rel='noopener';
+    a.textContent=(l.label||l.id)+' ↗';
+    if(l.note) a.title=l.note;
+    box.appendChild(a);
+  }
 }
 
 /* 완성도 필터. 토글은 이 브라우저에만 기억하고(다른 사람 화면을 바꾸지 않는다),
@@ -515,6 +543,7 @@ function showGate(){
   document.getElementById('legend').hidden=true;
   document.getElementById('stamp').textContent='';
   document.getElementById('body').textContent='';
+  document.getElementById('maps').innerHTML='';   // 링크도 들고 있지 않는다
   renderAuthbar();
 }
 
@@ -542,6 +571,7 @@ async function showTable(){
   if(!ROWS.length) toast('받은 행이 없습니다. node scripts/publish-portfolio.mjs --push 로 발행해 주세요.');
   범례();
   그리기();
+  loadLinks();                                   // 본표 뒤에, 실패해도 표에는 영향 없음
 }
 
 async function login(){
