@@ -40,7 +40,7 @@
        내고 preprint 를 같이 올려야 QEM 의 자매 인용과 GNN 의 게이트가 풀린다. */
     "Tomo_SFTFSoft":        "12월 계획서 전 IJAMT 투고 — DOCX 재빌드, preprint 같이",  /* 2026-10-26 결정(「새 과제 결과 뒤」 전략의 예외) */
     "SFTF_QEM":             "투고 — SFTFSoft 며칠 뒤",
-    "SFTF_Clustering":      "새 과제 결과까지 보류 — 이희란·강지언 RPJ 예비 동의",  /* 2026-10-25 결정: F&T 1순위, 미수주면 RPJ */
+    "SFTF_Clustering":      "심사 대기 — 보충자료 추가 요청 답 기다리는 중",  /* RPJ-11-2026-0777 (2026-11-05 투고). 보충자료가 빠져 11-06 편집부에 요청 */
     "SFTFSoft_GNN":         "SFTFSoft preprint DOI 뒤",
 
     /* ── 공저자 손에 가 있는 것 ───────────────────────────── */
@@ -53,8 +53,8 @@
 
     /* ── 내가 실측·촬영을 해야 하는 것 ────────────────────── */
     "cfmsDrapeInverse":     "직물 촬영 필요",
-    "cfmsDispersityProp":   "은종현 교수님에게 분산도 샘플 협조받기",
-    "cfmsHMDispersity":     "두 시편 복수 시야 촬영 · 측정방법론으로 전향",  /* 2026-10-30 사용자 ToDo. 10-31 보류(blocked) */
+    "cfmsDispersityProp":   "심사 대기",  /* M&M MAM-26-327 (2026-11-05 ScholarOne 투고) */
+    "cfmsHMDispersity":     "심사 대기",  /* J. Microscopy JMI-26-00455 (2026-11-05 투고, In Screening). 10-31 보류(blocked) → 투고 */
     "Jeon_DLPOrient":       "DLP 실물 출력 시편 확보",
     "cfmsDrapeSCAN":        "마네킹 스캔 촬영 필요",
     "SFTF_ActiveOverprint": "RGB-D 촬영 필요",

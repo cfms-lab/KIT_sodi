@@ -658,7 +658,7 @@ QUALITY_ROWS = [
     ("Tomo_SFTF", "Tomo_SFTF", "상", "TDP v2.1·외부 60-mesh 감사·budget–complexity·PiAM 연속성; **2026-11-05 TDP 온라인 게재(DOI 10.1177/23297662261499844, 권/호·쪽 미정)** — 투고(08-13) → 1차 리뷰(09-16) → 수정본 제출(09-17) → 게재확정(10-07, 「in its current form」 — 추가 수정 없음) → 교정쇄(10-15) → 온라인 게재(11-05). 1차 리뷰 지적 2건에 전향 확증 70메쉬로 대응한 수정본이 그대로 실렸고, 우려하던 분량 4,740/4,000 감축 요구는 오지 않았다. 남은 것은 권/호·쪽뿐"),
     ("Tomo_SFTFSoft", "Tomo_SFTFSoft", "상", "TDP v2.1·현대/legacy Cura·receiver 반례·조건부 first-hit 수렴"),
     ("SFTFSoft_GNN", "SFTFSoft_GNN", "상", "3,817 mesh·held-out·Cura 재라벨·Prusa 교차검증"),
-    ("SFTF_Clustering", "SFTF_Clustering", "상", "SFTFCluster 계열 TDP 원고·cross-slicer/partition 자산; 독립성 게이트 잔여"),
+    ("SFTF_Clustering", "SFTF_Clustering", "상", "SFTFCluster 계열 RPJ 투고 원고(2026-11-05)·cross-slicer/partition 자산"),
     # 2026-10-19: 보류 해제 → draft(사용자). 볼트 grade_note 와 같은 문구다 — 공개 파일이라 방법·제목은 특허 게이트 뒤에.
     # 2026-10-24: 中 → ToDo · draft → 보류(사용자) — 프레임워크 자체는 성과가 없었고, 그 원고는 PartialCost 로 갈랐다.
     # ToDo(흰 바탕·검정 테두리)에 보류가 겹쳐 파이가 검정 ⛔ 로 칠해진다(SFTF_HeatMethod 10-21 과 같다).
@@ -784,14 +784,14 @@ QUALITY_ROWS = [
     ("Jeon_DLPOrient", "Jeon_DLPOrient", "ToDo", "값싼 배향 순위가 실물 출력물의 물성 순위와 맞는지 재는 검증선; 착수 게이트 통과, 실측 대조 전"),
     # 2026-09-25 ToDo → 中 · undecided → draft (사용자 지시, 볼트 정본도 같은 날 고쳤다).
     # 09-24 에 게재지가 Fibers and Polymers 로 정해지면서 「등급 보류」가 끝났다.
-    ("cfmsDispersityProp", "cfmsDispersityProp", "중", "분산도 지표와 실제 물성의 상관을 기존 시편 사진으로 확인하는 검증선; 착수 게이트 통과, **2026-09-24 게재지 Fibers and Polymers(SCIE) 확정**. 공개 E116 체류 시간 계열 S14–S17 을 시료별 질량 지도로 비교 중 — S14 만 확실히 뭉친다"),
+    ("cfmsDispersityProp", "cfmsDispersityProp", "중", "입자 분산도를 현미경 사진에서 반복 가능하게 재는 절차 논문; 2026-11-05 Microscopy and Microanalysis 투고(MAM-26-327)"),
     # 2026-09-22 신설. 볼트 grade: ToDo · stage: undecided. 착수 게이트(§1) 전이라 등급 보류.
     # 볼트 Rules §8 대로 grade_note 전문을 옮기지 않고 공개 가능한 한 줄만 싣는다.
     # 2026-09-22 저녁: §1 착수 게이트 실행 — CONDITIONAL(사슬 물리로 0.53→0.27 pp, 결정화 항이 상쇄 가능).
     # 2026-09-23 신설. 볼트 grade: ToDo · stage: undecided. Mathematica 최소 모델만 GO_MODEL_ONLY.
     # 2026-09-25 ToDo → 中 · undecided → draft (사용자 지시, 볼트 정본도 같은 날 고쳤다).
     # v87 국문 원고가 있고 publication_target 이 SCIE 로 정해져 「등급 보류」가 끝났다.
-    ("cfmsHMDispersity", "cfmsHMDispersity", "중", "조화함수 기반 다중척도 분산도(HMD); **2026-09-25 저널 사다리 확정 — 1순위 Powder Technology · 2순위 Advanced Powder Technology**(둘 다 Elsevier SCIE, 이름만 비슷한 다른 저널이다). 영문 Maintext v114·보충자료·Highlights 가 1순위 규정에 맞춰 나와 있다. 앞 편 cfmsDispersityProp 이 먼저 나가야 하고(companion 인용 방향), 기존법 대비 추가 가치·입력 반복성·독립 자료 검증이 남았다"),
+    ("cfmsHMDispersity", "cfmsHMDispersity", "중", "입자 분산 상태를 국소 질서와 공간 상관으로 보고하는 절차 논문; 2026-11-05 Journal of Microscopy 투고(JMI-26-00455)"),
     # 2026-09-28 신설. 볼트 grade: ToDo · stage: undecided. 착수 게이트(§1) 통과, 실측 전이라 등급 보류.
     # 볼트 Rules §8 대로 grade_note 전문을 옮기지 않고 공개 가능한 한 줄만 싣는다.
     ("cfmsAnatomy", "cfmsAnatomy", "ToDo", "MakeHuman 아바타에 뼈점·연부조직 두께·장기 위치를 붙여 보호 장비를 착용자에 맞추는 설계선; 착수 게이트 통과(2026-09-28), 실측 전, 이희란 교수 공저 후보"),
@@ -853,7 +853,7 @@ INTRODUCTIONS = {
     "cfmsDrapeSCAN": "고정형·핸드헬드 스캔 패치를 cfmsDrape 물리와 소프트 대응으로 정합해 인체 표면을 복원하려는 실험선이다.",
     "cfmsDrapeInverse": "드레이프한 원단 사진에서 그 원단의 인장·전단·굽힘 강성을 거꾸로 알아내는 도구다.",
     "Jeon_DLPOrient": "값싸게 매긴 3D 프린팅 배향 순위가 실제로 찍어 본 물건의 물성 순위와 맞는지를 처음으로 실물에 대고 재는 연구다.",
-    "cfmsDispersityProp": "현미경 사진으로 잰 입자 분산도 숫자가 실제 물성과 정말로 이어지는지를, 이미 찍혀 있는 남의 시편 사진으로 확인한다.",
+    "cfmsDispersityProp": "입자 분산도 숫자가 시야 경계·기준 분포·주석자·뭉침 세는 법에 따라 흔들리는 폭을 재고, 반복 가능하게 재는 절차를 세운다.",
     "cfmsHMDispersity": "입자 주변의 거리와 방향 구조를 조화함수로 표현하고, 국소 배열과 거시적 반복·상쇄를 여러 척도에서 함께 측정한다.",
     "dynamicDispersity": "눈부심 방지 필름 속 실리카 입자가 고르게 퍼져 있는지를 사진으로 재되, 입자를 흔들어 보며 움직임까지 본 2013년 논문이다. 분산도 네 편의 첫 편이다.",
     "cfmsAnatomy": "MakeHuman 아바타에 뼈점·연부조직 두께·장기 위치를 붙여, 보호 장비의 두께와 위치를 입는 사람의 체형에 맞추는 도구다.",
@@ -1366,6 +1366,10 @@ if preserve_extended_quality:
             # 2026-10-16: 한국섬유공학회지 투고. 원고번호는 접수 승인 메일이 와야 생기므로 TomoSh4 처럼
             # 날짜만 적고, 번호가 오면 고친다.  볼트 badge 와 같은 문구다.
             "SFTF_DrapeOverprint": "한국섬유공학회지 투고 완료 (2026-10-16, 원고번호 할당중)",
+            # 2026-11-05 투고 셋.  볼트 badge 와 같은 문구다.
+            "SFTF_Clustering": "RPJ 투고 완료 (2026-11-05, RPJ-11-2026-0777) · 보충자료 추가 요청 중",
+            "cfmsDispersityProp": "M&M 투고 완료 (2026-11-05, MAM-26-327)",
+            "cfmsHMDispersity": "J. Microscopy 투고 완료 (2026-11-05, JMI-26-00455)",
             # 2026-10-19: 보류(⛔) 해제 → draft(사용자). 게재지 TDP 라 「저널,상태」 꼴이다(PFTF_VisCull_kDop 과 같다).
             # 볼트 badge 와 같은 문구다.
             # 2026-10-24: 보류(성과 없음, 사용자) — 원고와 「TDP,draft」 배지는 PartialCost 가 이어받았다.
@@ -1675,7 +1679,7 @@ DISPERSITYPROP_NODE = {
                "highlight": {"background": "#ffffff", "border": "#000000"}},
     "size": 15.4,
     "font": {"size": 13, "color": "#333333", "bold": False},
-    "title": "cfmsDispersityProp — ToDo: 분산도 지표와 물성의 상관 검증",
+    "title": "cfmsDispersityProp — ToDo: 분산도 값을 반복 가능하게 재는 절차",
     "community": 4,
     "community_name": "ToDo",
     "source_file": "cfmsDispersityProp.md",
@@ -2445,8 +2449,8 @@ COAUTHOR_KIM_GOAL_EDGES = [
 JEON_GOAL_EDGES = [
     {
         **_autoplace_goal_edge(
-            "cfmsDispersityKNN", "cfmsDispersityProp", "상관 검증",
-            "분산도 지표가 실제 물성과 정말로 이어지는지 이미 찍혀 있는 시편 사진으로 확인한다",
+            "cfmsDispersityKNN", "cfmsDispersityProp", "측정 절차",
+            "분산도 지표 값이 시야 경계·기준 분포·주석자에 따라 흔들리는 폭을 재고 반복 가능한 절차로 세운다",
             "정확도",
         ),
         "dashes": True,
@@ -2613,7 +2617,7 @@ SUBMIT_DEPENDENCY_EDGES = [
 
 # ------------------------------------------------------ 분산도 사슬 (2026-09-24 사용자 지시)
 #   dynamicDispersity → cfmsDispersityKNN → cfmsDispersityProp → cfmsHMDispersity
-# 가운데 한 칸(KNN → Prop, 「상관 검증」)은 위 JEON_GOAL_EDGES 에 이미 있다. 여기는 양 끝이다.
+# 가운데 한 칸(KNN → Prop, 「측정 절차」)은 위 JEON_GOAL_EDGES 에 이미 있다. 여기는 양 끝이다.
 #
 # 2026-09-23 에는 사용자가 「두 과제는 부모를 거쳐서만 이어지는 별도 연구선」이라고 해서
 # KNN → HMD 로 그렸다. 09-24 지시가 그것을 뒤집어 Prop → HMD 한 줄짜리 사슬로 바꾼다.
