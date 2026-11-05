@@ -493,7 +493,12 @@ function authorEng(n){const p=PEOPLE.find(x=>x.NAME===n);return p?{f:p.ENGNAME_F
 function searchPapers(f){const eng=f.author!=="ALL"?authorEng(f.author):{f:"",s:"",l:""};
   let res=PAPERS.filter(p=>{const y=evalYear(p);if(y<f.from||y>f.to)return false;if(f.categ!=="ALL"&&p.CATEG!==f.categ)return false;
     return checkName(p.AUTHORS,f.author,eng.f,eng.s,eng.l);});
-  res.sort((a,b)=>b.P_YEAR-a.P_YEAR||b.P_MONTH-a.P_MONTH||b.P_DAY-a.P_DAY||(a.JOURNAL_NAME||"").localeCompare(b.JOURNAL_NAME||""));
+  /* 줄 순서 = 평가연도 → 공저 교수 묶음 → 최신순 (2026-11-06, 사용자 지시 — 같은 색 줄을 모아 보기 편하게).
+     평가연도를 맨 앞에 두어 연도 구분선이 깨지지 않는다. 묶음 순서는 AUTHOR_COLORS 의 역순이고 흰 줄이 맨 앞이다
+     (흰 줄 → 김우석 → 은종현 → 이희란. 같은 날 사용자 지시로 뒤집었다). */
+  const group=new Map(res.map(p=>[p,coauthorKey(p)]));
+  const byGroup=(a,b)=>{const x=group.get(a),y=group.get(b);return x<y?1:x>y?-1:0;};
+  res.sort((a,b)=>evalYear(b)-evalYear(a)||byGroup(a,b)||b.P_YEAR-a.P_YEAR||b.P_MONTH-a.P_MONTH||b.P_DAY-a.P_DAY||(a.JOURNAL_NAME||"").localeCompare(b.JOURNAL_NAME||""));
   return res;}
 function doSearch(){const f=getFilters();renderList(searchPapers(f),f);}
 function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
@@ -547,9 +552,13 @@ const AUTHOR_COLORS=[
   {NAME:"은종현",COLOR:"var(--au-eun)"},
   {NAME:"김우석",COLOR:"var(--au-kim)"},
 ];
-function authorColors(p){
-  return AUTHOR_COLORS.filter(a=>{const e=authorEng(a.NAME);return checkName(p.AUTHORS,a.NAME,e.f,e.s,e.l);}).map(a=>a.COLOR);
+/* 이 줄에 든 공저 교수의 AUTHOR_COLORS 번호들. 색칠과 줄 순서가 같은 판정을 쓴다. */
+function authorHits(p){
+  return AUTHOR_COLORS.map((a,i)=>{const e=authorEng(a.NAME);return checkName(p.AUTHORS,a.NAME,e.f,e.s,e.l)?i:-1;}).filter(i=>i>=0);
 }
+function authorColors(p){return authorHits(p).map(i=>AUTHOR_COLORS[i].COLOR);}
+/* 줄 순서 열쇠(글자 역순 비교): 없음 "~"(맨 앞) · 김우석 "2" · 은종현 "1" · 이희란+은종현 "01" · 이희란 "0". */
+function coauthorKey(p){return authorHits(p).join("")||"~";}
 /* 한 줄의 class·style 조각. 공저 교수가 없으면 둘 다 빈 문자열(흰 줄). */
 function rowPaint(p){
   const cs=authorColors(p);

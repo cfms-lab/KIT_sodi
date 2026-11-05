@@ -10,7 +10,7 @@
 
 | 화면 | 값이 있는 곳 | 무엇을 칠하나 | 판정 기준 |
 |---|---|---|---|
-| `upjuk.html` | `:root` 의 `--au-lee` `--au-eun` `--au-kim` · `AUTHOR_COLORS` · `rowPaint()` | 업적 한 줄의 배경 | 저자 칸에 교수 이름이 있나(저자 필터와 같은 `checkName`) |
+| `upjuk.html` | `:root` 의 `--au-lee` `--au-eun` `--au-kim` · `AUTHOR_COLORS` · `rowPaint()` | 업적 한 줄의 배경과 **줄 순서**(평가연도 안에서 `AUTHOR_COLORS` 역순, 흰 줄이 맨 앞, 묶음 안은 최신순. 11-06) | 저자 칸에 교수 이름이 있나(저자 필터와 같은 `checkName`) |
 | `graph.html` | `layout_findings.py` `HYPEREDGES` 의 `fill`(면) · `color`(테두리·점선) · `labelColor` → 재생성이 `const hyperedges` 한 줄에 굽는다 | 훌(hyperedge)의 면·테두리·라벨 | 훌 구성원 목록(`nodes`) |
 | `mindmap.html` | `GROUP_FILLS`(렌더) · `HULL_GROUPS`(재편 마이그레이션) | 노드 **면색 = 최상위 가지**, **테두리 = 등급(KIND)** | 노드가 속한 최상위 가지. 가지는 id 로 먼저, 없으면 제목 정규식 |
 
@@ -45,7 +45,7 @@
    한글은 `checkName` 의 부분 일치로, 영문은 First/Last 토큰 일치로 잡힌다(「김우석*」·「Woosuk Kim」 둘 다).
    같은 성의 다른 저자(「Sung min Kim」·「Jae Ryoung Kim」)가 안 잡히는지 확인한다.
 3. 색까지 주려면 `:root` 에 `--au-xxx`, `AUTHOR_COLORS` 에 `{NAME:"…",COLOR:"var(--au-xxx)"}` 한 줄. 둘 이상이
-   같이 쓴 줄은 `rowPaint` 가 세로 띠(linear-gradient)로 나눈다.
+   같이 쓴 줄은 `rowPaint` 가 세로 띠(linear-gradient)로 나눈다. 배열의 역순이 줄 순서다(`coauthorKey`) — 넣는 자리를 정해서 넣는다.
 4. 검증은 브라우저 없이도 된다 — `<script>` 를 node `vm` 에서 돌려(`document`·`localStorage`·`fetch` 를 빈 객체로
    흉내) `authorColors({AUTHORS:"…"})` 를 표의 실제 저자 문자열로 찍어 본다. 10-31 에 쓴 스크립트의 요지:
    ```js
