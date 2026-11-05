@@ -54,8 +54,9 @@ const expectedVaultGrades = {
   cfmsDrapeSCAN: ["ngi2vmc1", "todo"],
   // 2026-09-25 ToDo → 中. 표는 지금 안 돌고(VAULT_GRADES_VERSION 고정) 실제 반영은
   // applyDispersityGrades20260925 이 한다 — 아래 테스트가 그쪽을 본다.
-  cfmsDispersityProp: ["cfmsDispersityProp", "medium"],
-  cfmsHMDispersity: ["cfmsHMDispersity", "medium"],
+  // 2026-11-06 中 → 上(사용자 지정, 투고한 저널의 급).
+  cfmsDispersityProp: ["cfmsDispersityProp", "high"],
+  cfmsHMDispersity: ["cfmsHMDispersity", "high"],
 };
 for (const [projectId, [mindmapId, kind]] of Object.entries(expectedVaultGrades)) {
   const literal = `'${projectId}':{mindmapId:'${mindmapId}',kind:'${kind}'}`;

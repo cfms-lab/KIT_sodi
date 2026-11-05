@@ -784,14 +784,14 @@ QUALITY_ROWS = [
     ("Jeon_DLPOrient", "Jeon_DLPOrient", "ToDo", "값싼 배향 순위가 실물 출력물의 물성 순위와 맞는지 재는 검증선; 착수 게이트 통과, 실측 대조 전"),
     # 2026-09-25 ToDo → 中 · undecided → draft (사용자 지시, 볼트 정본도 같은 날 고쳤다).
     # 09-24 에 게재지가 Fibers and Polymers 로 정해지면서 「등급 보류」가 끝났다.
-    ("cfmsDispersityProp", "cfmsDispersityProp", "중", "입자 분산도를 현미경 사진에서 반복 가능하게 재는 절차 논문; 2026-11-05 Microscopy and Microanalysis 투고(MAM-26-327)"),
+    ("cfmsDispersityProp", "cfmsDispersityProp", "상", "2026-11-06 中 → 上 (사용자 지정). 입자 분산도를 현미경 사진에서 반복 가능하게 재는 절차 논문; 2026-11-05 Microscopy and Microanalysis 투고(MAM-26-327)"),
     # 2026-09-22 신설. 볼트 grade: ToDo · stage: undecided. 착수 게이트(§1) 전이라 등급 보류.
     # 볼트 Rules §8 대로 grade_note 전문을 옮기지 않고 공개 가능한 한 줄만 싣는다.
     # 2026-09-22 저녁: §1 착수 게이트 실행 — CONDITIONAL(사슬 물리로 0.53→0.27 pp, 결정화 항이 상쇄 가능).
     # 2026-09-23 신설. 볼트 grade: ToDo · stage: undecided. Mathematica 최소 모델만 GO_MODEL_ONLY.
     # 2026-09-25 ToDo → 中 · undecided → draft (사용자 지시, 볼트 정본도 같은 날 고쳤다).
     # v87 국문 원고가 있고 publication_target 이 SCIE 로 정해져 「등급 보류」가 끝났다.
-    ("cfmsHMDispersity", "cfmsHMDispersity", "중", "입자 분산 상태를 국소 질서와 공간 상관으로 보고하는 절차 논문; 2026-11-05 Journal of Microscopy 투고(JMI-26-00455)"),
+    ("cfmsHMDispersity", "cfmsHMDispersity", "상", "2026-11-06 中 → 上 (사용자 지정). 입자 분산 상태를 국소 질서와 공간 상관으로 보고하는 절차 논문; 2026-11-05 Journal of Microscopy 투고(JMI-26-00455)"),
     # 2026-09-28 신설. 볼트 grade: ToDo · stage: undecided. 착수 게이트(§1) 통과, 실측 전이라 등급 보류.
     # 볼트 Rules §8 대로 grade_note 전문을 옮기지 않고 공개 가능한 한 줄만 싣는다.
     ("cfmsAnatomy", "cfmsAnatomy", "ToDo", "MakeHuman 아바타에 뼈점·연부조직 두께·장기 위치를 붙여 보호 장비를 착용자에 맞추는 설계선; 착수 게이트 통과(2026-09-28), 실측 전, 이희란 교수 공저 후보"),
@@ -1367,7 +1367,7 @@ if preserve_extended_quality:
             # 날짜만 적고, 번호가 오면 고친다.  볼트 badge 와 같은 문구다.
             "SFTF_DrapeOverprint": "한국섬유공학회지 투고 완료 (2026-10-16, 원고번호 할당중)",
             # 2026-11-05 투고 셋.  볼트 badge 와 같은 문구다.
-            "SFTF_Clustering": "RPJ 투고 완료 (2026-11-05, RPJ-11-2026-0777) · 보충자료 추가 요청 중",
+            "SFTF_Clustering": "RPJ 투고 완료 (2026-11-05, RPJ-11-2026-0777)",
             "cfmsDispersityProp": "M&M 투고 완료 (2026-11-05, MAM-26-327)",
             "cfmsHMDispersity": "J. Microscopy 투고 완료 (2026-11-05, JMI-26-00455)",
             # 2026-10-19: 보류(⛔) 해제 → draft(사용자). 게재지 TDP 라 「저널,상태」 꼴이다(PFTF_VisCull_kDop 과 같다).

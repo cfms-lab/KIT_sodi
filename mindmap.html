@@ -679,8 +679,9 @@ const VAULT_PROJECT_GRADES={
   'cfmsDrapeSCAN':{mindmapId:'ngi2vmc1',kind:'todo'},
   // 2026-09-25 ToDo → 中(사용자 지시). 이 표는 지금 안 돈다(VAULT_GRADES_VERSION 고정) —
   // 실제로 옮기는 것은 applyDispersityGrades20260925 이고, 여기는 다음 사람을 위한 정본이다.
-  'cfmsDispersityProp':{mindmapId:'cfmsDispersityProp',kind:'medium'},
-  'cfmsHMDispersity':{mindmapId:'cfmsHMDispersity',kind:'medium'}
+  // 2026-11-06 中 → 上(사용자 지정, 투고한 저널의 급). 화면 색은 표 overlay 가 정한다.
+  'cfmsDispersityProp':{mindmapId:'cfmsDispersityProp',kind:'high'},
+  'cfmsHMDispersity':{mindmapId:'cfmsHMDispersity',kind:'high'}
 };
 function applyVaultGrades20260901(data){
   if(!data||!data.root||data.vaultGradesVersion===VAULT_GRADES_VERSION) return false;
