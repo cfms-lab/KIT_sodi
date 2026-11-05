@@ -69,7 +69,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__applyOrientCert=applyOrientCert20261024;globalThis.__applyChoMoldWarpRetire=applyChoMoldWarpRetire20261027;globalThis.__applyHullRegroup=applyHullRegroup20261031;globalThis.__applyAsymTensorRetire=applyAsymTensorRetire20261101;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__applyOrientCert=applyOrientCert20261024;globalThis.__applyChoMoldWarpRetire=applyChoMoldWarpRetire20261027;globalThis.__applyHullRegroup=applyHullRegroup20261031;globalThis.__applyAsymTensorRetire=applyAsymTensorRetire20261101;globalThis.__applyTomoSftfPublished=applyTomoSftfPublished20261105;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -890,6 +890,30 @@ if (childIds(asymNoHeir.root) !== "nafefnc3,x1" || asymNoHeir.links.length !== 0
 const asymNoNode = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyAsymTensorRetire(asymNoNode)) throw new Error("AsymTensor retire migration must still stamp its version without the node");
 if (childIds(asymNoNode.root) !== "n0llvuh1") throw new Error("AsymTensor retire touched a document without the node");
+
+// 2026-11-05: Tomo_SFTF TDP 온라인 게재. 문서의 sftf 단계를 accepted → published 로 올리고, 옛 씨앗 제목·옛 볼트 메모일 때만
+// 갈아 끼운다. 자식과 손으로 둔 값은 그대로.
+const sftfPubSample = { root: mk("root", [
+  { id: "sftf", title: "#1 Tomo_SFTF — TDP 게재확정 (3DP-2026-0119.R1)", kind: "high", status: "accepted",
+    note: "2026-08-12 특허 3건 출원 → 2026-08-13 TDP 제출(3DP-2026-0119) → 2026-09-16 1차 리뷰 → 2026-09-17 수정본 제출(R1) → 2026-10-07 게재확정. 2026-08-13 확정된 예외 — Tomo_SFTFSoft·SFTF_Clustering·SFTFSoft_GNN(2026-09-20 부터 SFTF_QEM 도)은 이 논문의 accept 후에 제출한다 — 의 게이트가 이날 열렸다.",
+    children: [{ id: "sftfPubChild", title: "SFTF_Clustering", kind: "medium", status: "draft", children: [] }] },
+]), links: [] };
+if (!context.__applyTomoSftfPublished(sftfPubSample)) throw new Error("Tomo_SFTF published migration did not run");
+if (context.__applyTomoSftfPublished(sftfPubSample)) throw new Error("Tomo_SFTF published migration is not idempotent");
+const sftfPub = findIn(sftfPubSample.root, "sftf");
+if (sftfPub.status !== "published") throw new Error(`Tomo_SFTF published migration left sftf at ${sftfPub.status}`);
+if (sftfPub.title !== "#1 Tomo_SFTF — TDP 출판 (2026-11-05 온라인 게재)") throw new Error("Tomo_SFTF published migration did not retitle the old seed title");
+if (sftfPub.note !== "2026-08-12 특허 3건 출원 → 2026-08-13 TDP 제출(3DP-2026-0119) → 2026-09-16 1차 리뷰 → 2026-09-17 수정본 제출(R1) → 2026-10-07 게재확정 → 2026-11-05 온라인 게재(권/호 미정). 2026-08-13 확정된 예외 — Tomo_SFTFSoft·SFTF_Clustering·SFTFSoft_GNN(2026-09-20 부터 SFTF_QEM 도)은 이 논문의 accept 후에 제출한다 — 의 게이트는 2026-10-07 에 열렸다.") throw new Error("Tomo_SFTF published migration did not replace the vault note");
+if (findIn(sftfPubSample.root, "sftfPubChild").status !== "draft") throw new Error("Tomo_SFTF published migration touched a child");
+const sftfPubValidation = context.__validate(sftfPubSample);
+if (!sftfPubValidation.ok) throw new Error(`Tomo_SFTF published sample is invalid: ${sftfPubValidation.errors[0]}`);
+const sftfPubHand = { root: mk("root", [{ id: "sftf", title: "Tomo_SFTF", kind: "high", status: "cancelled", note: "손으로 쓴 메모", children: [] }]), links: [] };
+context.__applyTomoSftfPublished(sftfPubHand);
+const sftfPubHandNode = findIn(sftfPubHand.root, "sftf");
+if (sftfPubHandNode.status !== "cancelled" || sftfPubHandNode.note !== "손으로 쓴 메모" || sftfPubHandNode.title !== "Tomo_SFTF") throw new Error("Tomo_SFTF published migration overrode a hand-set field");
+const sftfPubNoNode = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyTomoSftfPublished(sftfPubNoNode)) throw new Error("Tomo_SFTF published migration must still stamp its version without the node");
+if (childIds(sftfPubNoNode.root) !== "n0llvuh1") throw new Error("Tomo_SFTF published migration touched a document without the node");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);

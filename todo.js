@@ -16,11 +16,12 @@
  * 2026-10-31 사용자 지시로 볼트 대조 갱신(10-21 발행 이후 바뀐 노트) — CIPC Rev2 · TomoSh4/5 Rev1 · SFTFSoft·PartialCost
  *   12월 계획서 전 투고 · Clustering 보류 · AsymTensor 3DP · OrientCert 3단계 완료 · Tomo_SFTF 게재 대기 · DFSVR 투고 준비 ·
  *   HMDispersity·AutoGrading 줄 신설. 같은 날 portfolio_rows 도 그 노트들만 --only 로 다시 발행했다.
+ * 2026-11-05 Tomo_SFTF 온라인 게재 — 빈 칸으로, 그 게재를 기다리던 Tomo_DFSVR 줄도 갱신.
  */
 (function () {
   const TODO = {
     /* ── 저널 손에 가 있는 것 ─────────────────────────────── */
-    "Tomo_SFTF":            "게재 대기 — 게재비 선발행 회신 대기",  /* TDP 3DP-2026-0119.R1 게재확정(2026-10-07) · 라이선스 서명 10-10 · 교정쇄 10-15 · 선발행 청구 요청 10-19 */
+    "Tomo_SFTF":            "",  /* 출판 — TDP 온라인 게재 2026-11-05, DOI 10.1177/23297662261499844, 권/호·쪽 미정. cfmsDispersityKNN 처럼 빈 칸으로 둔다 */
     "cfmsCIPC":             "Rev2 판정 대기",  /* TSE 26M-08-030 — Rev1 제출 2026-09-22 → Rev2 제출 2026-10-30 */
     "SFTF_UrbanTraffic":    "심사 대기",
     "TSE_TomoSh4":          "Rev1 제출 — 2차 판정 대기",  /* 26M-09-038 — 1차 수정후 게재가 10-20, Rev1 제출 2026-10-29(이희란 교수) */
@@ -68,7 +69,7 @@
     /* ── 내가 원고·문서를 써야 하는 것 ────────────────────── */
     "cfmsAutoPlace_JCDE":   "영문 집필",
     "SFTF_SewerPOC":        "원고 수치 v2 갱신",
-    "Tomo_DFSVR":           "투고 준비 — Tomo_SFTF 게재 뒤 서지 갱신",  /* JCDE. 2026-10-16 세 번째 사전등록에서 확증 통과 */
+    "Tomo_DFSVR":           "투고 준비 — Tomo_SFTF 서지를 DOI 판으로 갱신",  /* JCDE. 2026-10-16 세 번째 사전등록에서 확증 통과 */
     "PFTF":                 "보류 — 원고는 PartialCost 로",  /* 성과 없음, ToDo·보류 (2026-10-24 사용자) */
     "PartialCost":          "12월 계획서 전 TDP 투고 — SFTFSoft preprint DOI 뒤, 커버레터",  /* PFTF 저장소에서 갈라진 원고(2026-10-24 신설). 특허 출원 안 함(10-24). 10-26 결정 */
     "PFTF_OrientCert":      "1편 내용 병합 · 4·5절 집필 → CAD",  /* 2026-11-01 1편(AsymTensor) 병합 — 통합편. 저자 확정 박명진 · 은종현 · 설인환*(같은 날). 3단계(독립 인증서 검사) 10-24~26 완료 */

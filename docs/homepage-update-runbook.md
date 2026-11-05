@@ -166,7 +166,7 @@ SQL 만으로 바뀌지 않는 것들이다. 필요하면 고쳐서 커밋·푸�
 | 원고번호 수령 | badge 의 「할당중」 → 번호 | memo 에 번호 | `submission` · `badge` |
 | 수정 요청 | stage `revision` | stage `revision` | `next_gate` |
 | 게재확정 | stage `accepted` | stage `accepted` | `badge` |
-| 출판 | stage `published`, badge 「… 출판 (날짜, 권호)」 | `published`, volume `63(5)` 꼴, 쪽·DOI, 실제 발행일 | `todo.js` 는 빈 칸으로 |
+| 출판 | stage `published`, badge 「… 출판 (날짜, 권호)」. 온라인 선공개면 「… 출판 (날짜, 온라인 게재 · 권/호 미정)」 | `published`, volume `63(5)` 꼴, 쪽·DOI, 실제 발행일(선공개면 온라인 게재일, volume·page 는 빈칸). `pdf` 칸에 파일 이름 — 파일은 사용자가 올린다(아래 함정) | `todo.js` 는 빈 칸으로. `submission` 은 「저널 — 날짜 …」 꼴(게재지() 가 저널 이름만 남긴다), `doi:` 도 적는다. 선례 Tomo_SFTF(11-05) |
 | 등급 변경 | grade · grade_note | — | `grade` 와 `grade_note` 첫머리(「날짜 A → B (사용자 지정)」), 노트 머리 콜아웃. 저장소는 `QUALITY_ROWS` 등급 · `NODE_TITLES` 접두어(+ 본문을 바꾸면 `TITLE_REFRESH_IDS`). 등급은 사용자가 정한다 |
 | 보류(blocked) | stage `blocked`(노드 행이 없으면 INSERT — 노트에 `mindmap_id` 가 없으면 넣는다). 날짜는 그대로 | — | `stage: blocked`(+날짜 주석). 그다음 `--only` + 전체 재생성(VAULT_STAGES 씨앗). graph 파이 ⛔ · mindmap 은 표 덮어쓰기. 선례 10-31 넷 |
 | 논문 트랙 병합(A 편을 B 편에) | 접은 트랙(노드 = 노트 이름이면 노트 `stage`): `blocked` + badge 「보류(B 에 병합 · 저널)」. 살아남은 2편 노드 행은 볼트 발행이 못 덮으니 bottleneck·note 는 손 SQL | B 의 업적 행 authors·memo(저자가 바뀌면 같이) | 노트 `paper_stage`(A blocked · B draft)·`badge`·`submission`/`next_gate`/`bottleneck` 앞머리·본문 절; 프로젝트현황 분리트랙(A 순서 4 · B 가 A 의 순서 승계 · `공저자`). 저장소 `TRACK_STAGES[B]="draft"`(부모가 blocked 라 덮는다)·STATUS_BADGES·REMAINING_BOTTLENECKS·QUALITY_ROWS 메모·todo.js. 공저자가 생기면 HYPEREDGES 훌 + 가드 expectedHulls. 선례 HeatMethod→Holonomy(10-21) · AsymTensor→OrientCert(11-01) |
@@ -182,6 +182,8 @@ SQL 만으로 바뀌지 않는 것들이다. 필요하면 고쳐서 커밋·푸�
   `node scripts/publish-research-outputs.mjs --push --allow-new` 로 넣는다(볼트 `Rules/새업적_등록절차.md`).
   진행 중 원고는 이 길이 아니라 위의 `p…` + `papers_ids` 다.
 - 볼트 `Projects/*.md` 와 `Dashboards/프로젝트현황.md` 는 사용자가 커밋한다.
+- **PDF 파일은 클로드가 못 올린다.** `pdfs` 버킷은 비공개이고 RLS 가 `authenticated` 만 받는데, MCP 는 `--features=database` 라 SQL 만 된다. `pdf` 칸에 파일 이름을 넣고 사본을 프로젝트 폴더에 그 이름으로 둔 뒤, 사용자가 upjuk 「PDF 업로드」로 그 파일을 고른다. 파일 이름으로 짝을 짓고 저장 키는 `{papers_id}.pdf` 다. 올라갔는지는 `select name from storage.objects where bucket_id='pdfs' and name='{papers_id}.pdf'` 로 본다.
+- 출판사 게재본은 이 비공개 버킷까지만 둔다. Sage 는 게재본의 온라인 게시를 금지하고, 개인 웹·기관 저장소에는 accepted version 만 허용한다. IIS 가 떠 있는 `D:\IIS_Home` 아래(`UPJUK/PDF`, `KIT_sodi/tmp` 포함)에도 사본을 두지 않는다.
 - MCP 의 `execute_sql` 은 RLS 를 거치지 않는 관리 권한으로 돈다(SQL Editor 와 같다). 그래서 `delete`·
   `drop`·조건 없는 `update` 는 승인 창에서 한 번 더 본다. 스키마 변경은 `apply_migration` 이 따로 있다.
 
