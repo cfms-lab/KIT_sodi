@@ -2635,7 +2635,7 @@ DISPERSITY_GOAL_EDGES = [
     {
         **_autoplace_goal_edge(
             "cfmsDispersityProp", "cfmsHMDispersity", "다중척도 구조",
-            "물성과의 상관을 확인한 뒤, kNN 한 값 대신 조화함수 계수로 국소 배열과 거시적 반복·상쇄를 여러 척도에서 따로 잰다",
+            "값을 재는 절차 다음에, kNN 한 값이 버리는 방향 구조를 국소 질서와 공간 상관으로 함께 보고한다",
             "확장",
         ),
         "dashes": True,
