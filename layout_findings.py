@@ -666,7 +666,7 @@ QUALITY_ROWS = [
     # 2026-10-24 신설(사용자): PFTF 저장소의 원고(10-19 에 닫힘)를 PFTF 의 자식 노드로. 등급은 그 원고에 매겨 있던 PFTF 의
     # 中 을 이어받았다. 볼트 grade_note 를 줄인 공개 문구다 — 방법·제목은 특허 게이트 뒤에.
     ("PartialCost", "PartialCost", "중", "PFTF 저장소에서 갈라진 TDP 예정 단독 방법 논문(2026-10-24 신설); 원고는 2026-10-19 에 닫혔고 사전 등록 실측 이득이 주 결과. 투고 전 특허 출원 여부 결정이 남았다"),
-    ("SFTF_DrapePrior", "SFTF_DrapePrior", "하", "**2026-10-31 한국섬유공학회지 63권 5호 출판(26M-08-029)** — 투고(2026-08-14) → 수정후 게재가(2026-09-03) → Rev1 당일 제출 → 게재확정(2026-09-17) → 교정쇄 회신(2026-10-08) → 발행. 드레이프 품질 평가의 재현성(노이즈 플로어·예산 일치·솔버 간 이득 부호 반전). 쪽·DOI 는 미정"),
+    ("SFTF_DrapePrior", "SFTF_DrapePrior", "하", "**2026-10-31 한국섬유공학회지 63권 5호 306-315쪽 출판(26M-08-029)** — 투고(2026-08-14) → 수정후 게재가(2026-09-03) → Rev1 당일 제출 → 게재확정(2026-09-17) → 교정쇄 회신(2026-10-08) → 발행. 드레이프 품질 평가의 재현성(노이즈 플로어·예산 일치·솔버 간 이득 부호 반전). DOI 10.12772/TSE.2026.63.306"),
     ("SFTF_Composite", "SFTF_Composite", "상", "한·영문 완성·191 tests·R9–R13 사전등록/독립감사; R11 합성 held-out 음성, 공식 CAD·물리 검증 잔여"),
     ("SFTF_InjMold", "SFTF_InjMold", "중", "B24·exact integration·set-cover·B-rep·blind protocol; 원고 조립 잔여"),
     ("Tomo_DiffSupport", "Tomo_DiffSupport", "중", "claim–evidence matrix·JAX gradient·fail-closed; utility/print gate 미실행"),
@@ -1422,7 +1422,8 @@ if preserve_extended_quality:
             "Tomo_SFTF": "없음 — 출판(2026-11-05 온라인 게재, DOI 10.1177/23297662261499844). 남은 것은 권/호·쪽이 나오면 업적 행 p101 의 volume·page 를 채우는 일뿐이다. 후속 Tomo_SFTFSoft·SFTF_QEM·SFTF_Clustering 의 accept 게이트는 2026-10-07 에 열렸다(SFTFSoft_GNN 은 SFTFSoft preprint DOI 를 더 기다린다)",
             # 2026-09-17: 게재확정 뒤 남은 것은 행정이다(볼트 next_gate 를 옮긴 것).
             # 2026-10-08: 출판(2026-10-31, 63권 5호).  남은 것은 쪽·DOI 뿐이다(볼트 next_gate).
-            "SFTF_DrapePrior": "없음 — 출판(2026-10-31, 63권 5호). 남은 것은 서지뿐: 쪽·DOI 가 나오면 업적 행 p253 의 page·doi 를 채운다",
+            # 2026-11-06: 인쇄본으로 쪽·DOI 확정.  서지까지 끝났다.
+            "SFTF_DrapePrior": "없음 — 출판(2026-10-31, 63권 5호 306-315쪽, DOI 10.12772/TSE.2026.63.306)",
             "SFTF_UrbanTraffic": "접수(원고번호) 회신 확인 → 심사 결과 대기; 설인환 몫은 hwpx v1 공저자 검토(방법·수치 정합)",
             "PFTF_DrapePrior_VisCull_kDop": "독립 논문 등급 미적용 — 통합 evidence 저장소",
             "DFSVR_VisCull": "값·gradient parity·거짓음성 0 및 실제 end-to-end utility 검증",
