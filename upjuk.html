@@ -227,6 +227,10 @@ const PRINT_SUFFIX={2:"(In Print)",3:"(Accepted)",4:"(Submitted)",5:"(draft)"};
             「bridge」열이 생기므로 분류째 거른다. */
 const HIDDEN_IDS=new Set(["p142"]);
 const HIDDEN_CATEGS=new Set(["bridge"]);
+/* 2026-11-06 사용자 지시: 「할일 (ToDo) — 프로젝트 노드」 23줄은 당장 필요 없어 이 화면에서 뺀다.
+   표의 노드 행은 지우지 않는다 — graph.html·mindmap.html 이 같은 행을 쓰므로 지우면 그쪽 노드까지 사라진다.
+   다시 보이려면 true 로 바꾼다(종류 목록의 「할일」과 「ToDo n건」도 함께 돌아온다). */
+const SHOW_TODO_NODES=false;
 
 /* ===== 투고 진도 파이 · 깜빡임 (2026-09-22, 사용자 지시) =====
    graph.html 의 STAGE_PIE, portfolio.html 의 파이()·깜빡임과 같은 규칙이다 — 세 화면이 같은
@@ -372,7 +376,7 @@ async function loadNodes(){
    2026-10-26 사용자 지시로 바뀌었다 — 비로그인 방문자에게는 **출판(published)된 업적만** 보인다(아래 loadPapers).
    내년 과제 제안서를 준비하는 동안 진행 중인 원고(draft·submitted·accepted…)의 수와 제목이 바깥에 드러나지 않게 한다.
    여기서 비우면 종류 목록의 TODO 와 할일 목록이 함께 빠진다. */
-function todoNodes(){ return isLoggedIn()?NODES.filter(n=>n.grade==="ToDo"):[]; }
+function todoNodes(){ return SHOW_TODO_NODES&&isLoggedIn()?NODES.filter(n=>n.grade==="ToDo"):[]; }
 function nodeById(id){ return id?NODES.find(n=>n.id===id):null; }
 
 let HAS_PROJECT_COL=true;           // research_outputs 는 project_id 를 늘 가진다
@@ -750,7 +754,7 @@ function logout(){SESSION=null;localStorage.removeItem("cfms_session");renderAut
 function renderAuthbar(){
   const bar=document.getElementById("authbar");
   if(isLoggedIn()){
-    bar.innerHTML=`<span class="pill">✔ ${esc(SESSION.email)} (진행 중 업적·ToDo·PDF 열람)</span>
+    bar.innerHTML=`<span class="pill">✔ ${esc(SESSION.email)} (진행 중 업적·PDF 열람)</span>
       <button class="btn secondary sm" onclick="openUpload()" title="PDF 원문 업로드">PDF 업로드</button>
       <button class="btn secondary sm" onclick="logout()">로그아웃</button>`;
   }else{
