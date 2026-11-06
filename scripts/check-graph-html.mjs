@@ -378,8 +378,8 @@ if (
 // 2026-10-31 둘째(사용자 「볼트의 submit dependency 로 화살표를」, 범위는 「의존 선 추가만」): 미투고 논문 간 투고 의존 선 넷 —
 // 생성기 SUBMIT_DEPENDENCY_EDGES(점선·잠정, 범주 통합). 먼저 나가야 하는 편 → 기다리는 편. 선행 편이 나가면 실선으로 올리거나 걷는다.
 const expectedSubmitDependencyEdges = [
-  ["Tomo_SFTFSoft", "PartialCost", "preprint DOI 선행"],
-  ["Tomo_SFTFSoft", "SFTF_QEM", "며칠 먼저 투고"],
+  ["Tomo_SFTFSoft", "PartialCost", "IJAMT 결과 선행"],
+  ["Tomo_SFTFSoft", "SFTF_QEM", "IJAMT 결과 선행"],
   ["cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "A 투고 뒤 B"],
   ["SFTF_Holonomy", "SFTF_Composite", "앞 편 accept 뒤"],
 ];

@@ -36,12 +36,12 @@
     "cfmsDispersityKNN":       "",  /* 게재 완료 — 빈 칸으로 둔다 */
 
     /* ── Tomo_SFTF accept 가 열어 준 것 (2026-10-07) ─────────
-       순서 정본은 볼트 Papers/SFTF_4편_투고순서_2026-09-22.md — SFTFSoft 를 먼저
-       내고 preprint 를 같이 올려야 QEM 의 자매 인용과 GNN 의 게이트가 풀린다. */
+       순서 정본은 볼트 Papers/SFTF_4편_투고순서_2026-09-22.md. 2026-11-06 서두르지 않기로 했다 —
+       QEM·GNN 은 SFTFSoft 의 IJAMT 결과 뒤에 낸다. */
     "Tomo_SFTFSoft":        "심사 대기",  /* IJAMT JAMT-S-26-11299 (2026-11-06 투고) */
-    "SFTF_QEM":             "투고 — SFTFSoft 며칠 뒤",
+    "SFTF_QEM":             "투고 — SFTFSoft IJAMT 결과 뒤",
     "SFTF_Clustering":      "심사 대기",  /* RPJ-11-2026-0777 (2026-11-05 투고) */
-    "SFTFSoft_GNN":         "SFTFSoft preprint DOI 뒤",
+    "SFTFSoft_GNN":         "SFTFSoft IJAMT 결과 뒤",
 
     /* ── 공저자 손에 가 있는 것 ───────────────────────────── */
     "SFTF_InjMold":         "공저자 작업 중",
@@ -69,9 +69,9 @@
     /* ── 내가 원고·문서를 써야 하는 것 ────────────────────── */
     "cfmsAutoPlace_JCDE":   "영문 집필",
     "SFTF_SewerPOC":        "원고 수치 v2 갱신",
-    "Tomo_DFSVR":           "투고 준비 — Tomo_SFTF 서지를 DOI 판으로 갱신",  /* JCDE. 2026-10-16 세 번째 사전등록에서 확증 통과 */
+    "Tomo_DFSVR":           "투고 준비 — SFTFSoft IJAMT 결과 뒤, Tomo_SFTF 서지를 DOI 판으로",  /* JCDE. 2026-10-16 세 번째 사전등록에서 확증 통과 */
     "PFTF":                 "보류 — 원고는 PartialCost 로",  /* 성과 없음, ToDo·보류 (2026-10-24 사용자) */
-    "PartialCost":          "12월 계획서 전 TDP 투고 — SFTFSoft preprint DOI 뒤, 커버레터",  /* PFTF 저장소에서 갈라진 원고(2026-10-24 신설). 특허 출원 안 함(10-24). 10-26 결정 */
+    "PartialCost":          "TDP 투고 — SFTFSoft IJAMT 결과 뒤, 커버레터",  /* PFTF 저장소에서 갈라진 원고(2026-10-24 신설). 특허 출원 안 함(10-24). 2026-11-06 서두르지 않기로 */
     "PFTF_OrientCert":      "1편 내용 병합 · 4·5절 집필 → CAD",  /* 2026-11-01 1편(AsymTensor) 병합 — 통합편. 저자 확정 박명진 · 은종현 · 설인환*(같은 날). 3단계(독립 인증서 검사) 10-24~26 완료 */
     "PFTF_VisCull_kDop":    "GPU 경로 구현",
     "SFTF_HeatMethod":      "보류 — Holonomy 에서 다시 분리, 실을 원고 없음",  /* 2026-10-21 Holonomy 에 병합 → 2026-10-26 JCDE 리젝 사유 ②로 통제 실험을 다시 뺐다. 단독으로 낼지 사용자 결정 전 */

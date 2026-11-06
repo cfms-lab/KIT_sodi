@@ -220,7 +220,7 @@ NODE_TITLES = {
     # 2026-10-08: Tomo_SFTF 게재확정(2026-10-07)으로 「accept 대기」가 풀렸다(볼트 next_gate).
     "SFTF_QEM": "SFTF_QEM [draft] — 상: 주 기여 양성 2건(슬라이서 대비 ρ=+0.905, "
                 "배향당 1/103 비용), v3.0 개정 완료. Tomo_SFTF accept(2026-10-07)로 "
-                "대기가 풀렸다 — Tomo_SFTFSoft 며칠 뒤 투고.",
+                "대기가 풀렸다 — Tomo_SFTFSoft 의 IJAMT 결과 뒤 투고.",
     "SFTF_DynamicTargetSearch": "SFTF_DynamicTargetSearch — ToDo: "
                                 "Net1 G0 topology·provenance와 15개 테스트 완료; "
                                 "LeakDB scenario localization·baseline 전",
@@ -1427,7 +1427,7 @@ if preserve_extended_quality:
             # 2026-09-16: 볼트 노트의 bottleneck·next_gate 를 옮긴 것이다(표가 살아 있으면 표 값이 이긴다).
             # 2026-09-17: 수정본을 냈으므로 병목이 「대응」에서 「대기」로 옮겨 갔다.  볼트 값과 같다.
             # 2026-10-07: 게재확정.  병목은 없고 남은 것은 행정이다(볼트 bottleneck·next_gate 를 옮긴 것).
-            "Tomo_SFTF": "없음 — 출판(2026-11-05 온라인 게재, DOI 10.1177/23297662261499844). 남은 것은 권/호·쪽이 나오면 업적 행 p101 의 volume·page 를 채우는 일뿐이다. 후속 Tomo_SFTFSoft·SFTF_QEM·SFTF_Clustering 의 accept 게이트는 2026-10-07 에 열렸다(SFTFSoft_GNN 은 SFTFSoft preprint DOI 를 더 기다린다)",
+            "Tomo_SFTF": "없음 — 출판(2026-11-05 온라인 게재, DOI 10.1177/23297662261499844). 남은 것은 권/호·쪽이 나오면 업적 행 p101 의 volume·page 를 채우는 일뿐이다. 후속 Tomo_SFTFSoft·SFTF_QEM·SFTF_Clustering 의 accept 게이트는 2026-10-07 에 열렸다(SFTFSoft_GNN 은 SFTFSoft 의 IJAMT 결과를 더 기다린다)",
             # 2026-09-17: 게재확정 뒤 남은 것은 행정이다(볼트 next_gate 를 옮긴 것).
             # 2026-10-08: 출판(2026-10-31, 63권 5호).  남은 것은 쪽·DOI 뿐이다(볼트 next_gate).
             # 2026-11-06: 인쇄본으로 쪽·DOI 확정.  서지까지 끝났다.
@@ -1441,7 +1441,7 @@ if preserve_extended_quality:
             # 표(research_outputs)가 살아 있으면 표 값이 이기므로 볼트에서도 다시 발행해야 한다.
             # 2026-10-08: Tomo_SFTF 게재확정(2026-10-07)으로 「accept 대기」가 풀렸고, 「닫을 것 셋」은
             # 볼트 paper_completeness_note 대로 2026-09-20 `9fefbcc` 가 이미 닫았다(볼트 next_gate 를 옮긴 것).
-            "SFTF_QEM": "✅ Tomo_SFTF accept(2026-10-07)로 대기가 풀렸다 — 원고는 투고 가능 상태이고 Tomo_SFTFSoft 제출(+preprint) 며칠 뒤 CAD 로 낸다. 폼이 요구하던 산출물 셋(COI 별도 파일·Vitae 병합·재현 패키지 주소)은 2026-09-20 에 닫혔다. 선행연구 인용 보강과 성능 우월 주장 불가는 그대로다",
+            "SFTF_QEM": "✅ Tomo_SFTF accept(2026-10-07)로 대기가 풀렸다 — 원고는 투고 가능 상태이고 Tomo_SFTFSoft 의 IJAMT 결과 뒤 CAD 로 낸다. 폼이 요구하던 산출물 셋(COI 별도 파일·Vitae 병합·재현 패키지 주소)은 2026-09-20 에 닫혔다. 선행연구 인용 보강과 성능 우월 주장 불가는 그대로다",
             # 2026-09-21 볼트 동기화. 분량·형식·인용이 닫히면서 병목이 「행정 둘」로 바뀌었다.
             # 2026-09-21 오후: 원고가 방대석 교수에게 넘어갔다. 행정 둘은 그대로인데 그것을
             # 채울 사람이 내년 연구년에 본다니 병목의 이름이 「행정」에서 「일정」으로 바뀐다.
@@ -2606,12 +2606,12 @@ def _submit_dependency_edge(source, target, label, detail):
 
 SUBMIT_DEPENDENCY_EDGES = [
     _submit_dependency_edge(
-        "Tomo_SFTFSoft", "PartialCost", "preprint DOI 선행",
-        "PartialCost 투고의 선행 조건은 Tomo_SFTFSoft 투고와 preprint DOI 다 — 동반 원고 sftfsoft 를 그 DOI 로 인용한다(PartialCost.md next_gate, 2026-10-26)",
+        "Tomo_SFTFSoft", "PartialCost", "IJAMT 결과 선행",
+        "PartialCost 는 Tomo_SFTFSoft 의 IJAMT 결과 뒤에 낸다 — 동반 원고 sftfsoft 의 서지를 그때 상태로 적는다(PartialCost.md next_gate, 2026-11-06)",
     ),
     _submit_dependency_edge(
-        "Tomo_SFTFSoft", "SFTF_QEM", "며칠 먼저 투고",
-        "SFTFSoft 제출(+preprint) 며칠 뒤 QEM 을 낸다 — companionsoft 표기가 「투고 예정」에서 preprint DOI 로 바뀐다(SFTF_4편_투고순서 판정 ④)",
+        "Tomo_SFTFSoft", "SFTF_QEM", "IJAMT 결과 선행",
+        "QEM 은 Tomo_SFTFSoft 의 IJAMT 결과 뒤에 낸다 — companionsoft 표기를 그때 상태로 바꾼다(SFTF_QEM.md next_gate, 2026-11-06)",
     ),
     _submit_dependency_edge(
         "cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "A 투고 뒤 B",
