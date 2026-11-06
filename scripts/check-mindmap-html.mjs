@@ -916,6 +916,35 @@ const sftfPubNoNode = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyTomoSftfPublished(sftfPubNoNode)) throw new Error("Tomo_SFTF published migration must still stamp its version without the node");
 if (childIds(sftfPubNoNode.root) !== "n0llvuh1") throw new Error("Tomo_SFTF published migration touched a document without the node");
 
+// 2026-11-06: 진도 아이콘 색 = graph.html 노드 색(등급). 단계색으로 되돌아가거나 팔레트가 갈라지면 여기서 잡는다.
+const graphForIcons = readFileSync(new URL("../graph.html", import.meta.url), "utf8");
+const graphConst = (name) => {
+  const found = graphForIcons.match(new RegExp(`const ${name} = (\\{[^\\n]*?\\});`));
+  if (!found) throw new Error(`graph.html has no ${name}`);
+  return JSON.parse(found[1]);
+};
+const graphFill = graphConst("QUALITY_COLORS");
+const graphBorder = graphConst("QUALITY_BORDERS");
+const sourceOf = (source, pattern, what) => {
+  const found = source.match(pattern);
+  if (!found) throw new Error(`cannot find ${what}`);
+  return found[0];
+};
+const graphPieInk = runInNewContext(`(${sourceOf(graphForIcons, /function pieInk\(fill, border\) \{[\s\S]*?\n\}/, "graph.html pieInk")})`);
+const iconColors = runInNewContext(
+  `const INK="#0b0b0b";${sourceOf(html, /const KIND=\{[\s\S]*?\n\};/, "mindmap.html KIND")}\n${sourceOf(html, /function progInk\(kind\)\{[\s\S]*?\n\}/, "mindmap.html progInk")}\n({KIND, progInk});`,
+);
+const kindGrades = { group: "그룹", none: "등급 없음", high: "상", medium: "중", low: "하", todo: "ToDo", closed: "Closed" };
+for (const [kind, grade] of Object.entries(kindGrades)) {
+  const entry = iconColors.KIND[kind];
+  if (entry.fill !== graphFill[grade]) throw new Error(`mindmap KIND.${kind}.fill ${entry.fill} differs from graph ${grade} ${graphFill[grade]}`);
+  if (entry.stroke !== graphBorder[grade]) throw new Error(`mindmap KIND.${kind}.stroke ${entry.stroke} differs from graph ${grade} ${graphBorder[grade]}`);
+  const ink = graphPieInk(graphFill[grade], graphBorder[grade]);
+  if (iconColors.progInk(kind) !== ink) throw new Error(`mindmap progress icon for ${kind} is ${iconColors.progInk(kind)}, graph draws ${ink}`);
+}
+if (!html.includes("progIcon(n.status, 22, titleY-4.5, progInk(n.kind),")) throw new Error("mindmap node icons must use the grade colour (progInk)");
+if (/PROG_GREEN|PROG_YELLOW|PROG_RED|progColor/.test(html)) throw new Error("mindmap.html still has stage colours for progress icons");
+
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);
 console.log(`mindmap.html OK (${scripts.length} inline scripts, ${Object.keys(expectedVaultGrades).length} vault grades)`);
