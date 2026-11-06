@@ -40,7 +40,7 @@
        내고 preprint 를 같이 올려야 QEM 의 자매 인용과 GNN 의 게이트가 풀린다. */
     "Tomo_SFTFSoft":        "12월 계획서 전 IJAMT 투고 — DOCX 재빌드, preprint 같이",  /* 2026-10-26 결정(「새 과제 결과 뒤」 전략의 예외) */
     "SFTF_QEM":             "투고 — SFTFSoft 며칠 뒤",
-    "SFTF_Clustering":      "심사 대기 — 보충자료 추가 요청 답 기다리는 중",  /* RPJ-11-2026-0777 (2026-11-05 투고). 보충자료가 빠져 11-06 편집부에 요청 */
+    "SFTF_Clustering":      "심사 대기",  /* RPJ-11-2026-0777 (2026-11-05 투고) */
     "SFTFSoft_GNN":         "SFTFSoft preprint DOI 뒤",
 
     /* ── 공저자 손에 가 있는 것 ───────────────────────────── */
