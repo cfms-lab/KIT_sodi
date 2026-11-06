@@ -656,7 +656,7 @@ HYPEREDGES = [
 # infrastructure/integration records but are not paper-quality candidates.
 QUALITY_ROWS = [
     ("Tomo_SFTF", "Tomo_SFTF", "상", "TDP v2.1·외부 60-mesh 감사·budget–complexity·PiAM 연속성; **2026-11-05 TDP 온라인 게재(DOI 10.1177/23297662261499844, 권/호·쪽 미정)** — 투고(08-13) → 1차 리뷰(09-16) → 수정본 제출(09-17) → 게재확정(10-07, 「in its current form」 — 추가 수정 없음) → 교정쇄(10-15) → 온라인 게재(11-05). 1차 리뷰 지적 2건에 전향 확증 70메쉬로 대응한 수정본이 그대로 실렸고, 우려하던 분량 4,740/4,000 감축 요구는 오지 않았다. 남은 것은 권/호·쪽뿐"),
-    ("Tomo_SFTFSoft", "Tomo_SFTFSoft", "상", "TDP v2.1·현대/legacy Cura·receiver 반례·조건부 first-hit 수렴"),
+    ("Tomo_SFTFSoft", "Tomo_SFTFSoft", "상", "적합 계수 없는 출력 방향 순위 규칙과 그 미분가능형을 사전등록 봉인 홀드아웃·두 슬라이서로 검증한 원고; 2026-11-06 IJAMT 투고(JAMT-S-26-11299)"),
     ("SFTFSoft_GNN", "SFTFSoft_GNN", "상", "3,817 mesh·held-out·Cura 재라벨·Prusa 교차검증"),
     ("SFTF_Clustering", "SFTF_Clustering", "상", "SFTFCluster 계열 RPJ 투고 원고(2026-11-05)·cross-slicer/partition 자산"),
     # 2026-10-19: 보류 해제 → draft(사용자). 볼트 grade_note 와 같은 문구다 — 공개 파일이라 방법·제목은 특허 게이트 뒤에.
@@ -807,7 +807,7 @@ QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
 # Node Info용 안내 문구이며, RAW_NODES와 함께 graph.html에 저장된다.
 INTRODUCTIONS = {
     "Tomo_SFTF": "3D 프린터가 물체를 만들 때 가장 안정적인 방향을 찾는 기본 방법이다.",
-    "Tomo_SFTFSoft": "딱 잘라 판단하지 않고 부드러운 점수로 가장 좋은 출력 방향을 찾는 방법이다.",
+    "Tomo_SFTFSoft": "값싼 지표 가운데 실제 슬라이서의 지지량을 따르는 것을 가려내, 맞출 계수가 없는 출력 방향 순위 규칙과 그 미분 가능한 형태를 제시한다.",
     "SFTF_Clustering": "비슷한 면들을 묶어 복잡한 물체의 지지 구조를 빠르게 분석하는 방법이다.",
     "PFTF": "방향 정보를 행렬로 정리해 여러 응용 문제에 재사용하는 일반 이론이다.",
     # 2026-10-24: 볼트 PartialCost.md intro 와 같은 문구다 — 목적만 적고 방법은 적지 않는다(특허 게이트 전).
@@ -1370,6 +1370,8 @@ if preserve_extended_quality:
             "SFTF_Clustering": "RPJ 투고 완료 (2026-11-05, RPJ-11-2026-0777)",
             "cfmsDispersityProp": "M&M 투고 완료 (2026-11-05, MAM-26-327)",
             "cfmsHMDispersity": "J. Microscopy 투고 완료 (2026-11-05, JMI-26-00455)",
+            # 2026-11-06 투고.  볼트 badge 와 같은 문구다.
+            "Tomo_SFTFSoft": "IJAMT 투고 완료 (2026-11-06, JAMT-S-26-11299)",
             # 2026-10-19: 보류(⛔) 해제 → draft(사용자). 게재지 TDP 라 「저널,상태」 꼴이다(PFTF_VisCull_kDop 과 같다).
             # 볼트 badge 와 같은 문구다.
             # 2026-10-24: 보류(성과 없음, 사용자) — 원고와 「TDP,draft」 배지는 PartialCost 가 이어받았다.
@@ -1420,6 +1422,8 @@ if preserve_extended_quality:
             "TSE_TomoSh5": "심사 결과 대기 (2026-09-14 투고, 원고번호 26M-09-036)",
             # 2026-10-16: 투고로 「국문 원고 준비」가 닫혔다. 공개 파일이라 판정 수치는 싣지 않는다.
             "SFTF_DrapeOverprint": "원고번호 발급 대기 (2026-10-16 한국섬유공학회지 투고) — 접수 승인 메일이 오면 배지에 적는다. 그다음은 심사 결과 대기",
+            # 2026-11-06: 투고로 옛 병목(Prusa 전이 기술·수치 동기화)이 닫혔다.  공개 칸이라 짧게 둔다(볼트 bottleneck 과 같다).
+            "Tomo_SFTFSoft": "심사 대기",
             # 2026-09-16: 볼트 노트의 bottleneck·next_gate 를 옮긴 것이다(표가 살아 있으면 표 값이 이긴다).
             # 2026-09-17: 수정본을 냈으므로 병목이 「대응」에서 「대기」로 옮겨 갔다.  볼트 값과 같다.
             # 2026-10-07: 게재확정.  병목은 없고 남은 것은 행정이다(볼트 bottleneck·next_gate 를 옮긴 것).
@@ -1464,6 +1468,10 @@ if preserve_extended_quality:
         s,
         "INDUSTRIAL_EFFECTS",
         {
+            # 2026-11-06: 패널 소개는 이 표가 _intro 보다 먼저다. 옛 문구가 투고본과 어긋나 둘을 바꾼다 —
+            # SFTFSoft 는 슬라이싱 자체를 미분하지 않고, Clustering 은 solver 선택이 아니라 분할 논문이다.
+            "Tomo_SFTFSoft": "슬라이스 전에 프로파일의 임계각만으로 출력 방향 후보의 순위를 매겨, 슬라이서로 확인할 후보를 줄일 수 있다.",
+            "SFTF_Clustering": "부품을 나눠 출력할 때 지지 거동이 같은 면끼리 묶어, 어디를 자를지 정하는 기준을 제공한다.",
             "PFTF_GFiberCT": "X선 CT로 촬영한 적층 섬유구조(복합재 적층체·스페이서 패브릭)에서 층 간격과 두께를 층간 오연결 없이 계산할 수 있고, 표본이 부족하면 필요한 관측 밀도를 스스로 알려 준다. 맞닿은 계면과 자동 객체 탐지는 미지원이다.",
             "DFSVR_VisCull": "정확한 first-hit 결과를 유지하면서 불필요한 교차 후보를 안전하게 줄이면 미분가능 지지 구조 계산의 확장성을 높일 수 있다.",
             "SFTFSoft_GNN_DFSVR": "GNN의 빠른 후보 제안과 DFSVR의 정밀 보정을 결합해 출력 방향 탐색 시간과 검증 비용을 함께 줄이는 것을 목표로 한다.",
