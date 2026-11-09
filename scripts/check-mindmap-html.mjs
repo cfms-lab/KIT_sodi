@@ -70,7 +70,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__applyOrientCert=applyOrientCert20261024;globalThis.__applyChoMoldWarpRetire=applyChoMoldWarpRetire20261027;globalThis.__applyHullRegroup=applyHullRegroup20261031;globalThis.__applyAsymTensorRetire=applyAsymTensorRetire20261101;globalThis.__applyTomoSftfPublished=applyTomoSftfPublished20261105;globalThis.__applyTomoSh5Accepted=applyTomoSh5Accepted20261108;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__applyOrientCert=applyOrientCert20261024;globalThis.__applyChoMoldWarpRetire=applyChoMoldWarpRetire20261027;globalThis.__applyHullRegroup=applyHullRegroup20261031;globalThis.__applyAsymTensorRetire=applyAsymTensorRetire20261101;globalThis.__applyTomoSftfPublished=applyTomoSftfPublished20261105;globalThis.__applyTomoSh5Accepted=applyTomoSh5Accepted20261108;globalThis.__applyTomoSh4Accepted=applyTomoSh4Accepted20261109;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -937,6 +937,28 @@ if (findIn(sh5AccHand.root, "ny81ju21").status !== "published") throw new Error(
 const sh5AccNoNode = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyTomoSh5Accepted(sh5AccNoNode)) throw new Error("TomoSh5 accepted migration must still stamp its version without the node");
 if (childIds(sh5AccNoNode.root) !== "n0llvuh1") throw new Error("TomoSh5 accepted migration touched a document without the node");
+// 2026-11-09: TSE_TomoSh4 게재가. 문서의 nowmyrt1 단계를 submitted → accepted 로 올린다. 제목·메모·자식 ⑤(ny81ju21)와
+// 사람이 달리 정한 단계(inprint·published·cancelled 등)는 그대로.
+const sh4AccSample = { root: mk("root", [
+  { id: "nowmyrt1", title: "TSE_TomoSh4", kind: "low", status: "submitted", note: "④ 메모", children: [
+    { id: "ny81ju21", title: "TSE_TomoSh5", kind: "low", status: "accepted", note: "⑤ 메모", children: [] },
+  ] },
+]), links: [] };
+if (!context.__applyTomoSh4Accepted(sh4AccSample)) throw new Error("TomoSh4 accepted migration did not run");
+if (context.__applyTomoSh4Accepted(sh4AccSample)) throw new Error("TomoSh4 accepted migration is not idempotent");
+const sh4Acc = findIn(sh4AccSample.root, "nowmyrt1"), sh5AccChild = findIn(sh4AccSample.root, "ny81ju21");
+if (sh4Acc.status !== "accepted") throw new Error(`TomoSh4 accepted migration left nowmyrt1 at ${sh4Acc.status}`);
+if (sh4Acc.title !== "TSE_TomoSh4" || sh4Acc.note !== "④ 메모") throw new Error("TomoSh4 accepted migration touched title or note");
+if (sh5AccChild.status !== "accepted" || sh5AccChild.note !== "⑤ 메모") throw new Error("TomoSh4 accepted migration touched TomoSh5");
+if (childIds(sh4Acc) !== "ny81ju21") throw new Error("TomoSh4 accepted migration moved TomoSh5 out from under TomoSh4");
+const sh4AccValidation = context.__validate(sh4AccSample);
+if (!sh4AccValidation.ok) throw new Error(`TomoSh4 accepted sample is invalid: ${sh4AccValidation.errors[0]}`);
+const sh4AccHand = { root: mk("root", [{ id: "nowmyrt1", title: "TSE_TomoSh4", kind: "low", status: "published", children: [] }]), links: [] };
+context.__applyTomoSh4Accepted(sh4AccHand);
+if (findIn(sh4AccHand.root, "nowmyrt1").status !== "published") throw new Error("TomoSh4 accepted migration rewound a later stage");
+const sh4AccNoNode = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyTomoSh4Accepted(sh4AccNoNode)) throw new Error("TomoSh4 accepted migration must still stamp its version without the node");
+if (childIds(sh4AccNoNode.root) !== "n0llvuh1") throw new Error("TomoSh4 accepted migration touched a document without the node");
 
 // 2026-11-06: 진도 아이콘 색 = graph.html 노드 색(등급). 단계색으로 되돌아가거나 팔레트가 갈라지면 여기서 잡는다.
 const graphForIcons = readFileSync(new URL("../graph.html", import.meta.url), "utf8");
