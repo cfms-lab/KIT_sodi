@@ -334,7 +334,13 @@ export function buildRows(vaultRoot) {
      가지면(TSE·CR) 저널 메모 줄에 **먼저 적힌 쪽**이 대표다 — 삽입 순서가 곧 그 순서다. */
   const 대표 = {};
   for (const [full, short] of Object.entries(약어)) if (!(short in 대표)) 대표[short] = full;
-  const rows = out.행.map((row) => {
+  /* 노트 frontmatter `portfolio: hidden` — portfolio.html 에서만 뺀다(2026-11-10 사용자 지시, 보류 다섯 편).
+     dataviewjs 의 `p.file.name !==` 필터가 아닌 이유: 그 필터는 볼트의 「포트폴리오 한눈에」 표에서도 행을 지운다.
+     `homepage: hidden`(그래프·마인드맵·포트폴리오 모두에서 내림)과도 다르다 — 노드 필드(nodeFields)는 계속 내보낸다.
+     분리 트랙 행은 링크가 부모 노트라 부모에 적으면 그 트랙들이 같이 빠진다. */
+  const 포트폴리오숨김 = (row) =>
+    String(byPath.get(row.링크?.path ?? `Projects/${row.이름}.md`)?.portfolio ?? "").trim() === "hidden";
+  const rows = out.행.filter((row) => !포트폴리오숨김(row)).map((row) => {
     const short = 줄임(row.투고, 약어);
     const notePath = row.링크?.path ?? `Projects/${row.이름}.md`;
     const owner = byPath.get(notePath);
