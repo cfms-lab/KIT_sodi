@@ -17,6 +17,8 @@
  *   12월 계획서 전 투고 · Clustering 보류 · AsymTensor 3DP · OrientCert 3단계 완료 · Tomo_SFTF 게재 대기 · DFSVR 투고 준비 ·
  *   HMDispersity·AutoGrading 줄 신설. 같은 날 portfolio_rows 도 그 노트들만 --only 로 다시 발행했다.
  * 2026-11-05 Tomo_SFTF 온라인 게재 — 빈 칸으로, 그 게재를 기다리던 Tomo_DFSVR 줄도 갱신.
+ * 2026-11-11 사용자 지시로 미투고 줄 갱신 — 저장소 이력과 볼트 next_gate 를 대조해 투고순서·완성도 재채점과
+ *   함께 고쳤다. 다음 일이 바뀐 줄은 그 일의 묶음으로 옮겼다(ColdOndol·SewerPOC → 공저자, AutoSew·PINNDrape → 원고).
  */
 (function () {
   const TODO = {
@@ -41,12 +43,14 @@
     "Tomo_SFTFSoft":        "심사 대기",  /* IJAMT JAMT-S-26-11299 (2026-11-06 투고) */
     "SFTF_QEM":             "투고 — SFTFSoft IJAMT 결과 뒤",
     "SFTF_Clustering":      "심사 대기",  /* RPJ-11-2026-0777 (2026-11-05 투고) */
-    "SFTFSoft_GNN":         "SFTFSoft IJAMT 결과 뒤",
+    "SFTFSoft_GNN":         "본문 4천 단어로 · SFTFSoft IJAMT 결과 뒤",  /* 2026-11-11: 본문 7,831단어(규칙 4,000), 닫힌 형식 기준선 검산 보류 */
 
     /* ── 공저자 손에 가 있는 것 ───────────────────────────── */
     "SFTF_InjMold":         "공저자 작업 중",
     "PFTF_Mold":            "공저자 작업 중",
     "ColdOndol_Materials":  "공저자 작업 중",  /* 김우석 교수님께 넘어갔다 (2026-09-21) */
+    "ColdOndol":            "공저자 검토 회신 대기",  /* 2026-11-11: EnergyPlus 대조는 끝났다(V2b). 08-16 김우석 교수 전달 뒤 회신 없음 */
+    "SFTF_SewerPOC":        "공저자 회신 대기 · 실유역 검증",  /* 2026-11-11: 원고 수치는 08-16 에 이미 갱신됨. 김우석 교수 검토(08-16 전달) */
 
     /* ── 남의 눈이 필요한 것 ──────────────────────────────── */
     "cfmsAutoPlace_IJCST":  "제2 전문가 의견 대기 중",
@@ -58,27 +62,25 @@
     "Jeon_DLPOrient":       "DLP 실물 출력 시편 확보",
     "cfmsDrapeSCAN":        "마네킹 스캔 촬영 필요",
     "SFTF_ActiveOverprint": "RGB-D 촬영 필요",
-    "PFTF_Compression":     "SizeKorea 실측 연동 필요",
-    "SFTF_Composite":       "공식 CAD·물성 시험 확보",
+    "PFTF_Compression":     "상완밴드 의복압 실측 · 엔진 재검정",  /* 2026-11-11: SizeKorea held-out 은 원고에 이미 있다. 엔진 BUG-9 는 08-18 종결 */
+    "SFTF_Composite":       "R23 반영 결정 · 은 교수팀 실측 회신",  /* 2026-11-11: HeatMethod accept 게이트는 사라졌다. R23(10-20) 원고 미반영 */
     "SFTFSoft_DFSVR":       "절제 사다리 실측",
-    "cfmsPINNDrape":        "봉제 구간 시간 계측",
-    "ColdOndol":            "EnergyPlus 대조 실행",
     "Tomo_DiffSupport":     "utility 게이트 실행",
-    "cfmsAutoSew":          "edge F1 측정",
 
     /* ── 내가 원고·문서를 써야 하는 것 ────────────────────── */
-    "cfmsAutoPlace_JCDE":   "영문 집필",
-    "SFTF_SewerPOC":        "원고 수치 v2 갱신",
-    "Tomo_DFSVR":           "투고 준비 — SFTFSoft IJAMT 결과 뒤, Tomo_SFTF 서지를 DOI 판으로",  /* JCDE. 2026-10-16 세 번째 사전등록에서 확증 통과 */
+    "cfmsAutoPlace_JCDE":   "IJCST 투고 뒤 · 봉합 정답 재채점",  /* 2026-11-11: 영문 원고는 있다(11-03 DOCX·PDF). 벌 단위 CI·LOGO 계산이 남았다 */
+    "Tomo_DFSVR":           "3차 사독 반영 — SFTFSoft IJAMT 결과 뒤",  /* JCDE. 2026-10-16 세 번째 사전등록에서 확증 통과. 2026-11-11: Tomo_SFTF DOI 는 들어갔다, 11-10 3차 사독 반영 전 */
     "PFTF":                 "보류 — 원고는 PartialCost 로",  /* 성과 없음, ToDo·보류 (2026-10-24 사용자) */
-    "PartialCost":          "TDP 투고 — SFTFSoft IJAMT 결과 뒤, 커버레터",  /* PFTF 저장소에서 갈라진 원고(2026-10-24 신설). 특허 출원 안 함(10-24). 2026-11-06 서두르지 않기로 */
-    "PFTF_OrientCert":      "1편 내용 병합 · 4·5절 집필 → CAD",  /* 2026-11-01 1편(AsymTensor) 병합 — 통합편. 저자 확정 박명진 · 은종현 · 설인환*(같은 날). 3단계(독립 인증서 검사) 10-24~26 완료 */
+    "PartialCost":          "본문 4천 단어로 · 커버레터 — SFTFSoft IJAMT 결과 뒤",  /* PFTF 저장소에서 갈라진 원고(2026-10-24 신설). 특허 출원 안 함(10-24). 2026-11-06 서두르지 않기로. 2026-11-11: P599 정본화 뒤 본문 4,191단어(TDP 4,000) */
+    "PFTF_OrientCert":      "검토용한글 동기화 → 공저자 동의",  /* 2026-11-01 1편(AsymTensor) 병합 — 통합편. 저자 확정 박명진 · 은종현 · 설인환*(같은 날). 2026-11-11: 병합본 완성(11-01), 남은 것 O3 공저자 동의·O2 과제 병기 */
+    "cfmsAutoSew":          "라벨 수치 존치 결정 · 분량 축소",  /* 2026-11-11: edge F1 은 09-25 에 쟀다(0.407). GNN 을 덜고 다시 썼다, Emerald ≈8,300/7,000 */
+    "cfmsPINNDrape":        "GPU 서술·IJCST 투고 여부 결정",  /* 2026-11-11: 봉제 구간 계측은 끝났다. 10-22 IJCST 원고, GPU 서술·원고 중심 미결 */
     "PFTF_VisCull_kDop":    "GPU 경로 구현",
     "SFTF_HeatMethod":      "보류 — Holonomy 에서 다시 분리, 실을 원고 없음",  /* 2026-10-21 Holonomy 에 병합 → 2026-10-26 JCDE 리젝 사유 ②로 통제 실험을 다시 뺐다. 단독으로 낼지 사용자 결정 전 */
-    "ColdOndol_Positioning":"투고처 결정 필요",
+    "ColdOndol_Positioning":"JBPS 서식 정리 · 공저자 회신 대기",  /* 2026-11-11: 투고처는 08-12 JBPS 로 정해져 있었다 */
 
     /* ── 순서를 기다리는 것 ───────────────────────────────── */
-    "TSE_SEM3_AutoTune":    "2027-3월투고/교내과제 단독사사",
+    "TSE_SEM3_AutoTune":    "JMS 실측 SEM 접목 · 2027-3월 투고(교내과제 사사)",  /* 2026-11-11: 11-08 사용자 결정 JMS 실측 접목, 투고본 25면(규정 20). 저자는 09-22 공저로 되돌림 */
     "DFSVR_VisCull":        "착수 전 — DFSVR 뒤",
     "SFTFSoft_GNN_DFSVR":   "착수 전 — GNN 뒤",
     "SFTF_DynamicTargetSearch": "상수관망 현장 확보 전까지 보류",
@@ -87,7 +89,7 @@
     /* ── 응용선 — 남의 데이터가 있어야 움직이는 것 ────────── */
     "PFTF_FXShock":         "데이터 확장 필요",
     "PFTF_AssetShock":      "실시장 데이터 확보",
-    "SFTF_ThermalChip":     "외부 열해석 검증 필요",
+    "SFTF_ThermalChip":     "실단위 보정 1례 · 게재지 확정",  /* 2026-11-11: 볼트 next_gate 와 맞췄다 */
     "PFTF_Inspection":      "치구 장면 재검증",
     "PFTF_RainNowcast":     "국내 사례 추가 필요",
     "PFTF_Terrain":         "실측 이동데이터 확보",
