@@ -43,7 +43,7 @@
     /* ── Tomo_SFTF accept 가 열어 준 것 (2026-10-07) ─────────
        순서 정본은 볼트 Papers/SFTF_4편_투고순서_2026-09-22.md. 2026-11-06 서두르지 않기로 했다 —
        QEM·GNN 은 SFTFSoft 의 IJAMT 결과 뒤에 낸다. */
-    "Tomo_SFTFSoft":        "심사 대기",  /* IJAMT JAMT-S-26-11299 (2026-11-06 투고) */
+    "Tomo_SFTFSoft":        "동료심사 중",  /* IJAMT JAMT-S-26-11299 (2026-11-06 투고 → 2026-11-11 데스크 통과, 동료심사 진입). 이전: 심사 대기 */
     "SFTF_QEM":             "투고 — SFTFSoft IJAMT 결과 뒤",
     "SFTF_Clustering":      "심사 대기",  /* RPJ-11-2026-0777 (2026-11-05 투고) */
     "SFTFSoft_GNN":         "본문 4천 단어로 · SFTFSoft IJAMT 결과 뒤",  /* 2026-11-11: 본문 7,831단어(규칙 4,000), 닫힌 형식 기준선 검산 보류 */

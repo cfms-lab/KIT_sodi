@@ -1382,7 +1382,8 @@ if preserve_extended_quality:
             "cfmsDispersityProp": "M&M 투고 완료 (2026-11-05, MAM-26-327)",
             "cfmsHMDispersity": "J. Microscopy 투고 완료 (2026-11-05, JMI-26-00455)",
             # 2026-11-06 투고.  볼트 badge 와 같은 문구다.
-            "Tomo_SFTFSoft": "IJAMT 투고 완료 (2026-11-06, JAMT-S-26-11299)",
+            # 2026-11-11 데스크 통과 — 동료심사 진입(Springer Nature 안내 메일). 앞 값: 「IJAMT 투고 완료 (2026-11-06, JAMT-S-26-11299)」
+            "Tomo_SFTFSoft": "IJAMT 동료심사 중 (2026-11-11 데스크 통과, JAMT-S-26-11299)",
             # 2026-10-19: 보류(⛔) 해제 → draft(사용자). 게재지 TDP 라 「저널,상태」 꼴이다(PFTF_VisCull_kDop 과 같다).
             # 볼트 badge 와 같은 문구다.
             # 2026-10-24: 보류(성과 없음, 사용자) — 원고와 「TDP,draft」 배지는 PartialCost 가 이어받았다.
