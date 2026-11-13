@@ -7,10 +7,11 @@
 <style>
   :root{--green:#2e7d32;--green-d:#1b5e20;--bg:#f4f6f4;--line:#cfd8cf;
     /* ── 공저 교수 색 (2026-10-31, 사용자 지시) ──────────────────────────────
-       행 배경은 투고 단계·등급이 아니라 **저자 칸의 공저 교수**로 칠한다(rowPaint 참조).
+       투고 단계·등급이 아니라 **저자 칸의 공저 교수**로 칠한다(authorsHtml 참조).
+       2026-11-13 사용자 지시로 줄 전체 배경을 걷고 **그 교수 이름의 글자 배경**만 칠한다.
        이희란·은종현은 timetable.html 의 교수 색 — Supabase tt_professors.sProfColor,
        학기마다 같은 값 — 을 **흰색에 50% 섞어** 쓴다. 원색 그대로는 줄 전체를 덮기에 너무
-       짙었다(같은 날 사용자 지시로 밝혔다). 색상(hue)은 같아 시간표와 같은 언어다.
+       짙었다(같은 날 사용자 지시로 밝혔다). 이름 배경으로 줄인 뒤에도 같은 값이다(graph 훌·mindmap 과 한 벌). 색상(hue)은 같아 시간표와 같은 언어다.
        김우석은 시간표에 없어 옅은 회색이다.
        2026-09-12 의 등급 색(--q-high 등, 안 나간 원고를 연결 프로젝트 등급으로 칠하던 것)은
        걷어냈다. 등급은 이제 파이 색(QUALITY_PIE)으로만 보인다.
@@ -49,17 +50,15 @@
   .yearsep{display:flex;align-items:center;gap:10px;margin:18px 0 8px}
   .yearsep .y{font-size:20px;font-weight:700;color:var(--green-d)} .yearsep .ln{flex:1;height:2px;background:var(--line)}
   .paper{display:flex;gap:10px;padding:8px 10px;border-radius:6px;margin-bottom:6px;border:1px solid #eee}
-  /* 행 배경 — 공저 교수 색. 색은 rowPaint() 가 style 로 박는다(둘 이상이면 세로 띠).
-     공저 교수가 없는 줄은 흰색, ToDo 노드 줄은 흰색 점선(q-todo)이다. */
+  /* 줄 배경은 흰색, ToDo 노드 줄은 흰색 점선(q-todo)이다. 공저 교수 색은 저자 칸의 그 이름에만
+     글자 배경으로 칠한다(.au-name, 색은 authorsHtml() 이 style 로 박는다 — 2026-11-13 사용자 지시).
+     2026-10-31 ~ 11-12 에는 줄 전체를 칠했다(rowPaint, 둘 이상이면 세로 띠). */
   .paper{background:#fff}
   .paper.q-todo{background:var(--q-todo)}
-  /* 50% 로 옅어진 보라·파랑 바탕에서 본문 검정은 12:1, 제목 파랑(#0d47a1)은 5.0:1·5.2:1 로
-     WCAG AA(4.5:1)를 넘는다. 다만 DOI 파랑(#1565c0)은 3.3:1·3.5:1, 연구비 초록(#2e7d32)은
-     3.0:1·3.1:1 로 못 미쳐, 색칠된 줄(.au)에서만 DOI 는 제목 파랑(→ 5.0:1·5.2:1), 연구비는
-     --green-d(#1b5e20 → 4.5:1·4.8:1)로 한 톤 낮춘다. 회색 줄은 더 밝아 같은 규칙으로 충분하다.
-     흰 줄은 그대로다. */
-  .paper.au .doitxt{color:#0d47a1}
-  .paper.au .funding{color:var(--green-d)}
+  /* 이름 배경 위의 글자는 저자 칸 그대로 검정 굵은 글씨라 50% 보라·파랑·회색 위에서 12:1 안팎이다
+     (WCAG AA 4.5:1). 줄 배경이 흰색으로 돌아와 DOI·연구비 색을 낮추던 .paper.au 규칙은 걷었다.
+     줄바꿈에 걸린 이름도 조각마다 둥근 모서리가 나오게 box-decoration-break 를 준다. */
+  .au-name{border-radius:3px;padding:0 3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
   .paper .num{font-weight:700;color:#888;min-width:34px;text-align:right}
   .paper .body{flex:1;line-height:1.5}
   .authors{font-weight:700}.title{color:#0d47a1;cursor:pointer}.title:hover{text-decoration:underline}
@@ -545,12 +544,12 @@ function renderTodoNode(n,i){
   // ToDo 노드 줄은 그 노드 자신의 등급(항상 ToDo=흰색)이라 점선 테두리로만 구분한다.
   return `<div class="paper q-todo" style="border-style:dashed"><div class="num">${i}.</div><div class="body">${x.join("")} ${link} ${mm}</div></div>`;
 }
-/* ===== 행 배경 = 공저 교수 (2026-10-31, 사용자 지시) =====
+/* ===== 공저 교수 색 = 저자 칸의 그 이름 글자 배경 (2026-10-31 줄 배경 → 2026-11-13 이름, 사용자 지시) =====
    전에는 아직 안 나간 원고를 연결 프로젝트의 등급 색으로 칠했다(2026-09-12, rowClass).
    이제는 투고 단계와 무관하게 **저자 칸에 든 공저 교수**로 칠한다. 색의 정본은 :root 의 --au-* 다.
-   저자 판정은 저자 필터와 같은 checkName 이라, 필터에서 그 교수를 고르면 나오는 줄과 색칠된
-   줄이 같다. 둘 이상이 함께 쓴 줄은 이 순서대로 왼쪽부터 세로 띠로 나눠 칠한다
-   (2026-10-31 현재 표에는 그런 줄이 없다). */
+   저자 판정은 저자 필터와 같은 checkName 이라, 필터에서 그 교수를 고르면 나오는 줄과 이름이
+   칠해진 줄이 같다. 2026-11-13 부터는 줄 전체가 아니라 저자 칸에서 그 교수의 이름 하나만 칠한다
+   (둘 이상이 함께 쓴 줄은 이름마다 제 색 — 전에는 줄을 세로 띠로 나눴다). */
 const AUTHOR_COLORS=[
   {NAME:"이희란",COLOR:"var(--au-lee)"},
   {NAME:"은종현",COLOR:"var(--au-eun)"},
@@ -563,13 +562,18 @@ function authorHits(p){
 function authorColors(p){return authorHits(p).map(i=>AUTHOR_COLORS[i].COLOR);}
 /* 줄 순서 열쇠(글자 역순 비교): 없음 "~"(맨 앞) · 김우석 "2" · 은종현 "1" · 이희란+은종현 "01" · 이희란 "0". */
 function coauthorKey(p){return authorHits(p).join("")||"~";}
-/* 한 줄의 class·style 조각. 공저 교수가 없으면 둘 다 빈 문자열(흰 줄). */
-function rowPaint(p){
-  const cs=authorColors(p);
-  if(!cs.length) return {cls:"",style:""};
-  const n=cs.length,pct=i=>(100*i/n).toFixed(1)+"%";
-  const bg=n===1?cs[0]:`linear-gradient(90deg,${cs.map((c,i)=>`${c} ${pct(i)} ${pct(i+1)}`).join(",")})`;
-  return {cls:" au",style:` style="background:${bg}"`};
+/* 저자 칸 HTML. 저자 문자열을 쉼표·and·&·;·/ 로 나눈 저자 하나하나에 checkName 을 다시 대어, 공저 교수인
+   저자의 이름(뒤의 교신 표시 *·† 는 빼고)을 <span class="au-name"> 으로 감싼다. 구분자와 나머지 글자는 그대로다.
+   한 저자 조각만 보면 앞 저자 이름이 성 앞 토큰으로 섞이지 않아 줄 전체 판정(authorHits)과 같은 교수가 잡힌다
+   (2026-11-13 표의 실제 저자 문자열 전부로 대조했다). */
+const AUTHOR_SPLIT=/(\s*,\s*(?:and\s+|&\s*)?|\s+and\s+|\s*&\s*|\s*;\s*|\s*\/\s*)/i;
+function authorsHtml(p){
+  return String(p.AUTHORS||"").split(AUTHOR_SPLIT).map((part,k)=>{
+    if(k%2) return esc(part);                                  // 구분자
+    const m=part.match(/^(\s*)(.*?)([\s*\u2020\u2021]*)$/);    // 앞 공백 · 이름 · 교신 표시와 뒤 공백
+    const hit=m[2]?AUTHOR_COLORS.find(a=>{const e=authorEng(a.NAME);return checkName(m[2],a.NAME,e.f,e.s,e.l);}):null;
+    return hit?`${esc(m[1])}<span class="au-name" style="background:${hit.COLOR}">${esc(m[2])}</span>${esc(m[3])}`:esc(part);
+  }).join("");
 }
 /* 표의 doi 칸은 지금 모두 「10.xxxx/…」 꼴이지만, 볼트에 URL·「doi:」 째로 적힌 값이 와도
    같은 모양이 되도록 접두어를 벗긴다. */
@@ -579,7 +583,7 @@ function renderPaper(p,i){const st=p.PrintStatus;let x=[];
   if(p.FUNDING)x.push(`<span class="funding">[${esc(p.FUNDING)}]</span>`);
   // 2026-09-22: Pub/Submit/Draft 배지 → 진도 파이. 글자 상태는 저널 뒤 PRINT_SUFFIX 가 이미 보여 준다.
   x.push(stagePie(p));
-  x.push(`<span class="authors">${esc(p.AUTHORS)}</span>, `);
+  x.push(`<span class="authors">${authorsHtml(p)}</span>, `);
   x.push(`<span class="title" onclick="openEdit(${jsArg(p.ID)})">"${esc(p.TITLE)}"</span>`);
   x.push(`, <span class="journal">${esc(p.JOURNAL_NAME)+(PRINT_SUFFIX[st]||"")}</span>, `);
   if(p.CATEG==="IJ"||p.CATEG==="DJ"){
@@ -594,8 +598,7 @@ function renderPaper(p,i){const st=p.PrintStatus;let x=[];
   // 원문 PDF 는 로그인한 사람에게만 (비공개)
   const access=isLoggedIn()&&p.PDF?`<button class="pdf" onclick="openPdf(${jsArg(pdfKeyIds(p).join(","))},${jsArg(p.PDF)})">PDF</button>`:"";
   const edit=isLoggedIn()?`<div class="rowtools"><button onclick="openEdit(${jsArg(p.ID)})">수정</button></div>`:"";
-  const paint=rowPaint(p);
-  return `<div class="paper${paint.cls}"${paint.style}><div class="num">${i}.</div><div class="body">${x.join("")} ${access}</div>${edit}</div>`;
+  return `<div class="paper"><div class="num">${i}.</div><div class="body">${x.join("")} ${access}</div>${edit}</div>`;
 }
 function publicationCounts(items){
   return items.reduce((n,p)=>{p.PrintStatus===1?n.published++:n.other++;return n;},{published:0,other:0});

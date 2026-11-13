@@ -10,7 +10,7 @@
 
 | 화면 | 값이 있는 곳 | 무엇을 칠하나 | 판정 기준 |
 |---|---|---|---|
-| `upjuk.html` | `:root` 의 `--au-lee` `--au-eun` `--au-kim` · `AUTHOR_COLORS` · `rowPaint()` | 업적 한 줄의 배경과 **줄 순서**(평가연도 안에서 `AUTHOR_COLORS` 역순, 흰 줄이 맨 앞, 묶음 안은 최신순. 11-06) | 저자 칸에 교수 이름이 있나(저자 필터와 같은 `checkName`) |
+| `upjuk.html` | `:root` 의 `--au-lee` `--au-eun` `--au-kim` · `AUTHOR_COLORS` · `authorsHtml()` | 저자 칸의 **그 교수 이름 글자 배경**(11-13~, 그 전 10-31~11-12 는 줄 전체 배경 `rowPaint()`)과 **줄 순서**(평가연도 안에서 `AUTHOR_COLORS` 역순, 흰 줄이 맨 앞, 묶음 안은 최신순. 11-06) | 저자 칸에 교수 이름이 있나(저자 필터와 같은 `checkName`) |
 | `graph.html` | `layout_findings.py` `HYPEREDGES` 의 `fill`(면) · `color`(테두리·점선) · `labelColor` → 재생성이 `const hyperedges` 한 줄에 굽는다 | 훌(hyperedge)의 면·테두리·라벨 | 훌 구성원 목록(`nodes`) |
 | `mindmap.html` | `GROUP_FILLS`(렌더) · `HULL_GROUPS`(재편 마이그레이션) | 노드 **면색 = 최상위 가지**, **테두리 = 등급(KIND)** | 노드가 속한 최상위 가지. 가지는 id 로 먼저, 없으면 제목 정규식 |
 
@@ -30,9 +30,9 @@
 
 - timetable 의 교수 색은 Supabase `tt_professors.sProfColor` 다(학기마다 같은 값). MCP 가 붙어 있으면
   `select semester,"sProfName","sProfColor" from tt_professors where "sProfName" in ('…')` 로 읽는다.
-- 50% 섞기는 채널마다 `(원색 + 255) / 2` 다. 원색 그대로 줄 전체를 덮으면 너무 짙다(사용자, 10-31).
-- 파스텔 면에서 글자 대비: upjuk 은 색칠된 줄(`.paper.au`)에서만 DOI 를 제목 파랑, 연구비를 `--green-d` 로
-  낮춘다(WCAG AA 4.5:1). mindmap 은 글자를 늘 잉크색(`INK`)으로 둔다.
+- 50% 섞기는 채널마다 `(원색 + 255) / 2` 다. 원색 그대로 줄 전체를 덮으면 너무 짙다(사용자, 10-31). 이름 배경으로 줄인 11-13 뒤에도 같은 값이다.
+- 파스텔 면에서 글자 대비: upjuk 은 11-13 부터 이름(`.au-name`, 검정 굵은 글씨)만 칠해 12:1 안팎이고 줄은 흰색이라
+  DOI·연구비 색을 낮추던 `.paper.au` 규칙은 걷었다. mindmap 은 글자를 늘 잉크색(`INK`)으로 둔다.
 
 ## 1. 공저자 한 사람을 새로 넣을 때 (upjuk)
 
@@ -45,11 +45,13 @@
    한글은 `checkName` 의 부분 일치로, 영문은 First/Last 토큰 일치로 잡힌다(「김우석*」·「Woosuk Kim」 둘 다).
    같은 성의 다른 저자(「Sung min Kim」·「Jae Ryoung Kim」)가 안 잡히는지 확인한다.
 3. 색까지 주려면 `:root` 에 `--au-xxx`, `AUTHOR_COLORS` 에 `{NAME:"…",COLOR:"var(--au-xxx)"}` 한 줄. 둘 이상이
-   같이 쓴 줄은 `rowPaint` 가 세로 띠(linear-gradient)로 나눈다. 배열의 역순이 줄 순서다(`coauthorKey`) — 넣는 자리를 정해서 넣는다.
+   같이 쓴 줄은 `authorsHtml` 이 이름마다 제 색을 칠한다(저자 문자열을 `,`·`and`·`&`·`;`·`/` 로 나눈 조각마다
+   `checkName`, 교신 표시 `*`·`†` 는 칠하지 않는다). 배열의 역순이 줄 순서다(`coauthorKey`) — 넣는 자리를 정해서 넣는다.
 4. 검증은 브라우저 없이도 된다 — `<script>` 를 node `vm` 에서 돌려(`document`·`localStorage`·`fetch` 를 빈 객체로
-   흉내) `authorColors({AUTHORS:"…"})` 를 표의 실제 저자 문자열로 찍어 본다. 10-31 에 쓴 스크립트의 요지:
+   흉내) `authorsHtml({AUTHORS:"…"})` 를 표의 실제 저자 문자열 **전부**로 찍어, 칠한 교수 집합이 `authorHits`(줄 전체 판정 =
+   저자 필터)와 같은지 본다(11-13: 269줄 중 38줄 칠함, 어긋남 0). 10-31 에 쓴 스크립트의 요지:
    ```js
-   const src = html.match(/<script>([\s\S]*?)<\/script>/)[1] + ";globalThis.__t={checkName,authorEng,authorColors,rowPaint,PEOPLE};";
+   const src = html.match(/<script>([\s\S]*?)<\/script>/)[1] + ";globalThis.__t={checkName,authorEng,authorHits,authorsHtml,PEOPLE};";
    vm.runInContext(src, sandbox);   // sandbox.document.getElementById = () => ({value:"",style:{},classList:{toggle(){}}, …})
    ```
 5. 커밋·푸시(`upjuk.html` 한 파일). 재생성·SQL 없음.
@@ -159,4 +161,5 @@ git commit -m "graph·mindmap: … (사용자, YYYY-MM-DD)" && git push origin m
 - [graph-positions-runbook.md](graph-positions-runbook.md) — 좌표·재생성·`pull`
 - [homepage-update-runbook.md](homepage-update-runbook.md) — 업적 행·노드 행 SQL
 - 메모리 `coauthor-pastel-palette-sync` · `mindmap-cloud-doc-migration` · `graph-edges-only-regeneration`
+- 11-13: upjuk 줄 배경 → 저자 이름 글자 배경(사용자 지시).
 - 10-31 커밋: a923a39(upjuk 저자·행 배경) · 2faab39(50% 밝힘) · 80547b4(김우석 #e0e0e0) · 417a133(graph 훌·mindmap 재편)
