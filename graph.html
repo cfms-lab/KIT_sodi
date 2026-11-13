@@ -2416,7 +2416,7 @@ network.on('afterDrawing', function (ctx) {
   ctx.restore();
 });
 
-/* 범례: Paper quality 아래에 한 줄. 아이콘은 위 drawProgBadge 를 그대로 써서
+/* 범례: Paper quality 아래에 현재 단계표를 표시한다. 아이콘은 위 drawNodePie 를 그대로 써서
    작은 캔버스에 그린다 — 그림을 두 벌 유지하지 않으려고. */
 (function () {
   const wrap = document.getElementById('legend-wrap');
@@ -2430,14 +2430,13 @@ network.on('afterDrawing', function (ctx) {
   // 색은 논문 등급이므로, 범례 아이콘은 색을 빼고(회색) 모양만 보인다.
   const hint = document.createElement('div');
   hint.style.cssText = 'font-size:12px;color:#888;margin:-2px 0 5px;line-height:1.4';
-  hint.textContent = '노드의 크기·채운 정도 = 진도 · 색 = 논문 등급';
+  hint.textContent = '모양 = 투고 진도 · 색 = 논문 등급 · 노드 크기는 동일';
   box.appendChild(hint);
   const S = 16, dpr = window.devicePixelRatio || 1;
-  // 이 그래프에 실제로 있는 단계만 보인다 — 어휘 열 가지를 다 늘어놓으면 범례가 본문보다 길다.
-  const used = new Set(Object.values(NODE_STAGE));
-  const keys = Object.keys(STAGE_PIE).filter((k) => used.has(k));
-  (keys.length ? keys : Object.keys(PROG)).forEach((k) => {
-    const stage = STAGE_PIE[k] || PROG[k];
+  // 서버 데이터를 받기 전 NODE_STAGE 는 비어 있다. 범례는 그 시점의 노드 목록 대신
+  // 현재 단계표 전체를 써서, 초고·미정·보류도 항상 같은 아이콘으로 안내한다.
+  Object.keys(STAGE_PIE).forEach((k) => {
+    const stage = STAGE_PIE[k];
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;align-items:center;gap:6px;margin:3px 0;font-size:13px;color:#555';
     const cv = document.createElement('canvas');
@@ -2449,7 +2448,8 @@ network.on('afterDrawing', function (ctx) {
     // 색은 등급이 정하므로 범례는 회색이다.
     drawNodePie(c, S / 2, S / 2, S / 2 * 0.86, stage, '#94a3b8');
     row.appendChild(cv);
-    row.appendChild(document.createTextNode(stage.label));
+    const detail = stage.dot ? ' · 가운데 점' : k === 'submitted' ? ' · 1/4 원' : '';
+    row.appendChild(document.createTextNode(stage.label + detail));
     box.appendChild(row);
   });
   wrap.appendChild(box);
