@@ -1385,7 +1385,9 @@ if preserve_extended_quality:
             # 날짜만 적고, 번호가 오면 고친다.  볼트 badge 와 같은 문구다.
             "SFTF_DrapeOverprint": "한국섬유공학회지 투고 완료 (2026-10-16, 원고번호 할당중)",
             # 2026-11-05 투고 셋.  볼트 badge 와 같은 문구다.
-            "SFTF_Clustering": "RPJ 투고 완료 (2026-11-05, RPJ-11-2026-0777)",
+            # 2026-11-12: initial screening 통과 — 심사 진입(ScholarOne Author update 메일, Tomo_SFTFSoft 11-11 과 같은 꼴).
+            # 앞 값: 「RPJ 투고 완료 (2026-11-05, RPJ-11-2026-0777)」
+            "SFTF_Clustering": "RPJ 동료심사 중 (2026-11-12 데스크 통과, RPJ-11-2026-0777)",
             "cfmsDispersityProp": "M&M 투고 완료 (2026-11-05, MAM-26-327)",
             "cfmsHMDispersity": "J. Microscopy 투고 완료 (2026-11-05, JMI-26-00455)",
             # 2026-11-06 투고.  볼트 badge 와 같은 문구다.
