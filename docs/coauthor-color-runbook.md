@@ -1,16 +1,17 @@
-# 공저자 색 · 훌(그룹) 재편 런북 — upjuk · graph · mindmap
+# 공저자 색 · 훌(그룹) 재편 런북 — upjuk · portfolio · graph · mindmap
 
 2026-10-31 에 세 화면의 색 규칙을 **공저자** 기준으로 바꿨다(커밋 a923a39 → 2faab39 → 80547b4 → 417a133).
 다음에 공저자를 넣거나, 훌 색을 바꾸거나, 훌을 새로 세우거나, 마인드맵을 다시 묶을 때 이 문서대로 한다.
 
 ## 한 줄 요약
 
-세 화면이 **공저자 파스텔 한 벌**을 쓴다. 같은 값이 **세 파일에 따로** 박혀 있고 발행 경로(볼트 → 표 → 화면)가
+네 화면이 **공저자 파스텔 한 벌**을 쓴다. 같은 값이 **네 파일에 따로** 박혀 있고 발행 경로(볼트 → 표 → 화면)가
 없으므로 손으로 같이 고친다. 팔레트의 정본 표는 `layout_findings.py` 의 `HYPEREDGES` 바로 앞 주석이다.
 
 | 화면 | 값이 있는 곳 | 무엇을 칠하나 | 판정 기준 |
 |---|---|---|---|
 | `upjuk.html` | `:root` 의 `--au-lee` `--au-eun` `--au-kim` · `AUTHOR_COLORS` · `authorsHtml()` | 저자 칸의 **그 교수 이름 글자 배경**(11-13~, 그 전 10-31~11-12 는 줄 전체 배경 `rowPaint()`)과 **줄 순서**(평가연도 안에서 `AUTHOR_COLORS` 역순, 흰 줄이 맨 앞, 묶음 안은 최신순. 11-06) | 저자 칸에 교수 이름이 있나(저자 필터와 같은 `checkName`) |
+| `portfolio.html` | 같은 `--au-lee` `--au-eun` `--au-kim` · `.au-name` · `공저교수색` · `공저자칸()` | 공저자 칸의 **이희란·은종현·김우석 이름 글자 배경**(11-13~) | `esc()` 로 HTML 이스케이프한 뒤 세 한글 이름만 찾아 칠한다. `(후보)` 등 나머지 글자는 그대로 |
 | `graph.html` | `layout_findings.py` `HYPEREDGES` 의 `fill`(면) · `color`(테두리·점선) · `labelColor` → 재생성이 `const hyperedges` 한 줄에 굽는다 | 훌(hyperedge)의 면·테두리·라벨 | 훌 구성원 목록(`nodes`) |
 | `mindmap.html` | `GROUP_FILLS`(렌더) · `HULL_GROUPS`(재편 마이그레이션) | 노드 **면색 = 최상위 가지**, **테두리 = 등급(KIND)** | 노드가 속한 최상위 가지. 가지는 id 로 먼저, 없으면 제목 정규식 |
 
@@ -32,7 +33,8 @@
   `select semester,"sProfName","sProfColor" from tt_professors where "sProfName" in ('…')` 로 읽는다.
 - 50% 섞기는 채널마다 `(원색 + 255) / 2` 다. 원색 그대로 줄 전체를 덮으면 너무 짙다(사용자, 10-31). 이름 배경으로 줄인 11-13 뒤에도 같은 값이다.
 - 파스텔 면에서 글자 대비: upjuk 은 11-13 부터 이름(`.au-name`, 검정 굵은 글씨)만 칠해 12:1 안팎이고 줄은 흰색이라
-  DOI·연구비 색을 낮추던 `.paper.au` 규칙은 걷었다. mindmap 은 글자를 늘 잉크색(`INK`)으로 둔다.
+  DOI·연구비 색을 낮추던 `.paper.au` 규칙은 걷었다. portfolio 도 같은 `.au-name` 모양과 파스텔 값을 쓴다.
+  mindmap 은 글자를 늘 잉크색(`INK`)으로 둔다.
 
 ## 1. 공저자 한 사람을 새로 넣을 때 (upjuk)
 
@@ -54,7 +56,11 @@
    const src = html.match(/<script>([\s\S]*?)<\/script>/)[1] + ";globalThis.__t={checkName,authorEng,authorHits,authorsHtml,PEOPLE};";
    vm.runInContext(src, sandbox);   // sandbox.document.getElementById = () => ({value:"",style:{},classList:{toggle(){}}, …})
    ```
-5. 커밋·푸시(`upjuk.html` 한 파일). 재생성·SQL 없음.
+5. 포트폴리오에도 표시할 교수라면 `portfolio.html` 의 `--au-*` · `공저교수색` · `공저자칸()` 정규식을 함께 고친다.
+   `공저자칸()` 은 반드시 `esc()` **뒤에** 이름만 `<span class="au-name">` 으로 감싼다. 현재 대상은 이희란·은종현·김우석 셋이다.
+   교수 이름·후보 표기·HTML 특수문자가 섞인 예로 이름만 칠해지는지 확인하고 `node scripts/check-portfolio-html.mjs` 도 돌린다.
+6. 바꾼 HTML 을 커밋·푸시한다. **이름 강조만 바꿀 때는 재생성·SQL이 없다.** portfolio 의 로그인 게이트와
+   Supabase `portfolio_rows` 접근 제한은 그대로 둔다.
 
 ## 2. 훌 색만 바꿀 때 (graph + mindmap 의 같은 값)
 
@@ -68,7 +74,8 @@
 2. `layout_findings.py` `HYPEREDGES` 에서 그 훌의 `fill` · `color` · `labelColor` 를 고치고, 앞 주석의 팔레트 표도 같이.
 3. 생성기를 **두 번** 돌려 두 결과가 같은지(`cmp`) 본다. `git diff -U0 -- graph.html | grep ^@@` 가 `const hyperedges`
    한 줄(1753 부근)만 가리켜야 한다.
-4. `mindmap.html` `GROUP_FILLS` 의 같은 묶음 `fill`·`stroke` 를 같은 값으로. upjuk 은 교수 셋만 해당(`--au-*`).
+4. `mindmap.html` `GROUP_FILLS` 의 같은 묶음 `fill`·`stroke` 를 같은 값으로. upjuk·portfolio 는 교수 셋만 해당하며,
+   두 파일의 `--au-*` 를 함께 맞춘다.
 5. 검증 → 커밋·푸시 (아래 3절).
 
 그리기 구조(10-31~): 면은 `network.on('beforeDrawing')` 이 볼록껍질을 계산해 칠하고 `_hullFrame` 에 다각형을
@@ -134,6 +141,7 @@
 ```bash
 node scripts/check-graph-html.mjs                     # 훌 라벨·구성원·좌표·가드 리터럴
 node scripts/check-mindmap-html.mjs                   # 마이그레이션 샘플 테스트 포함
+node scripts/check-portfolio-html.mjs                 # 데이터 비내장·로그인 게이트
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/publish-research-views.ps1   # 통합(푸시 없음). pwsh 는 없다
 git add graph.html layout_findings.py mindmap.html scripts/check-mindmap-html.mjs scripts/check-graph-html.mjs
 git commit -m "graph·mindmap: … (사용자, YYYY-MM-DD)" && git push origin main
@@ -154,12 +162,13 @@ git commit -m "graph·mindmap: … (사용자, YYYY-MM-DD)" && git push origin m
 - 마인드맵 마이그레이션은 **비로그인 방문자에게는 저장되지 않는다**(화면만 바뀐다). 배포 뒤 로그인해서 한 번 연다.
 - upjuk 의 「printed」는 stage `published` 다(특허·학회·저널 모두).
 - 파일은 모두 LF 다. 커밋 때 나오는 「LF will be replaced by CRLF」는 autocrlf 안내일 뿐이다.
-- 세 파일의 같은 값을 **한 곳만** 고치면 upjuk 줄·graph 훌·mindmap 가지가 다른 색으로 갈린다.
+- 네 파일의 같은 값을 **한 곳만** 고치면 upjuk 교수 이름·portfolio 교수 이름·graph 훌·mindmap 가지가 다른 색으로 갈린다.
+- portfolio 이름 강조는 HTML 이스케이프 뒤에 적용한다. 이름 강조를 위해 로그인 게이트를 풀거나 표 데이터를 HTML 에 굽지 않는다.
 
 ## 6. 참고
 
 - [graph-positions-runbook.md](graph-positions-runbook.md) — 좌표·재생성·`pull`
 - [homepage-update-runbook.md](homepage-update-runbook.md) — 업적 행·노드 행 SQL
 - 메모리 `coauthor-pastel-palette-sync` · `mindmap-cloud-doc-migration` · `graph-edges-only-regeneration`
-- 11-13: upjuk 줄 배경 → 저자 이름 글자 배경(사용자 지시).
+- 11-13: upjuk 줄 배경 → 저자 이름 글자 배경, portfolio 공저자 칸에도 같은 세 교수의 이름 배경 적용(사용자 지시).
 - 10-31 커밋: a923a39(upjuk 저자·행 배경) · 2faab39(50% 밝힘) · 80547b4(김우석 #e0e0e0) · 417a133(graph 훌·mindmap 재편)

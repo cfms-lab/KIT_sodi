@@ -23,6 +23,9 @@
     /* 등급 색 — graph.html 의 QUALITY_COLORS 와 같은 값이다. 세 페이지가 같은 언어를 쓴다. */
     --q-high:#e02020; --q-medium:#f28e2b; --q-low:#2a78d6;
     --q-todo:#ffffff; --q-closed:#6b7280; --q-group:#c8c8c8; --q-none:#94a3b8;
+    /* 공저 교수 색 (2026-11-13, 사용자 지시) — upjuk.html :root 의 --au-* 와 같은 값이다(timetable 교수 색을
+       흰색에 50%, 김우석은 시간표에 없어 옅은 회색). 공저자 칸에서 그 교수 이름의 글자 배경으로만 쓴다. */
+    --au-lee:#c9bfe5; --au-eun:#adcdea; --au-kim:#e0e0e0;
   }
   *{box-sizing:border-box}
   /* 클래스의 display:flex 가 UA 의 [hidden]{display:none} 을 이겨서, 로그인 전에
@@ -96,6 +99,8 @@
   /* 열 폭 — 볼트의 dashboard-portfolio-table.css 와 같은 뜻으로 고정한다. 긴 서술 두 열이
      나머지를 밀어내지 않게 하는 것이 이 표의 가독성 전부다. */
   col.c-name{width:15%} col.c-order{width:64px} col.c-done{width:78px} col.c-grade{width:74px}
+  /* 공저자 칸의 교수 이름 — upjuk.html 의 .au-name 과 같은 모양(검정 글씨라 세 색 위에서 12:1 안팎). */
+  .au-name{border-radius:3px;padding:0 3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
   col.c-co{width:110px} col.c-journal{width:15%} col.c-gate{width:26%} col.c-intro{width:22%}
   td.num{text-align:center;font-variant-numeric:tabular-nums}
   .name{font-weight:600}
@@ -384,9 +389,13 @@ function 파이(stage, color) {
     안 = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>`
        + `<path d="M${cx - 3.5},${cy} L${cx + 3.5},${cy}" fill="none" stroke="#fff"`
        + ` stroke-width="2.4" stroke-linecap="round"/>`;
+  } else if (stage === 'draft' || s.dot) {
+    // 초고는 빈 원 가운데 점이다 (2026-11-13, 사용자 지시 — 전에는 1/4 파이였다).
+    안 += `<circle cx="${cx}" cy="${cy}" r="1.8" fill="${c}"/>`;
   } else if (s.frac > 0) {
-    const a = 2 * Math.PI * s.frac;
-    const ex = cx + r * Math.sin(a), ey = cy - r * Math.cos(a), big = s.frac > 0.5 ? 1 : 0;
+    // 모양은 화면에서 정하므로 메타 행 갱신 전에도 투고는 1/4이다. 크기·깜빡임은 frac 그대로.
+    const f = stage === 'submitted' ? 0.25 : (s.fill ?? s.frac), a = 2 * Math.PI * f;
+    const ex = cx + r * Math.sin(a), ey = cy - r * Math.cos(a), big = f > 0.5 ? 1 : 0;
     안 += `<path d="M${cx},${cy} L${cx},${cy - r} A${r},${r} 0 ${big} 1 ${ex},${ey} Z" fill="${c}"/>`;
   }
   // 깜빡임은 CSS 가 한다. 여기서는 깜빡일 단계에만 클래스와 주기를 실어 준다 — 스위치가
@@ -398,6 +407,13 @@ function 파이(stage, color) {
 }
 
 const esc = v => String(v ?? "").replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+
+/* 공저자 칸 HTML (2026-11-13, 사용자 지시 — upjuk.html 의 저자 칸과 같이). 이희란·은종현·김우석 이름에만
+   글자 배경을 칠한다. 이 칸은 볼트 coauthors 에서 온 한글 이름이고(「이희란, 강지언」·「(후보) 이희란」·
+   「김우석 · 검토중」), 영문 표기가 없어 이름 글자 그대로 찾는다. 색의 정본은 :root 의 --au-* 다. */
+const 공저교수색 = {"이희란": "var(--au-lee)", "은종현": "var(--au-eun)", "김우석": "var(--au-kim)"};
+const 공저자칸 = v => esc(v).replace(/이희란|은종현|김우석/g,
+  n => `<span class="au-name" style="background:${공저교수색[n]}">${n}</span>`);
 
 /* 투고 사다리 (2026-09-20, 사용자 요청) — 「1순위 → 2순위 → 3순위」를 **저널 약어**로
    한 줄에 쓴다. 값은 scripts/publish-portfolio.mjs 의 사다리() 가 표에 실어 주고, 약어는
@@ -444,7 +460,7 @@ function 행그리기(row) {
     + `<td class="num">${esc(row.order)}</td>`
     + `<td class="num">${esc(row.completeness)}</td>`
     + `<td><span class="chip"><span class="dot" style="background:${QUALITY_COLORS[row.grade] || "var(--q-none)"}"></span>${esc(row.grade)}</span></td>`
-    + `<td class="c-co">${esc(row.coauthor)}</td>`
+    + `<td class="c-co">${공저자칸(row.coauthor)}</td>`
     + `<td><span class="journal" title="${esc(투고툴팁(row, stage))}">${파이(row.stage, 파이색(row.grade))}<span>${투고사슬(row)}</span></span></td>`
     + `<td><div class="clamp" title="${esc(할일(row))}">${esc(할일(row))}</div></td>`
     + `<td class="c-intro"><div class="clamp" title="${esc(row.intro)}">${esc(row.intro)}</div></td>`;

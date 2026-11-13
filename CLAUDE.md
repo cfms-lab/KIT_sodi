@@ -37,7 +37,10 @@
 
 ## 공저자 색 · 훌(그룹) 재편
 
-upjuk 저자 이름 배경(2026-11-13~, 전에는 행 배경)·graph 훌 면색·mindmap 노드 면색은 **공저자 파스텔 한 벌**이고 세 파일에 따로 박혀 있다.
+upjuk 저자 이름 배경(2026-11-13~, 전에는 행 배경)·portfolio 공저자 이름 배경·graph 훌 면색·mindmap 노드 면색은
+**공저자 파스텔 한 벌**이고 네 파일에 따로 박혀 있다. upjuk·portfolio 는 같은 `--au-*` 값과 `.au-name` 을 쓴다.
+portfolio 의 `공저자칸()` 은 HTML 이스케이프 뒤 이희란·은종현·김우석 이름만 칠한다. 이름 강조만 고칠 때는
+SQL·재생성이 없으며 portfolio 로그인 게이트는 유지한다.
 공저자를 넣거나, 훌 색·구성원을 바꾸거나, 마인드맵을 다시 묶을 때는
 [docs/coauthor-color-runbook.md](docs/coauthor-color-runbook.md) 를 따른다 — 팔레트 정본은 `layout_findings.py`
 `HYPEREDGES` 앞 주석, 마인드맵 재편은 `applyXxx` 마이그레이션(실제 문서로 시뮬레이션한 뒤 커밋).

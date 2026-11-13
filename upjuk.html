@@ -239,8 +239,10 @@ const STAGE_PIE={
   inprint:{frac:0.875,label:'인쇄중(in print)'},
   accepted:{frac:0.75,label:'게재확정(accepted)'},
   revision:{frac:0.625,label:'심사 수정(revision)'},
-  submitted:{frac:0.5,label:'투고(submitted)'},
-  draft:{frac:0.25,label:'초고(draft)'},
+  /* 2026-11-13 (사용자 최종 지시): 초고는 빈 원 가운데 점, 투고만 1/4 파이로 그린다.
+     나머지 단계와 크기·깜빡임은 그대로이고, 그리는 채움만 fill(없으면 frac)이 정한다. */
+  submitted:{frac:0.5,fill:0.25,label:'투고(submitted)'},
+  draft:{frac:0.25,dot:true,label:'초고(draft)'},
   undecided:{frac:0,label:'미정(undecided)'},
   blocked:{frac:0,x:true,label:'보류(blocked)'},
   cancelled:{frac:0,xx:true,label:'취소(cancelled)'},
@@ -272,9 +274,11 @@ function 파이(stage,color){
     // 보류는 ⛔ — 꽉 찬 원에 흰 가로 막대 (graph·portfolio 와 같다)
     안=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>`
       +`<path d="M${cx-3.5},${cy} L${cx+3.5},${cy}" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>`;
+  }else if(s.dot){
+    안+=`<circle cx="${cx}" cy="${cy}" r="1.8" fill="${c}"/>`;   // 초고: 빈 원 가운데 점 (2026-11-13)
   }else if(s.frac>0){
-    const a=2*Math.PI*s.frac;
-    const ex=cx+r*Math.sin(a),ey=cy-r*Math.cos(a),big=s.frac>0.5?1:0;
+    const f=s.fill??s.frac,a=2*Math.PI*f;
+    const ex=cx+r*Math.sin(a),ey=cy-r*Math.cos(a),big=f>0.5?1:0;
     안+=`<path d="M${cx},${cy} L${cx},${cy-r} A${r},${r} 0 ${big} 1 ${ex},${ey} Z" fill="${c}"/>`;
   }
   // 깜빡임은 CSS 가 한다. 깜빡일 단계에만 클래스와 주기를 실어 주고, 스위치가 꺼져 있으면

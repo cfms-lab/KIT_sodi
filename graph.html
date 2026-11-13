@@ -2097,8 +2097,10 @@ const MINDMAP_STATUS = {"SFTF_DrapePrior": "submitted", "Tomo_SFTF": "submitted"
    셋끼리는 파이가 찬 정도로 가른다. 이 표는 옛 배지용이고, 노드 파이의 색은 등급이다(아래 STAGE_PIE). mindmap.html 도 2026-11-06 부터 등급 색이다. */
 const PROG_GREEN = '#16a34a';    // 출판(끝난 것)
 const PROG_YELLOW = '#eab308';   // 저널 손에 가 있는 단계(투고·게재확정·인쇄중)
+/* 2026-11-13 (사용자 최종 지시): 초고는 빈 원 가운데 점, 투고만 1/4 파이로 그린다.
+   나머지 단계와 크기·깜빡임·graph3d 높이는 그대로이고, 그리는 채움만 fill(없으면 frac)이 정한다. */
 const PROG = {
-  submitted: { frac: 0.5,   color: PROG_YELLOW, label: '투고(submitted)' },
+  submitted: { frac: 0.5,   fill: 0.25, color: PROG_YELLOW, label: '투고(submitted)' },
   accepted:  { frac: 0.75,  color: PROG_YELLOW, label: '게재확정(accepted)' },
   inprint:   { frac: 0.875, color: PROG_YELLOW, label: '인쇄중(in print)' },
   published: { done: true,  color: PROG_GREEN,  label: '출판(published)' },
@@ -2114,8 +2116,8 @@ const STAGE_PIE = {
   inprint:   { frac: 0.875,             label: '인쇄중(in print)' },
   accepted:  { frac: 0.75,              label: '게재확정(accepted)' },
   revision:  { frac: 0.625,             label: '심사 수정(revision)' },
-  submitted: { frac: 0.5,               label: '투고(submitted)' },
-  draft:     { frac: 0.25,              label: '초고(draft)' },
+  submitted: { frac: 0.5,   fill: 0.25, label: '투고(submitted)' },
+  draft:     { frac: 0.25,  dot: true,  label: '초고(draft)' },
   /* 2026-09-14: 미정·보류를 가르는 기준이 바뀌었다(사용자). 전에는 **낼 곳**이 기준이라
      「게재지 미정」이 undecided 였다. 이제는 **손을 댔는가**가 기준이다 — 아예 시작하지
      않은 것만 미정이고, 하다가 미뤄 둔 것은 보류다. 범례에 그 뜻을 적어 둔다. */
@@ -2173,7 +2175,7 @@ function drawProgBadge(ctx, cx, cy, R, p) {
     outline(1.233 * R);
     ctx.beginPath();                          // 12시에서 시계방향으로 채운다
     ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * p.frac);
+    ctx.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * (p.fill ?? p.frac));
     ctx.closePath();
     ctx.fillStyle = col;
     ctx.fill();
@@ -2273,10 +2275,16 @@ function drawNodePie(ctx, cx, cy, R, p, color, border) {
     ctx.moveTo(cx - 0.5 * R, cy - 0.5 * R);
     ctx.lineTo(cx + 0.5 * R, cy + 0.5 * R);
     ctx.stroke();
+  } else if (p.dot) {
+    // 초고는 빈 원 가운데 점이다 (2026-11-13, 사용자 지시 — 전에는 1/4 파이였다).
+    ctx.beginPath();
+    ctx.arc(cx, cy, 0.3 * R, 0, 2 * Math.PI);
+    ctx.fillStyle = ink;
+    ctx.fill();
   } else {
     ctx.beginPath();                          // 12시에서 시계방향으로 채운다
     ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * p.frac);
+    ctx.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * (p.fill ?? p.frac));
     ctx.closePath();
     ctx.fillStyle = ink;
     ctx.fill();
