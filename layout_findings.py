@@ -380,6 +380,12 @@ POS = {
     # 처음 자리는 Drape 훌 왼쪽 아래 바깥 (-400, 1360) 이었다. 사용자가 웹에서 JCDE 바로 아래로 옮겼고
     # 같은 날 Drape 훌에 들어갔다(HYPEREDGES). 2026-10-19 pull-graph-positions 로 그 웹 좌표를 받았다.
     "cfmsAutoGrading": (70, 1430),
+    # 2026-11-14: 볼트에 cfmsSXJacobian 이 섰다(2026-11-12 착수, ToDo·undecided, 공저자 없음). 부모는
+    # cfmsDrape — 생성한 힘·Jacobian 커널이 그 엔진에 들어간다. 자리는 웹 배치(graph_positions) 기준으로
+    # cfmsDrape(-580, 1060) 바로 왼쪽, 같은 줄이다. 엔진에서 나가는 선 아홉이 모두 오른쪽으로 뻗고
+    # x < -640 에는 노드가 없어서, 가장 가까운 노드·선이 둘 다 241px 이고 Drape 훌은 빈 왼쪽으로만 는다.
+    # 훌 안쪽 빈칸 (-360, 1190) 은 IJCST–cfmsDrape 선과 63px 라 버렸다. 표에 행이 없으니 웹도 이 씨앗을 쓴다.
+    "cfmsSXJacobian": (-820, 1080),
 }
 
 # 노드 id 가 노트 이름에서 규칙으로 나오지 않는 트랙 노드 → (볼트 노트 stem,
@@ -559,11 +565,13 @@ HYPEREDGES = [
     # 2026-10-19: cfmsAutoGrading 을 넣었다(사용자 지시). 10-18 에 graph.html 에 바로 세운 ToDo
     # 노드로 어느 훌에도 없었다(한 노드는 한 훌 규약 그대로). 공유 배치 (70, 1430) 는 JCDE 바로
     # 아래라 훌이 아래로 조금 늘 뿐 남의 노드를 새로 삼키지 않는다 — 이희란 훌과 11px 떨어진다.
+    # 2026-11-14: cfmsSXJacobian 을 넣었다(사용자 지시). cfmsDrape 엔진의 힘·Jacobian 을 생성하는 도구이고
+    # 공저자가 없어 다른 훌에 없다(한 노드는 한 훌). 자리 (-820, 1080) 는 훌을 빈 왼쪽으로만 늘린다.
     {"label": "Drape",
      "kind": "topic",
      "nodes": ["cfmsMiindo", "cfmsDrape", "cfmsCIPC", "cfmsPINNDrape", "cfmsPINNCAD",
                "cfmsAutoPlace_JCDE", "SFTF_DrapePrior", "PFTF_DrapePrior_VisCull_kDop",
-               "cfmsAutoGrading"],
+               "cfmsAutoGrading", "cfmsSXJacobian"],
      "fill": "#f9d3b4", "color": "#e8955a", "labelColor": "#b35f24",
      "fillAlpha": 1.0, "strokeAlpha": 0.85, "labelAlpha": 0.95,
      "lineWidth": 3, "dash": [12, 6], "scale": 1.10},
@@ -811,6 +819,9 @@ QUALITY_ROWS = [
     # 2026-10-18 신설(graph.html 에 바로), 2026-10-19 생성기로 옮김. 볼트 grade: ToDo · stage: undecided.
     # 볼트 Rules §8 대로 grade_note · next_gate · 시험 수치를 옮기지 않고 소개와 단계만 싣는다.
     ("cfmsAutoGrading", "cfmsAutoGrading", "ToDo", "이미 그린 패턴을 몸 특징점 좌표로 다시 적어 치수에 불변인 스타일 코드를 만드는 설계선; 공개 데이터셋 짝 시험 단계, 실제 그레이딩 자료 검증 전"),
+    # 2026-11-14 신설(2026-11-12 착수). 볼트 grade: ToDo · stage: undecided.
+    # 볼트 Rules §8 대로 grade_note · next_gate · 게이트 수치를 옮기지 않고 소개와 단계만 싣는다.
+    ("cfmsSXJacobian", "cfmsSXJacobian", "ToDo", "조건 함수 한 줄에서 의복 시뮬레이션의 힘·Jacobian 과 SoA 데이터 배치 코드를 자동으로 만드는 생성기; cfmsDrape 엔진 연결은 작은 천에서 확인, 실제 의복 검증 전"),
 ]
 QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
 
@@ -873,6 +884,7 @@ INTRODUCTIONS = {
     "TSE_SEM1_Bezier": "전자현미경 사진 한 장에서 섬유 한 올 한 올을 매끈한 곡선으로 따라가며 굵기와 방향을 재어내는 방법이다.",
     "TSE_SEM2_Tensor": "섬유를 하나씩 오려내지 않고 사진 전체에서 섬유가 어느 쪽으로 누워 있는지와 겹친 아래층까지 한꺼번에 재는 방법이다.",
     "cfmsAutoGrading": "이미 그린 옷 패턴을 입는 사람의 몸 특징점 좌표로 다시 적어, 치수가 달라도 같은 값을 내는 스타일 코드와 그레이딩 불변 점수를 만드는 도구다.",
+    "cfmsSXJacobian": "의복 시뮬레이션에서 힘의 식 한 줄만 쓰면, 그 미분(Jacobian)과 빠른 데이터 배치(SoA)를 자동으로 만들어 주는 도구다.",
     "TSE_SEM3_AutoTune": "정답을 모르는 실제 사진에서도 측정기의 손잡이를 스스로 안전하게 맞추는 방법을 다루는 연구다.",
 }
 
@@ -1789,6 +1801,27 @@ CFMS_AUTOGRADING_NODE = {
 }
 
 
+# 2026-11-14: 볼트에 새로 선 cfmsSXJacobian(2026-11-12 착수, status active · grade ToDo · stage undecided,
+# 리포 cfms-lab/cfmsSXJacobian_dev 비공개). 흰 바탕·검정 외곽선(community 4). 부모는 SXJACOBIAN_GOAL_EDGES,
+# 훌은 Drape. 공개 툴팁이라 게이트 판정·수치는 싣지 않는다(볼트 Rules §8).
+CFMS_SXJACOBIAN_NODE = {
+    "id": "cfmsSXJacobian",
+    "label": "cfmsSXJacobian",
+    "color": {"background": "#ffffff", "border": "#000000",
+               "highlight": {"background": "#ffffff", "border": "#000000"}},
+    "size": 15.4,
+    "font": {"size": 13, "color": "#333333", "bold": False},
+    "title": "cfmsSXJacobian — ToDo: 조건 함수 한 줄에서 힘·Jacobian 과 SoA 코드를 자동으로 만든다",
+    "community": 4,
+    "community_name": "ToDo",
+    "source_file": "cfmsSXJacobian.md",
+    "file_type": "concept",
+    "degree": 1,
+    "_intro": INTRODUCTIONS["cfmsSXJacobian"],
+    "_project_path": PROJECT_PATHS.get("cfmsSXJacobian", r"D:\__CFMS_Projects\cfmsSXJacobian_dev"),
+}
+
+
 # 2026-10-24: 볼트에 새로 선 PartialCost(사용자 지시). PFTF 프레임워크가 성과 없이 보류되면서, 같은 저장소
 # (PFTF_dev, draft_keyword PartialCost)에서 따로 준비한 TDP 예정 원고를 PFTF 의 자식 노드로 세웠다. 등급 中 ·
 # stage draft 는 둘 다 볼트 값이고, 색·community 는 quality_lookup 이 QUALITY_ROWS 로 덮으므로 여기 적은 값은
@@ -1952,6 +1985,7 @@ TODO_NODES = [
     HMD_DISPERSITY_NODE,
     DYNAMIC_DISPERSITY_NODE,
     CFMS_AUTOGRADING_NODE,
+    CFMS_SXJACOBIAN_NODE,
     PARTIALCOST_NODE,
     ORIENTCERT_NODE,
 ]
@@ -2589,6 +2623,23 @@ AUTOGRADING_GOAL_EDGES = [
     },
 ]
 
+# ------------------------------------------------ cfmsSXJacobian 의 부모 (2026-11-14)
+# 볼트 노트가 손 코드가 있는 엔진으로 cfmsDrape(drape/src/sde_core)를 적고, 생성 커널이 그 엔진의 굽힘·인장·전단으로
+# 들어갔다. 범주는 정확도 — 손으로 유도하던 힘·Jacobian 을 기호 미분으로 바꾼다. 실제 의복 검증 전이라
+# Anatomy·AutoGrading 과 같은 이유로 점선·잠정이다. cfmsDrapeInverse(정확 Hessian 검산)로 가는 선은 긋지 않는다 —
+# 이 자리에서 그으면 Drape 훌을 가로질러 cfmsDrape 노드를 29px 로 스친다. 그 관계는 볼트 노트에만 둔다.
+SXJACOBIAN_GOAL_EDGES = [
+    {
+        **_autoplace_goal_edge(
+            "cfmsDrape", "cfmsSXJacobian", "힘·Jacobian 자동 생성",
+            "조건 함수 한 줄에서 엔진의 힘·강성·감쇠 Jacobian 과 SoA 데이터 배치 코드를 만들어 손 유도를 대신한다",
+            "정확도",
+        ),
+        "dashes": True,
+        "_tentative": True,
+    },
+]
+
 # ------------------------------------------------ PartialCost 의 부모 (2026-10-24 사용자 지시)
 # 볼트 depends_on = [PFTF] 이고 같은 저장소·같은 draft/ 에서 갈라진 원고라(cfmsPINNCAD → cfmsHipDetect 와 같은 형태)
 # 계보가 분명하다 — 실선이다. 공개 툴팁이라 방법은 적지 않는다(특허 게이트 전).
@@ -3009,7 +3060,8 @@ def _preserve_goal_edges(match):
         (str(edge["from"]), str(edge["to"]))
         for edge in DYNAMIC_TARGET_SEARCH_GOAL_EDGES + COAUTHOR_KIM_GOAL_EDGES
         + JEON_GOAL_EDGES + MOLD_GOAL_EDGES + CHO_GOAL_EDGES + DISPERSITY_GOAL_EDGES
-        + ANATOMY_GOAL_EDGES + AUTOGRADING_GOAL_EDGES + PARTIALCOST_GOAL_EDGES + ORIENTCERT_GOAL_EDGES
+        + ANATOMY_GOAL_EDGES + AUTOGRADING_GOAL_EDGES + SXJACOBIAN_GOAL_EDGES
+        + PARTIALCOST_GOAL_EDGES + ORIENTCERT_GOAL_EDGES
         + SUBMIT_DEPENDENCY_EDGES
     }
     # 2026-09-24: 사슬이 바뀌면서 cfmsDispersityKNN → cfmsHMDispersity 가 없어졌다. 위 목록에서
@@ -3042,6 +3094,7 @@ def _preserve_goal_edges(match):
     edges.extend(copy.deepcopy(CHO_GOAL_EDGES))
     edges.extend(copy.deepcopy(ANATOMY_GOAL_EDGES))
     edges.extend(copy.deepcopy(AUTOGRADING_GOAL_EDGES))
+    edges.extend(copy.deepcopy(SXJACOBIAN_GOAL_EDGES))
     edges.extend(copy.deepcopy(PARTIALCOST_GOAL_EDGES))
     edges.extend(copy.deepcopy(ORIENTCERT_GOAL_EDGES))
     edges.extend(copy.deepcopy(SUBMIT_DEPENDENCY_EDGES))

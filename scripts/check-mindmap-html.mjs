@@ -70,7 +70,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__applyOrientCert=applyOrientCert20261024;globalThis.__applyChoMoldWarpRetire=applyChoMoldWarpRetire20261027;globalThis.__applyHullRegroup=applyHullRegroup20261031;globalThis.__applyAsymTensorRetire=applyAsymTensorRetire20261101;globalThis.__applyTomoSftfPublished=applyTomoSftfPublished20261105;globalThis.__applyTomoSh5Accepted=applyTomoSh5Accepted20261108;globalThis.__applyTomoSh4Accepted=applyTomoSh4Accepted20261109;globalThis.__applyGFiberCTAccepted=applyGFiberCTAccepted20261111;globalThis.__applyBezierAccepted=applyBezierAccepted20261112;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__applyOrientCert=applyOrientCert20261024;globalThis.__applyChoMoldWarpRetire=applyChoMoldWarpRetire20261027;globalThis.__applyHullRegroup=applyHullRegroup20261031;globalThis.__applyAsymTensorRetire=applyAsymTensorRetire20261101;globalThis.__applyTomoSftfPublished=applyTomoSftfPublished20261105;globalThis.__applyTomoSh5Accepted=applyTomoSh5Accepted20261108;globalThis.__applyTomoSh4Accepted=applyTomoSh4Accepted20261109;globalThis.__applyGFiberCTAccepted=applyGFiberCTAccepted20261111;globalThis.__applyBezierAccepted=applyBezierAccepted20261112;globalThis.__applySXJacobian=applySXJacobian20261114;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -1006,6 +1006,39 @@ if (findIn(bzAccHand.root, "nuzx6yz7").status !== "published") throw new Error("
 const bzAccNoNode = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyBezierAccepted(bzAccNoNode)) throw new Error("Bezier accepted migration must still stamp its version without the node");
 if (childIds(bzAccNoNode.root) !== "n0llvuh1") throw new Error("Bezier accepted migration touched a document without the node");
+
+// 2026-11-14: cfmsSXJacobian 신설 — cfmsDrape(nptj5211) 밑 끝에 ToDo 노드 하나. 부모의 필드·자식·접힘과 관계선은 그대로,
+// 이미 있는 노드는 건드리지 않고, 부모가 없으면 Drape 가지 → root 순으로 물러나되 버전 도장은 찍는다.
+const sxjSample = { root: mk("root", [
+  { id: "hull_drape", title: "Drape", kind: "group", children: [
+    { id: "nptj5211", title: "cfmsDrape", kind: "none", status: "draft", note: "엔진 메모", collapsed: false,
+      children: [mk("njkskwe4")] },
+  ] },
+]), links: [{ from: "nptj5211", to: "njkskwe4", label: "integrated M1", type: "engine" }] };
+if (!context.__applySXJacobian(sxjSample)) throw new Error("SXJacobian migration did not run");
+if (context.__applySXJacobian(sxjSample)) throw new Error("SXJacobian migration is not idempotent");
+const sxjParent = findIn(sxjSample.root, "nptj5211");
+if (childIds(sxjParent) !== "njkskwe4,cfmsSXJacobian") throw new Error(`SXJacobian migration put the node in the wrong place: ${childIds(sxjParent)}`);
+if (sxjParent.title !== "cfmsDrape" || sxjParent.kind !== "none" || sxjParent.status !== "draft" || sxjParent.note !== "엔진 메모" || sxjParent.collapsed !== false) throw new Error("SXJacobian migration changed the parent");
+if (sxjSample.links.length !== 1) throw new Error("SXJacobian migration touched the links");
+const sxjNode = findIn(sxjSample.root, "cfmsSXJacobian");
+if (sxjNode.kind !== "todo" || sxjNode.status !== "draft" || sxjNode.title !== "cfmsSXJacobian"
+  || sxjNode.url !== "https://github.com/cfms-lab/cfmsSXJacobian_dev" || sxjNode.projectPath !== "D:\\__CFMS_Projects\\cfmsSXJacobian_dev") throw new Error("SXJacobian node has the wrong fields");
+if (/GO|PASS|FAIL|L[0-9]/.test(`${sxjNode.brief} ${sxjNode.note}`)) throw new Error("SXJacobian node leaks gate verdicts onto the public page");
+const sxjValidation = context.__validate(sxjSample);
+if (!sxjValidation.ok) throw new Error(`SXJacobian sample is invalid: ${sxjValidation.errors[0]}`);
+const sxjHand = { root: mk("root", [
+  { id: "nptj5211", title: "cfmsDrape", kind: "none", children: [
+    { id: "cfmsSXJacobian", title: "내가 만든 SXJacobian", kind: "low", status: "submitted", children: [] }] },
+]), links: [] };
+context.__applySXJacobian(sxjHand);
+if (childIds(findIn(sxjHand.root, "nptj5211")) !== "cfmsSXJacobian" || findIn(sxjHand.root, "cfmsSXJacobian").title !== "내가 만든 SXJacobian") throw new Error("SXJacobian migration touched an existing node");
+const sxjNoEngine = { root: mk("root", [{ id: "hull_drape", title: "Drape", kind: "group", children: [mk("nf18t2n5")] }]), links: [] };
+context.__applySXJacobian(sxjNoEngine);
+if (childIds(findIn(sxjNoEngine.root, "hull_drape")) !== "nf18t2n5,cfmsSXJacobian") throw new Error("SXJacobian migration did not fall back to the Drape branch");
+const sxjBare = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applySXJacobian(sxjBare)) throw new Error("SXJacobian migration must still stamp its version without the engine node");
+if (childIds(sxjBare.root) !== "n0llvuh1,cfmsSXJacobian") throw new Error("SXJacobian migration did not fall back to the root");
 
 // 2026-11-06: 진도 아이콘 색 = graph.html 노드 색(등급). 단계색으로 되돌아가거나 팔레트가 갈라지면 여기서 잡는다.
 const graphForIcons = readFileSync(new URL("../graph.html", import.meta.url), "utf8");
