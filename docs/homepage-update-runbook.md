@@ -40,7 +40,7 @@ anon 키로는 못 읽던 `portfolio_rows`(로그인 전용)까지 보인다.
 
 | 키 | 투고 때 | 비고 |
 |---|---|---|
-| `stage` | `submitted` | 어휘: published inprint accepted revision submitted draft undecided blocked cancelled idea |
+| `stage` | `submitted` | 어휘: published inprint accepted revision2 revision submitted draft undecided blocked cancelled idea (2026-11-15 revision2 = 2차 심사 수정) |
 | `badge` | `"한국섬유공학회지 투고 완료 (2026-10-16, 원고번호 할당중)"` | 그래프 배지로 그대로 뜬다 |
 | `submission` · `next_gate` · `bottleneck` | 투고 사실 · 「원고번호 발급 대기」 · 「심사 대기 …」 | 병목은 그래프 「남은 병목」 |
 | `paper_completeness` | `1` (+ `_commit` · `_date`) | **투고본은 1** 이 규칙 |
@@ -164,7 +164,7 @@ SQL 만으로 바뀌지 않는 것들이다. 필요하면 고쳐서 커밋·푸�
 |---|---|---|---|
 | 투고 | stage `submitted`, badge 「… 투고 완료 (날짜, 원고번호 할당중)」 | 없으면 INSERT, stage `submitted` | 위 ① 전부 |
 | 원고번호 수령 | badge 의 「할당중」 → 번호 | memo 에 번호 | `submission` · `badge` |
-| 수정 요청 | stage `revision` | stage `revision` | `next_gate` |
+| 수정 요청 | 1차는 stage `revision`(파이 1/3), 2차는 `revision2`(2/3) — 수정본을 내고 판정을 기다리는 동안도 그 단계다 | 같은 값, 날짜는 수정본 제출일 | `stage`(손으로 — `set-stage.mjs` 는 손으로 정한 값 여럿을 되돌리니 돌리지 않는다) · `submission` 머리를 「저널 번호 투고(날짜) → 2차 심사 수정 — …」 꼴로(파서가 같은 단계를 읽게) · `next_gate`. 선례 cfmsCIPC(11-15) |
 | 게재확정 | stage `accepted` | stage `accepted` | `badge` |
 | 출판 | stage `published`, badge 「… 출판 (날짜, 권호)」. 온라인 선공개면 「… 출판 (날짜, 온라인 게재 · 권/호 미정)」 | `published`, volume `63(5)` 꼴, 쪽·DOI, 실제 발행일(선공개면 온라인 게재일, volume·page 는 빈칸). `pdf` 칸에 파일 이름 — 파일은 사용자가 올린다(아래 함정) | `todo.js` 는 빈 칸으로. `submission` 은 「저널 — 날짜 …」 꼴(게재지() 가 저널 이름만 남긴다), `doi:` 도 적는다. 선례 Tomo_SFTF(11-05) |
 | 등급 변경 | grade · grade_note | — | `grade` 와 `grade_note` 첫머리(「날짜 A → B (사용자 지정)」), 노트 머리 콜아웃. 저장소는 `QUALITY_ROWS` 등급 · `NODE_TITLES` 접두어(+ 본문을 바꾸면 `TITLE_REFRESH_IDS`). 등급은 사용자가 정한다 |

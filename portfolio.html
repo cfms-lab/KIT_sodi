@@ -368,10 +368,17 @@ const 깜빡임주기 = frac => BLINK_T_SLOW - (BLINK_T_SLOW - BLINK_T_FAST) * (
 /* 깜빡이는 단계는 **저널 손에 가 있고 아직 결판이 안 난** 셋뿐이다 (2026-09-19, 사용자
    지시 — 전부 깜빡이니 정신이 없다). 쓰는 중(초고)과 끝난 것(출판)은 가만히 둔다.
    미정·보류·취소·아이디어도 마찬가지다. 인쇄중은 사용자가 든 목록에 없어 함께 빼 두었다. */
-const BLINK_STAGES = new Set(['submitted', 'revision', 'accepted']);
+const BLINK_STAGES = new Set(['submitted', 'revision', 'revision2', 'accepted']);
+
+/* 2026-11-15 (사용자): 1차 심사 수정(revision)은 1/3, 2차 심사 수정(revision2)은 2/3 파이다. 투고 1/4 처럼 모양은
+   화면에서 정하므로 메타 행이 옛 값이어도 이 채움으로 그린다. 크기·깜빡임은 frac 그대로(1차 0.625 · 2차 0.6875).
+   revision2 는 볼트 프로젝트현황 「파이단계」에 같은 날 생겼다 — 메타 행이 아직 모르면 아래 보충 값을 쓴다. */
+const 채움고정 = { submitted: 0.25, revision: 1 / 3, revision2: 2 / 3 };
+const 단계보충 = { revision2: { frac: 0.6875, fill: 2 / 3, color: "#eab308", label: "2차 심사 수정" } };
+const 단계정보 = id => (META.stages && META.stages[id]) || 단계보충[id];
 
 function 파이(stage, color) {
-  const s = META.stages && META.stages[stage];
+  const s = 단계정보(stage);
   if (!s) return "";
   const r = 6, cx = 8, cy = 8, c = color || s.color;
   const 크기 = PIE_MIN + (PIE_MAX - PIE_MIN) * (s.frac || 0);
@@ -393,8 +400,8 @@ function 파이(stage, color) {
     // 초고는 빈 원 가운데 점이다 (2026-11-13, 사용자 지시 — 전에는 1/4 파이였다).
     안 += `<circle cx="${cx}" cy="${cy}" r="1.8" fill="${c}"/>`;
   } else if (s.frac > 0) {
-    // 모양은 화면에서 정하므로 메타 행 갱신 전에도 투고는 1/4이다. 크기·깜빡임은 frac 그대로.
-    const f = stage === 'submitted' ? 0.25 : (s.fill ?? s.frac), a = 2 * Math.PI * f;
+    // 모양은 화면에서 정하므로 메타 행 갱신 전에도 투고는 1/4 · 1차 심사 수정 1/3 · 2차 2/3 이다. 크기·깜빡임은 frac 그대로.
+    const f = 채움고정[stage] ?? s.fill ?? s.frac, a = 2 * Math.PI * f;
     const ex = cx + r * Math.sin(a), ey = cy - r * Math.cos(a), big = f > 0.5 ? 1 : 0;
     안 += `<path d="M${cx},${cy} L${cx},${cy - r} A${r},${r} 0 ${big} 1 ${ex},${ey} Z" fill="${c}"/>`;
   }
@@ -449,7 +456,7 @@ const 할일 = row => {
 
 function 행그리기(row) {
   const tr = document.createElement("tr");
-  const stage = META.stages && META.stages[row.stage];
+  const stage = 단계정보(row.stage);
   const 저장소 = row.repo
     ? `<a class="repo" href="${esc(row.repo)}" target="_blank" rel="noopener" title="저장소 열기">↗</a>` : "";
   const 브이에스 = row.projectPath

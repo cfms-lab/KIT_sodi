@@ -576,7 +576,7 @@ for (let k = RAW_EDGES.length - 1; k >= 0; k--) {
 
 const CURATED_POSITIONS = {"cfmsAutoSew": {"x": 460, "y": 1280}, "cfmsAutoPlace_IJCST": {"x": 170, "y": 1280}, "cfmsAutoPlace_JCDE": {"x": -140, "y": 1350}, "cfmsDrapeSCAN": {"x": 360, "y": 980}, "SFTF_Holonomy": {"x": 760, "y": 1050}, "cfmsHipDetect": {"x": 460, "y": 1090}, "cfmsDispersityKNN": {"x": 600, "y": 1050}, "TSE_TomoSh4": {"x": 460, "y": 650}, "TSE_TomoSh5": {"x": 450, "y": 850}};
 const PAPER_COMPLETENESS = {"ColdOndol": 3, "ColdOndol_Materials": 4, "ColdOndol_Positioning": 3, "PFTF": 10, "PFTF_Compression": 6, "PFTF_FXShock": 8, "PFTF_GFiberCT": 2, "PFTF_Mold": 2, "PFTF_OrientCert": 2, "PFTF_VisCull_kDop": 4, "PartialCost": 2, "SFTFSoft_DFSVR": 5, "SFTFSoft_GNN": 5, "SFTF_Clustering": 1, "SFTF_Composite": 5, "SFTF_DrapeOverprint": 1, "SFTF_DrapePrior": 1, "SFTF_HeatMethod": 10, "SFTF_Holonomy": 1, "SFTF_InjMold": 2, "SFTF_QEM": 1, "SFTF_SewerPOC": 5, "SFTF_ThermalChip": 5, "SFTF_UrbanTraffic": 1, "TSE_SEM1_Bezier": 2, "TSE_SEM2_Tensor": 1, "TSE_SEM3_AutoTune": 3, "TSE_TomoSh4": 1, "TSE_TomoSh5": 1, "Tomo_DFSVR": 3, "Tomo_SFTF": 1, "Tomo_SFTFSoft": 1, "cfmsAutoPlace_IJCST": 3, "cfmsAutoPlace_JCDE": 3, "cfmsAutoSew": 4, "cfmsCIPC": 1, "cfmsDispersityKNN": 1, "cfmsDispersityProp": 1, "cfmsDrapeSCAN": 10, "cfmsHMDispersity": 1, "cfmsHipDetect": 2, "cfmsPINNCAD": 10, "cfmsPINNDrape": 3, "cfmsSXJacobian": 1};
-const VAULT_STAGES = {"ColdOndol": "undecided", "ColdOndol_Positioning": "draft", "DFSVR_VisCull": "blocked", "Jeon_DLPOrient": "blocked", "PFTF": "blocked", "PFTF_Compression": "draft", "PFTF_DrapePrior_VisCull_kDop": "blocked", "PFTF_GFiberCT": "accepted", "PFTF_Mold": "draft", "PFTF_OrientCert": "draft", "PFTF_VisCull_kDop": "blocked", "PartialCost": "draft", "SFTFSoft_DFSVR": "blocked", "SFTFSoft_GNN": "draft", "SFTFSoft_GNN_DFSVR": "blocked", "SFTF_ActiveOverprint": "blocked", "SFTF_Clustering": "submitted", "SFTF_Composite": "draft", "SFTF_DrapeOverprint": "submitted", "SFTF_DrapePrior": "published", "SFTF_DynamicTargetSearch": "blocked", "SFTF_HeatMethod": "blocked", "SFTF_Holonomy": "submitted", "SFTF_InjMold": "draft", "SFTF_QEM": "draft", "SFTF_SewerPOC": "undecided", "SFTF_UrbanTraffic": "submitted", "TSE_SEM1_Bezier": "accepted", "TSE_SEM2_Tensor": "accepted", "TSE_SEM3_AutoTune": "blocked", "TSE_TomoSh4": "accepted", "TSE_TomoSh5": "accepted", "Tomo_DFSVR": "draft", "Tomo_SFTF": "inprint", "Tomo_SFTFSoft": "submitted", "cfmsAnatomy": "undecided", "cfmsAutoGrading": "undecided", "cfmsAutoPlace_IJCST": "blocked", "cfmsAutoPlace_JCDE": "blocked", "cfmsAutoSew": "blocked", "cfmsCIPC": "submitted", "cfmsDispersityKNN": "published", "cfmsDispersityProp": "submitted", "cfmsDrape": "undecided", "cfmsDrapeInverse": "undecided", "cfmsDrapeSCAN": "blocked", "cfmsHMDispersity": "submitted", "cfmsHipDetect": "submitted", "cfmsPINNDrape": "blocked", "cfmsSXJacobian": "submitted", "dynamicDispersity": "published"};
+const VAULT_STAGES = {"ColdOndol": "undecided", "ColdOndol_Positioning": "draft", "DFSVR_VisCull": "blocked", "Jeon_DLPOrient": "blocked", "PFTF": "blocked", "PFTF_Compression": "draft", "PFTF_DrapePrior_VisCull_kDop": "blocked", "PFTF_GFiberCT": "accepted", "PFTF_Mold": "draft", "PFTF_OrientCert": "draft", "PFTF_VisCull_kDop": "blocked", "PartialCost": "draft", "SFTFSoft_DFSVR": "blocked", "SFTFSoft_GNN": "draft", "SFTFSoft_GNN_DFSVR": "blocked", "SFTF_ActiveOverprint": "blocked", "SFTF_Clustering": "submitted", "SFTF_Composite": "draft", "SFTF_DrapeOverprint": "submitted", "SFTF_DrapePrior": "published", "SFTF_DynamicTargetSearch": "blocked", "SFTF_HeatMethod": "blocked", "SFTF_Holonomy": "submitted", "SFTF_InjMold": "draft", "SFTF_QEM": "draft", "SFTF_SewerPOC": "undecided", "SFTF_UrbanTraffic": "submitted", "TSE_SEM1_Bezier": "accepted", "TSE_SEM2_Tensor": "accepted", "TSE_SEM3_AutoTune": "blocked", "TSE_TomoSh4": "accepted", "TSE_TomoSh5": "accepted", "Tomo_DFSVR": "draft", "Tomo_SFTF": "inprint", "Tomo_SFTFSoft": "submitted", "cfmsAnatomy": "undecided", "cfmsAutoGrading": "undecided", "cfmsAutoPlace_IJCST": "blocked", "cfmsAutoPlace_JCDE": "blocked", "cfmsAutoSew": "blocked", "cfmsCIPC": "revision2", "cfmsDispersityKNN": "published", "cfmsDispersityProp": "submitted", "cfmsDrape": "undecided", "cfmsDrapeInverse": "undecided", "cfmsDrapeSCAN": "blocked", "cfmsHMDispersity": "submitted", "cfmsHipDetect": "submitted", "cfmsPINNDrape": "blocked", "cfmsSXJacobian": "submitted", "dynamicDispersity": "published"};
 const COAUTHOR_CANDIDATES = {"cfmsAnatomy": "이희란", "cfmsDispersityProp": "은종현"};
 Object.assign(POS, CURATED_POSITIONS);
 
@@ -2128,7 +2128,10 @@ const STAGE_PIE = {
   published: { frac: 1,     done: true, label: '출판(published)' },
   inprint:   { frac: 0.875,             label: '인쇄중(in print)' },
   accepted:  { frac: 0.75,              label: '게재확정(accepted)' },
-  revision:  { frac: 0.625,             label: '심사 수정(revision)' },
+  /* 2026-11-15 (사용자): 1차 심사 수정은 1/3, 2차 심사 수정(revision2 — 볼트 stage.mjs 에 같은 날 생김)은 2/3 파이다.
+     크기·깜빡임·graph3d 높이는 frac(1차 0.625 그대로, 2차 0.6875 — 1차와 게재확정 사이)이고 그리는 채움만 fill 이다. */
+  revision2: { frac: 0.6875, fill: 2 / 3, label: '2차 심사 수정(revision2)' },
+  revision:  { frac: 0.625,  fill: 1 / 3, label: '1차 심사 수정(revision)' },
   submitted: { frac: 0.5,   fill: 0.25, label: '투고(submitted)' },
   draft:     { frac: 0.25,  dot: true,  label: '초고(draft)' },
   /* 2026-09-14: 미정·보류를 가르는 기준이 바뀌었다(사용자). 전에는 **낼 곳**이 기준이라
@@ -2330,7 +2333,7 @@ const BLINK_KEY = 'graphify_graph_blink_v1';
    지시 — 전부 깜빡이니 정신이 없다). 쓰는 중(draft)과 끝난 것(published)은 가만히 둔다.
    미정·보류·취소·아이디어도 마찬가지다 — 멈춰 있는 것들이고 수가 많아 소음의 대부분이었다.
    인쇄중(inprint)은 사용자가 든 목록에 없어 함께 빼 두었다. 한 줄만 고치면 넣을 수 있다. */
-const BLINK_STAGES = new Set(['submitted', 'revision', 'accepted']);
+const BLINK_STAGES = new Set(['submitted', 'revision', 'revision2', 'accepted']);
 function blinkPeriod(stage) {
   const frac = stage ? (stage.done ? 1 : (stage.x || stage.xx ? 0 : (stage.frac || 0))) : 0;
   return BLINK_T_SLOW - (BLINK_T_SLOW - BLINK_T_FAST) * frac;
@@ -2676,11 +2679,11 @@ network.on('afterDrawing', function(ctx) {
    범례의 커뮤니티별 개수는 파일 생성 시점 값을 유지한다(장식·색·보드는 갱신됨). */
 
 /* 볼트의 통합 단계 어휘 → 이 파일의 4단계 진도 아이콘.
-   revision 은 심사 중이므로 submitted 로, blocked·undecided·cancelled·idea 는
+   revision·revision2(1차·2차 심사 수정)는 심사 중이므로 submitted 로, blocked·undecided·cancelled·idea 는
    아이콘 없이 둔다(그래프는 진행선만 배지로 그린다). */
 const STAGE_TO_PROG = {
   published: 'published', inprint: 'inprint', accepted: 'accepted',
-  revision: 'submitted', submitted: 'submitted',
+  revision2: 'submitted', revision: 'submitted', submitted: 'submitted',
 };
 // 2026-11-13 사용자 정정: Tomo_SFTF 는 권/호·쪽 미배정이라 inprint 다.
 // 서버에 남은 11-05 오분류만 바로잡는다. 이후 다른 출판 배지로 갱신되면 서버 단계를 따른다.

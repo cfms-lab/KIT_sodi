@@ -136,7 +136,7 @@ PAPER_COMPLETENESS = _load_paper_completeness()
 def _load_note_stages():
     """볼트 frontmatter 의 `stage:` 를 노트 이름 기준으로 모은다.
 
-    통합 단계 어휘(published inprint accepted revision submitted draft undecided
+    통합 단계 어휘(published inprint accepted revision2 revision submitted draft undecided
     blocked cancelled idea)이며 정본은 볼트 `scripts/lib/stage.mjs` 다.  graph.html 은
     이 값으로 노드를 파이로 그린다 — **채운 정도가 투고 진도이고 색은 논문 등급**이다.
     표(research_outputs)가 살아 있으면 그쪽 값이 이기고, 여기 값은 오프라인 씨앗이다.

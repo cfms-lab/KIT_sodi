@@ -549,7 +549,7 @@ function toSql(payload, nodeFields) {
     "",
     "select kind, count(*) from public.portfolio_rows group by kind order by kind;",
     "select id, stage, grade from public.research_outputs",
-    " where kind = 'node' and stage in ('submitted','revision','accepted','inprint','published')",
+    " where kind = 'node' and stage in ('submitted','revision','revision2','accepted','inprint','published')",
     " order by id;",
     "",
   ].join("\n");

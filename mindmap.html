@@ -1852,8 +1852,8 @@ const BLINK_T_SLOW=2400, BLINK_T_FAST=800;
 /* 깜빡이는 단계는 **저널 손에 가 있고 아직 결판이 안 난** 것들뿐이다 (2026-09-19, 사용자
    지시 — 전부 깜빡이니 정신이 없다). 쓰는 중(draft)과 끝난 것(published)은 가만히 둔다.
    보류·취소도 마찬가지다. 인쇄중은 사용자가 든 목록에 없어 함께 빼 두었다.
-   revision 은 이 페이지의 어휘에 없지만(STATUS 참고) 생기면 따라오도록 넣어 둔다. */
-const BLINK_STAGES=new Set(['submitted','revision','accepted']);
+   revision·revision2 는 이 페이지의 어휘에 없지만(STATUS 참고) 생기면 따라오도록 넣어 둔다. */
+const BLINK_STAGES=new Set(['submitted','revision','revision2','accepted']);
 function progPeriod(status){
   const p=PROGRESS[progStatus(status)]; if(!p) return BLINK_T_SLOW;
   const frac = p.done ? 1 : (p.x ? 0 : (p.frac||0));
@@ -2287,7 +2287,7 @@ const GRADE_TO_KIND={'상':'high','중':'medium','하':'low','ToDo':'todo','Clos
    점선 테두리가 「미완성」이라는 뜻이라 빈칸으로 두는 것보다 정확하다.
    볼트 publish-to-supabase.mjs 의 WIRE_STATUS 와 같은 매핑이어야 한다. */
 const STAGE_TO_NODE={published:'published',inprint:'inprint',accepted:'accepted',
-  revision:'submitted',submitted:'submitted',
+  revision2:'submitted',revision:'submitted',submitted:'submitted',   // 2026-11-15 revision2(2차 심사 수정)도 투고 칸으로 접는다
   // 2026-09-14: blocked 를 draft 로 접지 않는다 — 이 페이지에 보류 칸이 생겼다.
   // undecided(미정)는 아직 접어 둔다. 이 지도에 「손도 안 댐」 칸이 따로 없다.
   draft:'draft',blocked:'blocked',undecided:'draft',idea:'draft',
