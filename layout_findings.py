@@ -241,6 +241,8 @@ NODE_TITLES = {
     "DFSVR_VisCull": "DFSVR_VisCull — ToDo: DFSVR exact first-hit용 "
                      "conservative BVH scalability 설계선; 값·gradient parity·"
                      "거짓음성 0·end-to-end utility gate 전",
+    # 2026-11-15: 투고본(굽힘 미분 어림의 두 효과)에 맞춘 툴팁(사용자 승인). 공개 칸이라 수치는 싣지 않는다.
+    "cfmsSXJacobian": "cfmsSXJacobian — 상: 굽힘 미분 어림이 만드는 가짜 모서리 힘·수치 끌림을 정확한 미분과 견준다",
     "SFTFSoft_GNN_DFSVR": "SFTFSoft_GNN_DFSVR — ToDo: profile-conditioned "
                           "GNN proposer → DFSVR first-hit refiner → "
                           "held-out slicer verifier",
@@ -250,6 +252,7 @@ NODE_TITLES = {
 # NODE_TITLES 문구가 graph.html 의 현재 문구보다 새로운지 먼저 확인한다.
 TITLE_REFRESH_IDS = {
     "SFTF_DrapeOverprint",   # 2026-10-16 — 10-15 첫 문구에 머물러 있었다
+    "cfmsSXJacobian",        # 2026-11-15 — 도구 설명(11-14)에서 투고본 설명으로. 패널 소개 _intro 는 graph.html 값을 직접 고쳤다
 }
 
 # Nodes promoted from idea-only placeholders to real project notes keep their
@@ -887,7 +890,8 @@ INTRODUCTIONS = {
     "TSE_SEM1_Bezier": "전자현미경 사진 한 장에서 섬유 한 올 한 올을 매끈한 곡선으로 따라가며 굵기와 방향을 재어내는 방법이다.",
     "TSE_SEM2_Tensor": "섬유를 하나씩 오려내지 않고 사진 전체에서 섬유가 어느 쪽으로 누워 있는지와 겹친 아래층까지 한꺼번에 재는 방법이다.",
     "cfmsAutoGrading": "이미 그린 옷 패턴을 입는 사람의 몸 특징점 좌표로 다시 적어, 치수가 달라도 같은 값을 내는 스타일 코드와 그레이딩 불변 점수를 만드는 도구다.",
-    "cfmsSXJacobian": "의복 시뮬레이션에서 힘의 식 한 줄만 쓰면, 그 미분(Jacobian)과 빠른 데이터 배치(SoA)를 자동으로 만들어 주는 도구다.",
+    # 2026-11-15 투고본(굽힘 미분 어림의 두 효과)에 맞춤(사용자 승인, 볼트 intro 와 같다). 앞 문구: 「의복 시뮬레이션에서 힘의 식 한 줄만 쓰면, 그 미분(Jacobian)과 빠른 데이터 배치(SoA)를 자동으로 만들어 주는 도구다.」
+    "cfmsSXJacobian": "옷 시뮬레이션에서 굽힘 힘의 미분을 어림하면 천 가장자리를 당기는 가짜 힘과 움직임을 늦추는 수치 끌림이 생긴다는 것을, 프로그램이 유도한 정확한 미분과 견줘 밝히고 그 크기를 식으로 맞힌 연구다.",
     "TSE_SEM3_AutoTune": "정답을 모르는 실제 사진에서도 측정기의 손잡이를 스스로 안전하게 맞추는 방법을 다루는 연구다.",
 }
 
@@ -1811,7 +1815,8 @@ CFMS_AUTOGRADING_NODE = {
 # 2026-11-14: 볼트에 새로 선 cfmsSXJacobian(2026-11-12 착수, status active · grade ToDo · stage undecided,
 # 리포 cfms-lab/cfmsSXJacobian_dev 비공개). 부모는 SXJACOBIAN_GOAL_EDGES, 훌은 Drape. 공개 툴팁이라 게이트 판정·수치는
 # 싣지 않는다(볼트 Rules §8). 2026-11-15 TVC 투고 · 등급 ToDo → 상(사용자 지정) — 흰 바탕·검정 외곽선(community 4)이던
-# 씨앗을 상 색(community 1)으로 맞춘다(SFTF_DrapeOverprint 10-16 선례). 툴팁 본문은 프로젝트 설명이라 그대로 둔다.
+# 씨앗을 상 색(community 1)으로 맞춘다(SFTF_DrapeOverprint 10-16 선례). 같은 날 툴팁 본문도 투고본(굽힘 미분 어림의
+# 두 효과)에 맞췄다(사용자 승인) — 앞 문구: 「조건 함수 한 줄에서 힘·Jacobian 과 SoA 코드를 자동으로 만든다」.
 CFMS_SXJACOBIAN_NODE = {
     "id": "cfmsSXJacobian",
     "label": "cfmsSXJacobian",
@@ -1819,7 +1824,7 @@ CFMS_SXJACOBIAN_NODE = {
                "highlight": {"background": "#e02020", "border": "#e02020"}},
     "size": 15.4,
     "font": {"size": 13, "color": "#333333", "bold": False},
-    "title": "cfmsSXJacobian — 상: 조건 함수 한 줄에서 힘·Jacobian 과 SoA 코드를 자동으로 만든다",
+    "title": "cfmsSXJacobian — 상: 굽힘 미분 어림이 만드는 가짜 모서리 힘·수치 끌림을 정확한 미분과 견준다",
     "community": 1,
     "community_name": "상",
     "source_file": "cfmsSXJacobian.md",
