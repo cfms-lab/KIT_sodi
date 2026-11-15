@@ -820,8 +820,11 @@ QUALITY_ROWS = [
     # 볼트 Rules §8 대로 grade_note · next_gate · 시험 수치를 옮기지 않고 소개와 단계만 싣는다.
     ("cfmsAutoGrading", "cfmsAutoGrading", "ToDo", "이미 그린 패턴을 몸 특징점 좌표로 다시 적어 치수에 불변인 스타일 코드를 만드는 설계선; 공개 데이터셋 짝 시험 단계, 실제 그레이딩 자료 검증 전"),
     # 2026-11-14 신설(2026-11-12 착수). 볼트 grade: ToDo · stage: undecided.
+    # 2026-11-15 The Visual Computer 투고, 같은 날 등급 ToDo → 상(사용자 지정, 볼트 grade 와 같다).
+    # 앞 문구: 「조건 함수 한 줄에서 의복 시뮬레이션의 힘·Jacobian 과 SoA 데이터 배치 코드를 자동으로 만드는 생성기;
+    # cfmsDrape 엔진 연결은 작은 천에서 확인, 실제 의복 검증 전」. 투고본(굽힘 미분 근사의 두 효과)에 맞춰 바꿨다.
     # 볼트 Rules §8 대로 grade_note · next_gate · 게이트 수치를 옮기지 않고 소개와 단계만 싣는다.
-    ("cfmsSXJacobian", "cfmsSXJacobian", "ToDo", "조건 함수 한 줄에서 의복 시뮬레이션의 힘·Jacobian 과 SoA 데이터 배치 코드를 자동으로 만드는 생성기; cfmsDrape 엔진 연결은 작은 천에서 확인, 실제 의복 검증 전"),
+    ("cfmsSXJacobian", "cfmsSXJacobian", "상", "근사한 굽힘 미분이 암시적 의복 시뮬레이션에 만드는 가짜 모서리 힘과 수치 끌림을, 조건 함수 한 줄에서 생성한 정확·Gauss–Newton 미분과 견준 원고; 2026-11-15 TVC 투고(원고번호 할당중)"),
 ]
 QUALITY_ROWS = [row for row in QUALITY_ROWS if row[0] not in HIDDEN_NODE_IDS]
 
@@ -1424,6 +1427,8 @@ if preserve_extended_quality:
             # 2026-10-26: 2026-10-25 JCDE 데스크 리젝(심사 없음) — 볼트 badge 와 같은 문구다.
             # 2026-10-27: 볼트 10-26 오후 판(통제 실험 분리) — 볼트 badge 와 같은 문구다.
             "SFTF_Holonomy": "JCDE 데스크 리젝 (2026-10-25) — 통제 실험 분리, IJMF 재투고 준비",
+            # 2026-11-15 The Visual Computer 투고(SNAPP, 원고번호 할당 전). 볼트 badge 와 같은 문구다.
+            "cfmsSXJacobian": "TVC 투고 완료 (2026-11-15, 원고번호 할당중)",
         },
         # 옛 노드 id 도 함께 지운다.  이 갱신기는 **병합**이라 적어 주지 않으면 옛 키가
         # 남아, 그래프에 없는 id 의 배지가 파일에 계속 실린다(2026-09-14 개명 때 실제로 그랬다).
@@ -1494,6 +1499,8 @@ if preserve_extended_quality:
             # 2026-10-24: PFTF_AsymTensor 의 2편. 볼트 프로젝트현황 분리트랙의 게이트와 같은 문구다.
             # 2026-11-01: 1편을 병합해 한 편으로(사용자) — 3단계는 10-24~26 에 끝났고 1편 투고 게이트는 사라졌다. 분리트랙 게이트와 같은 문구다.
             "PFTF_OrientCert": "1편 내용(층 분할 탐색·동결 하이브리드·60° 반증) 병합(2026-11-01) → 4·5절 → 6·7·1절·초록 → CRediT 분담 기록 → CAD 투고(이중 익명·Highlights·데이터 Option C)",
+            # 2026-11-15 TVC 투고. 공개 칸이라 짧게 둔다(볼트 bottleneck 과 같다 — 원고번호 대기는 볼트 next_gate).
+            "cfmsSXJacobian": "심사 대기",
         },
         # 2026-09-21: PFTF_Mold 를 걷는다. 파일에 구워져 있던 「solids4foam 사슬 IBOF
         # 재채점·외부 물리 검증」은 볼트가 이미 닫은 일이고(grade_note — 선언한 아홉 관문
@@ -1802,18 +1809,19 @@ CFMS_AUTOGRADING_NODE = {
 
 
 # 2026-11-14: 볼트에 새로 선 cfmsSXJacobian(2026-11-12 착수, status active · grade ToDo · stage undecided,
-# 리포 cfms-lab/cfmsSXJacobian_dev 비공개). 흰 바탕·검정 외곽선(community 4). 부모는 SXJACOBIAN_GOAL_EDGES,
-# 훌은 Drape. 공개 툴팁이라 게이트 판정·수치는 싣지 않는다(볼트 Rules §8).
+# 리포 cfms-lab/cfmsSXJacobian_dev 비공개). 부모는 SXJACOBIAN_GOAL_EDGES, 훌은 Drape. 공개 툴팁이라 게이트 판정·수치는
+# 싣지 않는다(볼트 Rules §8). 2026-11-15 TVC 투고 · 등급 ToDo → 상(사용자 지정) — 흰 바탕·검정 외곽선(community 4)이던
+# 씨앗을 상 색(community 1)으로 맞춘다(SFTF_DrapeOverprint 10-16 선례). 툴팁 본문은 프로젝트 설명이라 그대로 둔다.
 CFMS_SXJACOBIAN_NODE = {
     "id": "cfmsSXJacobian",
     "label": "cfmsSXJacobian",
-    "color": {"background": "#ffffff", "border": "#000000",
-               "highlight": {"background": "#ffffff", "border": "#000000"}},
+    "color": {"background": "#e02020", "border": "#e02020",
+               "highlight": {"background": "#e02020", "border": "#e02020"}},
     "size": 15.4,
     "font": {"size": 13, "color": "#333333", "bold": False},
-    "title": "cfmsSXJacobian — ToDo: 조건 함수 한 줄에서 힘·Jacobian 과 SoA 코드를 자동으로 만든다",
-    "community": 4,
-    "community_name": "ToDo",
+    "title": "cfmsSXJacobian — 상: 조건 함수 한 줄에서 힘·Jacobian 과 SoA 코드를 자동으로 만든다",
+    "community": 1,
+    "community_name": "상",
     "source_file": "cfmsSXJacobian.md",
     "file_type": "concept",
     "degree": 1,
