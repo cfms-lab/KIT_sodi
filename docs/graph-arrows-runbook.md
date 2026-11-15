@@ -59,6 +59,9 @@ git add graph.html layout_findings.py scripts/check-graph-html.mjs && git commit
 - 노드 정보의 「차수 (in/out)」는 생성기 RAW 기준이라 화면 방향과 다를 수 있다(전부터 그랬다).
 - `EDGE_PRUNE_PAIRS` 는 **점선만** 뺄 수 있고 「노드마다 부모 하나」 가드가 있다. 실선을 화면에서 걷으려면 생성기 `lineage_pairs` 로
   관계째 걷어야 한다 — 그래서 10-31 에는 계보 선을 그대로 두고 의존 선만 더했다(사용자 선택).
+- 사용자가 곡선을 직선으로 바꾸라고 하면 `STRAIGHT_EDGES` 에 더하고 **`EDGE_SMOOTH_OVERRIDES` 의 그 쌍 항목을 지운다** —
+  `_edgeSmoothOverride` 는 `find` 의 첫 항목이라 곡선 항목이 남으면 곡선이 이긴다(2026-11-15 가드가 막는다). 부채꼴 허브 cfmsDrape 에
+  닿는 선도 덮어쓰기라 부채꼴은 그 선을 직선으로 고정한다. 확인은 `tmp/geometry/verify.js` 의 WATCH 를 그 쌍으로 바꿔 휨 0 · 교차 수를 본다.
 - 웹 배치는 사용자가 자주 다시 저장한다(10-31 에만 두 번). 잴 때마다 `graph_positions` 의 `updated_at` 부터 본다.
 - 10-31 의 측정 스크립트(`edge-order.mjs`·`measure-cands.js`·`measure-mid.js`)는 세션 스크래치패드에만 있었다. 다시 쓰려면 위 설명대로
   `tmp/geometry/verify.js` 를 본떠 새로 쓴다.

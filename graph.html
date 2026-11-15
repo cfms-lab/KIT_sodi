@@ -995,7 +995,11 @@ let FAN_SMOOTH = {};
    «from, to» 가 키라 뒤집힌 선은 같이 뒤집는다 — SFTF_HeatMethod → SFTF_Composite 는 SFTF_Composite → SFTF_HeatMethod 로,
    SFTF_HeatMethod → SFTF_Holonomy 는 SFTF_Holonomy → SFTF_HeatMethod 로(37개 그대로),
    PFTF → PFTF_VisCull_kDop(curvedCW 0.165) 은 PFTF_VisCull_kDop → PFTF(curvedCCW 0.165), PFTF_VisCull_kDop → SFTF_DrapePrior(curvedCCW 0.125)
-   는 SFTF_DrapePrior → PFTF_VisCull_kDop(curvedCW 0.125). 방향을 뒤집으면서 CW↔CCW 를 바꾸면 vis 가 같은 곡선을 그린다(화살촉만 반대 끝). */
+   는 SFTF_DrapePrior → PFTF_VisCull_kDop(curvedCW 0.125). 방향을 뒤집으면서 CW↔CCW 를 바꾸면 vis 가 같은 곡선을 그린다(화살촉만 반대 끝).
+   2026-11-15(사용자): 넷을 더해 마흔하나 — PartialCost → SFTF_QEM · Tomo_SFTFSoft → SFTF_QEM · Tomo_SFTFSoft → PartialCost(투고 의존 점선
+   셋, 앞의 곡선 덮어쓰기를 걷었다) · cfmsDrape → cfmsSXJacobian(점선, 부채꼴 허브 cfmsDrape 에 닿아 부채꼴은 이것을 직선으로 고정한다).
+   11-14 07:49 웹 배치에서 선분과 다른 노드 중심의 거리: PartialCost → QEM 은 SFTF_Clustering 64px(가장 가깝다), SFTFSoft → QEM 은
+   Tomo_SFTF 182px, SFTFSoft → PartialCost 는 Jeon_DLPOrient 113px, cfmsDrape → cfmsSXJacobian 은 cfmsCIPC 148px. */
 const STRAIGHT_EDGE_SMOOTH = { enabled: false };
 const STRAIGHT_EDGES = [
   ["Tomo_DFSVR", "DFSVR_VisCull"],
@@ -1034,7 +1038,11 @@ const STRAIGHT_EDGES = [
   ["SFTF_DrapePrior", "SFTF_ActiveOverprint"],
   ["cfmsDrape", "cfmsCIPC"],
   ["cfmsDrape", "cfmsPINNDrape"],
-  ["cfmsMiindo", "cfmsDrape"]
+  ["cfmsMiindo", "cfmsDrape"],
+  ["PartialCost", "SFTF_QEM"],
+  ["Tomo_SFTFSoft", "SFTF_QEM"],
+  ["Tomo_SFTFSoft", "PartialCost"],
+  ["cfmsDrape", "cfmsSXJacobian"]
 ];
 const EDGE_SMOOTH_OVERRIDES = [
   ["PFTF_VisCull_kDop", "PFTF", { type: 'curvedCCW', roundness: 0.165 }],
@@ -1052,16 +1060,15 @@ const EDGE_SMOOTH_OVERRIDES = [
      · Tomo_SFTFSoft → PartialCost(595px)는 기본 곡선이 SFTF_UrbanTraffic 캡션 위를 지난다. CCW 0.2 = 휨 55px, 상자 밖 28px.
        어느 쪽으로 휘어도 Tomo_SFTF 의 동쪽 부채(→ Clustering·SewerPOC·UrbanTraffic, ColdOndol → PFTF)를 건너 엇갈림 4 가 남는다 —
        CW 는 UrbanTraffic 노드를 관통(중심 −2px)하므로 못 쓴다. 배치 문제다: PartialCost 를 PFTF 서쪽이나 SFTFSoft 아래로 옮기면 풀린다.
-     · cfmsAutoPlace_IJCST → cfmsAutoPlace_JCDE 는 기본 곡선으로 충분하다(cfmsAutoGrading 상자 50px). */
+     · cfmsAutoPlace_IJCST → cfmsAutoPlace_JCDE 는 기본 곡선으로 충분하다(cfmsAutoGrading 상자 50px).
+     2026-11-15(사용자): Tomo_SFTFSoft → SFTF_QEM(CW 0.35) · Tomo_SFTFSoft → PartialCost(CCW 0.2) 는 직선으로 바꿨다(STRAIGHT_EDGES). */
   ["SFTF_Holonomy", "SFTF_Composite", { type: 'curvedCCW', roundness: 0.4 }],
-  ["Tomo_SFTFSoft", "SFTF_QEM", { type: 'curvedCW', roundness: 0.35 }],
-  ["Tomo_SFTFSoft", "PartialCost", { type: 'curvedCCW', roundness: 0.2 }],
   /* 2026-11-15 (사용자 「점선도 더한다」, 생성기 SUBMIT_DEPENDENCY_EDGES 셋 — 볼트 2026-11-15 투고순서 점검 노트). 11-14 07:49 웹 배치에서 잰다:
      · PartialCost → SFTF_QEM(820px)은 기본 곡선이 SFTF_Clustering 노드를 지난다(중심 −15px). 직선·CCW 0.05–0.12 는
        「IJAMT 게재확정 선행」 캡션 상자를 지나고(−9px), CCW 0.18 이 8px, 0.2(휨 77px)가 상자 밖 14px · 노드 여유 40px(SFTFSoft)다.
        Tomo_SFTF → Tomo_SFTFSoft 실선과의 엇갈림 1 은 직선으로도 남는다(배치 문제). 그 선을 피하는 CCW 0.3 은 SFTFSoft 노드에 닿는다.
-     · SFTFSoft_GNN → Tomo_DFSVR(노드 여유 124px) · SFTF_InjMold → PFTF_Mold(158px)는 기본 곡선으로 충분하다(엇갈림 0). */
-  ["PartialCost", "SFTF_QEM", { type: 'curvedCCW', roundness: 0.2 }],
+     · SFTFSoft_GNN → Tomo_DFSVR(노드 여유 124px) · SFTF_InjMold → PFTF_Mold(158px)는 기본 곡선으로 충분하다(엇갈림 0).
+     같은 날 뒤(사용자): PartialCost → SFTF_QEM(CCW 0.2)은 직선으로 바꿨다(STRAIGHT_EDGES). */
   ...STRAIGHT_EDGES.map(([from, to]) => [from, to, STRAIGHT_EDGE_SMOOTH]),
 ];
 function _edgeSmoothOverride(i) {
