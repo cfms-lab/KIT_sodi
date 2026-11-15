@@ -156,6 +156,8 @@ if (
   || !html.includes(`["SFTF_Holonomy", "SFTF_Composite", { type: 'curvedCCW', roundness: 0.4 }]`)
   || !html.includes(`["Tomo_SFTFSoft", "SFTF_QEM", { type: 'curvedCW', roundness: 0.35 }]`)
   || !html.includes(`["Tomo_SFTFSoft", "PartialCost", { type: 'curvedCCW', roundness: 0.2 }]`)
+  // 2026-11-15: PartialCost → QEM 간격 점선은 Clustering 노드와 「IJAMT 게재확정 선행」 캡션을 비켜 CCW 0.2 로 휜다.
+  || !html.includes(`["PartialCost", "SFTF_QEM", { type: 'curvedCCW', roundness: 0.2 }]`)
   || !html.includes("const edgeSmooth = i => _edgeSmoothOverride(i) || FAN_SMOOTH[i] || DEFAULT_EDGE_SMOOTH;")
   || !html.includes("const candsOf = i => { const o = _edgeSmoothOverride(i); return o ? [o] : FAN_CANDIDATES; };")
 ) {
@@ -384,6 +386,10 @@ const expectedSubmitDependencyEdges = [
   ["Tomo_SFTFSoft", "SFTF_QEM", "IJAMT 게재확정 선행"],
   ["cfmsAutoPlace_IJCST", "cfmsAutoPlace_JCDE", "A 투고 뒤 B"],
   ["SFTF_Holonomy", "SFTF_Composite", "앞 편 accept 뒤"],
+  // 2026-11-15 투고 순서 재편(볼트 2026-11-15 투고순서 점검 노트, 사용자 「점선도 더한다」): 형제 간격 셋.
+  ["PartialCost", "SFTF_QEM", "4~6주 뒤"],
+  ["SFTFSoft_GNN", "Tomo_DFSVR", "4~6주 뒤"],
+  ["SFTF_InjMold", "PFTF_Mold", "2~4주 뒤"],
 ];
 for (const [from, to, label] of expectedSubmitDependencyEdges) {
   const matches = shownEdges.filter((edge) => edge.from === from && edge.to === to);

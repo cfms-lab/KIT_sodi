@@ -2706,6 +2706,23 @@ SUBMIT_DEPENDENCY_EDGES = [
         "SFTF_Holonomy", "SFTF_Composite", "앞 편 accept 뒤",
         "Composite 의 투고 게이트는 앞 편의 accept 다 — HeatMethod 가 보류돼 앞 편은 Holonomy(IJMF 재투고)다(SFTF_Holonomy.md 2026-10-26; 사용자: 필요하면 Composite 는 포기해도 된다)",
     ),
+    # 2026-11-15 (사용자 승인 — 볼트 2026-11-15 투고순서 점검 노트): SFTFSoft 게재 확정으로 함께 풀리는 넷은
+    # PartialCost → QEM → GNN → DFSVR 차례로 4~6주 간격, 방대석 교수 쪽 두 편은 InjMold → Mold 2~4주 간격이다. 그 노트는
+    # 간격을 「일정이지 게이트가 아니다」라고 적었지만 사용자가 그 차례도 선으로 그리라고 골랐다(「점선도 더한다」, 같은 날).
+    # QEM → GNN 은 계보 실선 「입력 경량화」가 이미 같은 방향이라 더하지 않는다. OrientCert → QEM(CAD 한 편씩)은 QEM 에 AES
+    # 우회가 있어 게이트가 아니므로 뺀다. 투고순서 숫자는 PartialCost·QEM 2·2, GNN·DFSVR 2·2, InjMold 1 · Mold 2 라 방향 규칙과 맞는다.
+    _submit_dependency_edge(
+        "PartialCost", "SFTF_QEM", "4~6주 뒤",
+        "QEM 은 PartialCost 투고 4~6주 뒤에 낸다 — Tomo_SFTFSoft 게재 확정으로 함께 풀리는 형제 원고를 하나씩 낸다. CAD 에는 PFTF_OrientCert 가 먼저 가고, 그 결정 전이면 AES 로 낸다(SFTF_QEM.md next_gate, 2026-11-15 사용자 승인)",
+    ),
+    _submit_dependency_edge(
+        "SFTFSoft_GNN", "Tomo_DFSVR", "4~6주 뒤",
+        "DFSVR 은 넷 중 마지막으로 SFTFSoft_GNN 투고 4~6주 뒤에 낸다. JCDE 에는 SFTF_InjMold 와 이 편 중 먼저 준비된 편이 먼저 간다(Tomo_DFSVR.md next_gate, 2026-11-15 사용자 승인)",
+    ),
+    _submit_dependency_edge(
+        "SFTF_InjMold", "PFTF_Mold", "2~4주 뒤",
+        "Mold 는 InjMold 와 같은 날이 아니라 그 2~4주 뒤에 낸다 — 옛 「함께 나간다」를 대신한다(PFTF_Mold.md next_gate, 2026-11-15 사용자 승인)",
+    ),
 ]
 
 # ------------------------------------------------------ 분산도 사슬 (2026-09-24 사용자 지시)
