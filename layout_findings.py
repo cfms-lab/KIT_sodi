@@ -230,9 +230,10 @@ NODE_TITLES = {
                             "RGB-D replay·controlled textile print 전",
     # 2026-10-15 신설. 공개 그래프라 진행 수치·병목은 싣지 않는다(볼트 Rules §8).
     # 2026-10-16: 한국섬유공학회지 투고(원고번호 할당중). 같은 날 등급 ToDo → 하(사용자 지정, 볼트 grade).
+    # 2026-11-17: 1차 심사 수정 — Rev1 제출(26M-10-047).
     "SFTF_DrapeOverprint": "SFTF_DrapeOverprint — 하: "
                            "드레이프된 의복 위 덧출력의 가상 재관측; "
-                           "한국섬유공학회지 투고 완료(2026-10-16, 원고번호 할당중)",
+                           "한국섬유공학회지 1차 심사 수정(2026-11-17 Rev1 제출, 26M-10-047)",
     "SFTF_UrbanTraffic": "SFTF_UrbanTraffic — 하: 한국재난정보학회논문집(KOSDI) 투고 완료(2026-09-16, 김우석 교수 측 투고). 도시 교통 가역차로 방향장 응용",
     "PFTF_GFiberCT": "PFTF_GFiberCT — 중: positive two-layer draft; "
                   "Phase 50/51C frozen evidence, B5/M1 상대 207/207 paired wins·"
@@ -729,8 +730,9 @@ QUALITY_ROWS = [
     # 2026-10-15 신설. 볼트 grade: ToDo · stage: undecided. 공개 가능한 한 줄만 싣는다(Rules §8).
     # 2026-10-16: stage submitted — 한국섬유공학회지 투고(설인환 단독, 원고번호 할당중).
     # 같은 날 등급 ToDo → 하(사용자 지정). 볼트 grade 와 같다.
+    # 2026-11-17: stage revision — 1차 심사 수정본(Rev1) 제출(26M-10-047).
     ("SFTF_DrapeOverprint", "SFTF_DrapeOverprint", "하",
-     "드레이프된 의복 위 덧출력의 가상 재관측; **2026-10-16 한국섬유공학회지 투고 완료**(설인환 단독). 원고번호 할당중"),
+     "드레이프된 의복 위 덧출력의 가상 재관측; 2026-10-16 한국섬유공학회지 투고(설인환 단독, 26M-10-047) → **2026-11-17 1차 심사 수정본(Rev1) 제출**"),
     ("DFSVR_VisCull", "DFSVR_VisCull", "ToDo",
      "DFSVR exact first-hit용 conservative BVH scalability 설계선; 값·gradient parity·거짓음성 0·end-to-end utility gate 전"),
     ("SFTFSoft_GNN_DFSVR", "SFTFSoft_GNN_DFSVR", "ToDo",
@@ -1403,7 +1405,8 @@ if preserve_extended_quality:
             "cfmsCIPC": "TSE 투고 완료 (2026-08-21, 원고번호 26M-08-030)",
             # 2026-10-16: 한국섬유공학회지 투고. 원고번호는 접수 승인 메일이 와야 생기므로 TomoSh4 처럼
             # 날짜만 적고, 번호가 오면 고친다.  볼트 badge 와 같은 문구다.
-            "SFTF_DrapeOverprint": "한국섬유공학회지 투고 완료 (2026-10-16, 원고번호 할당중)",
+            # 2026-11-17: 1차 심사 수정 — Rev1 제출(26M-10-047, 사용자). 앞 값: 「한국섬유공학회지 투고 완료 (2026-10-16, 원고번호 할당중)」
+            "SFTF_DrapeOverprint": "한국섬유공학회지 Rev1 제출 (2026-11-17, 26M-10-047) — 판정 대기",
             # 2026-11-05 투고 셋.  볼트 badge 와 같은 문구다.
             # 2026-11-12: initial screening 통과 — 심사 진입(ScholarOne Author update 메일, Tomo_SFTFSoft 11-11 과 같은 꼴).
             # 앞 값: 「RPJ 투고 완료 (2026-11-05, RPJ-11-2026-0777)」
@@ -1469,7 +1472,8 @@ if preserve_extended_quality:
             # 2026-11-08: 게재가 — 남은 것은 심사 결과를 반영한 최종본 제출(볼트 next_gate).
             "TSE_TomoSh5": "최종본 제출 (2026-11-08 게재가, 원고번호 26M-09-036, 한국섬유공학회지, 이희란 교수 교신)",
             # 2026-10-16: 투고로 「국문 원고 준비」가 닫혔다. 공개 파일이라 판정 수치는 싣지 않는다.
-            "SFTF_DrapeOverprint": "원고번호 발급 대기 (2026-10-16 한국섬유공학회지 투고) — 접수 승인 메일이 오면 배지에 적는다. 그다음은 심사 결과 대기",
+            # 2026-11-17: Rev1 제출로 「2차 판정 대기」. 공개 칸이라 심사 의견·약점은 싣지 않는다(볼트 bottleneck 과 같다).
+            "SFTF_DrapeOverprint": "2차 판정 대기",
             # 2026-11-06: 투고로 옛 병목(Prusa 전이 기술·수치 동기화)이 닫혔다.  공개 칸이라 짧게 둔다(볼트 bottleneck 과 같다).
             "Tomo_SFTFSoft": "심사 대기",
             # 2026-09-16: 볼트 노트의 bottleneck·next_gate 를 옮긴 것이다(표가 살아 있으면 표 값이 이긴다).
