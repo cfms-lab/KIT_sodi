@@ -1415,8 +1415,9 @@ if preserve_extended_quality:
             # 2026-11-18 In Screening → Under Review(사용자 확인). 앞 값: 「J. Microscopy 투고 완료 (2026-11-05, JMI-26-00455)」
             "cfmsHMDispersity": "J. Microscopy Under Review (2026-11-05 투고, JMI-26-00455)",
             # 2026-11-06 투고.  볼트 badge 와 같은 문구다.
-            # 2026-11-11 데스크 통과 — 동료심사 진입(Springer Nature 안내 메일). 앞 값: 「IJAMT 투고 완료 (2026-11-06, JAMT-S-26-11299)」
-            "Tomo_SFTFSoft": "IJAMT 동료심사 중 (2026-11-11 데스크 통과, JAMT-S-26-11299)",
+            # 2026-11-18 저널 화면 Editor Assignment Pending 8일째 · 현재 번호 JAMT-D-26-08299(사용자 확인).
+            # 앞 값(11-11, Springer 안내 메일을 데스크 통과로 읽었다): 「IJAMT 동료심사 중 (2026-11-11 데스크 통과, JAMT-S-26-11299)」
+            "Tomo_SFTFSoft": "IJAMT 편집자 배정 대기 (2026-11-06 투고, JAMT-D-26-08299)",
             # 2026-10-19: 보류(⛔) 해제 → draft(사용자). 게재지 TDP 라 「저널,상태」 꼴이다(PFTF_VisCull_kDop 과 같다).
             # 볼트 badge 와 같은 문구다.
             # 2026-10-24: 보류(성과 없음, 사용자) — 원고와 「TDP,draft」 배지는 PartialCost 가 이어받았다.
