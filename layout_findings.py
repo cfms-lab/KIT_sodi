@@ -1411,7 +1411,8 @@ if preserve_extended_quality:
             # 2026-11-12: initial screening 통과 — 심사 진입(ScholarOne Author update 메일, Tomo_SFTFSoft 11-11 과 같은 꼴).
             # 앞 값: 「RPJ 투고 완료 (2026-11-05, RPJ-11-2026-0777)」
             "SFTF_Clustering": "RPJ 동료심사 중 (2026-11-12 데스크 통과, RPJ-11-2026-0777)",
-            "cfmsDispersityProp": "M&M 투고 완료 (2026-11-05, MAM-26-327)",
+            # 2026-11-18 ScholarOne Awaiting Reviewer Selection(사용자 전달, 11-09 편집자 배정 뒤). 앞 값: 「M&M 투고 완료 (2026-11-05, MAM-26-327)」
+            "cfmsDispersityProp": "M&M 심사자 선정 대기 (2026-11-05 투고, MAM-26-327)",
             # 2026-11-18 In Screening → Under Review(사용자 확인). 앞 값: 「J. Microscopy 투고 완료 (2026-11-05, JMI-26-00455)」
             "cfmsHMDispersity": "J. Microscopy Under Review (2026-11-05 투고, JMI-26-00455)",
             # 2026-11-06 투고.  볼트 badge 와 같은 문구다.

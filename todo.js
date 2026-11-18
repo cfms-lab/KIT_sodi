@@ -62,7 +62,7 @@
 
     /* ── 내가 실측·촬영을 해야 하는 것 ────────────────────── */
     "cfmsDrapeInverse":     "직물 촬영 필요",
-    "cfmsDispersityProp":   "심사 대기",  /* M&M MAM-26-327 (2026-11-05 ScholarOne 투고) */
+    "cfmsDispersityProp":   "심사 대기",  /* M&M MAM-26-327 (2026-11-05 ScholarOne 투고 → 2026-11-09 편집자 배정 → 2026-11-18 Awaiting Reviewer Selection) */
     "cfmsHMDispersity":     "심사 대기",  /* J. Microscopy JMI-26-00455 (2026-11-05 투고, In Screening → 2026-11-18 Under Review). 10-31 보류(blocked) → 투고 */
     "Jeon_DLPOrient":       "DLP 실물 출력 시편 확보",
     "cfmsDrapeSCAN":        "마네킹 스캔 촬영 필요",
