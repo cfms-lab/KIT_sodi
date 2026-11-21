@@ -70,7 +70,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__applyOrientCert=applyOrientCert20261024;globalThis.__applyChoMoldWarpRetire=applyChoMoldWarpRetire20261027;globalThis.__applyHullRegroup=applyHullRegroup20261031;globalThis.__applyAsymTensorRetire=applyAsymTensorRetire20261101;globalThis.__applyTomoSftfPublished=applyTomoSftfPublished20261105;globalThis.__applyTomoSh5Accepted=applyTomoSh5Accepted20261108;globalThis.__applyTomoSh4Accepted=applyTomoSh4Accepted20261109;globalThis.__applyGFiberCTAccepted=applyGFiberCTAccepted20261111;globalThis.__applyBezierAccepted=applyBezierAccepted20261112;globalThis.__applySXJacobian=applySXJacobian20261114;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__applyOrientCert=applyOrientCert20261024;globalThis.__applyChoMoldWarpRetire=applyChoMoldWarpRetire20261027;globalThis.__applyHullRegroup=applyHullRegroup20261031;globalThis.__applyAsymTensorRetire=applyAsymTensorRetire20261101;globalThis.__applyTomoSftfPublished=applyTomoSftfPublished20261105;globalThis.__applyTomoSh5Accepted=applyTomoSh5Accepted20261108;globalThis.__applyTomoSh4Accepted=applyTomoSh4Accepted20261109;globalThis.__applyGFiberCTAccepted=applyGFiberCTAccepted20261111;globalThis.__applyBezierAccepted=applyBezierAccepted20261112;globalThis.__applySXJacobian=applySXJacobian20261114;globalThis.__applyDrapeOverprint=applyDrapeOverprint20261121;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -1039,6 +1039,41 @@ if (childIds(findIn(sxjNoEngine.root, "hull_drape")) !== "nf18t2n5,cfmsSXJacobia
 const sxjBare = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applySXJacobian(sxjBare)) throw new Error("SXJacobian migration must still stamp its version without the engine node");
 if (childIds(sxjBare.root) !== "n0llvuh1,cfmsSXJacobian") throw new Error("SXJacobian migration did not fall back to the root");
+
+// 2026-11-21: SFTF_DrapeOverprint 신설 — Physics-AI 가지의 SFTF_ActiveOverprint(n7hixqe5) 첫 자식. 부모의 필드·자식·접힘과
+// 관계선은 그대로, 이미 있는 노드는 건드리지 않고, 부모가 없으면 Physics-AI 가지 → root 순으로 물러나되 버전 도장은 찍는다.
+const dopSample = { root: mk("root", [
+  { id: "hull_physics_ai", title: "Physics-AI", kind: "group", children: [
+    { id: "nkbfa3m1", title: "SFTF_DynamicTargetSearch", kind: "todo", status: "blocked", children: [
+      { id: "n7hixqe5", title: "SFTF_ActiveOverprint", kind: "todo", status: "blocked", note: "AO 메모", collapsed: false,
+        children: [mk("nkj1hir1"), mk("nr8ssdt1")] },
+    ] },
+  ] },
+]), links: [{ from: "nkbfa3m1", to: "n7hixqe5", label: "계보", type: "engine" }] };
+if (!context.__applyDrapeOverprint(dopSample)) throw new Error("DrapeOverprint migration did not run");
+if (context.__applyDrapeOverprint(dopSample)) throw new Error("DrapeOverprint migration is not idempotent");
+const dopParent = findIn(dopSample.root, "n7hixqe5");
+if (childIds(dopParent) !== "SFTF_DrapeOverprint,nkj1hir1,nr8ssdt1") throw new Error(`DrapeOverprint migration put the node in the wrong place: ${childIds(dopParent)}`);
+if (dopParent.title !== "SFTF_ActiveOverprint" || dopParent.kind !== "todo" || dopParent.status !== "blocked" || dopParent.note !== "AO 메모" || dopParent.collapsed !== false) throw new Error("DrapeOverprint migration changed the parent");
+if (dopSample.links.length !== 1) throw new Error("DrapeOverprint migration touched the links");
+const dopNode = findIn(dopSample.root, "SFTF_DrapeOverprint");
+if (dopNode.kind !== "low" || dopNode.status !== "submitted" || dopNode.title !== "SFTF_DrapeOverprint"
+  || dopNode.url !== "https://github.com/cfms-lab/SFTF_DrapeOverprint_dev" || dopNode.projectPath !== "D:\\__SFTF_Projects(2026)\\SFTF_DrapeOverprint_dev") throw new Error("DrapeOverprint node has the wrong fields");
+if (/리젝|reject|심사자|reviewer/i.test(`${dopNode.brief} ${dopNode.note || ""}`)) throw new Error("DrapeOverprint node leaks review details onto the public page");
+const dopValidation = context.__validate(dopSample);
+if (!dopValidation.ok) throw new Error(`DrapeOverprint sample is invalid: ${dopValidation.errors[0]}`);
+const dopHand = { root: mk("root", [
+  { id: "n7hixqe5", title: "SFTF_ActiveOverprint", kind: "todo", children: [
+    { id: "SFTF_DrapeOverprint", title: "내가 만든 DrapeOverprint", kind: "high", status: "accepted", children: [] }] },
+]), links: [] };
+context.__applyDrapeOverprint(dopHand);
+if (childIds(findIn(dopHand.root, "n7hixqe5")) !== "SFTF_DrapeOverprint" || findIn(dopHand.root, "SFTF_DrapeOverprint").title !== "내가 만든 DrapeOverprint") throw new Error("DrapeOverprint migration touched an existing node");
+const dopNoAO = { root: mk("root", [{ id: "hull_physics_ai", title: "Physics-AI", kind: "group", children: [mk("nkbfa3m1")] }]), links: [] };
+context.__applyDrapeOverprint(dopNoAO);
+if (childIds(findIn(dopNoAO.root, "hull_physics_ai")) !== "nkbfa3m1,SFTF_DrapeOverprint") throw new Error("DrapeOverprint migration did not fall back to the Physics-AI branch");
+const dopBare = { root: mk("root", [mk("n0llvuh1")]), links: [] };
+if (!context.__applyDrapeOverprint(dopBare)) throw new Error("DrapeOverprint migration must still stamp its version without the parent");
+if (childIds(dopBare.root) !== "n0llvuh1,SFTF_DrapeOverprint") throw new Error("DrapeOverprint migration did not fall back to the root");
 
 // 2026-11-06: 진도 아이콘 색 = graph.html 노드 색(등급). 단계색으로 되돌아가거나 팔레트가 갈라지면 여기서 잡는다.
 const graphForIcons = readFileSync(new URL("../graph.html", import.meta.url), "utf8");
