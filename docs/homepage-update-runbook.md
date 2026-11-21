@@ -25,8 +25,8 @@ anon 키로는 못 읽던 `portfolio_rows`(로그인 전용)까지 보인다.
 
 | 화면 | 읽는 곳 | 사건이 바꾸는 것 |
 |---|---|---|
-| `graph.html` | 파일에 구운 값(`layout_findings.py` → `graph.html`) 위에 **`research_outputs` kind='node'** 를 덮는다(`r.id` = 그래프 노드 id). 좌표만 `graph_positions` | 단계 파이(stage) · 배지 · 등급 설명 · 병목 · 소개 |
-| `mindmap.html` | 클라우드 문서 `mindmaps`(id `cfms`) 위에 **`research_outputs` kind='node'** 를 덮는다(`mindmap_id` 또는 `id` 로 짝지음) | 노드 상태·메모. ⚠ **트리에 이미 있는 노드만** 덮는다 |
+| `graph.html` | 파일에 구운 값(`layout_findings.py` → `graph.html`) 위에 **`research_outputs` kind='node'** 를 덮는다(`r.id` = 그래프 노드 id). 좌표만 `graph_positions`. `node_parent` 가 있는데 파일에 없는 행은 부모 옆에 **붙인다**(2026-11-21~) | 단계 파이(stage) · 배지 · 등급 설명 · 병목 · 소개 · 새 노드 |
+| `mindmap.html` | 클라우드 문서 `mindmaps`(id `cfms`) 위에 **`research_outputs` kind='node'** 를 덮는다(`mindmap_id` 또는 `id` 로 짝지음) | 노드 상태·메모. 트리에 없는 노드는 `node_parent` 가 있을 때만 부모 밑에 **붙인다**(2026-11-21~) |
 | `upjuk.html` | **`research_outputs` kind='output'** (업적 행). grade='ToDo' 인 노드 행은 TODO 로 보인다 | 업적 목록·배지(Submit/Accept/…) |
 | `portfolio.html` | **`portfolio_rows`** (로그인 필요). 볼트에서 생성 | 단계 · 저널 · 투고순서 · 완성도 · 다음 게이트 |
 | `todo.js` (graph · portfolio 가 읽는다) | **`todo_lines`** (anon 읽기, 2026-11-21~). 볼트 노트 `todo:` · 대시보드 분리트랙 `할일:` 에서 생성 | 그래프·포트폴리오의 「ToDo」 한 줄(DB 의 병목 · 다음 게이트 문장보다 먼저 쓴다) |
@@ -42,6 +42,7 @@ anon 키로는 못 읽던 `portfolio_rows`(로그인 전용)까지 보인다.
 | 키 | 투고 때 | 비고 |
 |---|---|---|
 | `stage` | `submitted` | 어휘: published inprint accepted revision2 revision submitted draft undecided blocked cancelled idea (2026-11-15 revision2 = 2차 심사 수정) |
+| `node_parent` · `node_hull` | **새 노드일 때만** — `SFTF_ActiveOverprint` · `Physics-AI` | 화면에 아직 없는 노드를 세운다(2026-11-21~, 아래 「새 노드」). 부모는 노트 이름 · `mindmap_id` · graph 노드 id · 분리 트랙 이름, 훌은 graph 훌 이름(「이희란 교수님」 꼴, 골라서). `mindmap_id` 도 적는다(새 노트는 노트 이름) |
 | `badge` | `"한국섬유공학회지 투고 완료 (2026-10-16, 원고번호 할당중)"` | 그래프 배지로 그대로 뜬다 |
 | `submission` · `next_gate` · `bottleneck` | 투고 사실 · 「원고번호 발급 대기」 · 「심사 대기 …」 | 병목은 그래프 「남은 병목」 |
 | `todo` | `"심사 대기"` | 저자 관점 한 줄 — graph · portfolio 「ToDo」 칸. **공개 읽기**라 리젝 · 심사 경위 · 연락처 · 원고별 주소를 쓰지 않는다(발행기가 막는다). `""` 는 「할 일 없음」, 키를 지우면 화면이 옛 문장(병목 · 다음 게이트)으로 떨어진다 |
@@ -56,7 +57,8 @@ anon 키로는 못 읽던 `portfolio_rows`(로그인 전용)까지 보인다.
 ### ② 표에 행이 있는지 읽어 본다
 
 있으면 UPDATE, 없으면 INSERT 다. **새 프로젝트는 노드 행도 업적 행도 없는 경우가 많다**
-(그래프 노드와 좌표만 세워 둔 상태). MCP 가 붙어 있으면 `execute_sql` 에 select 하나로 끝난다:
+(그래프 노드와 좌표만 세워 둔 상태). 노드 행은 노트에 `node_parent` 를 적으면 ③ (나) 의 발행 SQL 이 만든다(2026-11-21~) —
+손 INSERT 는 그 칸을 안 쓰는 노드(분리 트랙 등)만. MCP 가 붙어 있으면 `execute_sql` 에 select 하나로 끝난다:
 
 ```sql
 select id, kind, stage, mindmap_id, papers_id from public.research_outputs
@@ -81,7 +83,8 @@ console.log(await q("research_outputs?kind=eq.output&select=id,papers_id&order=p
 
 **(가) 손으로 쓰는 것** — `tmp/research-outputs-{날짜}-{이름}.sql` (`tmp/` 는 gitignore)
 
-- **노드 행이 없으면 INSERT**: `id` = `mindmap_id` = `vault_note` = 노트 이름, `kind='node'`, 값은 볼트
+- **노드 행이 없으면 INSERT** — 2026-11-21 부터는 노트에 `node_parent` 를 적는 것이 먼저다(발행 SQL 이 만든다). 손으로 쓸 때는
+  `id` = `mindmap_id` = `vault_note` = 노트 이름, `kind='node'`, 값은 볼트
   frontmatter 그대로(grade·badge·grade_note·bottleneck·brief·repository→url·path→project_path).
   선례: `Cho_MoldWarpDIC`(볼트 `tmp/publish-2026-09-22.sql`), `SFTF_DrapeOverprint`(이 저장소 `tmp/`, 10-16).
 - **업적 행이 없으면 INSERT**: `id = 'p{다음 번호}'`, `papers_id` 같은 번호, `kind='output'`,
@@ -155,7 +158,16 @@ SQL 만으로 바뀌지 않는 것들이다. 필요하면 고쳐서 커밋·푸�
     `NODE_TITLES` 문구가 graph.html 의 현재 문구보다 새로운지 확인한다(2026-10-16 발견).
   - 재생성 뒤에는 HEAD 와 상수별(`RAW_NODES` · `QUALITY_ROWS` · `STATUS_BADGES` · `VAULT_STAGES` · `POS` …)로
     키를 비교해 **의도한 노드만** 바뀌었는지 보고, 두 번 돌려 해시가 같은지 본다.
-- **마인드맵** — 트리에 노드가 없으면 표만으로는 안 뜬다. `mindmap.html` 에
+- **새 노드** (2026-11-21~) — 노트에 `node_parent:`(와 graph 훌 `node_hull:`)를 적고 ③ (나) 로 보내면 끝이다. 발행 SQL 이
+  노드 행을 만들고(부모 칸이 있는 노트만), graph 는 부모 옆 빈자리(저장 좌표가 있으면 그 자리)에 부모 → 자식 선과 훌까지,
+  mindmap 은 부모 밑 끝(부모가 문서에 없으면 훌 이름의 최상위 가지 밑)에 붙인다. 생성기 재생성 · 마이그레이션 · 커밋이 없다.
+  - 자리는 graph 에서 끌어 놓고 **노드 저장**, mindmap 에서는 옮기면 문서에 들어간다. mindmap 에서 지우면 문서
+    `dismissedTableNodes` 가 기억해 다시 붙이지 않는다(이 기능 전에 지운 15개는 `TABLE_NODE_SEED_DISMISSED`).
+  - 발행기가 멈추는 때: 부모 · 훌 이름이 틀림, `mindmap_id` 없음, 생성기 `HIDDEN_NODE_IDS` 로 내린 노드(자신이든 부모든).
+    `homepage: hidden` 노트는 부모 칸을 비워 보낸다.
+  - 선 캡션 · 곡률 · graph3d 노출까지 다듬으려면 예전처럼 생성기에 노드를 굽는다 — 그러면 화면은 「이미 있다」로 보고 붙이지 않는다.
+    가드는 `scripts/check-table-nodes.mjs` 와 `check-mindmap-html.mjs`.
+- **마인드맵 구조를 바꿀 때**(노드를 옮기거나 합치기 · 개명 · 관계선) — 여전히 `mindmap.html` 에
   `apply{이름}{YYYYMMDD}(data)` 마이그레이션을 넣고 호출부 넷(기본 DATA 체인 · loadDoc · catch 폴백 ·
   importJSON)에 끼운 뒤 `APP_VERSION` 을 올린다. `scripts/check-mindmap-html.mjs` 에 검사를 더한다.
   배포 뒤 로그인한 사용자가 페이지를 열어야 클라우드 문서에 저장된다.

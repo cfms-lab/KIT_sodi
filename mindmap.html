@@ -177,7 +177,7 @@
 <script src="stages.js"></script>
 <script>
 /* ====================== 버전 (배포 확인용) ====================== */
-const APP_VERSION='v2026-11-21-stages-js';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
+const APP_VERSION='v2026-11-21-table-nodes';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
 
 /* ====================== 기본 데이터 (첫 실행 시드) ====================== */
 const DEFAULT_DATA = /*DATA_START*/{"version":1,"title":"CFMS 프로젝트 관계도 2026","showRel":true,"root":{"id":"root","title":"CFMS 연구실 2026","kind":"root","note":"두 워크스페이스의 세부 프로젝트 관계도","children":[{"id":"sftf","title":"__SFTF_Projects(2026)","kind":"group","note":"3D 프린팅 Support Flow Tensor Field 연구군 (D:\\__SFTF_Projects(2026))","children":[{"id":"tomo_sftf","title":"Tomo_SFTF_dev","kind":"core","status":"active","note":"SFTF 본체: 빌드방향 후보 생성(coarse-to-refine) + TOMO_CPU/GPU 엔진(DLL). 표준 템플릿의 기원."},{"id":"clustering","title":"SFTF_Clustering_dev","kind":"app","status":"active","note":"면별 SFTF 특징 → 출판지향 메쉬 분할(clustering). 한국섬유공학회지 투고."},{"id":"derivative","title":"SFTF_Derivative_dev","kind":"app","status":"active","note":"미분가능 SFTF 손실항 + GNN + 경사기반 빌드방향 최적화. TOMO 교차검증."},{"id":"composite","title":"SFTF_Composite_dev","kind":"app","status":"stub","note":"복합재 적용 (신규 스캐폴드)."},{"id":"injmold","title":"SFTF_InjMold_dev","kind":"app","status":"stub","note":"사출성형 적용 (신규 스캐폴드)."}]},{"id":"vscode","title":"__VSCode_Projects","kind":"group","note":"의복 CAD·영상계측·랩 웹앱·인프라 (D:\\__VSCode_Projects)","children":[{"id":"cadsuite","title":"의복 CAD 스위트","kind":"subgroup","note":"Clo3D 오픈소스 대안","children":[{"id":"cfmscad","title":"cfmsCAD2026_dev","kind":"app","status":"active","note":"3D 의복 CAD 에디터 (UI/패턴)."},{"id":"cfmsdrape","title":"cfmsDrape2026_dev","kind":"app","status":"active","note":"암시적 옷감 드레이프 솔버(DLL). SCAD/GarmentCode 입력, 인체 충돌·자기충돌."},{"id":"cfmssew","title":"cfmsSew2026_dev","kind":"app","status":"active","note":"2D 패턴 봉제대응 자동인식(휴리스틱→GNN). CAD/Drape에 병합 예정."},{"id":"cfmsshared","title":"cfmsShared2026_dev","kind":"infra","status":"infra","note":"CAD↔Drape 인터페이스 단일진실(contract/messages) 공유 git 채널."}]},{"id":"measure","title":"영상 계측","kind":"subgroup","children":[{"id":"dispersity","title":"cfmsDispersityKNN_Dev","kind":"app","status":"active","note":"광학현미경 입자 분산도 정량화(정적 kNN 에너지). C++Builder(Baraff 클로스심) 포팅."},{"id":"sem","title":"TSE_SEM2026_dev","kind":"app","status":"active","note":"SEM 섬유 영상 정량화(반지름·배향·기공) + metaball 3D 재구성."}]},{"id":"webapps","title":"랩 웹앱 (cfms-lab/KIT_sodi · Supabase)","kind":"subgroup","children":[{"id":"upjuk","title":"논문관리 (upjuk)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/upjuk.html","note":"업적 리스트 CRUD + PDF. draft는 RLS로 비로그인 숨김."},{"id":"timetable","title":"수업시간표 (TimeTable)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/timetable.html","note":"학기별 시간표 드래그 편성."},{"id":"jobgis","title":"취업현황 (JobGIS)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/jobgis.html","note":"졸업생 취업처 지도."},{"id":"mindmap","title":"이 관계도 (Mindmap)","kind":"web","status":"active","note":"프로젝트 관계도 (이 페이지, 로그인 전용)."}]},{"id":"infra","title":"인프라/템플릿","kind":"subgroup","children":[{"id":"template","title":"__vscode_AI_template","kind":"infra","status":"infra","note":"표준 프로젝트 템플릿(코드+논문, uv/xelatex/훅). 모든 *_dev의 기반. Tomo_SFTF에서 기원."},{"id":"hooks","title":"__클로드코드_훅설정","kind":"infra","status":"infra","note":"Claude Code 전역 훅 설정."}]}]}]},"links":[{"from":"tomo_sftf","to":"clustering","label":"코어 분리"},{"from":"tomo_sftf","to":"derivative","label":"코어 재사용"},{"from":"tomo_sftf","to":"composite","label":"파생"},{"from":"tomo_sftf","to":"injmold","label":"파생"},{"from":"clustering","to":"derivative","label":"코드 재사용"},{"from":"tomo_sftf","to":"template","label":"템플릿 기원"},{"from":"cfmsshared","to":"cfmscad","label":"contract"},{"from":"cfmsshared","to":"cfmsdrape","label":"contract"},{"from":"cfmssew","to":"cfmscad","label":"병합 예정"},{"from":"cfmssew","to":"cfmsdrape","label":"병합 예정"},{"from":"derivative","to":"cfmsdrape","label":"드레이프 응용 연계"},{"from":"dispersity","to":"cfmsdrape","label":"클로스심 계보"}]}/*DATA_END*/;
@@ -1743,6 +1743,73 @@ function applyDrapeOverprint20261121(data){
   data.drapeOverprintVersion=DRAPE_OVERPRINT_VERSION;
   return true;   // 버전 상승 자체도 클라우드 문서에 저장해야 재실행되지 않는다.
 }
+/* ====== 표에서 노드 붙이기 (2026-11-21, 사용자 지시 — 「새 노드를 표에서 자동으로」) ======
+   볼트 노트에 node_parent:(와 node_hull:)를 적고 발행하면 research_outputs 노드 행에 그 칸이 채워진다(schema_node_parent.sql).
+   그 행의 노드가 이 문서에 없으면 overlayFromTable 이 이 함수로 붙인다 — 이제 새 논문 노드에 applyXxx 마이그레이션이 필요 없다.
+   · 자리: 부모 밑 끝. 부모는 그 이름의 행의 mindmap_id → 같은 id 의 노드 → 같은 제목의 노드 순으로 찾는다. 부모가 문서에 없으면
+     node_hull 과 이름이 같은 최상위 가지(「이희란 교수님」 = 「이희란 교수님방」) 밑, 그것도 없으면 붙이지 않는다.
+   · 부모도 같은 묶음의 새 노드면 부모부터 붙인다.
+   · 사용자가 지운 노드는 data.dismissedTableNodes 에 남아(del() 이 rememberDismissed 로 적는다) 다시 붙이지 않는다.
+   · 칸이 빈 행은 건드리지 않는다 — 노드 행 104개 가운데 이 문서에 없는 것(내린 노드 · graph 전용 등)이 쏟아지면 안 된다.
+   붙인 노드는 화면에만 있다가, 로그인한 사용자가 무엇이든 고쳐 저장하면 문서에 들어간다 — 그 뒤로는 사용자가 옮긴 자리가 정본이다.
+   kindOf · statusOf 는 등급 · 단계 → 이 페이지 칸(GRADE_TO_KIND · STAGE_TO_NODE)이다 — 순수 구역 밖이라 부르는 쪽이 넘긴다. */
+/* 이 기능 전에 지도에서 지운(또는 처음부터 안 둔) 노드 — 2026-11-21 에 표에는 노드 행이 있는데 문서에 없던 15개 id(행 id · mindmap_id).
+   SFTF_HeatMethod(nro5uca3)처럼 사용자가 일부러 지운 것이라, 나중에 그 노트에 node_parent 가 적혀도 되살리지 않는다.
+   다시 띄우려면 여기서 뺀다(그 뒤 지운 것은 문서의 dismissedTableNodes 가 기억한다). */
+const TABLE_NODE_SEED_DISMISSED=['cfmsPINNCAD','npp8yov2','cfmsAutoPlace','nqrynfe1','TSE_SEM','cfmsAutoPlace_1','cfmsAutoPlace_2',
+  'nsrsy6g1','SFTF_HeatMethod','nro5uca3','na25mau3','PFTF_ResearchOptimize','gx_pftf_researchoptimize','nrl6vop4','Cho_MoldWarpDIC'];
+function tableHullKey(v){ return String(v||'').replace(/\s+/g,'').replace(/방$/,'').replace(/교수님$/,'').toLowerCase(); }
+function attachTableNodes(data, rows, opts){
+  if(!data||!data.root||!Array.isArray(rows)) return [];
+  const root=data.root;
+  const kindOf=(opts&&opts.kindOf)||(()=> 'todo');
+  const statusOf=(opts&&opts.statusOf)||(()=> 'draft');
+  const dismissed=new Set((data.dismissedTableNodes||[]).concat(TABLE_NODE_SEED_DISMISSED));
+  const byId=new Map(); rows.forEach(r=>{ if(r&&r.id) byId.set(r.id,r); });
+  const byTitle=new Map(); walk(root,n=>{ if(n.title&&!byTitle.has(n.title)) byTitle.set(n.title,n); });
+  const keyOf=r=>r.mindmap_id||r.id;
+  const present=r=>!!(findNode(root,keyOf(r))||findNode(root,r.id)||byTitle.has(r.id)||(r.vault_note&&byTitle.has(r.vault_note)));
+  const parentOf=name=>{
+    const pr=byId.get(name);
+    return (pr&&pr.mindmap_id&&findNode(root,pr.mindmap_id))||findNode(root,name)||byTitle.get(name)||null;
+  };
+  const branchOf=label=>{
+    if(!label) return null;
+    const k=tableHullKey(label);
+    return (root.children||[]).find(c=>tableHullKey(c.title)===k)||null;
+  };
+  const added=[];
+  const insert=(r,parent)=>{
+    const node={id:keyOf(r),title:r.title||r.vault_note||r.id,kind:kindOf(r),status:statusOf(r),fromTable:true,children:[]};
+    if(r.brief) node.brief=r.brief;
+    if(r.url) node.url=r.url;
+    if(r.project_path) node.projectPath=r.project_path;
+    (parent.children||(parent.children=[])).push(node);
+    if(!byTitle.has(node.title)) byTitle.set(node.title,node);
+    added.push(node.id);
+  };
+  let pending=rows.filter(r=>r&&r.id&&r.node_parent&&!dismissed.has(keyOf(r))&&!dismissed.has(r.id)&&!present(r));
+  let progress=true;
+  while(pending.length&&progress){
+    progress=false;
+    pending=pending.filter(r=>{
+      if(present(r)) return false;                     // 같은 묶음에 같은 노드가 두 번 온 경우
+      const parent=parentOf(r.node_parent);
+      if(!parent) return true;
+      insert(r,parent); progress=true; return false;
+    });
+  }
+  pending.forEach(r=>{ const branch=branchOf(r.node_hull); if(branch&&!present(r)) insert(r,branch); });
+  return added;
+}
+/* 지운 노드 기억 — del() 이 지운 하위 트리의 id 가운데 표에서 붙일 수 있는 것(붙인 노드 · 부모 칸이 있는 행의 노드)을 남긴다.
+   되돌리기(Ctrl+Z)는 문서 전체를 되돌리므로 이 목록도 같이 돌아간다. */
+function rememberDismissed(data, ids){
+  const list=data.dismissedTableNodes||(data.dismissedTableNodes=[]);
+  let n=0;
+  ids.forEach(id=>{ if(id&&!list.includes(id)){ list.push(id); n++; } });
+  return n;
+}
 //==PURE_END
 
 /* ====================== Supabase 설정/세션 (upjuk과 공유) ====================== */
@@ -2223,8 +2290,11 @@ function del(){
   if(!confirm('이 노드와 하위 노드를 삭제할까요? (Ctrl+Z로 되돌릴 수 있습니다)')) return;
   pushHistory();
   const ids=new Set(); const n=findNode(DATA.root,sel); if(n) walk(n,x=>ids.add(x.id));
+  // 2026-11-21: 표에서 붙인(또는 붙일 수 있는) 노드는 다음 로딩 때 되살아나지 않도록 기억한다 — attachTableNodes 주석.
+  const tableIds=[...ids].filter(id=>TABLE_NODE_KEYS.has(id)||(findNode(DATA.root,id)||{}).fromTable);
   deleteNode(DATA.root, sel);
   DATA.links=(DATA.links||[]).filter(l=>!ids.has(l.from)&&!ids.has(l.to));
+  if(tableIds.length&&rememberDismissed(DATA,tableIds)) toast('표에서 붙는 노드라 다시 붙이지 않도록 기억했습니다 (Ctrl+Z로 취소)');
   sel=null; scheduleSave(); render(); renderEdit();
 }
 
@@ -2320,6 +2390,7 @@ const STAGE_TO_NODE={published:'published',inprint:'inprint',accepted:'accepted'
   cancelled:'cancelled'};
 
 /** 표에서 노드 값을 읽어 트리에 덮어쓴다. 저장하지 않는다(화면에만 반영). */
+const TABLE_NODE_KEYS=new Set();   // 부모 칸(node_parent)이 있는 행의 id · mindmap_id — del() 이 「지운 것 기억」에 쓴다
 async function overlayFromTable(){
   let rows;
   try{ rows=await api('/rest/v1/research_outputs?kind=eq.node&select=*',{headers:authHeaders(true)}); }
@@ -2327,6 +2398,11 @@ async function overlayFromTable(){
   if(!Array.isArray(rows)||!rows.length) return 0;
   const byMm=new Map(), byId=new Map();
   rows.forEach(r=>{ if(r.mindmap_id)byMm.set(r.mindmap_id,r); byId.set(r.id,r); });
+  // 2026-11-21: node_parent 가 있는 행의 노드가 문서에 없으면 먼저 붙인다(attachTableNodes) — 아래 덮어쓰기가 그 노드도 칠한다.
+  TABLE_NODE_KEYS.clear();
+  rows.forEach(r=>{ if(r.node_parent){ TABLE_NODE_KEYS.add(r.id); if(r.mindmap_id) TABLE_NODE_KEYS.add(r.mindmap_id); } });
+  const attached=attachTableNodes(DATA,rows,{kindOf:r=>GRADE_TO_KIND[r.grade]||'todo',statusOf:r=>STAGE_TO_NODE[r.stage]||'draft'});
+  if(attached.length) console.info('mindmap: 표에서 붙인 노드 '+attached.length+'개 —',attached.join(', '));
   let n=0;
   walk(DATA.root,node=>{
     if(node.id==='root')return;
@@ -2452,6 +2528,7 @@ async function login(){
     SESSION={access_token:r.access_token,refresh_token:r.refresh_token,email};
     localStorage.setItem("cfms_session",JSON.stringify(SESSION));
     toast('로그인되었습니다. 이제 편집할 수 있습니다.'); renderAuthbar(); applyPerms(); await loadDoc();
+    if(await overlayFromTable()){ render(); renderEdit(); }   // 2026-11-21: 문서를 새로 읽으면 표 값 · 표에서 붙인 노드도 다시
   }catch(e){ toast('로그인 실패: 이메일/비밀번호 확인'); }
 }
 async function logout(){
@@ -2459,6 +2536,7 @@ async function logout(){
   renderAuthbar(); applyPerms(); setSaveState('');
   toast('로그아웃되었습니다. 열람 모드로 전환합니다.');
   await loadDoc();                                  // 저장 안 된 로컬 변경을 버리고 클라우드 정본을 다시 읽는다
+  if(await overlayFromTable()){ render(); renderEdit(); }
 }
 function renderAuthbar(){
   const bar=document.getElementById('authbar');

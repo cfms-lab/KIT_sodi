@@ -50,6 +50,14 @@ Supabase `todo_lines` 로 올리고, `todo.js` 는 그 표를 받아 오는 로�
 표는 **anon 읽기**라 발행기 `공개금지()` 가 리젝 · 심사 경위 · 이메일 · 주소 같은 낱말을 막는다. 키는 노트 · 트랙 이름
 (research_outputs 노드 행 id 와 다르다 — TSE_SEM 트랙 · TSE_TomoSh4/5).
 
+## 새 노드 — 노트의 node_parent
+
+2026-11-21 부터 새 논문 노드는 **볼트 노트에 `node_parent:`(와 graph 훌 `node_hull:`)를 적고 `--sql --only 이름` 으로 보내면** 끝이다.
+발행 SQL 이 노드 행을 만들고(부모 칸이 있는 노트만), graph 는 부모 옆에 선 · 훌과 함께, mindmap 은 부모 밑에 로딩 때 붙인다 —
+생성기 재생성 · applyXxx 마이그레이션 · 커밋이 필요 없다. 칸이 빈 행(기존 104개)은 아무 일도 없다. mindmap 에서 지운 노드는
+문서 `dismissedTableNodes`(그 전 것은 `TABLE_NODE_SEED_DISMISSED`)가 기억한다. 생성기 `HIDDEN_NODE_IDS` 노드에 부모 칸이 있으면
+발행기가 멈춘다. 절차는 [docs/homepage-update-runbook.md](docs/homepage-update-runbook.md) ⑤ 「새 노드」, 표 칸은 `schema_node_parent.sql`.
+
 ## 공저자 색 · 훌(그룹) 재편
 
 upjuk 저자 이름 배경(2026-11-13~, 전에는 행 배경)·portfolio 공저자 이름 배경·graph 훌 면색·mindmap 노드 면색은

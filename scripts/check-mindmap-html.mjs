@@ -70,7 +70,7 @@ const pureMatch = html.match(/\/\/==PURE_START([\s\S]*?)\/\/==PURE_END/);
 if (!pureMatch) throw new Error("mindmap.html pure model section is missing");
 const context = {};
 runInNewContext(
-  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__applyOrientCert=applyOrientCert20261024;globalThis.__applyChoMoldWarpRetire=applyChoMoldWarpRetire20261027;globalThis.__applyHullRegroup=applyHullRegroup20261031;globalThis.__applyAsymTensorRetire=applyAsymTensorRetire20261101;globalThis.__applyTomoSftfPublished=applyTomoSftfPublished20261105;globalThis.__applyTomoSh5Accepted=applyTomoSh5Accepted20261108;globalThis.__applyTomoSh4Accepted=applyTomoSh4Accepted20261109;globalThis.__applyGFiberCTAccepted=applyGFiberCTAccepted20261111;globalThis.__applyBezierAccepted=applyBezierAccepted20261112;globalThis.__applySXJacobian=applySXJacobian20261114;globalThis.__applyDrapeOverprint=applyDrapeOverprint20261121;globalThis.__validate=validate;`,
+  `${pureMatch[1]}\nglobalThis.__applyVaultGrades=applyVaultGrades20260901;globalThis.__applyLinkDirection=applyLinkDirection20260907;globalThis.__applyHolonomySplit=applyHolonomySplit20260907;globalThis.__applyHipDetectSplit=applyHipDetectSplit20260910;globalThis.__applyLeeRoomGather=applyLeeRoomGather20260911;globalThis.__applyGFiberCTRename=applyGFiberCTRename20260911;globalThis.__applyEunRoomAsymTensor=applyEunRoomAsymTensor20260916;globalThis.__applyResearchOptimizeRetire=applyResearchOptimizeRetire20260918;globalThis.__applyTomoShTracks=applyTomoShTracks20260921;globalThis.__applyVaultStages=applyVaultStages20260922;globalThis.__applyDispersityGrades=applyDispersityGrades20260925;globalThis.__applyDispersityKNNRename=applyDispersityKNNRename20260924;globalThis.__applyTomoSftfAccepted=applyTomoSftfAccepted20261007;globalThis.__applyDrapePriorPublished=applyDrapePriorPublished20261031;globalThis.__applyTensorSubmitted=applyTensorSubmitted20261009;globalThis.__applyHipDetectMerge=applyHipDetectMerge20261023;globalThis.__applyTensorAccepted=applyTensorAccepted20261023;globalThis.__applyBezierSeedFix=applyBezierSeedFix20261023;globalThis.__applyAutoTunePathFix=applyAutoTunePathFix20261023;globalThis.__applyPartialCost=applyPartialCost20261024;globalThis.__applyOrientCert=applyOrientCert20261024;globalThis.__applyChoMoldWarpRetire=applyChoMoldWarpRetire20261027;globalThis.__applyHullRegroup=applyHullRegroup20261031;globalThis.__applyAsymTensorRetire=applyAsymTensorRetire20261101;globalThis.__applyTomoSftfPublished=applyTomoSftfPublished20261105;globalThis.__applyTomoSh5Accepted=applyTomoSh5Accepted20261108;globalThis.__applyTomoSh4Accepted=applyTomoSh4Accepted20261109;globalThis.__applyGFiberCTAccepted=applyGFiberCTAccepted20261111;globalThis.__applyBezierAccepted=applyBezierAccepted20261112;globalThis.__applySXJacobian=applySXJacobian20261114;globalThis.__applyDrapeOverprint=applyDrapeOverprint20261121;globalThis.__attachTableNodes=attachTableNodes;globalThis.__rememberDismissed=rememberDismissed;globalThis.__SEED=TABLE_NODE_SEED_DISMISSED;globalThis.__validate=validate;`,
   context,
 );
 const sampleNodes = [...new Set(Object.values(expectedVaultGrades).map(([mindmapId]) => mindmapId))]
@@ -1197,6 +1197,59 @@ if (!html.includes("if(r.stage)TABLE_STAGE.set(node.id,r.stage); else TABLE_STAG
   throw new Error("overlayFromTable must record the table stage and vault-backed paper nodes for the icons");
 }
 if (/PROG_GREEN|PROG_YELLOW|PROG_RED|progColor/.test(html)) throw new Error("mindmap.html still has stage colours for progress icons");
+
+// 표에서 노드 붙이기 (2026-11-21, 3단계). 부모 칸(node_parent)이 있는 행만, 부모 밑(없으면 같은 이름의 최상위 가지 밑)에 붙이고,
+// 지운 노드(문서 dismissedTableNodes · 씨앗 목록)와 이미 있는 노드는 건너뛴다. 부모도 새 노드면 부모부터.
+{
+  const mk = (id, title, children = []) => ({ id, title, kind: "todo", status: "draft", children });
+  const doc = {
+    root: mk("root", "root", [
+      mk("hull_physics_ai", "Physics-AI", [mk("n7hixqe5", "SFTF_ActiveOverprint")]),
+      mk("nffg4ou5", "은종현 교수님방", [mk("nro9xxxx", "SFTF_Composite")]),
+      mk("SFTF_DrapeOverprint", "SFTF_DrapeOverprint"),
+    ]),
+    links: [],
+    dismissedTableNodes: ["ZZ_Gone"],
+  };
+  const rows = [
+    { id: "SFTF_ActiveOverprint", mindmap_id: "n7hixqe5", grade: "ToDo", stage: "blocked" },
+    { id: "ZZ_Grand", mindmap_id: "ZZ_Grand", grade: "하", stage: "draft", node_parent: "ZZ_Child" },       // 부모가 같은 묶음의 새 노드
+    { id: "ZZ_Child", mindmap_id: "ZZ_Child", vault_note: "ZZ_Child", grade: "중", stage: "submitted", brief: "소개",
+      url: "https://example.org/r", project_path: "D:/x", node_parent: "SFTF_ActiveOverprint", node_hull: "Physics-AI" },
+    { id: "ZZ_Hull", mindmap_id: "ZZ_Hull", grade: "하", stage: "draft", node_parent: "Nope", node_hull: "은종현 교수님" },
+    { id: "ZZ_Lost", mindmap_id: "ZZ_Lost", grade: "하", stage: "draft", node_parent: "Nope" },
+    { id: "ZZ_Gone", mindmap_id: "ZZ_Gone", grade: "하", stage: "draft", node_parent: "SFTF_ActiveOverprint" },
+    { id: "SFTF_HeatMethod", mindmap_id: "nro5uca3", grade: "ToDo", stage: "blocked", node_parent: "SFTF_Composite" },   // 씨앗
+    { id: "SFTF_DrapeOverprint", mindmap_id: "SFTF_DrapeOverprint", grade: "하", stage: "revision", node_parent: "SFTF_ActiveOverprint" },
+    { id: "ZZ_NoParent", mindmap_id: "ZZ_NoParent", grade: "하", stage: "draft" },
+  ];
+  const kinds = { 상: "high", 중: "medium", 하: "low" };
+  const opts = { kindOf: (r) => kinds[r.grade] || "todo", statusOf: (r) => (r.stage === "submitted" ? "submitted" : "draft") };
+  const added = context.__attachTableNodes(doc, rows, opts);
+  if (added.join(",") !== "ZZ_Child,ZZ_Grand,ZZ_Hull") throw new Error(`attachTableNodes added ${added.join(",")}`);
+  const find = (id) => { let hit = null, parent = null; const visit = (n, p) => { if (n.id === id) { hit = n; parent = p; } (n.children || []).forEach((c) => visit(c, n)); }; visit(doc.root, null); return { hit, parent }; };
+  const child = find("ZZ_Child");
+  if (child.parent.id !== "n7hixqe5" || child.hit.kind !== "medium" || child.hit.status !== "submitted" || !child.hit.fromTable
+    || child.hit.brief !== "소개" || child.hit.url !== "https://example.org/r" || child.hit.projectPath !== "D:/x" || child.hit.title !== "ZZ_Child") {
+    throw new Error("attachTableNodes put ZZ_Child in the wrong place or with the wrong fields");
+  }
+  if (find("ZZ_Grand").parent.id !== "ZZ_Child") throw new Error("attachTableNodes did not chain a child under a new parent");
+  if (find("ZZ_Hull").parent.id !== "nffg4ou5") throw new Error("attachTableNodes did not fall back to the hull branch");
+  for (const id of ["ZZ_Lost", "ZZ_Gone", "nro5uca3", "ZZ_NoParent"]) if (find(id).hit) throw new Error(`attachTableNodes attached ${id}`);
+  let dop = 0; const count = (n) => { if (n.id === "SFTF_DrapeOverprint") dop++; (n.children || []).forEach(count); }; count(doc.root);
+  if (dop !== 1) throw new Error("attachTableNodes duplicated a node that was already in the document");
+  if (context.__attachTableNodes(doc, rows, opts).length) throw new Error("attachTableNodes is not idempotent");
+  if (!context.__validate(doc).ok) throw new Error("attachTableNodes produced an invalid document");
+  if (!context.__SEED.includes("SFTF_HeatMethod") || !context.__SEED.includes("nro5uca3")) throw new Error("seed dismissed list lost SFTF_HeatMethod");
+  // 지운 것 기억
+  const d2 = { root: mk("root", "root") };
+  if (context.__rememberDismissed(d2, ["A", "B", "A"]) !== 2 || d2.dismissedTableNodes.join(",") !== "A,B") throw new Error("rememberDismissed");
+  if (context.__rememberDismissed(d2, ["A"]) !== 0) throw new Error("rememberDismissed is not idempotent");
+}
+if (!html.includes("const attached=attachTableNodes(DATA,rows,{kindOf:r=>GRADE_TO_KIND[r.grade]||'todo',statusOf:r=>STAGE_TO_NODE[r.stage]||'draft'});")) {
+  throw new Error("overlayFromTable must attach table nodes before overlaying");
+}
+if (!html.includes("if(tableIds.length&&rememberDismissed(DATA,tableIds))")) throw new Error("del() must remember deleted table nodes");
 
 const sampleValidation = context.__validate(sample);
 if (!sampleValidation.ok) throw new Error(`migrated sample is invalid: ${sampleValidation.errors[0]}`);

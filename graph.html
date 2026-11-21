@@ -2666,6 +2666,128 @@ function sharedNodeStage(row) {
     && row.badge === 'TDP 출판 (2026-11-05, 온라인 게재 · 권/호 미정)';
   return staleOnlineFirst ? 'inprint' : row.stage;
 }
+/* ====== 표에서 노드 붙이기 (2026-11-21, 사용자 지시 — 「새 노드를 표에서 자동으로」) ======
+   볼트 노트에 node_parent:(와 node_hull:)를 적고 발행하면 research_outputs 노드 행에 그 칸이 채워진다
+   (schema_node_parent.sql). 이 파일에 구운 노드(RAW_NODES)에 그 행이 없으면 여기서 붙인다 —
+   · 자리: 이 브라우저의 미저장 드래그 > graph_positions 의 공유 좌표 > 부모 둘레(훌만 있으면 훌 가운데 둘레)에서 이웃과 가장 먼 칸.
+     「노드 저장」을 누르면 다른 노드처럼 graph_positions 로 올라간다.
+   · 선: 부모 → 자식 하나(캡션 없음). 화살표 규칙(먼저 투고하는 편 → 나중 편)과 같은 방향이다.
+   · 훌: node_hull 이 가리키는 훌에 넣는다(「이희란」 · 「이희란 교수님」 · 「이희란 교수님방」은 같은 훌).
+   칸이 빈 행은 건드리지 않는다 — 2026-11-21 에 노드 행 104개 중 이 파일에 있는 것은 46개뿐이고, 나머지는 mindmap 전용이거나
+   내린 노드라 「표에 있으면 붙인다」로 하면 화면이 쏟아진다. 부모가 이 그래프에 없고 훌도 없으면 붙이지 않는다(mindmap 에만 뜬다).
+   선 캡션 · 곡률을 다듬거나 graph3d 에도 보이게 하려면 생성기(layout_findings.py)에 노드를 굽는다 — 그러면 이 함수는 그 노드를
+   「이미 있다」로 보고 지나간다. 구운 값은 표를 못 읽을 때의 예비값이다. */
+const TABLE_NODE_RINGS = [170, 250, 330];
+const tableHullKey = v => String(v || '').replace(/\s+/g, '').replace(/방$/, '').replace(/교수님$/, '').toLowerCase();
+function tableNodeSpot(anchor) {
+  const others = Object.values(network.getPositions());
+  let best = { x: anchor.x, y: anchor.y + TABLE_NODE_RINGS[0] }, bestScore = -Infinity;
+  TABLE_NODE_RINGS.forEach((ring, ri) => {
+    for (let k = 0; k < 12; k++) {
+      const a = Math.PI / 2 + 2 * Math.PI * k / 12;   // 아래쪽부터 시계 방향
+      const p = { x: anchor.x + ring * Math.cos(a), y: anchor.y + ring * Math.sin(a) };
+      const near = others.reduce((m, o) => Math.min(m, Math.hypot(o.x - p.x, o.y - p.y)), Infinity);
+      const score = Math.min(near, 260) - 40 * ri;        // 이웃과 멀수록, 부모와 가까운 고리일수록
+      if (score > bestScore) { bestScore = score; best = p; }
+    }
+  });
+  const grid = typeof DRAG_GRID === 'number' ? DRAG_GRID : 10;
+  return { x: Math.round(best.x / grid) * grid, y: Math.round(best.y / grid) * grid };
+}
+function tableHullCenter(hull) {
+  const pts = hull.nodes.map(id => network.getPositions([id])[id]).filter(Boolean);
+  if (!pts.length) return null;
+  return { x: pts.reduce((s, p) => s + p.x, 0) / pts.length, y: pts.reduce((s, p) => s + p.y, 0) / pts.length };
+}
+function addTableNode(r, parent, hull, spot) {
+  const grade = QUALITY_COLORS[r.grade] ? r.grade : 'ToDo';
+  const fill = QUALITY_COLORS[grade] || '#999999';
+  const border = QUALITY_BORDERS[grade] || fill;
+  const n = {
+    id: r.id, label: r.id,
+    color: { background: fill, border: border, highlight: { background: fill, border: border } },
+    size: NODE_SIZE, font: { size: 13, color: '#333333' },
+    title: r.id + ' — ' + grade + (r.brief ? '\n' + r.brief : ''),
+    community: QUALITY_COMMUNITY_IDS[grade], community_name: grade,
+    source_file: (r.vault_note || r.id) + '.md', file_type: 'concept', degree: parent ? 1 : 0,
+    _intro: r.brief || '', _project_path: r.project_path || '', _grade: grade, _stage: 'active', _horizon: 'near',
+    _level: 0, _in: parent ? 1 : 0, _out: 0, _quality: grade, _quality_note: r.grade_note || '', _bottleneck: null,
+    _graph_role: '', _finding_candidate: '', _from_table: true,
+  };
+  n._base = { title: n.title, label: n.label, shape: n.shape, borderWidth: n.borderWidth,
+              color: JSON.parse(JSON.stringify(n.color)), font: JSON.parse(JSON.stringify(n.font)) };
+  RAW_NODES.push(n);
+  NODE_BY_ID[n.id] = n;
+  QUALITY_BY_ID[n.id] = { id: n.id, label: n.id, grade: grade, note: r.grade_note || '' };   // 아래 오버라이드가 표 등급으로 다시 쓴다
+  DEGREE[n.id] = 0; NEIGH[n.id] = new Set(); PRED[n.id] = [];
+  HORIZON[n.id] = 'near'; FAMILY[n.id] = familyOf(n);
+  NODE_BORDER_COLOR[n.id] = String(border).toLowerCase();
+  nodesDS.add({
+    x: spot.x, y: spot.y, id: n.id, label: n.label, shape: 'dot', color: n.color, size: NODE_SIZE, borderWidth: 1,
+    font: { size: 18.7, color: '#333333', bold: false },
+    _community: n.community, _community_name: n.community_name, _source_file: n.source_file, _file_type: n.file_type,
+    _display_label: n.label, _graph_role: '', _finding_candidate: '', _closed: false, _degree: n.degree,
+    _project_path: n._project_path, _intro: n._intro, _quality: grade, _quality_note: n._quality_note, _bottleneck: null,
+  });
+  if (parent) {
+    const e = { from: parent.id, to: n.id, label: '', title: parent.id + ' → ' + n.id + '\n볼트 node_parent 로 표에서 붙인 선',
+                dashes: false, width: 2, color: { opacity: 0.65 }, _rel: '', _from_table: true };
+    RAW_EDGES.push(e);
+    const edgeId = RAW_EDGES.length - 1;
+    EDGE_AT[e.from + String.fromCharCode(0) + e.to] = e;
+    DEGREE[e.from] = (DEGREE[e.from] || 0) + 1; DEGREE[e.to] += 1;
+    if (NEIGH[e.from]) NEIGH[e.from].add(e.to);
+    NEIGH[e.to].add(e.from);
+    PRED[n.id].push(parent.id);
+    edgesDS.add({
+      id: edgeId, from: e.from, to: e.to, hidden: false, label: '', smooth: DEFAULT_EDGE_SMOOTH, title: e.title,
+      dashes: false, width: 2, color: dimmedEdgeColor(e), arrows: { to: { enabled: true, scaleFactor: 1.0 } },
+    });
+  }
+  LEVEL[n.id] = parent ? (LEVEL[parent.id] || 0) + 1 : 0;
+  if (hull && !hull.nodes.includes(n.id)) hull.nodes.push(n.id);
+  return n;
+}
+/* 행 목록을 받아 붙일 것만 붙이고 붙인 id 를 돌려준다. 부모가 같은 묶음의 새 노드면 부모부터 붙인다. */
+async function attachTableNodes(rows, url, key) {
+  const pending = (rows || []).filter(r => r && r.id && r.node_parent && !NODE_BY_ID[r.id]
+    && !RAW_NODES.some(n => n.label === r.id));
+  if (!pending.length) return [];
+  const shared = {};
+  try {   // 위 좌표 동기화(GRAPH_POSITION_SYNC)는 로딩 때 이 파일이 아는 노드만 받는다 — 새 노드의 좌표는 여기서 받는다.
+    const list = pending.map(r => '"' + String(r.id).replace(/"/g, '') + '"').join(',');
+    const res = await fetch(url + '/rest/v1/graph_positions?select=id,x,y&id=in.(' + encodeURIComponent(list) + ')', {
+      headers: { apikey: key, Authorization: 'Bearer ' + key },
+    });
+    if (res.ok) (await res.json()).forEach(p => { if (p && p.id) shared[p.id] = { x: p.x, y: p.y }; });
+  } catch (e) { /* 오프라인 — 부모 둘레에 놓는다 */ }
+  const added = [];
+  const parentOf = r => NODE_BY_ID[r.node_parent] || RAW_NODES.find(n => n.label === r.node_parent) || null;
+  const hullOf = r => (r.node_hull ? hyperedges.find(h => tableHullKey(h.label) === tableHullKey(r.node_hull)) : null) || null;
+  const place = (r, parent, hull) => {
+    const anchor = parent ? network.getPositions([parent.id])[parent.id] : tableHullCenter(hull);
+    if (!anchor) return false;
+    const spot = savedPos[r.id] || shared[r.id] || tableNodeSpot(anchor);
+    addTableNode(r, parent, hull, spot);
+    added.push(r.id);
+    return true;
+  };
+  let progress = true;
+  while (pending.length && progress) {
+    progress = false;
+    for (let i = pending.length - 1; i >= 0; i--) {
+      const parent = parentOf(pending[i]);
+      if (!parent) continue;
+      if (place(pending[i], parent, hullOf(pending[i]))) progress = true;
+      pending.splice(i, 1);
+    }
+  }
+  pending.forEach(r => {   // 부모가 이 그래프에 없다 — 훌이 있으면 훌 가운데 둘레에 선 없이 놓는다
+    const hull = hullOf(r);
+    if (hull) place(r, null, hull);
+  });
+  return added;
+}
 (async function () {
   const normUrl = u => (u || "").trim().replace(/\/+$/, "").replace(/\/rest\/v1$/i, "").replace(/\/auth\/v1$/i, "").replace(/\/+$/, "");
   const BAKED_URL = "https://ijutjirouxgqcldjyhma.supabase.co";
@@ -2679,6 +2801,8 @@ function sharedNodeStage(row) {
     if (!res.ok) return;
     const rows = await res.json();
     if (!Array.isArray(rows) || !rows.length) return;
+    // 표에만 있는 새 노드(node_parent 가 있는 행)를 먼저 붙인다 — 그래야 아래가 그 노드의 등급 · 단계 · 배지 · 소개도 칠한다.
+    const attached = await attachTableNodes(rows, url, key);
     let touched = false;
     rows.forEach(r => {
       const n = NODE_BY_ID[r.id];
@@ -2723,6 +2847,10 @@ function sharedNodeStage(row) {
     syncQualityBoard();
     applyStageSizes();      // 위 갱신 뒤에도 지름을 NODE_SIZE 로 맞춰 둔다
     network.redraw();
+    if (attached.length) {
+      applyEdgeVisibility();   // 새 선도 「에지」 토글 · 숨은 노드 규칙을 따른다(다시 그리기 포함)
+      console.info('graph: 표에서 붙인 노드 ' + attached.length + '개 —', attached.join(', '));
+    }
   } catch (e) { /* 오프라인/미설치 — 내장 데이터로 동작 */ }
 })();
 /* ToDo 한 줄은 todo.js 가 Supabase todo_lines 에서 받아 온다(2026-11-21~, 사용자 지시 — 정본은 볼트 노트 todo: ·

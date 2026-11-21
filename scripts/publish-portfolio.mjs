@@ -20,6 +20,9 @@
 //   · Projects/*.md 의 frontmatter          (등급·투고·게이트·소개·공저자·완성도)
 //   · Dashboards/프로젝트현황.md 의 dataviewjs (투고순서 맵·분리트랙·투고 단계 해석 규칙)
 //
+// 새 노드도 여기서 태어난다(2026-11-21~) — 노트에 `node_parent:`(와 graph 훌 `node_hull:`)가 있으면 노드 행이 없을 때
+//   만들고, graph · mindmap 이 로딩 때 부모 옆 · 부모 밑에 붙인다(schema_node_parent.sql). 칸이 빈 노트는 전처럼 UPDATE 만.
+//
 // ToDo 한 줄(graph·portfolio 의 「ToDo」 칸)도 같이 올린다(2026-11-21~, 전에는 KIT_sodi todo.js 에 손으로 적었다) —
 //   · 노트: frontmatter `todo:`  · 분리 트랙: 대시보드 분리트랙 항목의 `할일:`
 //   표는 public.todo_lines(schema_todo_lines.sql)이고 **공개 읽기**다 — 아래 공개금지() 가 막는 낱말이 있으면 멈춘다.
@@ -316,6 +319,65 @@ function 예비저널(submission) {
     .map(([rank, name]) => ({ rank, name }));
 }
 
+/* node_parent · node_hull 검사 (2026-11-21, 3단계 — 「새 노드를 표에서 자동으로」).
+   부모는 볼트 노트 이름 · 노트의 mindmap_id · graph 노드 id · 분리 트랙 이름 가운데 하나여야 하고, 훌은 graph.html 훌 이름과
+   같아야 한다(「이희란」 · 「이희란 교수님」 · 「이희란 교수님방」은 같은 훌로 본다 — 저장은 graph 의 이름으로 한다).
+   틀린 이름은 화면이 조용히 건너뛰므로 여기서 멈춘다. `homepage: hidden` 인 노트는 화면에서 내린 것이라 부모를 비워 보낸다.
+   생성기 HIDDEN_NODE_IDS 로 내린 노드(자신이든 부모든)에 부모 칸이 있으면 멈춘다 — graph.html 은 그 목록을 몰라서 되살린다. */
+const 훌정규 = (value) => String(value ?? "").replace(/\s+/g, "").replace(/방$/, "").replace(/교수님$/, "").toLowerCase();
+function graphNames() {
+  const file = path.join(repoRoot, "graph.html");
+  if (!existsSync(file)) return null;
+  const html = readFileSync(file, "utf8");
+  const hulls = html.match(/const hyperedges = (\[.*?\]);\n/);
+  return {
+    // 노드 정의는 RAW_NODES 한 줄과 손으로 끼운 노드 상수(CFMS_AUTOSEW_NODE 등) 둘이라 "id" 를 다 모은다.
+    nodes: new Set([...html.matchAll(/"id": "([^"]+)"/g)].map((match) => match[1])),
+    hulls: hulls ? JSON.parse(hulls[1]).map((hull) => hull.label) : [],
+  };
+}
+function 내린노드() {
+  const file = path.join(repoRoot, "layout_findings.py");
+  if (!existsSync(file)) return new Set();
+  const hit = readFileSync(file, "utf8").match(/^HIDDEN_NODE_IDS = \{([^}]*)\}/m);
+  return new Set(hit ? [...hit[1].matchAll(/"([^"]+)"/g)].map((match) => match[1]) : []);
+}
+export function 노드부모검사(pages, tracks) {
+  const graph = graphNames();
+  const hidden = 내린노드();
+  const known = new Set(graph ? graph.nodes : []);
+  for (const page of pages) {
+    known.add(page.file.name);
+    const mm = String(page.mindmap_id ?? "").trim();
+    if (mm) known.add(mm);
+  }
+  for (const row of tracks || []) if (row && row.이름) known.add(String(row.이름));
+  return (page) => {
+    const parent = String(page.node_parent ?? "").trim() || null;
+    const hullRaw = String(page.node_hull ?? "").trim() || null;
+    if (!parent && !hullRaw) return { parent: null, hull: null };
+    const where = page.file.path;
+    if (!parent) throw new Error(`${where}: node_hull 만 있고 node_parent 가 없다 — 부모가 있어야 노드를 세운다`);
+    if (parent === page.file.name) throw new Error(`${where}: node_parent 가 자기 자신이다`);
+    if (hidden.has(page.file.name) || hidden.has(parent)) {
+      throw new Error(`${where}: ${hidden.has(page.file.name) ? "이 노드" : `부모 「${parent}」`}는 생성기 HIDDEN_NODE_IDS 로 내린 노드다 — node_parent 를 지우거나 먼저 그 목록에서 뺀다`);
+    }
+    if (!known.has(parent)) {
+      throw new Error(`${where}: node_parent 「${parent}」를 찾지 못했다 — 노트 이름 · mindmap_id · graph 노드 id · 분리 트랙 이름 가운데 하나`);
+    }
+    let hull = null;
+    if (hullRaw) {
+      const match = graph && graph.hulls.find((label) => 훌정규(label) === 훌정규(hullRaw));
+      if (!match) {
+        throw new Error(`${where}: node_hull 「${hullRaw}」는 graph.html 훌이 아니다 — ${graph ? graph.hulls.join(" · ") : "graph.html 없음"}`);
+      }
+      hull = match;
+    }
+    if (String(page.homepage ?? "").trim() === "hidden") return { parent: null, hull: null };
+    return { parent, hull };
+  };
+}
+
 export function buildRows(vaultRoot) {
   const { pages, byPath } = loadPages(vaultRoot);
   const dv = {
@@ -401,14 +463,20 @@ export function buildRows(vaultRoot) {
   /* graph.html 이 읽는 research_outputs(kind='node')의 노드 필드도 같이 모은다 (2026-09-14).
      정본은 볼트 하나인데 화면이 읽는 캐시가 둘이라, 따로 갱신하면 한쪽만 옛 값으로 남는다
      (cfmsCIPC 등급이 실제로 그랬다). 짝짓기는 볼트 발행 스크립트와 같은 방식인 mindmap_id 다.
-     **행을 만들지도 지우지도 않는다** — UPDATE 만 낸다. 그 규율은 볼트 쪽과 같다.
+     **지우지는 않는다.** 행을 만드는 것은 `node_parent:` 가 있는 노트뿐이다(2026-11-21~, 3단계 — 그 칸이 「이 노트를
+     화면에 노드로 세운다」는 표시다). 칸이 빈 노트는 전처럼 UPDATE 만 낸다.
      pos_x·pos_y 는 일부러 뺐다. 화면의 좌표 정본은 graph_positions 이고, 노트의 node_pos 는
      그보다 낡았다 — 여기서 밀면 옛 배치를 되살린다. */
   const GRADE_OUT2 = { none: "등급 없음" };
   const nodeFields = [];
+  const 부모찾기 = 노드부모검사(pages, out.행);
   for (const page of pages) {
     if (page.type !== "project") continue;
     const mindmapId = String(page.mindmap_id ?? "").trim();
+    const { parent, hull } = 부모찾기(page);
+    if (parent && !mindmapId) {
+      throw new Error(`${page.file.name}: node_parent 가 있으면 mindmap_id 도 적는다(새 노트는 노트 이름 — 노드 행 키)`);
+    }
     if (!mindmapId) continue;
     const text = (key) => {
       const value = String(page[key] ?? "").trim();
@@ -428,6 +496,10 @@ export function buildRows(vaultRoot) {
         note: text("mindmap_note"),
         url: /^https?:\/\//i.test(repository) ? repository : null,
         project_path: text("path"),
+        node_parent: parent,
+        node_hull: hull,
+        vault_note: page.file.name,                  // 아래 둘은 행을 새로 만들 때만 쓴다(UPDATE 는 안 건드린다)
+        title: text("node_title") ?? page.file.name,  // 볼트 publish-research-outputs.mjs 와 같은 규칙
       },
     });
   }
@@ -538,6 +610,52 @@ async function api(pathname, accessToken, options = {}) {
   return text ? JSON.parse(text) : null;
 }
 
+/* 노드 행 SQL — 전체 판과 부분 판이 같이 쓴다(2026-11-21, 3단계에서 한 곳으로 모았다). 값은 jsonb 임시 표에 받은 뒤
+   ① node_parent 가 있는데 행이 없는 노트만 INSERT(id = mindmap_id — SFTF_DrapeOverprint 선례처럼 새 노트는 노트 이름),
+   ② 전부 mindmap_id 로 UPDATE. 지우지는 않는다. 부모 · 훌 칸은 볼트 값으로 덮으므로 노트에서 지우면 표에서도 비고,
+   그러면 화면은 더 붙이지 않는다(이미 mindmap 문서에 들어간 노드는 문서가 갖는다). */
+export function nodeSql(nodes) {
+  if (!nodes.length) return [];
+  const values = nodes.map((node) => {
+    const json = JSON.stringify(node.data);
+    if (json.includes("$json$")) throw new Error(`${node.mindmap_id} 의 값에 $json$ 가 들어 있습니다`);
+    return `  ('${node.mindmap_id.replace(/'/g, "''")}', $json$${json}$json$)`;
+  });
+  return [
+    "",
+    "create temp table _nodes (mindmap_id text, data jsonb) on commit drop;",
+    "insert into _nodes (mindmap_id, data) values",
+    values.join(",\n") + ";",
+    "",
+    "-- node_parent 가 있는 노트는 노드 행이 없으면 만든다 — graph · mindmap 이 그 행을 보고 노드를 붙인다.",
+    "insert into public.research_outputs (id, kind, mindmap_id, vault_note, title, grade, stage, badge, grade_note,",
+    "  bottleneck, brief, note, url, project_path, node_parent, node_hull)",
+    "select n.mindmap_id, 'node', n.mindmap_id, n.data->>'vault_note', n.data->>'title', n.data->>'grade', n.data->>'stage',",
+    "  n.data->>'badge', n.data->>'grade_note', n.data->>'bottleneck', n.data->>'brief', n.data->>'note', n.data->>'url',",
+    "  n.data->>'project_path', n.data->>'node_parent', n.data->>'node_hull'",
+    "from _nodes n",
+    "where n.data->>'node_parent' is not null",
+    "  and not exists (select 1 from public.research_outputs r",
+    "                  where r.id = n.mindmap_id or (r.kind = 'node' and r.mindmap_id = n.mindmap_id));",
+    "",
+    "update public.research_outputs r set",
+    "  grade        = n.data->>'grade',",
+    "  stage        = n.data->>'stage',",
+    "  badge        = n.data->>'badge',",
+    "  grade_note   = n.data->>'grade_note',",
+    "  bottleneck   = n.data->>'bottleneck',",
+    "  brief        = n.data->>'brief',",
+    "  note         = n.data->>'note',",
+    "  url          = n.data->>'url',",
+    "  project_path = n.data->>'project_path',",
+    "  node_parent  = n.data->>'node_parent',",
+    "  node_hull    = n.data->>'node_hull',",
+    "  updated_at   = now()",
+    "from _nodes n",
+    "where r.kind = 'node' and r.mindmap_id = n.mindmap_id;",
+  ];
+}
+
 // Supabase SQL Editor 에 그대로 붙여넣을 스크립트. 값은 달러 인용($json$)으로 감싸므로
 // 따옴표·역슬래시·줄바꿈을 따로 이스케이프하지 않는다. 임시 표에 모두 받은 뒤 한 번에
 // upsert 하고, 볼트에 없는 행을 지운다 — --push 와 결과가 같고 여러 번 돌려도 안전하다.
@@ -548,13 +666,6 @@ function toSql(payload, nodeFields, todoLines) {
       throw new Error(`${row.id} 의 값에 $json$ 가 들어 있어 달러 인용을 쓸 수 없습니다`);
     }
     return `  ('${row.id.replace(/'/g, "''")}', '${row.kind}', ${row.sort_index}, $json$${json}$json$)`;
-  });
-  const nodeValues = nodeFields.map((node) => {
-    const json = JSON.stringify(node.data);
-    if (json.includes("$json$")) {
-      throw new Error(`${node.mindmap_id} 의 값에 $json$ 가 들어 있습니다`);
-    }
-    return `  ('${node.mindmap_id.replace(/'/g, "''")}', $json$${json}$json$)`;
   });
   return [
     "-- portfolio_rows 발행 — scripts/publish-portfolio.mjs --sql 이 만든 파일이다.",
@@ -584,29 +695,11 @@ function toSql(payload, nodeFields, todoLines) {
     "--",
     "-- 정본은 볼트 하나인데 화면이 읽는 캐시가 둘이라, 따로 갱신하면 한쪽만 옛 값으로 남는다",
     "-- (2026-09-14 cfmsCIPC 등급이 실제로 그랬다). 그래서 같은 파일에 담는다.",
-    "-- 짝짓기는 볼트 발행 스크립트와 같은 mindmap_id 이고, **UPDATE 만 한다** — 행을 만들지도",
-    "-- 지우지도 않는다. 좌표(pos_x·pos_y)는 건드리지 않는다: 화면의 좌표 정본은",
+    "-- 짝짓기는 볼트 발행 스크립트와 같은 mindmap_id 이고 지우지 않는다. 행을 만드는 것은 node_parent 가",
+    "-- 있는 노트뿐이다(2026-11-21~). 좌표(pos_x·pos_y)는 건드리지 않는다: 화면의 좌표 정본은",
     "-- graph_positions 이고 노트의 node_pos 는 그보다 낡았다.",
     "---------------------------------------------------------------------------",
-    "",
-    "create temp table _nodes (mindmap_id text, data jsonb) on commit drop;",
-    "",
-    "insert into _nodes (mindmap_id, data) values",
-    nodeValues.join(",\n") + ";",
-    "",
-    "update public.research_outputs r set",
-    "  grade        = n.data->>'grade',",
-    "  stage        = n.data->>'stage',",
-    "  badge        = n.data->>'badge',",
-    "  grade_note   = n.data->>'grade_note',",
-    "  bottleneck   = n.data->>'bottleneck',",
-    "  brief        = n.data->>'brief',",
-    "  note         = n.data->>'note',",
-    "  url          = n.data->>'url',",
-    "  project_path = n.data->>'project_path',",
-    "  updated_at   = now()",
-    "from _nodes n",
-    "where r.kind = 'node' and r.mindmap_id = n.mindmap_id;",
+    ...nodeSql(nodeFields),
     ...todoSql(todoLines, true),
     "",
     "commit;",
@@ -631,13 +724,6 @@ function toPartialSql(rows, nodes, only, todos = []) {
     if (json.includes("$json$")) throw new Error(`${row.id} 의 값에 $json$ 가 들어 있습니다`);
     return `  ('${row.id.replace(/'/g, "''")}', '${row.kind}', ${row.sort_index}, $json$${json}$json$)`;
   });
-  const nodeValues = nodes.map((node) => {
-    const json = JSON.stringify(node.data);
-    if (json.includes("$json$")) throw new Error(`${node.mindmap_id} 의 값에 $json$ 가 들어 있습니다`);
-    // ::jsonb 가 없으면 VALUES 의 이 열이 text 로 잡혀 아래 n.data->>'…' 가 「연산자 없음」으로 죽는다
-    // (전체 판은 임시 표 열을 jsonb 로 선언해서 필요 없었다).
-    return `  ('${node.mindmap_id.replace(/'/g, "''")}', $json$${json}$json$::jsonb)`;
-  });
   const lines = [
     "-- portfolio_rows · research_outputs 부분 발행 — scripts/publish-portfolio.mjs --sql --only 가 만든 파일이다.",
     `-- 만든 날: ${new Date().toISOString().slice(0, 10)} · 대상: ${only.join(", ")}`,
@@ -655,26 +741,7 @@ function toPartialSql(rows, nodes, only, todos = []) {
       "  data = excluded.data, updated_at = now();",
     );
   }
-  if (nodeValues.length) {
-    lines.push(
-      "",
-      "update public.research_outputs r set",
-      "  grade        = n.data->>'grade',",
-      "  stage        = n.data->>'stage',",
-      "  badge        = n.data->>'badge',",
-      "  grade_note   = n.data->>'grade_note',",
-      "  bottleneck   = n.data->>'bottleneck',",
-      "  brief        = n.data->>'brief',",
-      "  note         = n.data->>'note',",
-      "  url          = n.data->>'url',",
-      "  project_path = n.data->>'project_path',",
-      "  updated_at   = now()",
-      "from (values",
-      nodeValues.join(",\n"),
-      ") as n(mindmap_id, data)",
-      "where r.kind = 'node' and r.mindmap_id = n.mindmap_id;",
-    );
-  }
+  lines.push(...nodeSql(nodes));
   lines.push(...todoSql(todos, false));
   lines.push("", "commit;", "");
   return lines.join("\n");
@@ -713,6 +780,10 @@ async function main() {
   console.log(`행 ${rows.length}개 + 메타 1개 (볼트: ${vaultRoot})`);
   console.log("단계:", JSON.stringify(byStage));
   console.log(`ToDo 한 줄 ${todoLines.length}개 (빈 줄 ${todoLines.filter((line) => line.todo === "").length})`);
+  const parented = nodeFields.filter((node) => node.data.node_parent);
+  if (parented.length) {
+    console.log(`부모 칸이 있는 노드 ${parented.length}개 — 행이 없으면 만들고 graph · mindmap 이 붙인다: ${parented.map((node) => `${node.name} ← ${node.data.node_parent}${node.data.node_hull ? ` [${node.data.node_hull}]` : ""}`).join(", ")}`);
+  }
   // ToDo 한 줄은 노트 이름 · 트랙 이름 · mindmap_id 로 고른다.
   const todoWanted = (want) => todoLines.filter((line) => want.has(line.id) || (line.mindmap_id && want.has(line.mindmap_id)));
   if (todoOnly) {
@@ -799,7 +870,12 @@ async function main() {
   console.log("ToDo 한 줄(todo_lines)은 --push 가 올리지 않는다 — --sql --todo-only 로 만든 SQL 을 보낸다.");
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exitCode = 1;
-});
+// 가드(scripts/check-table-nodes.mjs)가 nodeSql 을 import 해 시험한다 — 그때는 발행하지 않는다(2026-11-21).
+const 직접실행 = Boolean(process.argv[1])
+  && path.resolve(process.argv[1]).toLowerCase() === fileURLToPath(import.meta.url).toLowerCase();
+if (직접실행) {
+  main().catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  });
+}
