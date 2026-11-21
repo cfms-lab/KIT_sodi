@@ -228,6 +228,19 @@ SQL 만으로 바뀌지 않는 것들이다. 필요하면 고쳐서 커밋·푸�
 - 볼트 `Projects/*.md` 와 `Dashboards/프로젝트현황.md` 는 사용자가 커밋한다.
 - **처음 보는 저널에 투고하면** `stages.js` 의 `SUBMISSION_SITES` 에 한 줄(key·badge 첫머리 이름·투고 시스템 주소)을 더한다 — 재생성은 필요 없다(2026-11-21 에 `layout_findings.py` 에서 옮겼다). graph NODE INFO 의 「투고 사이트」 버튼(submitted~inprint)이 badge 첫머리로 저널을 찾는데, 못 찾으면 `check-graph-html.mjs` 가 멈춘다. 주소는 원고별(submission-details UUID 등)이 아닌 저널 공통 로그인 주소만 쓴다(2026-11-21~).
 - **단계 어휘·파이 모양·깜빡임을 바꿀 때는 `stages.js` 한 곳이다**(2026-11-21~ — graph·mindmap·portfolio·upjuk 이 같이 읽는다). 예외 하나: graph3d 가 graph.html 소스를 읽으므로 graph.html 의 `const STAGE_PIE = {…}` 리터럴을 글자까지 같게 고친다(`node scripts/check-stages-js.mjs` 가 다르면 멈춘다). portfolio 범례·툴팁의 문구와 순서는 볼트 프로젝트현황 「파이단계」(메타 행)이고, 볼트 대시보드의 투고셀() 도 따로 고친다.
+- **SFTF 7편 지도의 진도 파이는 명령 하나로 맞춘다**(2026-11-21~). 지도는 두 벌이다 — 볼트 노트 `Papers/SFTF_7편_지도_논문차이_2026-11-03.md`
+  와 claude.ai artifact 「SFTF 7편 지도」. 둘 다 열 때 표를 읽을 수 없어서(artifact 는 보안 정책상 바깥 주소를 못 읽고, Obsidian 은 스크립트를 지운다)
+  graph 처럼 저절로 따라오지 않는다. SFTF 계열 일곱 편(Tomo_SFTF · Tomo_SFTFSoft · SFTF_Clustering · SFTF_QEM · SFTFSoft_GNN · Tomo_DFSVR · PartialCost)의
+  단계 · 등급 · draft 뱃지를 표에 올린 뒤, 또는 `stages.js` 의 파이 모양 · 깜빡임을 고친 뒤:
+  1. `node scripts/sync-sftf-map.mjs --check` 로 무엇이 바뀌는지 보고, `node scripts/sync-sftf-map.mjs` 로 쓴다 — 표(anon 읽기)의 노드 행과 `stages.js` 로
+     볼트 노트의 파이(알약 · 그림 · 표, 29곳)를 다시 그리고 `tmp/sftf-map/sftf-pies.js` 를 만든다. 노트에 커밋 안 된 변경이 있으면 멈춘다(다른 세션부터 본다).
+  2. artifact 에 두 파일을 그 이름 그대로 올린다 — Claude 가 `publish_files`(patch)로 `stages.js` ← 저장소 `stages.js`, `sftf-pies.js` ← `tmp/sftf-map/sftf-pies.js`.
+     index.html 은 건드리지 않는다. 명령이 「artifact: … 그대로」라고 하고 `stages.js` 도 그대로면 올릴 것이 없다.
+  3. 볼트 노트는 사용자가 커밋한다.
+
+  artifact 는 두 파일을 못 받으면 index.html 에 구워 둔 파이를 그대로 보인다(예비값). 명령은 파이 아이콘 · 깜빡임 · 「진도 파이 · 날짜 표 값」 표시만 맞춘다 —
+  알약 글자(저널 · 날짜), 머리 「상태 날짜」, 그림 속 글자, 표의 투고 칸은 여전히 손으로 고친다. 검증 스크립트가 `--verify`(표 없이 노트 파이 = 지금 `stages.js` 규칙)를
+  부르므로, `stages.js` 파이를 바꾸고 이 명령을 안 돌리면 거기서 멈춘다.
 - **PDF 파일은 클로드가 못 올린다.** `pdfs` 버킷은 비공개이고 RLS 가 `authenticated` 만 받는데, MCP 는 `--features=database` 라 SQL 만 된다. `pdf` 칸에 파일 이름을 넣고 사본을 프로젝트 폴더에 그 이름으로 둔 뒤, 사용자가 upjuk 「PDF 업로드」로 그 파일을 고른다. 파일 이름으로 짝을 짓고 저장 키는 `{papers_id}.pdf` 다. 올라갔는지는 `select name from storage.objects where bucket_id='pdfs' and name='{papers_id}.pdf'` 로 본다.
 - 출판사 게재본은 이 비공개 버킷까지만 둔다. Sage 는 게재본의 온라인 게시를 금지하고, 개인 웹·기관 저장소에는 accepted version 만 허용한다. IIS 가 떠 있는 `D:\IIS_Home` 아래(`UPJUK/PDF`, `KIT_sodi/tmp` 포함)에도 사본을 두지 않는다.
 - MCP 의 `execute_sql` 은 RLS 를 거치지 않는 관리 권한으로 돈다(SQL Editor 와 같다). 그래서 `delete`·

@@ -41,6 +41,8 @@
 단계를 더하거나 모양·박자를 바꾸거나 새 저널의 투고 시스템 주소(`SUBMISSION_SITES`)를 더할 때는 이 파일을 고친다(재생성 불필요).
 예외: graph3d 가 graph.html 소스를 읽으므로 graph.html 의 `const STAGE_PIE = {…}` 리터럴을 글자까지 같게 고친다 —
 `node scripts/check-stages-js.mjs` 가 다르면 멈춘다. portfolio 범례·툴팁 문구는 볼트 「파이단계」(메타 행)이고 볼트 투고셀() 은 따로다.
+SFTF 7편 지도(볼트 노트 + artifact)의 파이는 표를 못 읽으므로 `node scripts/sync-sftf-map.mjs` 로 다시 그리고 artifact 에 `stages.js` ·
+`tmp/sftf-map/sftf-pies.js` 두 파일을 올린다 — SFTF 일곱 편의 단계 · 등급이 바뀌거나 `stages.js` 파이를 고칠 때(runbook 4. 함정).
 
 ## graph · portfolio 「ToDo」 한 줄
 
