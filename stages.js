@@ -143,7 +143,7 @@
       system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/ijcst' },
     { key: 'TDP', journal: '3D Printing and Additive Manufacturing', names: ['3D Printing and Additive Manufacturing', 'TDP'],
       system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/3dp' },
-    { key: 'M&M', journal: 'Microscopy and Microanalysis', names: ['Microscopy and Microanalysis', 'M&M'],
+    { key: 'MAM', journal: 'Microscopy and Microanalysis', names: ['Microscopy and Microanalysis', 'MAM'],   // 2026-11-21 약어 M&M → MAM(사용자 지시)
       system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/mam' },
     { key: 'JCDE', journal: 'Journal of Computational Design and Engineering', names: ['Journal of Computational Design and Engineering', 'JCDE'],
       system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/jcde' },
