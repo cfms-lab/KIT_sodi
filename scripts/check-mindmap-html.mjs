@@ -1074,6 +1074,30 @@ if (childIds(findIn(dopNoAO.root, "hull_physics_ai")) !== "nkbfa3m1,SFTF_DrapeOv
 const dopBare = { root: mk("root", [mk("n0llvuh1")]), links: [] };
 if (!context.__applyDrapeOverprint(dopBare)) throw new Error("DrapeOverprint migration must still stamp its version without the parent");
 if (childIds(dopBare.root) !== "n0llvuh1,SFTF_DrapeOverprint") throw new Error("DrapeOverprint migration did not fall back to the root");
+// 2026-11-21 b: 미인도 프로젝트(cfmsdrape) → SFTF_DrapeOverprint 「착장 형상」 관계선. 두 끝이 다 있을 때만, 한 번만, 어느 방향이든
+// 같은 쌍이 있으면 더하지 않는다. 첫 판 도장('2026-11-21')이 찍힌 문서에서는 선만 더하고 노드를 겹치지 않는다.
+const dopMiindo = () => ({ id: "cfmsdrape", title: "미인도 프로젝트", kind: "none", children: [mk("nptj5211")] });
+const dopLinkSample = { root: mk("root", [
+  { id: "hull_drape", title: "Drape", kind: "group", children: [dopMiindo()] },
+  { id: "hull_physics_ai", title: "Physics-AI", kind: "group", children: [mk("n7hixqe5")] },
+]), links: [{ from: "nptj5211", to: "n7hixqe5", label: "기존 선", type: "engine" }] };
+if (!context.__applyDrapeOverprint(dopLinkSample)) throw new Error("DrapeOverprint migration did not run with Miindo present");
+if (context.__applyDrapeOverprint(dopLinkSample)) throw new Error("DrapeOverprint link migration is not idempotent");
+const dopLinks = dopLinkSample.links.filter((l) => l.from === "cfmsdrape" && l.to === "SFTF_DrapeOverprint");
+if (dopLinks.length !== 1 || dopLinks[0].label !== "착장 형상" || dopLinks[0].type !== "engine" || dopLinkSample.links.length !== 2) throw new Error(`DrapeOverprint 착장 형상 link is wrong: ${JSON.stringify(dopLinkSample.links)}`);
+const dopLinkValidation = context.__validate(dopLinkSample);
+if (!dopLinkValidation.ok) throw new Error(`DrapeOverprint link sample is invalid: ${dopLinkValidation.errors[0]}`);
+const dopStamped = { drapeOverprintVersion: "2026-11-21", root: mk("root", [
+  dopMiindo(),
+  { id: "n7hixqe5", title: "SFTF_ActiveOverprint", kind: "todo", children: [mk("SFTF_DrapeOverprint")] },
+]), links: [] };
+if (!context.__applyDrapeOverprint(dopStamped)) throw new Error("DrapeOverprint b did not rerun on a document stamped with the first version");
+if (childIds(findIn(dopStamped.root, "n7hixqe5")) !== "SFTF_DrapeOverprint" || dopStamped.links.length !== 1) throw new Error("DrapeOverprint b must only add the link on a stamped document");
+const dopReverse = { root: mk("root", [dopMiindo(), mk("n7hixqe5")]),
+  links: [{ from: "SFTF_DrapeOverprint", to: "cfmsdrape", label: "사용자가 그은 선", type: "engine" }] };
+context.__applyDrapeOverprint(dopReverse);
+if (dopReverse.links.length !== 1) throw new Error("DrapeOverprint migration duplicated a link the user already drew the other way");
+if (dopBare.links.length !== 0 || dopNoAO.links.length !== 0) throw new Error("DrapeOverprint migration drew a link without the Miindo node");
 
 // 2026-11-06: 진도 아이콘 색 = graph.html 노드 색(등급). 단계색으로 되돌아가거나 팔레트가 갈라지면 여기서 잡는다.
 const graphForIcons = readFileSync(new URL("../graph.html", import.meta.url), "utf8");
