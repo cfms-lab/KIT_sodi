@@ -400,7 +400,7 @@ const ICON={
   "town-hall":"M200-280v-280h80v280h-80Zm240 0v-280h80v280h-80ZM80-120v-80h800v80H80Zm600-160v-280h80v280h-80ZM80-640v-80l400-200 400 200v80H80Z",
   _:"M160-120q-33 0-56.5-23.5T80-200v-440q0-33 23.5-56.5T160-720h160v-80q0-33 23.5-56.5T400-880h160q33 0 56.5 23.5T640-800v80h160q33 0 56.5 23.5T880-640v440q0 33-23.5 56.5T800-120H160Zm240-600h160v-80H400v80Z",
 };
-let symbolByType={}, markers=[];
+let symbolByType={}, markers=[], openPopup=null;
 function symbolOf(type){return symbolByType[type]||"_";}
 function avgOf(a){const v=a.filter(x=>x!=null);return v.length?v.reduce((p,c)=>p+c,0)/v.length:0;}
 function modeType(items){const c={};let best=null,bn=0;items.forEach(j=>{const t=j.sOfficeType||"";c[t]=(c[t]||0)+1;if(c[t]>bn){bn=c[t];best=t;}});return best;}
@@ -418,7 +418,8 @@ function rebuildMarkers(list){
     el.innerHTML=`<div class="jgm-in"><svg viewBox="0 -960 960 960" width="30" height="30"><path d="${ICON[sym]||ICON._}" fill="none" stroke="#ffffff" stroke-width="96" stroke-linejoin="round"/><path d="${ICON[sym]||ICON._}" fill="${color}" stroke="rgba(15,23,42,.5)" stroke-width="22" paint-order="stroke"/></svg>`+
       (g.items.length>1?`<span class="cnt">${g.items.length}</span>`:"")+`</div>`;
     el.title=(g.items[0].sOfficeName||"")+" ["+(modeType(g.items)||"")+"]";
-    el.addEventListener("click",()=>popupGroup(g));
+    // 2026-11-21 고침: 마커 클릭이 지도까지 올라가 지도 클릭이 되면, 방금 연 팝업이 closeOnClick 으로 곧바로 닫혔다.
+    el.addEventListener("click",e=>{e.stopPropagation();popupGroup(g);});
     markers.push(new maplibregl.Marker({element:el,anchor:"center"}).setLngLat([g.lng,g.lat]).addTo(map));
   }
 }
@@ -428,7 +429,11 @@ function popupGroup(g){
     `${esc((""+(j.sStudentYear||"")).slice(-2))}학번 <b>${esc(j.sStudentName||"")}</b> · 연봉 ${esc(j.sOfficeSalary||"")}만원`+
     (j.sOfficeURL?` · <a href="${esc(j.sOfficeURL)}" target="_blank">홈페이지</a>`:"")+
     (isIn()?` · <a href="#" onclick="openEdit(${j.id});return false;">수정</a>`:"")+`</div>`).join("");
-  new maplibregl.Popup({maxWidth:"280px"}).setLngLat([g.lng,g.lat]).setHTML(head+rows).addTo(map);
+  // 팝업은 하나만 — 마커 클릭은 지도로 안 올라가므로(위) 다른 마커를 누를 때 앞 팝업을 여기서 닫는다. 빈 지도를 누르면 closeOnClick 이 닫는다.
+  if(openPopup) openPopup.remove();
+  const p=new maplibregl.Popup({maxWidth:"280px",focusAfterOpen:false}).setLngLat([g.lng,g.lat]).setHTML(head+rows).addTo(map);
+  p.on("close",()=>{if(openPopup===p)openPopup=null;});
+  openPopup=p;
 }
 function esc(s){return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 
