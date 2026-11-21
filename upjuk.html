@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KIT CFMS 논문 리스트 (읽기 전용 · 볼트 정본)</title>
+<!-- 다크 모드 공용 스위치. <style> 보다 먼저 읽어 첫 그림부터 정해진 색으로 그린다 (2026-11-21, 사용자 지시 — 다크 모드). -->
+<script src="theme.js"></script>
 <style>
   :root{--green:#2e7d32;--green-d:#1b5e20;--bg:#f4f6f4;--line:#cfd8cf;
     /* ── 공저 교수 색 (2026-10-31, 사용자 지시) ──────────────────────────────
@@ -22,7 +24,9 @@
          김우석    #e0e0e0    #e0e0e0     옅은 회색(시간표에 없음). 50% 로 밝히면 흰 줄과
                                          구별이 안 돼 원색 그대로다(사용자 지시)        */
     --au-lee:#c9bfe5; --au-eun:#adcdea; --au-kim:#e0e0e0;
-    --q-todo:#ffffff;}
+    --q-todo:#ffffff;
+    /* 인라인 style · 스크립트가 박는 글자 색. 값은 예전에 박혀 있던 그대로이고, 다크 모드가 맨 아래에서 바꾼다 (2026-11-21). */
+    --green-ink:#1b5e20; --tx-label:#555; --tx-note:#666; --tx-faint:#888;}
   *{box-sizing:border-box}
   body{margin:0;font-family:"Segoe UI","Malgun Gothic",sans-serif;background:var(--bg);color:#222;font-size:14px}
   header{background:linear-gradient(135deg,var(--green),var(--green-d));color:#fff;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -65,6 +69,11 @@
   .journal{font-style:italic;font-weight:600}.vol{text-decoration:underline}
   .doitxt{color:#1565c0;text-decoration:none;overflow-wrap:anywhere}.doitxt:hover{text-decoration:underline}
   .badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;color:#fff;margin-right:6px}
+  .badge.todo{background:#fff;color:#333;border:1px solid #000}
+  /* 다크 모드 체크박스 자리 — 로그인 칸(authbar, 스크립트가 다시 그린다) 바로 왼쪽. 둘을 .hdr-end 로 묶어 오른쪽으로 밀어
+     좁은 화면에서 줄이 넘어가도 로그인 칸이 예전처럼 오른쪽에 붙는다. */
+  .hdr-end{margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap}
+  .theme-slot{display:inline-flex;align-items:center}
   /* 투고 진도 파이 (2026-09-22, 사용자 지시) — 저자 앞에 있던 Pub/Submit/Draft 배지를 대신한다.
      그 글자는 저널 뒤 「(Submitted)」로 이미 한 번 더 나오므로 배지는 중복이었다.
      graph.html·portfolio.html 과 같은 그림이다: 채운 정도 = 투고 진도, 색 = 연결된
@@ -101,14 +110,67 @@
     .sidebar{width:100%;min-width:0;height:auto;max-height:48vh;border-right:0;border-bottom:1px solid var(--line)}
     .main{height:auto;min-height:52vh}
   }
+
+  /* ── 다크 모드 (2026-11-21, 사용자 지시 — 다크 모드: 밤에 흰 화면이 눈부시다) ──────────────────────
+     밝은 화면은 위 규칙 그대로이고, 여기는 html[data-theme="dark"](theme.js 가 정한다) 아래에서만 덮는다.
+     공용 색 --dk-* 는 theme.js 에 있다. 저시력 · 눈부심을 고려한 대비 — 순검정 · 순백을 피하고 본문은 12:1 대다.
+     넓은 면(줄 · 툴바 · 통계표 · 머리줄 띠)은 어두운 색조로 낮추고, 작은 글자 · 테두리는 밝혀 바탕과 떼어 놓는다.
+     공저 교수 이름 배경은 같은 색상(hue)의 짙은 색이다 — 밝은 글자(#dde1e6, 굵게)와 이희란 7.2:1 · 은종현 6.6:1 ·
+     김우석 6.6:1(WCAG AA 4.5:1 이상), 줄 바탕(#22262b)과는 1.6~1.8:1 로 구별된다. portfolio.html 과 같은 값이다.
+     파이 색은 스크립트가 칠하므로 QUALITY_PIE_DARK(아래 스크립트)가 맡는다. */
+  html[data-theme="dark"]{--bg:var(--dk-bg);--line:var(--dk-border);
+    --au-lee:#4d3884; --au-eun:#234e76; --au-kim:#474c53;
+    --q-todo:var(--dk-surface);
+    --green-ink:var(--dk-green); --tx-label:var(--dk-muted); --tx-note:var(--dk-muted); --tx-faint:var(--dk-faint)}
+  html[data-theme="dark"] header{background:linear-gradient(135deg,#255a2b,#173d1b);color:var(--dk-strong)}
+  html[data-theme="dark"] .authbar input{background:var(--dk-raised);color:var(--dk-text);border-color:var(--dk-border)}
+  html[data-theme="dark"] .toolbar{background:var(--dk-surface)}
+  html[data-theme="dark"] .toolbar label{color:var(--dk-muted)}
+  html[data-theme="dark"] .toolbar select,html[data-theme="dark"] .toolbar input{background:var(--dk-raised);color:var(--dk-text);border-color:var(--dk-border)}
+  html[data-theme="dark"] .btn{background:#2b6e30;color:var(--dk-strong)}
+  html[data-theme="dark"] .btn:hover{background:#235a28}
+  html[data-theme="dark"] .btn.secondary{background:var(--dk-raised);color:var(--dk-green);border-color:#4f8f57}
+  html[data-theme="dark"] .btn.secondary:hover{background:var(--dk-hover)}
+  html[data-theme="dark"] .btn.danger{background:#b23a35}
+  html[data-theme="dark"] .sidebar{background:var(--dk-surface)}
+  html[data-theme="dark"] .stats-table th{background:#24502a;color:var(--dk-strong)}
+  html[data-theme="dark"] .stats-table .yr{background:#2a332c}
+  html[data-theme="dark"] .stats-table .sum td{background:#1f3a24}
+  html[data-theme="dark"] .cnt{color:var(--dk-green)}
+  html[data-theme="dark"] .yearsep .y{color:var(--dk-green)}
+  html[data-theme="dark"] .paper{background:var(--dk-surface);border-color:var(--dk-border-soft)}
+  html[data-theme="dark"] .paper .num{color:var(--dk-faint)}
+  html[data-theme="dark"] .title{color:var(--dk-link)}
+  html[data-theme="dark"] .doitxt{color:var(--dk-link)}
+  html[data-theme="dark"] .funding{color:var(--dk-green)}
+  html[data-theme="dark"] .doi{color:var(--dk-link);border-color:var(--dk-link)}
+  html[data-theme="dark"] .pdf{color:var(--dk-red);background:var(--dk-raised);border-color:var(--dk-red)}
+  html[data-theme="dark"] .badge.todo{background:var(--dk-raised);color:var(--dk-text);border-color:var(--dk-muted)}
+  html[data-theme="dark"] .progress{background:var(--dk-raised)}
+  html[data-theme="dark"] .uplog{color:var(--dk-muted)}
+  html[data-theme="dark"] .rowtools button{background:var(--dk-raised);color:var(--dk-text);border-color:var(--dk-border)}
+  html[data-theme="dark"] .rowtools button:hover{background:var(--dk-hover)}
+  html[data-theme="dark"] .count-info{color:var(--dk-muted)}
+  html[data-theme="dark"] .modal-bg{background:rgba(0,0,0,.6)}
+  html[data-theme="dark"] .modal{background:var(--dk-surface);color:var(--dk-text);box-shadow:var(--dk-shadow)}
+  html[data-theme="dark"] .modal h2{color:var(--dk-green)}
+  html[data-theme="dark"] .grid label{color:var(--dk-muted)}
+  html[data-theme="dark"] .modal input:not([type=checkbox]):not([type=file]),html[data-theme="dark"] .modal select,html[data-theme="dark"] .modal textarea{background:var(--dk-raised);color:var(--dk-text);border-color:var(--dk-border)}
+  html[data-theme="dark"] .hint{color:var(--dk-faint)}
+  html[data-theme="dark"] .err{color:var(--dk-red)}
+  html[data-theme="dark"] .banner{background:#3a3020;border-bottom-color:#6b5524;color:#e8cf95}
+  html[data-theme="dark"] .toast{background:#3b424b;color:var(--dk-strong);border:1px solid var(--dk-border);box-shadow:var(--dk-shadow)}
 </style>
 </head>
 <body>
 <header>
-  <a href="index.html" style="color:#fff;text-decoration:none;font-size:13px;background:rgba(255,255,255,.18);padding:4px 11px;border-radius:12px">← 홈</a>
+  <a href="index.html" style="color:inherit;text-decoration:none;font-size:13px;background:rgba(255,255,255,.18);padding:4px 11px;border-radius:12px">← 홈</a>
   <h1>KIT CFMS Journal List</h1>
   <span class="sub">클라우드 · 종류별 검색 (정본은 옵시디언 볼트)</span>
-  <div class="authbar" id="authbar"></div>
+  <div class="hdr-end">
+    <span class="theme-slot" data-theme-toggle></span>
+    <div class="authbar" id="authbar"></div>
+  </div>
 </header>
 
 <div class="banner" id="banner"></div>
@@ -126,7 +188,7 @@
 
 <div class="layout">
   <aside class="sidebar">
-    <h3 style="margin:4px 0 10px;color:var(--green-d);font-size:14px">통계 (Statistics)</h3>
+    <h3 style="margin:4px 0 10px;color:var(--green-ink);font-size:14px">통계 (Statistics)</h3>
     <div id="statsArea"></div>
   </aside>
   <main class="main">
@@ -173,12 +235,12 @@
 <!-- 설정 모달 (Supabase 연결정보) -->
 <div class="modal-bg" id="cfgBg"><div class="modal" style="width:520px">
   <h2>Supabase 연결 설정</h2>
-  <p style="font-size:12px;color:#666">Supabase 프로젝트의 <b>Project URL</b>과 <b>anon public key</b>를 붙여넣으세요. (Settings → API)</p>
+  <p style="font-size:12px;color:var(--tx-note)">Supabase 프로젝트의 <b>Project URL</b>과 <b>anon public key</b>를 붙여넣으세요. (Settings → API)</p>
   <div style="display:flex;flex-direction:column;gap:10px">
-    <label style="font-size:11px;color:#555">Project URL
+    <label style="font-size:11px;color:var(--tx-label)">Project URL
       <input id="cfgUrl" placeholder="https://xxxxx.supabase.co" style="width:100%;padding:7px;border:1px solid var(--line);border-radius:6px">
     </label>
-    <label style="font-size:11px;color:#555">anon public key
+    <label style="font-size:11px;color:var(--tx-label)">anon public key
       <input id="cfgKey" placeholder="eyJhbGciOi..." style="width:100%;padding:7px;border:1px solid var(--line);border-radius:6px">
     </label>
   </div>
@@ -191,16 +253,16 @@
 <!-- PDF 업로드 모달 (관리자) -->
 <div class="modal-bg" id="upBg"><div class="modal" style="width:560px">
   <h2>PDF 원문 업로드</h2>
-  <p style="font-size:12px;color:#666">기존 <b>PDF 폴더</b>를 통째로 선택하면, 논문에 연결된 PDF들이 클라우드(비공개 버킷)에 올라갑니다.
+  <p style="font-size:12px;color:var(--tx-note)">기존 <b>PDF 폴더</b>를 통째로 선택하면, 논문에 연결된 PDF들이 클라우드(비공개 버킷)에 올라갑니다.
   파일명은 그대로 유지되어 각 논문의 <b>PDF</b> 버튼과 자동 연결됩니다. (로그인한 사람만 열람 가능)</p>
-  <label style="font-size:12px;color:#555;display:block;margin-bottom:6px">PDF 폴더 또는 파일 선택
+  <label style="font-size:12px;color:var(--tx-label);display:block;margin-bottom:6px">PDF 폴더 또는 파일 선택
     <input type="file" id="upFiles" webkitdirectory multiple style="display:block;margin-top:4px">
   </label>
-  <label style="font-size:12px;color:#555;display:flex;align-items:center;gap:6px">
+  <label style="font-size:12px;color:var(--tx-label);display:flex;align-items:center;gap:6px">
     <input type="checkbox" id="upMissing" checked> 논문에 연결된 파일만 업로드 (불필요한 파일 제외)
   </label>
   <div class="progress"><div id="upBar"></div></div>
-  <div id="upInfo" style="font-size:12px;color:#666"></div>
+  <div id="upInfo" style="font-size:12px;color:var(--tx-note)"></div>
   <div class="uplog" id="upLog"></div>
   <div class="modal-actions">
     <button class="btn secondary" onclick="closeUpload()">닫기</button>
@@ -241,7 +303,12 @@ const 단계=window.CFMS_STAGES||null;
 /* 색 = 논문 등급. graph.html QUALITY_COLORS · portfolio.html QUALITY_PIE 와 같은 원색이다.
    연결된 프로젝트가 없으면 회색이다. (2026-10-31 부터 행 배경은 등급이 아니라 공저 교수 색이다.) */
 const QUALITY_PIE={"상":"#e02020","중":"#f28e2b","하":"#2a78d6","ToDo":"#9ca3af","Closed":"#6b7280","그룹":"#c8c8c8","등급 없음":"#94a3b8"};
-const 파이색=g=>QUALITY_PIE[g]||"#94a3b8";
+/* 다크 모드의 파이 색 (2026-11-21, 사용자 지시 — 다크 모드). 상 · 하 · Closed 원색은 어두운 줄 바탕(#22262b)에서 3.2~3.5:1 이라
+   빈 원 테두리가 흐려진다. 같은 색상(hue)으로 밝혀 4.5:1 이상으로 올린다(상 4.6 · 하 4.9 · Closed 4.5).
+   중 · ToDo · 그룹 · 등급 없음은 그대로도 5.9:1 이상이다. portfolio.html 의 QUALITY_PIE_DARK · 다크 --q-* 와 같은 값이다.
+   모드를 바꾸면 아래 CFMS_THEME.onChange 가 목록을 다시 그린다. */
+const QUALITY_PIE_DARK=Object.assign({},QUALITY_PIE,{"상":"#f45555","하":"#4d94ec","Closed":"#858c96"});
+const 파이색=g=>((window.CFMS_THEME&&window.CFMS_THEME.dark)?QUALITY_PIE_DARK:QUALITY_PIE)[g]||"#94a3b8";
 /* 크기 사다리는 frac 을 그대로 탄다(portfolio 14~28, graph 14~34). 여기는 글줄 안에 놓이므로
    12~20 으로 줄였다 — 비율은 같고 픽셀만 다르다. */
 const PIE_MIN=12,PIE_MAX=20;
@@ -515,7 +582,7 @@ function renderList(res,f){
   const label=(f.categ==="ALL"?"전체 종류":(CATEG_KOR[f.categ]||f.categ))+` · 평가연도 ${f.from}~${f.to} (3월~다음해 2월)`+(f.author!=="ALL"?` · 저자: ${f.author}`:"");
   info.textContent=`${label} — 총 ${res.length}건`+(todos.length?` · ToDo ${todos.length}건`:"");
   const area=document.getElementById("listArea");
-  if(!res.length&&!todos.length){area.innerHTML='<p style="color:#888">검색 결과가 없습니다.</p>';return;}
+  if(!res.length&&!todos.length){area.innerHTML='<p style="color:var(--tx-faint)">검색 결과가 없습니다.</p>';return;}
   let html="";
   if(todos.length){
     html+=`<div class="yearsep"><span class="y">할일 (ToDo) — 프로젝트 노드</span><span class="ln"></span></div>`;
@@ -529,11 +596,11 @@ function renderList(res,f){
 // 수정은 mindmap.html에서 한다 (여기서는 열람 전용).
 function renderTodoNode(n,i){
   const x=[];
-  x.push(`<span class="badge" style="background:#fff;color:#333;border:1px solid #000">ToDo</span>`);
+  x.push(`<span class="badge todo">ToDo</span>`);   // 색은 CSS .badge.todo (다크 모드가 덮는다)
   x.push(`<span class="authors">${esc(n.title||n.id)}</span>`);
-  if(n.id&&n.title!==n.id)x.push(` <span style="color:#888;font-size:12px">(${esc(n.id)})</span>`);
+  if(n.id&&n.title!==n.id)x.push(` <span style="color:var(--tx-faint);font-size:12px">(${esc(n.id)})</span>`);
   const sub=n.brief||n.note||"";
-  if(sub)x.push(`<br><span style="color:#555;font-size:12px">${esc(sub)}</span>`);
+  if(sub)x.push(`<br><span style="color:var(--tx-label);font-size:12px">${esc(sub)}</span>`);
   const link=n.url?`<a class="doi" href="${esc(n.url)}" target="_blank" rel="noopener">LINK</a>`:"";
   const mm=`<a class="doi" href="mindmap.html" title="mindmap에서 편집">관계도</a>`;
   // ToDo 노드 줄은 그 노드 자신의 등급(항상 ToDo=흰색)이라 점선 테두리로만 구분한다.
@@ -782,6 +849,9 @@ function boot(){renderAuthbar();
   if(!CFG.url||!CFG.key){showBanner("처음이신가요? 우측 상단 ⚙ 버튼으로 Supabase 연결정보를 입력하세요. (설정 안내 파일 참고)");openConfig();return;}
   loadNodes().then(loadPapers);
 }
+/* 다크 모드를 켜고 끄면 스크립트가 칠한 파이 색(파이색)만 바뀌어야 하므로 목록을 다시 그린다 — 검색 조건은 칸에 남아 있다.
+   나머지 색은 CSS 의 html[data-theme="dark"] 규칙이 맡는다 (2026-11-21). */
+if(window.CFMS_THEME) window.CFMS_THEME.onChange(()=>{ if(PAPERS.length) doSearch(); });
 boot();
 </script>
 </body>

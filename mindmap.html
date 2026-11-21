@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CFMS 프로젝트 관계도 (Mindmap · Cloud)</title>
+<!-- 다크 모드 공용 스위치 (2026-11-21). <style> 보다 먼저 읽어 첫 그림부터 어둡게 한다 — 체크박스는 머리줄 오른쪽 끝 [data-theme-toggle] 자리. -->
+<script src="theme.js"></script>
 <style>
   :root{--g:#2e7d32;--g2:#1b5e20;--line:#d6dde6;--panel:#fff;--bg:#f4f3f0;}
   *{box-sizing:border-box}
@@ -94,6 +96,60 @@
   #saveState{font-size:11px;color:#94a3b8;margin-left:4px}
   .ver{font-size:10.5px;color:#898781;background:#f4f3f0;border:1px solid var(--line);padding:2px 8px;border-radius:9px;letter-spacing:.02em}
   .ver:hover{color:#52514e}
+  #editArea .brief{color:#334155}
+  .btn.danger{color:#c62828;border-color:#f1c0c0}
+  /* 다크 모드 체크박스 자리(theme.js 가 채운다) — 머리줄 오른쪽 끝, 로그인 칸 옆. 좁은 화면에서는 머리줄이 줄바꿈되며 다음 줄로 내려간다. */
+  .themeslot{display:inline-flex;align-items:center;color:#334155}
+  .themeslot .cfms-theme-toggle{border:1px solid var(--line);background:#fff;border-radius:7px;padding:5px 9px;font-weight:600}
+  .themeslot .cfms-theme-toggle:hover{background:#f1f5f9}
+
+  /* ====================== 다크 모드 (2026-11-21 사용자 지시 — 다크 모드, 밤에 흰 화면이 눈부심) ======================
+     theme.js 가 <html data-theme="dark"> 를 붙이면 켜진다. 위의 밝은 화면 규칙은 그대로 두고 여기서 덮어쓰기만 한다.
+     저시력 · 눈부심을 고려한 대비 — 넓은 면(머리줄 · 패널 · 캔버스)은 어둡게, 작은 표시(선 · 글자 · 테두리)는 밝기를 올린다.
+     순검정 바탕 · 순백 글자는 쓰지 않는다(공용 --dk-* 값은 theme.js). 노드 면 · 등급 테두리 · 진도 아이콘 · 범례 견본은
+     스크립트가 칠하므로 본문 스크립트의 DARK_FACE · DARK_INK · DARK_UI 가 그릴 때만 바꾼다. */
+  html[data-theme="dark"]{--line:var(--dk-border);--panel:var(--dk-surface);--bg:var(--dk-bg)}
+  html[data-theme="dark"] header{background:var(--dk-surface)}
+  html[data-theme="dark"] header a.home{color:var(--dk-text);background:var(--dk-raised)}
+  html[data-theme="dark"] header h1,html[data-theme="dark"] .panel h3{color:var(--dk-strong)}
+  html[data-theme="dark"] header .sub{color:var(--dk-muted)}
+  html[data-theme="dark"] .authbar input,html[data-theme="dark"] .search,html[data-theme="dark"] .panel input,
+  html[data-theme="dark"] .panel select,html[data-theme="dark"] .panel textarea{background:var(--dk-bg);color:var(--dk-text)}
+  html[data-theme="dark"] input::placeholder,html[data-theme="dark"] textarea::placeholder{color:var(--dk-faint)}
+  html[data-theme="dark"] .pill{background:#1f3a26;color:#a6dcae}
+  html[data-theme="dark"] .btn{background:var(--dk-raised);color:var(--dk-text)}
+  html[data-theme="dark"] .btn:hover{background:var(--dk-hover)}
+  html[data-theme="dark"] .btn:disabled:hover{background:var(--dk-raised)}
+  html[data-theme="dark"] .btn.p{background:var(--g);color:#f1f7f1;border-color:var(--g)}
+  html[data-theme="dark"] .btn.p:hover{background:var(--g2)}
+  html[data-theme="dark"] .btn.danger{color:var(--dk-red);border-color:#7a3d38}
+  html[data-theme="dark"] .canvas{background:radial-gradient(circle at 1px 1px,#30353c 1px,transparent 0) 0 0/22px 22px,#1b1e22}
+  html[data-theme="dark"] .node.sel{filter:drop-shadow(0 0 5px rgba(143,184,240,.6))}
+  html[data-theme="dark"] .node.match rect.box{stroke:#ff8f5e}
+  html[data-theme="dark"] .node.droptarget rect.box{stroke:#ffa64d}
+  html[data-theme="dark"] .edge{stroke:#69717b}
+  html[data-theme="dark"] .rel{stroke:#9aa2ac}
+  /* 관계선 이름은 선 · 노드 위에 겹치므로 바탕색 테두리(paint-order)로 떼어 읽히게 한다 — 다크 모드에만. */
+  html[data-theme="dark"] .rel-lbl{fill:#bcc3cb;paint-order:stroke;stroke:#1b1e22;stroke-width:3px;stroke-linejoin:round}
+  html[data-theme="dark"] .rel.engine{stroke:#f472b6}
+  html[data-theme="dark"] .rel-lbl.engine{fill:#f9a8d4}
+  html[data-theme="dark"] #inlineEdit{color:var(--dk-strong);background:var(--dk-raised);box-shadow:var(--dk-shadow)}
+  html[data-theme="dark"] #dragGhost{background:var(--dk-raised);color:#a6dcae;box-shadow:var(--dk-shadow)}
+  html[data-theme="dark"] .panel label,html[data-theme="dark"] .lg,html[data-theme="dark"] .muted,html[data-theme="dark"] .help{color:var(--dk-muted)}
+  html[data-theme="dark"] #editArea .brief{color:var(--dk-text)}
+  html[data-theme="dark"] .sec{border-top-color:var(--dk-border-soft)}
+  html[data-theme="dark"] .links-list .li{background:var(--dk-raised);border-color:var(--dk-border-soft)}
+  html[data-theme="dark"] .banner{background:#3a3120;border-bottom-color:#6b5a2e;color:#ecd39a}
+  html[data-theme="dark"] .toast{background:#3a4048;color:var(--dk-strong);box-shadow:var(--dk-shadow)}
+  html[data-theme="dark"] #saveState{color:var(--dk-faint)}
+  html[data-theme="dark"] .ver{color:var(--dk-faint);background:var(--dk-raised)}
+  html[data-theme="dark"] .ver:hover{color:var(--dk-muted)}
+  html[data-theme="dark"] .themeslot{color:var(--dk-text)}
+  html[data-theme="dark"] .themeslot .cfms-theme-toggle{background:var(--dk-raised)}
+  html[data-theme="dark"] .themeslot .cfms-theme-toggle:hover{background:var(--dk-hover)}
+  @media (max-width:760px){
+    html[data-theme="dark"] .panel{box-shadow:-6px 0 22px rgba(0,0,0,.5)}
+  }
 </style>
 </head>
 <body>
@@ -120,6 +176,8 @@
     <input type="file" id="imp" accept=".json,application/json" style="display:none" onchange="importJSON(this)">
   </div>
   <div class="authbar" id="authbar"></div>
+  <!-- 다크 모드 체크박스(theme.js 가 채운다). authbar 는 renderAuthbar 가 innerHTML 로 다시 그리므로 그 밖에 둔다. -->
+  <span class="themeslot" data-theme-toggle></span>
 </header>
 
 <div class="banner" id="banner"></div>
@@ -177,7 +235,7 @@
 <script src="stages.js"></script>
 <script>
 /* ====================== 버전 (배포 확인용) ====================== */
-const APP_VERSION='v2026-11-21-fallback';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
+const APP_VERSION='v2026-11-21-dark';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
 
 /* ====================== 기본 데이터 (첫 실행 시드) ====================== */
 const DEFAULT_DATA = /*DATA_START*/{"version":1,"title":"CFMS 프로젝트 관계도 2026","showRel":true,"root":{"id":"root","title":"CFMS 연구실 2026","kind":"root","note":"두 워크스페이스의 세부 프로젝트 관계도","children":[{"id":"sftf","title":"__SFTF_Projects(2026)","kind":"group","note":"3D 프린팅 Support Flow Tensor Field 연구군 (D:\\__SFTF_Projects(2026))","children":[{"id":"tomo_sftf","title":"Tomo_SFTF_dev","kind":"core","status":"active","note":"SFTF 본체: 빌드방향 후보 생성(coarse-to-refine) + TOMO_CPU/GPU 엔진(DLL). 표준 템플릿의 기원."},{"id":"clustering","title":"SFTF_Clustering_dev","kind":"app","status":"active","note":"면별 SFTF 특징 → 출판지향 메쉬 분할(clustering). 한국섬유공학회지 투고."},{"id":"derivative","title":"SFTF_Derivative_dev","kind":"app","status":"active","note":"미분가능 SFTF 손실항 + GNN + 경사기반 빌드방향 최적화. TOMO 교차검증."},{"id":"composite","title":"SFTF_Composite_dev","kind":"app","status":"stub","note":"복합재 적용 (신규 스캐폴드)."},{"id":"injmold","title":"SFTF_InjMold_dev","kind":"app","status":"stub","note":"사출성형 적용 (신규 스캐폴드)."}]},{"id":"vscode","title":"__VSCode_Projects","kind":"group","note":"의복 CAD·영상계측·랩 웹앱·인프라 (D:\\__VSCode_Projects)","children":[{"id":"cadsuite","title":"의복 CAD 스위트","kind":"subgroup","note":"Clo3D 오픈소스 대안","children":[{"id":"cfmscad","title":"cfmsCAD2026_dev","kind":"app","status":"active","note":"3D 의복 CAD 에디터 (UI/패턴)."},{"id":"cfmsdrape","title":"cfmsDrape2026_dev","kind":"app","status":"active","note":"암시적 옷감 드레이프 솔버(DLL). SCAD/GarmentCode 입력, 인체 충돌·자기충돌."},{"id":"cfmssew","title":"cfmsSew2026_dev","kind":"app","status":"active","note":"2D 패턴 봉제대응 자동인식(휴리스틱→GNN). CAD/Drape에 병합 예정."},{"id":"cfmsshared","title":"cfmsShared2026_dev","kind":"infra","status":"infra","note":"CAD↔Drape 인터페이스 단일진실(contract/messages) 공유 git 채널."}]},{"id":"measure","title":"영상 계측","kind":"subgroup","children":[{"id":"dispersity","title":"cfmsDispersityKNN_Dev","kind":"app","status":"active","note":"광학현미경 입자 분산도 정량화(정적 kNN 에너지). C++Builder(Baraff 클로스심) 포팅."},{"id":"sem","title":"TSE_SEM2026_dev","kind":"app","status":"active","note":"SEM 섬유 영상 정량화(반지름·배향·기공) + metaball 3D 재구성."}]},{"id":"webapps","title":"랩 웹앱 (cfms-lab/KIT_sodi · Supabase)","kind":"subgroup","children":[{"id":"upjuk","title":"논문관리 (upjuk)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/upjuk.html","note":"업적 리스트 CRUD + PDF. draft는 RLS로 비로그인 숨김."},{"id":"timetable","title":"수업시간표 (TimeTable)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/timetable.html","note":"학기별 시간표 드래그 편성."},{"id":"jobgis","title":"취업현황 (JobGIS)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/jobgis.html","note":"졸업생 취업처 지도."},{"id":"mindmap","title":"이 관계도 (Mindmap)","kind":"web","status":"active","note":"프로젝트 관계도 (이 페이지, 로그인 전용)."}]},{"id":"infra","title":"인프라/템플릿","kind":"subgroup","children":[{"id":"template","title":"__vscode_AI_template","kind":"infra","status":"infra","note":"표준 프로젝트 템플릿(코드+논문, uv/xelatex/훅). 모든 *_dev의 기반. Tomo_SFTF에서 기원."},{"id":"hooks","title":"__클로드코드_훅설정","kind":"infra","status":"infra","note":"Claude Code 전역 훅 설정."}]}]}]},"links":[{"from":"tomo_sftf","to":"clustering","label":"코어 분리"},{"from":"tomo_sftf","to":"derivative","label":"코어 재사용"},{"from":"tomo_sftf","to":"composite","label":"파생"},{"from":"tomo_sftf","to":"injmold","label":"파생"},{"from":"clustering","to":"derivative","label":"코드 재사용"},{"from":"tomo_sftf","to":"template","label":"템플릿 기원"},{"from":"cfmsshared","to":"cfmscad","label":"contract"},{"from":"cfmsshared","to":"cfmsdrape","label":"contract"},{"from":"cfmssew","to":"cfmscad","label":"병합 예정"},{"from":"cfmssew","to":"cfmsdrape","label":"병합 예정"},{"from":"derivative","to":"cfmsdrape","label":"드레이프 응용 연계"},{"from":"dispersity","to":"cfmsdrape","label":"클로스심 계보"}]}/*DATA_END*/;
@@ -1880,6 +1938,41 @@ const GROUP_FILLS=[
 ];
 function groupFill(top){ if(!top) return null; return GROUP_FILLS.find(g=>g.id===top.id)||GROUP_FILLS.find(g=>g.re.test(top.title||''))||null; }
 function branchMap(root){ const m={}; ((root&&root.children)||[]).forEach(top=>walk(top,n=>{ m[n.id]=top; })); return m; }   // 노드 id → 최상위 가지
+/* ====== 다크 모드 색 (2026-11-21) ======
+   theme.js 의 CFMS_THEME.dark 를 읽어 **그릴 때만** 색을 바꾼다. 클라우드 문서(mindmaps.data)에는 색이 없고(면색은 GROUP_FILLS,
+   테두리는 KIND 로 렌더가 정한다) 아래 표도 문서에 쓰지 않으므로 마이그레이션이 없다. 밝은 화면에서는 아무것도 바꾸지 않는다.
+   · 넓은 면(가지 파스텔) → 같은 색상(hue)의 어두운 색조. 밝은 글자(#e6e9ed)와 7.4:1 이상, 가지끼리 ΔE 13 이상으로 골랐다.
+   · 작은 표시(등급 테두리 · 진도 아이콘 · 접기 단추) → 같은 색상으로 밝기를 올린다. 캔버스와 5.4:1 이상, 가지 면과 2.9:1 이상이다.
+     ToDo 의 먹색은 어두운 바탕에서 사라지므로 밝은 회색으로 뒤집는다(밝은 화면의 제일 진한 테두리 = 다크 모드의 제일 밝은 테두리).
+   · 표에 없는 색은 그대로 쓴다. 바뀌면 CFMS_THEME.onChange 가 render() 를 다시 부른다(applyBlink 아래). */
+function isDark(){ return !!(window.CFMS_THEME&&window.CFMS_THEME.dark); }
+const DARK_FACE={
+  '#bfe6d6':'#2a5042',   // 3D프린팅
+  '#f6e7a9':'#514821',   // Physics-AI
+  '#f5c6d5':'#5b2536',   // Rendering
+  '#f9d3b4':'#5e3a1e',   // Drape
+  '#c9bfe5':'#3a2e57',   // 이희란
+  '#adcdea':'#24405a',   // 은종현
+  '#e0e0e0':'#3b3f45',   // 김우석
+  '#d3e8b5':'#3c4e23',   // 전석진
+  '#d9cdb4':'#4a4232',   // 방대석
+  '#ffffff':'#2a2f35'    // 가지 없는 노드(기타 · root)
+};
+const DARK_INK={
+  '#e02020':'#ff6b6b', '#f28e2b':'#f6a04d', '#2a78d6':'#5ea0f0',   // 상 · 중 · 하
+  '#000000':'#e6e9ed',                                              // ToDo 테두리 · 아이콘(pieInk 가 흰 면 대신 고른 먹색)
+  '#64748b':'#9aa7b8', '#94a3b8':'#a9b5c4',                         // 등급 없음 테두리 · 아이콘(범례 회색 PROG_LEGEND 도)
+  '#374151':'#959da7', '#6b7280':'#a3aab3',                         // Closed 테두리 · 아이콘
+  '#898781':'#a19f97'                                               // 그룹 테두리
+};
+/* 그 밖의 색. paper = 진도 아이콘의 종이색(링 · 빈 칸 · 체크) — 밝은 화면은 흰색, 다크 모드는 어두운 색이라 아이콘 둘레가 번쩍이지 않는다. */
+const LIGHT_UI={ink:INK, ink2:INK2, note:MUTED, paper:'#ffffff', legendPaper:'#ffffff', swatch:'#fff', toggleFill:'#fcfcfb',
+  cancelFill:'#e3e2de', cancelStroke:'#9d9c98', draftSwatch:'#999', draftAlpha:0.5};
+const DARK_UI={ink:'#e6e9ed', ink2:'#a7afb9', note:'#a7afb9', paper:'#1a1d21', legendPaper:'#22262b', swatch:'#22262b', toggleFill:'#1b1e22',
+  cancelFill:'#2b2e32', cancelStroke:'#80868e', draftSwatch:'#8b939d', draftAlpha:0.6};   // 초안 60% — 어두운 바탕에서 50% 는 테두리가 너무 흐리다
+function themeUI(){ return isDark()?DARK_UI:LIGHT_UI; }
+function themeFace(c){ return isDark()&&DARK_FACE[c]||c; }
+function themeInk(c){ return isDark()&&DARK_INK[c]||c; }
 const LEGACY_KIND={
   root:'group', subgroup:'group', core:'high', app:'medium', web:'high', infra:'closed'
 };
@@ -1957,7 +2050,10 @@ const isPaperNode=n=>PAPER_NODE_IDS.has(n.id)||PAPER_TRACKS_WITHOUT_NOTE.has(n.i
    QUALITY_BORDERS 와 같다. 흰 ToDo 는 보이지 않으니 graph 처럼 테두리색(먹색)으로 그린다. */
 function progInk(kind){
   const k=KIND[kind]||KIND.todo;
-  return STAGES?STAGES.pieInk(k.fill,k.stroke):k.fill;
+  const ink=STAGES?STAGES.pieInk(k.fill,k.stroke):k.fill;
+  // 2026-11-21 다크 모드: 같은 등급색을 밝혀 그린다(themeInk — ToDo 의 먹색은 밝은 회색). check-mindmap-html.mjs 는 이 함수만
+  // 떼어 돌려 graph 의 밝은 값과 맞대므로, themeInk 가 없는 곳에서는 밝은 값 그대로 낸다.
+  return typeof themeInk==='function'?themeInk(ink):ink;
 }
 /* 크기 = 진도 (2026-09-19, 사용자 요청 — 출판이 투고의 두 배).
    반지름을 frac 에 그대로 비례시키면 submitted 0.5 · published 1 이라 정확히 두 배가 된다.
@@ -1984,10 +2080,11 @@ const PROG_W=24;
 function progIcon(status, cx, cy, color, checkColor, outline){
   const st=progStatus(status), p=PROGRESS[st]; if(!p||!STAGES) return '';
   /* 그림은 stages.js 의 pieSvg 다(portfolio · upjuk 과 같은 r=6 기하를 반지름 비율대로 늘린다). 이 지도에서 다른 것은 셋 —
-     반지름이 진도를 탄다(progRadius) · 빈 칸이 흰색이다(파스텔 가지 면 위라서 — 남은 흰 부분이 「아직」이다) ·
+     반지름이 진도를 탄다(progRadius) · 빈 칸이 흰색이다(파스텔 가지 면 위라서 — 남은 흰 부분이 「아직」이다. 2026-11-21: 빈 칸은
+     checkColor 와 같은 종이색이라 다크 모드에서는 어두운 색이다) ·
      outline 을 주면 바깥에 그 색 링을 깐다(주황 '중' 아이콘과 살구색 Drape 가지 면처럼 색이 가까운 조합).
      범례는 밝은 배경이라 outline 을 안 넘긴다 — 넘기면 아이콘이 커져 viewBox 를 키워야 한다. */
-  const inner=STAGES.pieSvg(p, {cx, cy, r:progRadius(status), color, mark:checkColor, blank:'#ffffff', halo:outline||null});
+  const inner=STAGES.pieSvg(p, {cx, cy, r:progRadius(status), color, mark:checkColor, blank:checkColor||'#ffffff', halo:outline||null});
   /* 깜빡임은 CSS 가 한다 — 여기서는 단계별 주기만 실은 <g> 로 감싼다. 스위치가 꺼져
      있으면 .blink-on 이 없어 animation-name 이 붙지 않으므로 이 값은 쓰이지 않는다. */
   return STAGES.blinks(st)
@@ -2099,13 +2196,14 @@ function render(){
   });
   if(showRel){ (DATA.links||[]).filter(l=>l.type!=='engine').forEach(l=>{ h+=relPath(l,''); }); }
   const branch=branchMap(DATA.root);   // 2026-10-31: 면색 = 최상위 가지(훌) 색, 테두리 = 등급
+  const u=themeUI();                   // 2026-11-21: 다크 모드 색은 그릴 때만 고른다(themeFace · themeInk) — 문서의 값은 그대로다
   lay.placed.forEach(p=>{
     const n=p.node, st=KIND[n.kind]||KIND.todo;
-    const gf=groupFill(branch[n.id]), base=gf?gf.fill:'#ffffff';
+    const gf=groupFill(branch[n.id]), base=themeFace(gf?gf.fill:'#ffffff'), edge=themeInk(st.stroke);
     const cancelled=(n.status==='cancelled'), draft=(n.status==='draft');
-    const fill=cancelled?'#e3e2de':draft?withAlpha(base,0.5):base;
-    const stroke=cancelled?'#9d9c98':draft?withAlpha(st.stroke,0.5):st.stroke;
-    const textColor=cancelled?INK2:INK;   // 파스텔 면이라 글자는 늘 잉크색
+    const fill=cancelled?u.cancelFill:draft?withAlpha(base,u.draftAlpha):base;
+    const stroke=cancelled?u.cancelStroke:draft?withAlpha(edge,u.draftAlpha):edge;
+    const textColor=cancelled?u.ink2:u.ink;   // 파스텔 면이라 글자는 늘 잉크색(다크 모드는 어두운 면에 밝은 글자)
     const dash=(n.status==='draft')?'stroke-dasharray="6 4"':'';
     const isMatch=q&&((n.title||'').toLowerCase().includes(q)||(n.note||'').toLowerCase().includes(q));
     const cls='node'+(n.id===sel?' sel':'')+(isMatch?' match':'');
@@ -2117,13 +2215,14 @@ function render(){
     h+=`<g class="${cls}" data-id="${n.id}" transform="translate(${p.x},${p.y})">`;
     h+=`<rect class="box" width="${p.w}" height="${lay.nodeH}" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="2" ${dash} data-act="sel" data-id="${n.id}"/>`;
     // 아이콘 색은 graph.html 노드와 같은 등급색이다(progInk). 파스텔 면과 가까운 색도 있어 흰 링(outline)을 두른다.
-    if(prog)h+=progIcon(nodeStage(n), 22, titleY-4.5, progInk(n.kind), '#ffffff', '#ffffff');   // 2026-11-21: 표 단계(TABLE_STAGE)
+    // 링 · 체크 · 빈 칸은 종이색(u.paper)이다 — 다크 모드에서는 어두운 링이 밝힌 등급색 아이콘을 면에서 떼어 놓는다.
+    if(prog)h+=progIcon(nodeStage(n), 22, titleY-4.5, progInk(n.kind), u.paper, u.paper);   // 2026-11-21: 표 단계(TABLE_STAGE)
     h+=`<text x="${titleX}" y="${titleY}" font-size="12.5" font-weight="700" fill="${textColor}" ${cancelled?'text-decoration="line-through"':''}>${esc(truncW(n.title, p.w-24-(n.url?16:0)-(prog?PROG_W:0), 12.5))}</text>`;
-    if(sub)h+=`<text x="12" y="${lay.nodeH-11}" font-size="10" fill="${cancelled?INK2:textColor}">${esc(sub)}</text>`;
+    if(sub)h+=`<text x="12" y="${lay.nodeH-11}" font-size="10" fill="${cancelled?u.ink2:textColor}">${esc(sub)}</text>`;
     if(n.url)h+=`<text x="${p.w-7}" y="15" text-anchor="end" font-size="10">🔗</text>`;
     h+=`<title>${esc(n.title)}${n.status?'\n상태: '+esc(STATUS[n.status]||n.status):''}${n.brief?'\n'+esc(n.brief):''}${n.note?'\n'+esc(n.note):''}${n.url?'\n'+esc(n.url):''}</title>`;
     if(hasKids){ const tx=-10,ty=lay.nodeH/2;
-      h+=`<g class="toggle" data-act="toggle" data-id="${n.id}"><circle cx="${tx}" cy="${ty}" r="8.5" fill="#fcfcfb" stroke="${stroke}" stroke-width="1.6"/>`+
+      h+=`<g class="toggle" data-act="toggle" data-id="${n.id}"><circle cx="${tx}" cy="${ty}" r="8.5" fill="${u.toggleFill}" stroke="${stroke}" stroke-width="1.6"/>`+
          `<text x="${tx}" y="${ty+4}" text-anchor="middle" font-size="12" font-weight="700" fill="${stroke}">${n.collapsed?'+':'–'}</text></g>`;
     }
     h+=`</g>`;
@@ -2132,19 +2231,20 @@ function render(){
 }
 function renderLegend(){
   // 2026-10-31: 면색 = 가지(훌), 테두리 = 등급. 가지 견본은 지금 문서의 최상위 가지에서 뽑는다.
-  const seen=new Set();
+  // 2026-11-21: 다크 모드는 노드와 같은 표(themeFace · themeInk · themeUI)로 견본을 칠한다.
+  const u=themeUI(), seen=new Set();
   const groupsHtml=((DATA&&DATA.root&&DATA.root.children)||[]).map(t=>groupFill(t)).filter(g=>g&&!seen.has(g.id)&&seen.add(g.id))
-    .map(g=>`<span class="lg"><i style="border-color:${g.stroke};background:${g.fill}"></i>${g.label}</span>`).join('');
+    .map(g=>`<span class="lg"><i style="border-color:${g.stroke};background:${themeFace(g.fill)}"></i>${g.label}</span>`).join('');
   document.getElementById('legend').innerHTML=groupsHtml
-    +`<span class="lg" style="margin-left:8px;color:#898781">테두리=등급</span>`
+    +`<span class="lg" style="margin-left:8px;color:${u.note}">테두리=등급</span>`
     +Object.keys(KIND).map(k=>
-    `<span class="lg"><i style="border-color:${KIND[k].stroke};background:#fff"></i>${KIND[k].label}</span>`).join('')
-    +`<span class="lg"><i style="border-style:dashed;border-color:#999;background:#fff"></i>draft(초안·채색 50%)</span>`
-    +`<span class="lg"><i style="border-color:#9d9c98;background:#e3e2de"></i><s>cancelled(취소)</s></span>`
-    +`<span class="lg" style="margin-left:8px;color:#898781">아이콘: 채운 정도=진도 · 색=등급</span>`
+    `<span class="lg"><i style="border-color:${themeInk(KIND[k].stroke)};background:${u.swatch}"></i>${KIND[k].label}</span>`).join('')
+    +`<span class="lg"><i style="border-style:dashed;border-color:${u.draftSwatch};background:${u.swatch}"></i>draft(초안·채색 50%)</span>`
+    +`<span class="lg"><i style="border-color:${u.cancelStroke};background:${u.cancelFill}"></i><s>cancelled(취소)</s></span>`
+    +`<span class="lg" style="margin-left:8px;color:${u.note}">아이콘: 채운 정도=진도 · 색=등급</span>`
     +Object.keys(PROGRESS).map(k=>
       `<span class="lg"><svg viewBox="0 0 20 20">`
-      +progIcon(k, 10, 10, PROG_LEGEND, '#ffffff')+`</svg>${PROGRESS[k].label}</span>`).join('');
+      +progIcon(k, 10, 10, themeInk(PROG_LEGEND), u.legendPaper)+`</svg>${PROGRESS[k].label}</span>`).join('');
 }
 
 /* ====== VSCODE·링크 버튼: 모든 노드에 동일하게 만들고, 값이 유효할 때만 눌리게 한다 ====== */
@@ -2211,7 +2311,7 @@ function renderEdit(){
   if(!canEdit()){                                   // 열람 모드: 내용만 보여주고 편집 폼은 만들지 않는다
     area.innerHTML=`<h4 style="margin:0 0 6px">${esc(n.title)}</h4>
       <p class="muted" style="margin:0 0 8px">${esc(KIND[n.kind]?KIND[n.kind].label:(n.kind||''))} · ${esc(STATUS[n.status]||n.status||'')}</p>
-      ${n.brief?`<p style="font-size:13px;color:#334155;margin:0 0 8px">${esc(n.brief)}</p>`:''}
+      ${n.brief?`<p class="brief" style="font-size:13px;margin:0 0 8px">${esc(n.brief)}</p>`:''}
       ${n.note?`<p style="font-size:12px;line-height:1.6;white-space:pre-wrap">${esc(n.note)}</p>`:''}
       ${n.projectPath?`<p class="muted" style="margin:8px 0 0;font-size:11px;word-break:break-all">📁 ${esc(n.projectPath)}</p>`:''}
       <div class="row" style="margin-top:8px">${vscodeBtnHtml(n)}${linkBtnHtml(n)}</div>
@@ -2244,7 +2344,7 @@ function renderEdit(){
     <div class="row">
       ${vscodeBtnHtml(n)}
       ${linkBtnHtml(n)}
-      <button class="btn sm" style="color:#c62828;border-color:#f1c0c0" onclick="del()">삭제</button>
+      <button class="btn sm danger" onclick="del()">삭제</button>
     </div>`;
   ['fTitle','fKind','fStatus','fUrl','fPath','fNote','fDir'].forEach(idf=>{const el=document.getElementById(idf);if(el)el.addEventListener('input',commitEdit);});
 }
@@ -2343,6 +2443,9 @@ function toggleBlink(){
   applyBlink();
 }
 applyBlink();
+/* 다크 모드 (2026-11-21): 체크박스 · 다른 탭 · 6시/18시 · 인쇄로 테마가 바뀌면 SVG(노드 · 관계선)와 범례만 다시 그린다 —
+   나머지는 CSS 다. 편집 패널은 다시 그리지 않는다(입력 중인 칸의 포커스를 지키려고 패널 색은 CSS 로만 칠했다). */
+if(window.CFMS_THEME) window.CFMS_THEME.onChange(()=>render());
 function fitView(){
   const lay=layout(DATA.root), cv=document.getElementById('canvas');
   const sx=(cv.clientWidth-40)/lay.width, sy=(cv.clientHeight-40)/lay.height;

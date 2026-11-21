@@ -1043,9 +1043,11 @@ function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes, vi
   ctx.textBaseline = 'middle';
   ctx.lineJoin = 'round';
   ctx.lineWidth = 5;
-  ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+  // 다크 모드(2026-11-21, theme.js): 글자 테두리는 어두운 바탕색, 글자는 훌의 밝은 파스텔(fill)이다.
+  const labelDark = !!(window.CFMS_THEME && window.CFMS_THEME.dark);
+  ctx.strokeStyle = labelDark ? 'rgba(26,29,33,0.92)' : 'rgba(255,255,255,0.92)';
   ctx.strokeText(h.label, 0, 0);
-  ctx.fillStyle = h.labelColor || h.color || '#6366f1';
+  ctx.fillStyle = labelDark ? (h.fill || h.labelColor || h.color || '#a5b4fc') : (h.labelColor || h.color || '#6366f1');
   ctx.fillText(h.label, 0, 0);
   ctx.restore();
 }
@@ -1233,9 +1235,11 @@ function _drawDynamicEdgeLabels(ctx) {
     ctx.rotate(best.angle);
     ctx.globalAlpha = 0.96;
     ctx.lineWidth = 4;
-    ctx.strokeStyle = 'rgba(255,255,255,0.94)';
+    // 다크 모드(2026-11-21, theme.js): 어두운 글자 테두리 위의 밝은 회백 글자.
+    const labelDark = !!(window.CFMS_THEME && window.CFMS_THEME.dark);
+    ctx.strokeStyle = labelDark ? 'rgba(26,29,33,0.94)' : 'rgba(255,255,255,0.94)';
     ctx.strokeText(edge.label, 0, 0);
-    ctx.fillStyle = '#3a3a3a';
+    ctx.fillStyle = labelDark ? '#dde1e6' : '#3a3a3a';
     ctx.fillText(edge.label, 0, 0);
     ctx.restore();
   });

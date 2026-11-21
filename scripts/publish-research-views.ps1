@@ -34,6 +34,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "portfolio.html validation failed" }
     node scripts/check-stages-js.mjs
     if ($LASTEXITCODE -ne 0) { throw "stages.js validation failed" }
+    node scripts/check-theme-js.mjs
+    if ($LASTEXITCODE -ne 0) { throw "theme.js (dark mode) validation failed" }
     node scripts/sync-sftf-map.mjs --verify --vault $vaultRoot
     if ($LASTEXITCODE -ne 0) { throw "SFTF map pies differ from stages.js - run node scripts/sync-sftf-map.mjs" }
     node scripts/check-todo-js.mjs

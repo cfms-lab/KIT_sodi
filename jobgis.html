@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>취업 현황 GIS (Cloud)</title>
+<script src="theme.js"></script>
 <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
 <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 <style>
@@ -67,6 +68,74 @@
   .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;opacity:0;transition:.3s;z-index:99}
   .toast.show{opacity:1}
   .hint{font-size:11px;color:#888;margin-top:3px}
+  /* 예전에는 style="…" 로 칠하던 것들 — 다크 규칙이 닿도록 클래스로 옮겼고 밝은 화면 값은 같다. */
+  .stat-n{font-weight:400;color:#777}
+  .stat-hint{font-weight:400;font-size:10px;color:#999}
+  .btn.danger{background:#c62828}
+  .mlab{font-size:11px;color:#555}
+  .pp-type{color:#00695c}
+  .pp-row{border-top:1px solid #eee;padding-top:3px;margin-top:3px}
+  /* 2026-11-21 사용자 지시 — 다크 모드(밤에 흰 화면이 눈부심). 체크박스와 공용 색(--dk-*)은 theme.js, 밝은 화면은 위 규칙 그대로다.
+     지도 타일은 아래 TILE_PAINT(MapLibre raster 칠)로 밝기를 뒤집는다 — 땅은 어둡게, 지명 글자는 밝게. 마커 · 팝업 · 범례는 HTML 이라
+     그 칠을 받지 않으므로 여기서 따로 어둡게 한다. 통계 표 머리줄 같은 넓은 청록 면은 어두운 청록으로 낮춘다. */
+  html[data-theme="dark"]{--line:#454c55}
+  html[data-theme="dark"] header{background:linear-gradient(135deg,#17423d,#12322e);color:var(--dk-strong)}
+  html[data-theme="dark"] a.home{background:rgba(255,255,255,.12);color:var(--dk-strong)}
+  html[data-theme="dark"] .authbar input{background:var(--dk-raised);color:var(--dk-text);border-color:var(--dk-border)}
+  html[data-theme="dark"] .pill{background:rgba(255,255,255,.1)}
+  html[data-theme="dark"] .btn{background:#1a5c54;color:var(--dk-strong)}
+  html[data-theme="dark"] .btn:hover{background:#154a44}
+  html[data-theme="dark"] .btn.g{background:var(--dk-raised);color:var(--dk-teal);border-color:#3f8f86}
+  html[data-theme="dark"] .btn.g:hover{background:var(--dk-hover)}
+  html[data-theme="dark"] .btn.danger{background:#9e3a33}
+  html[data-theme="dark"] .side{background:var(--dk-surface)}
+  html[data-theme="dark"] .banner{background:#2e2a22;border-bottom-color:#5c4a26;color:#ecc98a}
+  html[data-theme="dark"] .grp h3{color:var(--dk-teal)}
+  html[data-theme="dark"] .stat-n{color:var(--dk-muted)}
+  html[data-theme="dark"] .stat-hint{color:var(--dk-faint)}
+  html[data-theme="dark"] .slider .lab{color:var(--dk-muted)}
+  html[data-theme="dark"] .checks{background:var(--dk-surface)}
+  html[data-theme="dark"] .checks .sw{border-color:var(--dk-faint)}
+  html[data-theme="dark"] table.st th{background:#1f4a45;color:var(--dk-strong)}
+  html[data-theme="dark"] table.st td.n{color:var(--dk-muted)}
+  html[data-theme="dark"] table.st tr.off td.l,html[data-theme="dark"] table.st tr.off td.n{color:#858d97}
+  html[data-theme="dark"] table.st .avg{color:var(--dk-teal)}
+  html[data-theme="dark"] table.st td.l svg path{fill:var(--dk-muted)}          /* 업종 아이콘(fill="#555" 속성)을 밝힌다 */
+  html[data-theme="dark"] .jgm svg path:first-child{stroke:var(--dk-strong)}    /* 마커 바깥 테두리(stroke="#ffffff") */
+  html[data-theme="dark"] .jgm .cnt{background:#3a4048;color:var(--dk-strong);border-color:var(--dk-strong)}
+  html[data-theme="dark"] .maplibregl-popup-content{background:var(--dk-raised);color:var(--dk-text);box-shadow:0 2px 12px rgba(0,0,0,.6)}
+  html[data-theme="dark"] .maplibregl-popup-content a{color:var(--dk-link)}
+  html[data-theme="dark"] .maplibregl-popup-close-button{color:var(--dk-muted)}
+  html[data-theme="dark"] .maplibregl-popup-anchor-top .maplibregl-popup-tip,
+  html[data-theme="dark"] .maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+  html[data-theme="dark"] .maplibregl-popup-anchor-top-right .maplibregl-popup-tip{border-bottom-color:var(--dk-raised)}
+  html[data-theme="dark"] .maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
+  html[data-theme="dark"] .maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+  html[data-theme="dark"] .maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip{border-top-color:var(--dk-raised)}
+  html[data-theme="dark"] .maplibregl-popup-anchor-left .maplibregl-popup-tip{border-right-color:var(--dk-raised)}
+  html[data-theme="dark"] .maplibregl-popup-anchor-right .maplibregl-popup-tip{border-left-color:var(--dk-raised)}
+  html[data-theme="dark"] .pp-type{color:var(--dk-teal)}
+  html[data-theme="dark"] .pp-row{border-top-color:var(--dk-border)}
+  html[data-theme="dark"] .maplibregl-ctrl-group{background:var(--dk-raised)}
+  html[data-theme="dark"] .maplibregl-ctrl-group:not(:empty){box-shadow:0 0 0 2px rgba(0,0,0,.35)}
+  html[data-theme="dark"] .maplibregl-ctrl-group button+button{border-top-color:var(--dk-border)}
+  html[data-theme="dark"] .maplibregl-ctrl button .maplibregl-ctrl-icon{filter:invert(1) brightness(.9)}
+  html[data-theme="dark"] .maplibregl-ctrl-attrib,
+  html[data-theme="dark"] .maplibregl-ctrl-attrib.maplibregl-compact{background-color:rgba(34,38,43,.85);color:var(--dk-muted)}
+  html[data-theme="dark"] .maplibregl-ctrl-attrib a{color:var(--dk-muted)}
+  html[data-theme="dark"] .maplibregl-ctrl-attrib-button{filter:invert(1)}
+  html[data-theme="dark"] #salaryLegend{background:rgba(34,38,43,.92);border-color:var(--dk-border);color:var(--dk-muted);box-shadow:0 2px 8px rgba(0,0,0,.45)}
+  html[data-theme="dark"] #salaryLegend b{color:var(--dk-strong)}
+  html[data-theme="dark"] #salaryLegend .ramp{border-color:rgba(255,255,255,.2)}
+  html[data-theme="dark"] #salaryLegend .ax{color:var(--dk-muted)}
+  html[data-theme="dark"] .modal-bg{background:rgba(0,0,0,.55)}
+  html[data-theme="dark"] .modal{background:var(--dk-surface);color:var(--dk-text)}
+  html[data-theme="dark"] .modal h2{color:var(--dk-teal)}
+  html[data-theme="dark"] .grid label,html[data-theme="dark"] .mlab{color:var(--dk-muted)}
+  html[data-theme="dark"] .modal input,html[data-theme="dark"] .modal select{background:var(--dk-raised);color:var(--dk-text)}
+  html[data-theme="dark"] .hint{color:var(--dk-muted)}
+  html[data-theme="dark"] .err{color:var(--dk-red)}
+  html[data-theme="dark"] .toast{background:var(--dk-raised);color:var(--dk-strong);box-shadow:0 0 0 1px var(--dk-border)}
 </style>
 </head>
 <body>
@@ -74,6 +143,7 @@
   <a class="home" href="index.html">← 홈</a>
   <h1>금오공대 소재디자인공학과 취업 현황 GIS</h1>
   <div class="authbar" id="authbar"></div>
+  <span class="theme-slot" data-theme-toggle></span>
 </header>
 <div class="banner" id="banner"></div>
 
@@ -83,8 +153,8 @@
       <button class="btn g" id="btnAdd" onclick="openEdit(null)" disabled style="width:100%">＋ 취업 사례 추가</button>
     </div>
     <div class="grp">
-      <h3>분류별 현황 <span id="statCount" style="font-weight:400;color:#777"></span>
-        <span style="font-weight:400;font-size:10px;color:#999">· 체크로 지도 필터</span></h3>
+      <h3>분류별 현황 <span id="statCount" class="stat-n"></span>
+        <span class="stat-hint">· 체크로 지도 필터</span></h3>
       <div id="statTables"></div>
     </div>
   </aside>
@@ -115,7 +185,7 @@
   <div class="hint">좌표를 모르면 주소로 검색해 경위도를 채워주세요(없으면 지도에 표시되지 않습니다).</div>
   <div class="err" id="editErr"></div>
   <div class="modal-actions">
-    <button class="btn" style="background:#c62828" id="eDelete" onclick="deleteJob()">삭제</button>
+    <button class="btn danger" id="eDelete" onclick="deleteJob()">삭제</button>
     <button class="btn g" onclick="closeEdit()">취소</button>
     <button class="btn" id="eSave" onclick="saveJob()">저장</button>
   </div>
@@ -125,8 +195,8 @@
 <div class="modal-bg" id="cfgBg"><div class="modal" style="width:520px">
   <h2>Supabase 연결 설정</h2>
   <div style="display:flex;flex-direction:column;gap:10px">
-    <label style="font-size:11px;color:#555">Project URL<input id="cfgUrl" style="width:100%;padding:7px;border:1px solid var(--line);border-radius:6px"></label>
-    <label style="font-size:11px;color:#555">anon public key<input id="cfgKey" style="width:100%;padding:7px;border:1px solid var(--line);border-radius:6px"></label>
+    <label class="mlab">Project URL<input id="cfgUrl" style="width:100%;padding:7px;border:1px solid var(--line);border-radius:6px"></label>
+    <label class="mlab">anon public key<input id="cfgKey" style="width:100%;padding:7px;border:1px solid var(--line);border-radius:6px"></label>
   </div>
   <div class="err" id="cfgErr"></div>
   <div class="modal-actions"><button class="btn" onclick="saveConfig()">저장 후 연결</button></div>
@@ -276,18 +346,32 @@ function renderStats(){
 }
 
 /* ===== 지도 ===== */
+/* 2026-09-13: OSM 기본 타일은 도로·녹지·건물이 모두 원색이라 그 위에 얹은 마커와
+   채도가 맞붙는다. 타일을 바꾸지 않고(출처·약관 그대로) 채도만 내려 바탕으로
+   물러나게 한다. 마커 색이 유일한 강한 색이 되도록. — 아래 light 가 그 값이다.
+   2026-11-21 사용자 지시 — 다크 모드: 같은 OSM 타일(키 없음 · 약관 그대로)의 밝기를 raster 칠로 뒤집는다.
+   brightness-min 을 max 보다 크게 두면 흰 땅 · 도로는 어두운 회색, 검은 지명 글자는 밝은 회색이 된다.
+   뒤집으면 색조가 반대편으로 가므로 hue-rotate 180 으로 되돌린다. 마커 · 팝업은 HTML 이라 이 칠을 받지 않는다.
+   raster-hue-rotate 0 은 기본값이라 밝은 화면은 예전과 같다. */
+const TILE_PAINT={
+  light:{"raster-saturation":-0.9,"raster-contrast":-0.12,"raster-brightness-min":0.06,"raster-brightness-max":0.97,"raster-hue-rotate":0},
+  dark:{"raster-saturation":-0.9,"raster-contrast":0,"raster-brightness-min":0.8,"raster-brightness-max":0.08,"raster-hue-rotate":180}
+};
+function tilePaint(){return Object.assign({},TILE_PAINT[window.CFMS_THEME&&window.CFMS_THEME.dark?"dark":"light"]);}
+function applyTilePaint(){
+  if(!map||!mapReady||!map.getLayer("osm"))return;
+  const p=tilePaint();
+  for(const k in p) map.setPaintProperty("osm",k,p[k]);
+}
+if(window.CFMS_THEME) window.CFMS_THEME.onChange(applyTilePaint);
 function initMap(){
   map=new maplibregl.Map({container:"map",
     style:{version:8,sources:{osm:{type:"raster",tiles:["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],tileSize:256,attribution:"© OpenStreetMap contributors"}},
-      layers:[{id:"osm",type:"raster",source:"osm",
-        /* 2026-09-13: OSM 기본 타일은 도로·녹지·건물이 모두 원색이라 그 위에 얹은 마커와
-           채도가 맞붙는다. 타일을 바꾸지 않고(출처·약관 그대로) 채도만 내려 바탕으로
-           물러나게 한다. 마커 색이 유일한 강한 색이 되도록. */
-        paint:{"raster-saturation":-0.9,"raster-contrast":-0.12,"raster-brightness-min":0.06,"raster-brightness-max":0.97}}]},
+      layers:[{id:"osm",type:"raster",source:"osm",paint:tilePaint()}]},
     center:[127.885,36.238],zoom:6});
   map.addControl(new maplibregl.NavigationControl());
   map.on("load",()=>{
-    mapReady=true; apply();
+    mapReady=true; applyTilePaint(); apply();
     // 국내 좌표 기준으로 초기 화면 맞춤(해외 근무지는 줌아웃하면 보임)
     const kor=filtered().map(j=>[num(j.sOfficeLng),num(j.sOfficeLat)]).filter(([x,y])=>x>124&&x<132&&y>33&&y<39);
     if(kor.length){const b=new maplibregl.LngLatBounds();kor.forEach(c=>b.extend(c));map.fitBounds(b,{padding:50,maxZoom:10});}
@@ -339,8 +423,8 @@ function rebuildMarkers(list){
   }
 }
 function popupGroup(g){
-  const head=`<b>${esc(g.items[0].sOfficeName||"")}</b> <span style="color:#00695c">[${esc(modeType(g.items)||"")}]</span><br>${esc(g.items[0].sOfficeAddress||"")}`;
-  const rows=g.items.map(j=>`<div style="border-top:1px solid #eee;padding-top:3px;margin-top:3px">`+
+  const head=`<b>${esc(g.items[0].sOfficeName||"")}</b> <span class="pp-type">[${esc(modeType(g.items)||"")}]</span><br>${esc(g.items[0].sOfficeAddress||"")}`;
+  const rows=g.items.map(j=>`<div class="pp-row">`+
     `${esc((""+(j.sStudentYear||"")).slice(-2))}학번 <b>${esc(j.sStudentName||"")}</b> · 연봉 ${esc(j.sOfficeSalary||"")}만원`+
     (j.sOfficeURL?` · <a href="${esc(j.sOfficeURL)}" target="_blank">홈페이지</a>`:"")+
     (isIn()?` · <a href="#" onclick="openEdit(${j.id});return false;">수정</a>`:"")+`</div>`).join("");

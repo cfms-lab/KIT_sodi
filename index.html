@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CFMS 연구실 클라우드</title>
+<script src="theme.js"></script>
 <style>
   :root{--g:#2e7d32;--g2:#1b5e20;--b:#1565c0;--b2:#0d47a1;}
   *{box-sizing:border-box}
@@ -49,6 +50,30 @@
      준비된 원고 수가 바깥에 드러나지 않게. .card 의 display 가 [hidden] 의 기본 규칙을 이기므로 따로 적는다. */
   .login-only[hidden]{display:none!important}
   @media(max-width:780px){.cards{grid-template-columns:minmax(0,360px);width:min(100%,360px)}}
+  /* 2026-11-21 사용자 지시 — 다크 모드(밤에 흰 화면이 눈부심). 체크박스와 공용 색(--dk-*)은 theme.js, 밝은 화면은 위 규칙 그대로다.
+     넓은 면(바탕·머리줄·카드)은 어둡게 낮추고, 「열기 →」 글자는 카드마다 색조를 지키되 카드 바탕(#22262b)에서 7:1 이 넘게 밝혔다.
+     아이콘의 색 그라데이션은 작은 면이라 그대로 둔다. */
+  html[data-theme="dark"] header{background:var(--dk-surface);border-bottom-color:var(--dk-border-soft)}
+  html[data-theme="dark"] header h1{color:var(--dk-strong)}
+  html[data-theme="dark"] header .sub{color:var(--dk-muted)}
+  html[data-theme="dark"] .authbar input{background:var(--dk-raised);color:var(--dk-text);border-color:var(--dk-border)}
+  html[data-theme="dark"] .btn{background:#3d4a5a;color:var(--dk-strong)}
+  html[data-theme="dark"] .btn.ghost{background:var(--dk-raised);color:var(--dk-text);border-color:var(--dk-border)}
+  html[data-theme="dark"] .pill{background:#26332b;color:var(--dk-green)}
+  html[data-theme="dark"] .card{background:var(--dk-surface);border-color:var(--dk-border-soft);box-shadow:var(--dk-shadow)}
+  html[data-theme="dark"] .card:hover{box-shadow:0 12px 30px rgba(0,0,0,.55)}
+  html[data-theme="dark"] .card-ghost{box-shadow:0 18px 42px rgba(0,0,0,.6)}
+  html[data-theme="dark"] .card h2{color:var(--dk-strong)}
+  html[data-theme="dark"] .card p{color:var(--dk-muted)}
+  html[data-theme="dark"] .upjuk .go{color:var(--dk-green)}
+  html[data-theme="dark"] .tt .go{color:var(--dk-blue)}
+  html[data-theme="dark"] .jg .go{color:var(--dk-teal)}
+  html[data-theme="dark"] .mm .go{color:var(--dk-violet)}
+  html[data-theme="dark"] .gr .go{color:#a9b4f2}
+  html[data-theme="dark"] .research .go{color:#f5a582}
+  html[data-theme="dark"] .note{color:var(--dk-muted)}
+  html[data-theme="dark"] footer{color:var(--dk-faint)}
+  html[data-theme="dark"] .toast{background:var(--dk-raised);color:var(--dk-strong);box-shadow:0 0 0 1px var(--dk-border)}
 </style>
 </head>
 <body>
@@ -56,6 +81,7 @@
   <h1>CFMS 연구실 클라우드</h1>
   <span class="sub">금오공대 · 논문 / 시간표 통합 포털</span>
   <div class="authbar" id="authbar"></div>
+  <span class="theme-slot" data-theme-toggle></span>
 </header>
 
 <main>

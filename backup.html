@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CFMS 데이터 백업</title>
+<script src="theme.js"></script>
 <style>
   body{margin:0;font-family:"Segoe UI","Malgun Gothic",sans-serif;background:#eef2f7;color:#1f2937;font-size:14px}
   header{background:linear-gradient(135deg,#334155,#0f172a);color:#fff;padding:12px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -28,6 +29,30 @@
   .muted{color:#64748b;font-size:12.5px}
   .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;opacity:0;transition:.3s}
   .toast.show{opacity:1}
+  /* 설정 모달 — 예전에는 style="…" 로 칠했다. 다크 규칙이 닿도록 클래스로 옮겼고 밝은 화면 값은 같다. */
+  .cfg-panel{background:#fff;border-radius:10px;padding:18px;width:520px;max-width:94vw}
+  .cfg-lab{font-size:11px;color:#555}
+  .cfg-in{width:100%;padding:7px;border:1px solid #cbd5e1;border-radius:6px}
+  /* 2026-11-21 사용자 지시 — 다크 모드(밤에 흰 화면이 눈부심). 체크박스와 공용 색(--dk-*)은 theme.js, 밝은 화면은 위 규칙 그대로다.
+     카드 · 경고 상자 · 기록 칸 같은 넓은 면은 어둡게 낮추고 글자는 바탕에서 7:1 안팎으로 둔다. */
+  html[data-theme="dark"] header{background:linear-gradient(135deg,#2f3a48,#20262e);color:var(--dk-strong)}
+  html[data-theme="dark"] a.home{background:rgba(255,255,255,.12);color:var(--dk-strong)}
+  html[data-theme="dark"] .authbar input{background:var(--dk-raised);color:var(--dk-text);border-color:var(--dk-border)}
+  html[data-theme="dark"] .pill{background:rgba(255,255,255,.1)}
+  html[data-theme="dark"] .card{background:var(--dk-surface);border-color:var(--dk-border-soft);box-shadow:var(--dk-shadow)}
+  html[data-theme="dark"] .btn{background:#3d4a5a;color:var(--dk-strong)}
+  html[data-theme="dark"] .btn:hover{background:#4a5868}
+  html[data-theme="dark"] .btn.g{background:var(--dk-raised);color:var(--dk-text);border-color:var(--dk-border)}
+  html[data-theme="dark"] .btn.g:hover{background:var(--dk-hover)}
+  html[data-theme="dark"] .warn{background:#2e2a22;border-color:#5c4a26;color:#ecc98a}
+  html[data-theme="dark"] .log{background:var(--dk-bg);border-color:var(--dk-border-soft);color:var(--dk-muted)}
+  html[data-theme="dark"] table.t td,html[data-theme="dark"] table.t th{border-color:var(--dk-border-soft)}
+  html[data-theme="dark"] table.t th{background:var(--dk-raised)}
+  html[data-theme="dark"] .muted{color:var(--dk-muted)}
+  html[data-theme="dark"] .toast{background:var(--dk-raised);color:var(--dk-strong);box-shadow:0 0 0 1px var(--dk-border)}
+  html[data-theme="dark"] .cfg-panel{background:var(--dk-surface);color:var(--dk-text)}
+  html[data-theme="dark"] .cfg-lab{color:var(--dk-muted)}
+  html[data-theme="dark"] .cfg-in{background:var(--dk-raised);color:var(--dk-text);border-color:var(--dk-border)}
 </style>
 </head>
 <body>
@@ -35,6 +60,7 @@
   <a class="home" href="index.html">← 홈</a>
   <h1>CFMS 데이터 백업</h1>
   <div class="authbar" id="authbar"></div>
+  <span class="theme-slot" data-theme-toggle></span>
 </header>
 
 <div class="wrap">
@@ -65,11 +91,11 @@
 
 <!-- 설정 모달 -->
 <div class="card" id="cfgBox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);margin:0;border-radius:0;display:none;align-items:center;justify-content:center">
-  <div style="background:#fff;border-radius:10px;padding:18px;width:520px;max-width:94vw">
+  <div class="cfg-panel">
     <h2>Supabase 연결 설정</h2>
     <div style="display:flex;flex-direction:column;gap:10px">
-      <label style="font-size:11px;color:#555">Project URL<input id="cfgUrl" style="width:100%;padding:7px;border:1px solid #cbd5e1;border-radius:6px"></label>
-      <label style="font-size:11px;color:#555">anon public key<input id="cfgKey" style="width:100%;padding:7px;border:1px solid #cbd5e1;border-radius:6px"></label>
+      <label class="cfg-lab">Project URL<input id="cfgUrl" class="cfg-in"></label>
+      <label class="cfg-lab">anon public key<input id="cfgKey" class="cfg-in"></label>
     </div>
     <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px"><button class="btn" onclick="saveConfig()">저장</button></div>
   </div>

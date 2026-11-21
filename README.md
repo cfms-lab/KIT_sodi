@@ -25,6 +25,7 @@
 | `graph3d.html` | `graph.html`을 실시간으로 읽는 WebGL 3D 그래프 뷰어 |
 | `portfolio.html` | 볼트 「포트폴리오 한눈에」 표, **로그인 필수** (Supabase `portfolio_rows`) |
 | `backup.html` | Supabase 데이터 백업 도구 |
+| `theme.js` | 다크 모드 공용 스위치 — graph3d 를 뺀 위 페이지가 같이 읽는다. 18시~6시에는 저절로 어둡고, 머리줄의 「다크 모드」 체크로 바꾼 값은 다음 6시 · 18시까지 모든 페이지에 같이 적용된다 |
 | `scripts/build-vault-graph.mjs` | Markdown/Obsidian 볼트에서 `vault-graph.json` 생성 |
 
 ## Supabase 재구성 파일

@@ -44,6 +44,15 @@
 SFTF 7편 지도(볼트 노트 + artifact)의 파이는 표를 못 읽으므로 `node scripts/sync-sftf-map.mjs` 로 다시 그리고 artifact 에 `stages.js` ·
 `tmp/sftf-map/sftf-pies.js` 두 파일을 올린다 — SFTF 일곱 편의 단계 · 등급이 바뀌거나 `stages.js` 파이를 고칠 때(runbook 4. 함정).
 
+## 다크 모드
+
+2026-11-21 부터 index · upjuk · timetable · jobgis · mindmap · graph · portfolio · backup 이 `<head>` 에서 **`theme.js`** 를 읽는다(graph3d 는 뺀다 — 사용자 지시).
+18시~6시(방문자 컴퓨터 시계)에는 저절로 어둡고, 체크박스 「다크 모드」로 바꾼 값은 다음 6시 · 18시까지만 간다(localStorage `cfms_theme`, 모든 페이지 · 탭 공용).
+기기 설정(prefers-color-scheme)은 따르지 않는다. 어두운 색은 각 페이지 `<style>` 의 `html[data-theme="dark"]` 규칙과 theme.js 의 `--dk-*` 변수이고,
+캔버스 · 스크립트가 칠하는 색은 `CFMS_THEME.dark` 를 읽고 `CFMS_THEME.onChange` 로 다시 칠한다. 페이지에 색을 더하거나 새 페이지를 만들면
+밝은 화면과 어두운 화면을 둘 다 헤드리스 크롬으로 본다 — 어두운 화면은 넓은 흰 면 · 파스텔 면이 남지 않게, 글자는 4.5:1 이상(본문 7:1)으로.
+가드는 `node scripts/check-theme-js.mjs`(검증 스크립트에 들어 있다).
+
 ## graph · portfolio 「ToDo」 한 줄
 
 2026-11-21 부터 **볼트가 정본**이다 — 노트 frontmatter `todo:`, 분리 트랙은 대시보드 분리트랙 항목의 `할일:`.

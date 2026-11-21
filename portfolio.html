@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CFMS 포트폴리오 한눈에</title>
+<!-- 다크 모드 공용 스위치. <style> 보다 먼저 읽어 첫 그림부터 정해진 색으로 그린다 (2026-11-21, 사용자 지시 — 다크 모드). -->
+<script src="theme.js"></script>
 <!--
   볼트 Dashboards/프로젝트현황.md 의 「포트폴리오 한눈에」 표를 웹에서 보는 페이지다.
   읽기 전용이고 **정본은 옵시디언 볼트**다 — upjuk.html 과 같은 규율이다.
@@ -46,6 +48,10 @@
   nav.links a{font-size:12px;color:#334155;text-decoration:none;background:#f1f5f9;
     border:1px solid var(--line);padding:4px 10px;border-radius:10px}
   nav.links a:hover{background:#e2e8f0}
+  /* 다크 모드 체크박스 자리 — 로그인 칸(authbar, 스크립트가 다시 그린다) 바로 왼쪽. upjuk.html 과 같은 자리다.
+     링크 · 체크박스 · 로그인 칸을 .hdr-end 로 묶어 오른쪽으로 밀어, 좁은 화면에서 줄이 넘어가도 예전처럼 오른쪽에 붙는다. */
+  .hdr-end{margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+  .theme-slot{display:inline-flex;align-items:center}
   .authbar{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim)}
   .pill{background:#e8f5e9;color:#1b5e20;padding:5px 10px;border-radius:12px;font-weight:600}
   .btn{background:#334155;color:#fff;border:none;padding:6px 12px;border-radius:7px;
@@ -134,6 +140,46 @@
     col.c-co,th.c-co,td.c-co{display:none}
     .hint{display:none}
   }
+
+  /* ── 다크 모드 (2026-11-21, 사용자 지시 — 다크 모드: 밤에 흰 화면이 눈부시다) ──────────────────────
+     밝은 화면은 위 규칙 그대로이고, 여기는 html[data-theme="dark"](theme.js 가 정한다) 아래에서만 덮는다.
+     공용 색 --dk-* 는 theme.js 에 있다. 저시력 · 눈부심을 고려한 대비 — 순검정 · 순백을 피하고 본문은 12:1 대다.
+     흰 표 · 머리줄 · 칩은 어두운 면으로 낮추고, 줄 구분선 · 테두리는 밝혀 행을 따라 읽을 수 있게 한다.
+     공저 교수 이름 배경은 upjuk.html 다크 --au-* 와 같은 값이다(밝은 글자와 이희란 7.2:1 · 은종현 6.6:1 · 김우석 6.6:1).
+     등급 색 중 상 · 하 · Closed 는 어두운 바탕에서 3.2~3.5:1 이라 같은 색상(hue)으로 밝힌다 — 파이는 QUALITY_PIE_DARK
+     (아래 스크립트), 등급 칩 점은 --q-*. 로그인 화면(#gate)은 색만 바꾸고 구조는 그대로다. */
+  html[data-theme="dark"]{
+    --line:var(--dk-border); --ink:var(--dk-text); --dim:var(--dk-muted); --bg:var(--dk-bg);
+    --q-high:#f45555; --q-low:#4d94ec; --q-closed:#858c96;
+    --au-lee:#4d3884; --au-eun:#234e76; --au-kim:#474c53;
+  }
+  html[data-theme="dark"] header{background:var(--dk-surface)}
+  html[data-theme="dark"] header a.home,html[data-theme="dark"] nav.links a{background:var(--dk-raised);color:var(--dk-text)}
+  html[data-theme="dark"] header a.home:hover,html[data-theme="dark"] nav.links a:hover{background:var(--dk-hover)}
+  html[data-theme="dark"] .stamp{color:var(--dk-faint);background:var(--dk-raised)}
+  html[data-theme="dark"] .pill{background:#1f3a24;color:var(--dk-green)}
+  html[data-theme="dark"] .btn{background:#3d4c61;color:var(--dk-strong)}
+  html[data-theme="dark"] .btn:hover{background:#4a5b73}
+  html[data-theme="dark"] .btn.ghost{background:var(--dk-raised);color:var(--dk-text)}
+  html[data-theme="dark"] .btn.ghost:hover{background:var(--dk-hover)}
+  html[data-theme="dark"] .toolbar{background:var(--dk-surface)}
+  html[data-theme="dark"] .toolbar input[type="search"]{background:var(--dk-raised);color:var(--dk-text)}
+  html[data-theme="dark"] .chk{color:var(--dk-muted)}
+  html[data-theme="dark"] .maps a{color:var(--dk-text);background:#1e3238;border-color:#35525b}
+  html[data-theme="dark"] .maps a:hover{background:#26404a}
+  html[data-theme="dark"] #gate{background:var(--dk-surface);box-shadow:var(--dk-shadow)}
+  html[data-theme="dark"] #gate input{background:var(--dk-raised);color:var(--dk-text)}
+  html[data-theme="dark"] #gate .err{color:var(--dk-red)}
+  html[data-theme="dark"] table{background:var(--dk-surface)}
+  html[data-theme="dark"] thead th{background:var(--dk-raised);color:var(--dk-strong)}
+  html[data-theme="dark"] thead th.sortable:hover{background:var(--dk-hover)}
+  html[data-theme="dark"] tbody tr:hover{background:var(--dk-raised)}
+  html[data-theme="dark"] .repo{color:var(--dk-link)}
+  html[data-theme="dark"] .vscode-btn{background:var(--dk-raised);color:var(--dk-muted)}
+  html[data-theme="dark"] .vscode-btn:hover{background:#1f3550;border-color:#4d79b3;color:var(--dk-link)}
+  html[data-theme="dark"] .dot{border-color:rgba(221,225,230,.45)}
+  html[data-theme="dark"] .jarrow{color:var(--dk-faint)}
+  html[data-theme="dark"] .toast{background:#3b424b;color:var(--dk-strong);border:1px solid var(--dk-border);box-shadow:var(--dk-shadow)}
 </style>
 <!-- 저자 관점의 ToDo 한 줄. 이 파일이 DB 값보다 먼저다 (2026-09-21). -->
 <script src="todo.js"></script>
@@ -146,12 +192,15 @@
   <h1>포트폴리오 한눈에</h1>
   <span class="sub">등급 순 · 투고 · ToDo</span>
   <span class="stamp" id="stamp" title="이 표를 볼트에서 발행한 날짜"></span>
-  <nav class="links">
-    <a href="mindmap.html" title="프로젝트 관계도">관계도</a>
-    <a href="graph.html" title="프로젝트 그래프">그래프</a>
-    <a href="upjuk.html" title="논문 리스트">논문</a>
-  </nav>
-  <div class="authbar" id="authbar"></div>
+  <div class="hdr-end">
+    <nav class="links">
+      <a href="mindmap.html" title="프로젝트 관계도">관계도</a>
+      <a href="graph.html" title="프로젝트 그래프">그래프</a>
+      <a href="upjuk.html" title="논문 리스트">논문</a>
+    </nav>
+    <span class="theme-slot" data-theme-toggle></span>
+    <div class="authbar" id="authbar"></div>
+  </div>
 </header>
 
 <div class="toolbar" id="toolbar" hidden>
@@ -348,7 +397,11 @@ function 비교(a, b) {
    ToDo 는 원래 흰색인데 흰 바탕에서 안 보여 회색으로 둔다. */
 const QUALITY_PIE = {"상":"#e02020","중":"#f28e2b","하":"#2a78d6","ToDo":"#9ca3af",
   "Closed":"#6b7280","그룹":"#c8c8c8","등급 없음":"#94a3b8"};
-const 파이색 = g => QUALITY_PIE[g] || "#94a3b8";
+/* 다크 모드의 파이 색 (2026-11-21, 사용자 지시 — 다크 모드). 어두운 표 바탕(#22262b)에서 상 · 하 · Closed 원색은 3.2~3.5:1 이라
+   같은 색상(hue)으로 밝혀 4.5:1 이상으로 올린다. upjuk.html 의 QUALITY_PIE_DARK · 위 다크 --q-* 와 같은 값이다.
+   모드를 바꾸면 아래 CFMS_THEME.onChange 가 표를 다시 그린다. */
+const QUALITY_PIE_DARK = Object.assign({}, QUALITY_PIE, {"상":"#f45555","하":"#4d94ec","Closed":"#858c96"});
+const 파이색 = g => ((window.CFMS_THEME && window.CFMS_THEME.dark) ? QUALITY_PIE_DARK : QUALITY_PIE)[g] || "#94a3b8";
 
 /* ── 투고 파이 아이콘 — 볼트 노트의 투고셀() 과 같은 기하다(r=6, 12시에서 시계방향).
    단계(채운 정도)와 설명은 META.stages 로 볼트에서 따라오고, 색은 호출부가 준다.
@@ -572,6 +625,9 @@ async function showTable(){
 }
 /* ToDo 줄은 표 행과 따로 온다(todo.js). 행을 그린 뒤에 도착하면 한 번 더 그린다 — 로그인 전(행이 없을 때)에는 할 일이 없다. */
 if (window.cfmsTodoReady) window.cfmsTodoReady.then(ok => { if (ok && ROWS.length) 그리기(); });
+/* 다크 모드를 켜고 끄면 스크립트가 칠한 파이 색(파이색)이 바뀌어야 하므로 표를 다시 그린다(펼친 행은 접힌다).
+   범례 파이는 회색이라 그대로 두고, 나머지 색은 CSS 의 html[data-theme="dark"] 규칙이 맡는다 (2026-11-21). */
+if (window.CFMS_THEME) window.CFMS_THEME.onChange(() => { if (ROWS.length) 그리기(); });
 
 async function login(){
   const email=document.getElementById('liEmail').value.trim();

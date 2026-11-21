@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수업 시간표 (Cloud)</title>
+<script src="theme.js"></script>
 <style>
   :root{--blue:#1565c0;--blue-d:#0d47a1;--bg:#eef1f5;--line:#cbd5e1;}
   *{box-sizing:border-box}
@@ -56,14 +57,59 @@
   .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;opacity:0;transition:.3s;z-index:99}
   .toast.show{opacity:1}
   .hintbar{font-size:11px;color:#777;padding:4px 16px}
+  /* 예전에는 style="…" 로 칠하던 것들 — 다크 규칙이 닿도록 클래스로 옮겼고 밝은 화면 값은 같다.
+     교수 색은 render() 가 style 에 --pc(원래 색) · --pcd(다크 면) · --pcb(다크 테두리)로 넣는다. */
+  a.home{color:#fff;text-decoration:none;font-size:13px;background:rgba(255,255,255,.18);padding:4px 11px;border-radius:12px}
+  .btn.danger{background:#c62828}
+  .course,.legend .lg{background:var(--pc)}
+  .mlab{font-size:12px;color:#555}
+  .mlab.s11{font-size:11px}
+  .mnote{font-size:12px;color:#666}
+  .mlog{font-size:11px;color:#666;margin-top:8px;white-space:pre-wrap}
+  /* 2026-11-21 사용자 지시 — 다크 모드(밤에 흰 화면이 눈부심). 체크박스와 공용 색(--dk-*)은 theme.js, 밝은 화면은 위 규칙 그대로다.
+     과목 칸은 넓은 면이라 교수 색을 어두운 같은 색조(--pcd, 상대 휘도 0.05)로 낮추고 글자 #dde1e6 과 7:1 이 넘게 둔다.
+     원래 색은 테두리(--pcb)로 남겨 범례와 맞춰 볼 수 있게 한다. */
+  html[data-theme="dark"]{--line:#454c55;--bg:#1a1d21}
+  html[data-theme="dark"] header{background:linear-gradient(135deg,#1e3a5f,#172c48);color:var(--dk-strong)}
+  html[data-theme="dark"] a.home{background:rgba(255,255,255,.12);color:var(--dk-strong)}
+  html[data-theme="dark"] .authbar input{background:var(--dk-raised);color:var(--dk-text);border-color:var(--dk-border)}
+  html[data-theme="dark"] .pill{background:rgba(255,255,255,.1)}
+  html[data-theme="dark"] .toolbar,html[data-theme="dark"] .legend{background:var(--dk-surface)}
+  html[data-theme="dark"] .toolbar label{color:var(--dk-muted)}
+  html[data-theme="dark"] select{background:var(--dk-raised);color:var(--dk-text)}
+  html[data-theme="dark"] .btn{background:#245a9c;color:var(--dk-strong)}
+  html[data-theme="dark"] .btn:hover{background:#1d4f8a}
+  html[data-theme="dark"] .btn.secondary{background:var(--dk-raised);color:var(--dk-blue);border-color:#4f7fbf}
+  html[data-theme="dark"] .btn.secondary:hover{background:var(--dk-hover)}
+  html[data-theme="dark"] .btn.danger{background:#9e3a33}
+  html[data-theme="dark"] .banner{background:#2e2a22;border-bottom-color:#5c4a26;color:#ecc98a}
+  html[data-theme="dark"] table.tt{background:var(--dk-surface)}
+  html[data-theme="dark"] table.tt th{background:var(--dk-raised)}
+  html[data-theme="dark"] .rowlabel{background:#262a30}
+  html[data-theme="dark"] .dayfirst{border-top-color:#7b8490 !important}
+  html[data-theme="dark"] td.cell.drop{background:#2a3a50;outline-color:var(--dk-blue)}
+  html[data-theme="dark"] .course,html[data-theme="dark"] .legend .lg{background:var(--pcd);border-color:var(--pcb)}
+  html[data-theme="dark"] .course small{opacity:.9}
+  html[data-theme="dark"] .course.hl,html[data-theme="dark"] .course.conflict{outline-color:var(--dk-red)}
+  html[data-theme="dark"] .course.sel{outline-color:var(--dk-blue)}
+  html[data-theme="dark"] .conflict-note,html[data-theme="dark"] .err{color:var(--dk-red)}
+  html[data-theme="dark"] .dragclone{box-shadow:0 6px 18px rgba(0,0,0,.6)}
+  html[data-theme="dark"] .modal-bg{background:rgba(0,0,0,.55)}
+  html[data-theme="dark"] .modal{background:var(--dk-surface);color:var(--dk-text)}
+  html[data-theme="dark"] .modal h2{color:var(--dk-blue)}
+  html[data-theme="dark"] .grid label,html[data-theme="dark"] .mlab,html[data-theme="dark"] .mnote,html[data-theme="dark"] .mlog{color:var(--dk-muted)}
+  html[data-theme="dark"] .modal input,html[data-theme="dark"] .modal select{background:var(--dk-raised);color:var(--dk-text)}
+  html[data-theme="dark"] .hintbar{color:var(--dk-muted)}
+  html[data-theme="dark"] .toast{background:var(--dk-raised);color:var(--dk-strong);box-shadow:0 0 0 1px var(--dk-border)}
 </style>
 </head>
 <body>
 <header>
-  <a href="index.html" style="color:#fff;text-decoration:none;font-size:13px;background:rgba(255,255,255,.18);padding:4px 11px;border-radius:12px">← 홈</a>
+  <a class="home" href="index.html">← 홈</a>
   <h1>수업 시간표</h1>
   <span style="font-size:12px;opacity:.85">클라우드 · 드래그 배정</span>
   <div class="authbar" id="authbar"></div>
+  <span class="theme-slot" data-theme-toggle></span>
 </header>
 <div class="banner" id="banner"></div>
 
@@ -100,7 +146,7 @@
   </div>
   <div class="err" id="editErr"></div>
   <div class="modal-actions">
-    <button class="btn" style="background:#c62828" id="eDelete" onclick="deleteCourse()">삭제</button>
+    <button class="btn danger" id="eDelete" onclick="deleteCourse()">삭제</button>
     <button class="btn secondary" onclick="closeEdit()">취소</button>
     <button class="btn" id="eSave" onclick="saveCourse()">저장</button>
   </div>
@@ -109,21 +155,21 @@
 <!-- 학기 복제 모달 -->
 <div class="modal-bg" id="cloneBg"><div class="modal" style="width:480px">
   <h2>학기 복제 · 새 학기 만들기</h2>
-  <p style="font-size:12px;color:#666">이전 학기를 복제해 새 학기를 만듭니다. 만든 뒤 드래그로 자리만 조정하면 됩니다.</p>
+  <p class="mnote">이전 학기를 복제해 새 학기를 만듭니다. 만든 뒤 드래그로 자리만 조정하면 됩니다.</p>
   <div style="display:flex;flex-direction:column;gap:10px">
-    <label style="font-size:12px;color:#555">원본 학기 (복제할 학기)
+    <label class="mlab">원본 학기 (복제할 학기)
       <select id="clSrc" style="width:100%;padding:6px;border:1px solid var(--line);border-radius:6px"></select></label>
-    <label style="font-size:12px;color:#555">대상 학기 (새로 만들/채울 학기, 예: 2026-2)
+    <label class="mlab">대상 학기 (새로 만들/채울 학기, 예: 2026-2)
       <input id="clTgt" style="width:100%;padding:6px;border:1px solid var(--line);border-radius:6px"></label>
-    <label style="font-size:12px;color:#555">복제 범위
+    <label class="mlab">복제 범위
       <select id="clMode" style="width:100%;padding:6px;border:1px solid var(--line);border-radius:6px">
         <option value="full">과목 + 교수 + 강의실 전체 복제</option>
         <option value="meta">교수·강의실만 (과목은 직접 추가)</option>
       </select></label>
-    <label style="font-size:12px;color:#555;display:flex;align-items:center;gap:6px">
+    <label class="mlab" style="display:flex;align-items:center;gap:6px">
       <input type="checkbox" id="clClear"> 대상 학기에 이미 있는 데이터를 먼저 비우기(삭제)</label>
   </div>
-  <div id="clLog" style="font-size:11px;color:#666;margin-top:8px;white-space:pre-wrap"></div>
+  <div id="clLog" class="mlog"></div>
   <div class="err" id="clErr"></div>
   <div class="modal-actions">
     <button class="btn secondary" onclick="closeClone()">취소</button>
@@ -135,8 +181,8 @@
 <div class="modal-bg" id="cfgBg"><div class="modal" style="width:520px">
   <h2>Supabase 연결 설정</h2>
   <div style="display:flex;flex-direction:column;gap:10px">
-    <label style="font-size:11px;color:#555">Project URL<input id="cfgUrl" placeholder="https://xxxxx.supabase.co" style="width:100%;padding:7px;border:1px solid var(--line);border-radius:6px"></label>
-    <label style="font-size:11px;color:#555">anon public key<input id="cfgKey" placeholder="eyJhbGciOi..." style="width:100%;padding:7px;border:1px solid var(--line);border-radius:6px"></label>
+    <label class="mlab s11">Project URL<input id="cfgUrl" placeholder="https://xxxxx.supabase.co" style="width:100%;padding:7px;border:1px solid var(--line);border-radius:6px"></label>
+    <label class="mlab s11">anon public key<input id="cfgKey" placeholder="eyJhbGciOi..." style="width:100%;padding:7px;border:1px solid var(--line);border-radius:6px"></label>
   </div>
   <div class="err" id="cfgErr"></div>
   <div class="modal-actions"><button class="btn" onclick="saveConfig()">저장 후 연결</button></div>
@@ -214,6 +260,47 @@ async function loadAll(){
 }
 function semesters(){return [...new Set([...COURSES.map(c=>c.semester),...PROFS.map(p=>p.semester),...ROOMS.map(r=>r.semester)])].sort().reverse();}
 function profColor(sem,name){const p=PROFS.find(x=>x.semester===sem&&x.sProfName===name);return p&&p.sProfColor?p.sProfColor:"#ffffff";}
+/* 교수 색 → style 의 CSS 변수 세 개 (2026-11-21 사용자 지시 — 다크 모드).
+   --pc 는 원래 색이고 밝은 화면은 이것만 쓴다(예전 style="background:…" 와 같다).
+   --pcd 는 다크 모드의 과목 면 — 원래 색을 다크 카드 바탕(#22262b)에 섞되 상대 휘도가 0.05 가 되는 데까지만 섞는다.
+   섞는 비율만 바꾸므로 색조와 채도 차이(진한 노랑 · 연한 노랑)가 남고, 글자 #dde1e6 과는 8:1 안팎이다(지금 교수 색 13가지 모두 7.99~8.08:1).
+   --pcb 는 다크 모드의 테두리 — 원래 색에 가깝게, 너무 어두우면 밝혀서 작은 표시로 색이 읽히게 한다.
+   두 모드의 값을 늘 같이 넣으므로 체크박스를 눌러도 다시 그릴 필요가 없다. */
+const DK_FACE=[34,38,43], DK_INK=[221,225,230], PC_CACHE=new Map();
+let pcCtx=null;
+function parseColor(col){
+  try{ if(!pcCtx) pcCtx=document.createElement("canvas").getContext("2d"); }catch(e){ return null; }
+  if(!pcCtx) return null;
+  pcCtx.fillStyle="#010203"; pcCtx.fillStyle=String(col);
+  const v=String(pcCtx.fillStyle);
+  if(v==="#010203" && String(col).trim().toLowerCase()!=="#010203") return null;   // 색이 아닌 글자
+  let m=/^#([0-9a-f]{6})$/i.exec(v);
+  if(m) return [0,2,4].map(i=>parseInt(m[1].slice(i,i+2),16));
+  m=/^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i.exec(v);
+  return m?[+m[1],+m[2],+m[3]]:null;
+}
+function relLum(c){const f=v=>{v/=255;return v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);};return 0.2126*f(c[0])+0.7152*f(c[1])+0.0722*f(c[2]);}
+function mixRgb(a,b,t){return a.map((v,i)=>Math.round(v*t+b[i]*(1-t)));}
+function rgbHex(c){return "#"+c.map(v=>("0"+Math.max(0,Math.min(255,v)).toString(16)).slice(-2)).join("");}
+function pcVars(col){
+  const key=String(col);
+  if(PC_CACHE.has(key)) return PC_CACHE.get(key);
+  const rgb=parseColor(col);
+  let face="#383d44", edge="#8b939d";                 // 색을 못 읽으면 회색
+  if(rgb){
+    let t=1;
+    if(relLum(rgb)>0.05){ let lo=0,hi=1;
+      for(let i=0;i<24;i++){const mid=(lo+hi)/2; if(relLum(mixRgb(rgb,DK_FACE,mid))>0.05) hi=mid; else lo=mid;}
+      t=lo; }
+    face=rgbHex(mixRgb(rgb,DK_FACE,t));
+    let e=mixRgb(rgb,DK_FACE,0.85);
+    for(let k=0;k<10&&relLum(e)<0.2;k++) e=mixRgb(e,DK_INK,0.75);
+    edge=rgbHex(e);
+  }
+  const s=`--pc:${esc(col)};--pcd:${face};--pcb:${edge}`;
+  PC_CACHE.set(key,s);
+  return s;
+}
 
 function initUI(){
   const sems=semesters();
@@ -331,7 +418,7 @@ function render(){
           const cf=conflicts.get(c.id);
           const conf=cf?' conflict':'';
           const tip=`${esc(c.sClassProfName)} · ${esc(c.sClassType)}`+(cf?` ⚠ ${esc(cf)}`:'');
-          h+=`<div class="course${dim}${sel}${conf}" data-id="${c.id}" style="background:${esc(col)}" title="${tip}" `+
+          h+=`<div class="course${dim}${sel}${conf}" data-id="${c.id}" style="${pcVars(col)}" title="${tip}" `+
              `onpointerdown="dragStart(event)" ondblclick="openEdit(${c.id})">`+
              `${esc(c.sClassName)}<br><small>${esc(c.sClassRoom||'')}</small></div>`;
         }
@@ -354,7 +441,7 @@ function renderLegend(){
   const sem=curSem();
   const names=[...new Set(curCourses().map(c=>c.sClassProfName).filter(Boolean))];
   document.getElementById("legend").innerHTML=names.map(n=>
-    `<span class="lg" style="background:${esc(profColor(sem,n))}">${esc(n)}</span>`).join("");
+    `<span class="lg" style="${pcVars(profColor(sem,n))}">${esc(n)}</span>`).join("");
 }
 
 /* ===== 선택 / 드래그 (포인터 기반, 마우스+터치) =====

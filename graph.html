@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>SFTF/PFTF 연구 그래프 — 3D프린팅 + 공저자</title>
+<!-- 다크 모드 공용 스위치. <style> 보다 먼저 읽어 첫 그림부터 <html data-theme> 를 정한다 (2026-11-21). -->
+<script src="theme.js"></script>
 <script src="https://unpkg.com/vis-network@9.1.6/standalone/umd/vis-network.min.js"
         integrity="sha384-Ux6phic9PEHJ38YtrijhkzyJ8yQlH8i/+buBR8s3mAZOJrP1gwyvAcIYl3GWtpX1"
         crossorigin="anonymous"></script>
@@ -70,6 +72,59 @@
      vis 가 툴팁 div 를 컨테이너 밖에 붙일 수도 있어 body 기준으로 건다. */
   body.node-dragging .vis-tooltip { display: none !important; }
 
+  /* 다크 모드 (2026-11-21 사용자 지시 — 다크 모드(밤에 흰 화면이 눈부심)).
+     켜고 끄는 값은 theme.js 가 <html data-theme> 에 적고, 바탕 · 글자 기본색과 --dk-* 변수도 거기서 온다.
+     여기 규칙은 모두 html[data-theme="dark"] 아래라 밝은 화면은 그대로다. 저시력 · 눈부심을 고려해 순검정 바탕 · 순백 글자는
+     쓰지 않고, 넓은 면(패널 · 표)은 어둡게, 글자는 바탕과 대비가 크게 둔다. 캔버스(노드 · 엣지 · 훌 · 파이) 색은 CSS 가
+     닿지 않으므로 스크립트의 GRAPH_THEME 블록 · 훌 면 · 노드 파이 · 라벨 그리기가 CFMS_THEME.dark 를 읽어 칠한다.
+     스크립트가 style 속성으로 박아 넣는 색(버튼 · 범례 · 로그인 상자)은 !important 로 덮는다. */
+  #stats .cfms-theme-toggle { font-size: 14px; margin-left: 6px; }
+  html[data-theme="dark"] #matrix-wrap { background: var(--dk-bg); }
+  html[data-theme="dark"] #matrix-legend { color: var(--dk-muted); }
+  html[data-theme="dark"] table.adj th, html[data-theme="dark"] table.adj td { border-color: var(--dk-border-soft); }
+  html[data-theme="dark"] table.adj td.cell.diag { background: var(--dk-raised); }
+  html[data-theme="dark"] table.adj tr.hl th.rowhead, html[data-theme="dark"] table.adj th.colhead.hl { background: #4a4125; color: var(--dk-strong); }
+  html[data-theme="dark"] table.adj td.cell.hl { outline-color: var(--dk-strong); }
+  html[data-theme="dark"] table.adj th.grp { background: var(--dk-surface); color: var(--dk-muted); }
+  html[data-theme="dark"] #sidebar { background: var(--dk-surface); border-left-color: var(--dk-border); }
+  html[data-theme="dark"] #search-wrap, html[data-theme="dark"] #search-results { border-bottom-color: var(--dk-border-soft); }
+  html[data-theme="dark"] #search { background: var(--dk-bg); border-color: var(--dk-border); color: var(--dk-text); }
+  html[data-theme="dark"] #search::placeholder { color: var(--dk-faint); }
+  html[data-theme="dark"] #search:focus { border-color: var(--dk-blue); }
+  html[data-theme="dark"] .search-item:hover, html[data-theme="dark"] .legend-item:hover, html[data-theme="dark"] .neighbor-link:hover { background: var(--dk-hover); }
+  html[data-theme="dark"] #info-panel { border-top-color: var(--dk-border-soft); }
+  html[data-theme="dark"] #info-panel h3, html[data-theme="dark"] #legend-wrap h3 { color: var(--dk-muted); }
+  html[data-theme="dark"] #info-content { color: var(--dk-text); }
+  html[data-theme="dark"] #info-content .field b { color: var(--dk-strong); }
+  html[data-theme="dark"] #info-content .empty { color: var(--dk-faint); }
+  html[data-theme="dark"] #info-content [style*="color:#666"], html[data-theme="dark"] #info-content [style*="color:#aaa"] { color: var(--dk-muted) !important; }
+  html[data-theme="dark"] #info-content [style*="color:#999"] { color: var(--dk-faint) !important; }
+  html[data-theme="dark"] .vscode-btn { background: var(--dk-raised) !important; color: var(--dk-text) !important; border-color: var(--dk-border) !important; }
+  html[data-theme="dark"] .submission-site-btn, html[data-theme="dark"] #save-pos-btn { background: #1f3352 !important; color: #cfe0ff !important; border-color: #5b8def !important; }
+  html[data-theme="dark"] .legend-count { color: var(--dk-muted); }
+  html[data-theme="dark"] .stage-legend { border-top-color: var(--dk-border-soft) !important; }
+  html[data-theme="dark"] .stage-legend-hint { color: var(--dk-faint) !important; }
+  html[data-theme="dark"] .stage-legend-row { color: var(--dk-text) !important; }
+  html[data-theme="dark"] #stats { border-top-color: var(--dk-border-soft); color: var(--dk-muted); }
+  html[data-theme="dark"] #reset-pos-btn, html[data-theme="dark"] #copy-pos-btn, html[data-theme="dark"] #layout-sel,
+  html[data-theme="dark"] #view-sel, html[data-theme="dark"] #matrix-sort { background: var(--dk-raised) !important; color: var(--dk-text) !important; border-color: var(--dk-border) !important; }
+  html[data-theme="dark"] #stats button:disabled { color: var(--dk-faint) !important; }
+  html[data-theme="dark"] #save-pos-note { color: var(--dk-muted) !important; }
+  html[data-theme="dark"] #save-pos-note[style*="154, 52, 18"] { color: var(--dk-red) !important; }   /* say(…, false) 의 경고색 */
+  html[data-theme="dark"] #legend-controls label { color: var(--dk-muted); }
+  html[data-theme="dark"] #legend-controls label:hover { color: var(--dk-strong); }
+  html[data-theme="dark"] .legend-cb, html[data-theme="dark"] #select-all-cb { border-color: var(--dk-border); background: var(--dk-bg); }
+  html[data-theme="dark"] .legend-cb:checked, html[data-theme="dark"] #select-all-cb:checked,
+  html[data-theme="dark"] #select-all-cb:indeterminate { background: #4E79A7; border-color: #6f9bd0; }
+  html[data-theme="dark"] div.vis-tooltip { background-color: var(--dk-raised); color: var(--dk-text); border-color: var(--dk-border); box-shadow: var(--dk-shadow); }
+  html[data-theme="dark"] #open-3d-btn { background: rgba(42,47,53,0.94); color: var(--dk-text); border-color: var(--dk-border); box-shadow: 0 5px 16px rgba(0,0,0,0.45); }
+  html[data-theme="dark"] #open-3d-btn:hover { background: var(--dk-hover); border-color: var(--dk-blue); }
+  html[data-theme="dark"] #pos-login { background: var(--dk-raised) !important; color: var(--dk-text); border-color: var(--dk-border) !important; box-shadow: var(--dk-shadow) !important; }
+  html[data-theme="dark"] #pos-login [style*="color:#64748b"] { color: var(--dk-muted) !important; }
+  html[data-theme="dark"] #pos-login input { background: var(--dk-bg) !important; color: var(--dk-text) !important; border-color: var(--dk-border) !important; }
+  html[data-theme="dark"] #pos-login-err { color: var(--dk-red) !important; }
+  html[data-theme="dark"] #pos-login-cancel { background: var(--dk-surface) !important; color: var(--dk-text) !important; border-color: var(--dk-border) !important; }
+
 /* GRAPH3D_NAV_BEGIN */
   #open-3d-btn { position: fixed; top: 12px; left: 12px; z-index: 50; padding: 7px 11px; border: 1px solid #9aa8bd; border-radius: 7px; background: rgba(255,255,255,0.94); color: #243047; font: 600 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; box-shadow: 0 5px 16px rgba(32,48,76,0.14); cursor: pointer; }
   #open-3d-btn:hover { border-color: #4E79A7; background: #ffffff; }
@@ -113,6 +168,7 @@
     <label style="font-size:14px;margin-left:6px;cursor:pointer" title="노드 사이의 개발 목표 화살표. 끈 상태에서 노드를 클릭하면 그 노드의 화살표만 보입니다"><input type="checkbox" id="edge-cb" checked>개발 목표</label>
     <label style="font-size:14px;margin-left:6px;cursor:pointer" title="발견·BASE·METHOD·PIPELINE 영역(hull)과 영역 간 의존 화살표"><input type="checkbox" id="hyper-cb" checked>hyperedge</label>
     <label style="font-size:14px;margin-left:6px;cursor:pointer" title="심사 중인 원고(투고·심사 수정·게재확정)의 파이를 깜빡입니다. 나아갈수록 주기가 짧아집니다(투고 1.6초 → 게재확정 1.2초)"><input type="checkbox" id="blink-cb" checked>깜빡임</label>
+    <span data-theme-toggle></span>
     &nbsp;<select id="view-sel" style="font-size:14px;padding:2px 6px;border:1px solid #999;border-radius:4px;background:#f4f4f4">
       <option value="graph">뷰: 노드-링크</option>
       <option value="matrix">뷰: 인접행렬</option>
@@ -1395,14 +1451,16 @@ function buildMatrix() {
     const newGrp = g !== prevGrp; prevGrp = g;
     html += '<tr data-row="' + esc(rn.id) + '">';
     html += '<th class="grp">' + (newGrp ? esc(g) : '') + '</th>';
-    const sw = (rn.color && rn.color.background) || '#cccccc';
+    // 다크 모드에서는 노드와 같은 어두운 화면용 색(GRAPH_THEME 의 darkInk)으로 칠한다.
+    const ink = c => (graphDark() ? darkInk(c) : c);
+    const sw = ink((rn.color && rn.color.background) || '#cccccc');
     html += '<th class="rowhead" data-row="' + esc(rn.id) + '" title="' + esc(rn.id) + '">'
           + '<span class="swatch" style="background:' + esc(sw) + '"></span>' + esc(rn.id) + '</th>';
     order.forEach(cn => {
       if (rn.id === cn.id) { html += '<td class="cell diag"></td>'; return; }
       const e = EDGE_AT[rn.id + '\u0000' + cn.id];
       if (!e) { html += '<td class="cell" data-r="' + esc(rn.id) + '" data-c="' + esc(cn.id) + '"></td>'; return; }
-      const bg = (NODE_BY_ID[rn.id].color && NODE_BY_ID[rn.id].color.background) || '#666666';
+      const bg = ink((NODE_BY_ID[rn.id].color && NODE_BY_ID[rn.id].color.background) || '#666666');
       html += '<td class="cell on" data-r="' + esc(rn.id) + '" data-c="' + esc(cn.id) + '"'
             + ' style="background:' + esc(bg) + '"'
             + ' title="' + esc(rn.id + '  \u2192  ' + cn.id + '\n' + (e.label || '')) + '">'
@@ -1853,6 +1911,147 @@ LEGEND.forEach(c => {
   };
   legendEl.appendChild(item);
 });
+
+// GRAPH_THEME_BEGIN — 다크 모드의 캔버스 색 (2026-11-21). 패널 · 글자는 <style> 의 html[data-theme="dark"] 규칙이 맡는다.
+// 켜짐 여부는 theme.js(CFMS_THEME — 모든 페이지가 같이 쓴다)이고, 바뀌면 onChange 로 새로 고침 없이 다시 칠한다.
+//   · 색의 정본은 그대로 RAW_NODES · RAW_EDGES(밝은 화면 값)다. 장식(decorateNodes) · 표 오버라이드 · 표에서 붙인 노드도
+//     밝은 값을 nodesDS 에 넣고, 어두울 때만 아래 리스너가 곧바로 어두운 화면용 값으로 바꿔 넣는다(같은 호출 안 — 깜빡이지 않는다).
+//   · 등급 색은 뜻을 그대로 둔다: 상 빨강 · 하 파랑은 어두운 바탕에서 잘 보이게 조금 밝히고(중 주황은 그대로), ToDo 의
+//     흰 면 · 검정 테두리는 회백색 하나로 둔다(검정 테두리는 어두운 바탕에서 사라지고, 순백은 눈부시다).
+//     그 밖의 어두운 표시색은 바탕과 4.5:1 이 될 때까지 흰색 쪽으로 섞는다. 흐린 초고 색(투명도 50%)은 70% 로 올린다.
+//   · 노드 글자는 밝은 회백(--dk-text). 엣지는 출발 노드의 테두리색을 물려받으므로 노드 색을 따라오고, 투명도만 0.65 → 0.85.
+//     검정 테두리 노드에서 나가는 회색 엣지(dimmedEdgeColor)는 조금 밝은 회색이다.
+//   · 훌 면 · 훌 라벨 · 엣지 캡션 · 노드 파이는 그리는 순간 CFMS_THEME.dark 를 읽는다(아래 스크립트들 · 생성기 블록).
+const DARK_BG_RGB = [26, 29, 33];   // theme.js --dk-bg #1a1d21
+const DARK_TEXT = '#dde1e6';        // theme.js --dk-text
+const DARK_INK = {
+  '#e02020': '#ee4a40',   // 상
+  '#2a78d6': '#4a90e8',   // 하
+  '#ffffff': '#e3e7ec',   // ToDo 면
+  '#000000': '#e3e7ec',   // ToDo · 대괄호 캡션의 검정 테두리
+  '#808080': '#9aa2ac',   // 검정 테두리 노드에서 나가는 엣지(lightenHalf)
+};
+const DARK_EDGE_OPACITY = 0.85;
+function graphDark() { return !!(window.CFMS_THEME && window.CFMS_THEME.dark); }
+function _themeRgba(c) {
+  const s = String(c || '').trim().toLowerCase();
+  if (s === 'black') return [0, 0, 0, 1];
+  if (s === 'white') return [255, 255, 255, 1];
+  let m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/.exec(s);
+  if (m) {
+    const v = m[1].length === 3 ? m[1].split('').map(ch => ch + ch).join('') : m[1];
+    return [parseInt(v.slice(0, 2), 16), parseInt(v.slice(2, 4), 16), parseInt(v.slice(4, 6), 16), 1];
+  }
+  m = /^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*(?:,\s*([\d.]+)\s*)?\)$/.exec(s);
+  return m ? [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]] : null;
+}
+const _themeHex2 = v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0');
+function _themeLuminance(rgb) {
+  const lin = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  return 0.2126 * lin(rgb[0]) + 0.7152 * lin(rgb[1]) + 0.0722 * lin(rgb[2]);
+}
+const DARK_BG_LUM = _themeLuminance(DARK_BG_RGB);
+const _contrastOnDark = rgb => (_themeLuminance(rgb) + 0.05) / (DARK_BG_LUM + 0.05);
+/* 작은 표시(노드 면 · 테두리 · 선)의 어두운 화면 색. */
+function darkInk(c) {
+  const p = _themeRgba(c);
+  if (!p) return c;
+  const key = '#' + p.slice(0, 3).map(_themeHex2).join('');
+  let rgb = p.slice(0, 3);
+  if (DARK_INK[key]) rgb = _themeRgba(DARK_INK[key]).slice(0, 3);
+  else {
+    let t = 0;
+    while (_contrastOnDark(rgb) < 4.5 && t < 1) {
+      t = Math.min(1, t + 0.05);
+      rgb = p.slice(0, 3).map(v => v + (255 - v) * t);
+    }
+  }
+  if (p[3] >= 1) return '#' + rgb.map(_themeHex2).join('');
+  const alpha = p[3] + (1 - p[3]) * 0.4;   // 초고의 흐린 색 50% → 70%
+  return 'rgba(' + rgb.map(v => Math.round(v)).join(',') + ',' + alpha.toFixed(2) + ')';
+}
+function darkFont(c) {
+  const p = _themeRgba(c);
+  return !p || _contrastOnDark(p) < 4.5 ? DARK_TEXT : c;
+}
+function darkNodeColor(color) {
+  if (typeof color === 'string') return darkInk(color);
+  if (!color || typeof color !== 'object') return color;
+  const out = {};
+  Object.keys(color).forEach(k => { out[k] = darkNodeColor(color[k]); });
+  return out;
+}
+function _themedNodePatch(id, dark) {
+  const n = RAW_NODES.find(x => x.id === id);
+  const item = nodesDS.get(id);
+  if (!n || !item) return null;
+  const fontColor = (n.font && n.font.color) || '#333333';
+  return {
+    id,
+    color: dark ? darkNodeColor(n.color) : n.color,
+    font: Object.assign({}, item.font || {}, { color: dark ? darkFont(fontColor) : fontColor }),
+  };
+}
+function _themedEdgeColor(e, dark) {
+  const c = dimmedEdgeColor(e) || {};
+  if (!dark) return c;
+  const out = Object.assign({}, c, { opacity: DARK_EDGE_OPACITY });
+  ['color', 'highlight', 'hover'].forEach(k => { if (typeof out[k] === 'string') out[k] = darkInk(out[k]); });
+  return out;
+}
+let _graphThemeBusy = false;
+function _applyGraphThemeTo(nodeIds, edgeIds) {
+  const dark = graphDark();
+  _graphThemeBusy = true;
+  try {
+    if (nodeIds.length) nodesDS.update(nodeIds.map(id => _themedNodePatch(id, dark)).filter(Boolean));
+    if (edgeIds.length) {
+      edgesDS.update(edgeIds.filter(id => RAW_EDGES[id]).map(id => ({ id, color: _themedEdgeColor(RAW_EDGES[id], dark) })));
+    }
+  } finally { _graphThemeBusy = false; }
+}
+function paintLegendDots() {
+  const dark = graphDark();
+  const dots = legendEl.querySelectorAll('.legend-dot');
+  LEGEND.forEach((c, i) => {
+    const dot = dots[i];
+    if (!dot) return;
+    const fill = c.color, rim = c.border || c.color;
+    dot.style.background = dark ? darkInk(fill) : fill;
+    dot.style.borderColor = dark ? darkInk(rim) : rim;
+  });
+}
+function applyGraphTheme() {
+  _applyGraphThemeTo(nodesDS.getIds(), edgesDS.getIds());
+  paintLegendDots();
+  network.redraw();
+}
+// 밝은 값이 들어오는 길(표 오버라이드의 nodesDS.update · 표에서 붙인 노드와 선의 add)을 따라간다.
+// 색 · 글꼴을 건드리지 않는 갱신(hidden · size · smooth)은 지나간다.
+nodesDS.on('add', (event, props) => {
+  if (!_graphThemeBusy && graphDark()) _applyGraphThemeTo(props.items, []);
+});
+nodesDS.on('update', (event, props) => {
+  if (_graphThemeBusy || !graphDark()) return;
+  const ids = props.items.filter((id, k) => {
+    const d = props.data && props.data[k];
+    return !d || 'color' in d || 'font' in d;
+  });
+  if (ids.length) _applyGraphThemeTo(ids, []);
+});
+edgesDS.on('add', (event, props) => {
+  if (!_graphThemeBusy && graphDark()) _applyGraphThemeTo([], props.items);
+});
+if (window.CFMS_THEME) {
+  window.CFMS_THEME.onChange(() => {
+    applyGraphTheme();
+    const shown = network.getSelectedNodes();   // Node Info 의 이웃 색 띠도 새 색으로
+    if (shown.length === 1 && nodesDS.get(shown[0])) showInfo(shown[0]);
+    if (document.getElementById('matrix-wrap').classList.contains('on')) buildMatrix();   // 인접행렬 칸 색도
+  });
+  if (graphDark()) applyGraphTheme();
+}
+// GRAPH_THEME_END
 </script>
 <script>
 // Render hyperedges as shaded regions
@@ -1924,10 +2123,22 @@ function _roundedPolyPath(ctx, pts, radius) {
    없으면 color 다.
    ⚠️ 생성기(layout_findings.py)는 afterDrawing 쪽의 첫 두 줄과 「// Label …」 블록을 정규식으로
    다시 쓰므로 그 문구는 그대로 두고, 이 블록은 라벨 헬퍼 마커(HYPEREDGE_LABEL_HELPERS) 앞에 둔다. */
+/* 다크 모드의 훌 면색 (2026-11-21). 밝은 파스텔을 그대로 칠하면 넓은 면이 눈부시다. 어두운 바탕(#1a1d21)에 훌 테두리
+   색(h.color)을 22% 섞은 불투명한 어두운 색조로 칠한다 — 초록 · 노랑 · 분홍 · 보라 같은 색상은 그대로 읽히고, 면 위의
+   밝은 노드 글자(대비 8.5:1 이상)와 등급 색 노드가 떠 보인다. 훌 라벨은 거꾸로 밝은 파스텔(h.fill)로 쓴다(_drawHyperedgeLabel). */
+const HULL_DARK_MIX = 0.22;
+function _hullDarkFill(h) {
+  const m = /^#([0-9a-f]{6})$/i.exec(h.color || h.fill || '');
+  if (!m) return '#2a2f35';
+  const v = parseInt(m[1], 16), bg = [26, 29, 33];
+  return '#' + [v >> 16, (v >> 8) & 255, v & 255]
+    .map((c, i) => Math.round(bg[i] + (c - bg[i]) * HULL_DARK_MIX).toString(16).padStart(2, '0')).join('');
+}
 let _hullFrame = [];
 network.on('beforeDrawing', function(ctx) {
     _hullFrame = [];
     if (!showHyper) return;   // 'hyperedge' 체크박스 — 면·테두리·라벨을 함께 끈다
+    const hullDark = !!(window.CFMS_THEME && window.CFMS_THEME.dark);
     const cornerR = _smallestNodeRadius();   // 훌 모서리의 곡률 — 한 프레임에 한 번만 잰다
     // Draw the base hull first so application-region hulls remain readable
     // where the two sets overlap.  Array order is preserved for the finding
@@ -1975,7 +2186,7 @@ network.on('beforeDrawing', function(ctx) {
         const expanded = hull;   // 여백은 링이 이미 줬다 — afterDrawing 의 라벨 코드(생성기가 쓴다)가 이 이름을 읽는다
         ctx.save();
         ctx.globalAlpha = h.fillAlpha == null ? 0.12 : h.fillAlpha;
-        ctx.fillStyle = h.fill || h.color || '#6366f1';
+        ctx.fillStyle = hullDark ? _hullDarkFill(h) : (h.fill || h.color || '#6366f1');
         ctx.beginPath();
         _roundedPolyPath(ctx, expanded, cornerR);
         ctx.fill();
@@ -2050,9 +2261,11 @@ function _drawHyperedgeLabel(ctx, h, polygon, cx, cy, nodeBoxes, placedBoxes, vi
   ctx.textBaseline = 'middle';
   ctx.lineJoin = 'round';
   ctx.lineWidth = 5;
-  ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+  // 다크 모드(2026-11-21, theme.js): 글자 테두리는 어두운 바탕색, 글자는 훌의 밝은 파스텔(fill)이다.
+  const labelDark = !!(window.CFMS_THEME && window.CFMS_THEME.dark);
+  ctx.strokeStyle = labelDark ? 'rgba(26,29,33,0.92)' : 'rgba(255,255,255,0.92)';
   ctx.strokeText(h.label, 0, 0);
-  ctx.fillStyle = h.labelColor || h.color || '#6366f1';
+  ctx.fillStyle = labelDark ? (h.fill || h.labelColor || h.color || '#a5b4fc') : (h.labelColor || h.color || '#6366f1');
   ctx.fillText(h.label, 0, 0);
   ctx.restore();
 }
@@ -2210,8 +2423,14 @@ function pieInk(fill, border) {
   return SHARED_STAGES ? SHARED_STAGES.pieInk(fill, border) : fill;
 }
 
+/* 다크 모드(2026-11-21): 빈 칸은 흰색 대신 어두운 바탕색이고, 꽉 찬 원 위의 체크 · 막대도 그 색이다. 자국은 등급 색
+   그대로 — 어두운 빈 칸 위에서는 흰 ToDo 색도 보이므로 pieInk(흰색이면 테두리 색으로)를 거치지 않는다. 노드 색은
+   GRAPH_THEME 이 nodesDS 에 어두운 화면용으로 넣어 두었으므로 여기로 그 색이 들어온다. 밝은 화면은 예전과 같다. */
+const PIE_BLANK_DARK = '#1a1d21';   // theme.js --dk-bg
 function drawNodePie(ctx, cx, cy, R, p, color, border) {
-  const ink = pieInk(color, border);
+  const dark = !!(window.CFMS_THEME && window.CFMS_THEME.dark);
+  const ink = dark ? color : pieInk(color, border);
+  const blank = dark ? PIE_BLANK_DARK : '#ffffff';   // 빈 칸 · 꽉 찬 원 위의 체크와 막대
   // 마지막에 두르는 등급 테두리의 색. 보통은 등급 색 그대로지만, 아래 ⛔ 가지에서
   // 원을 먹색으로 채우는 경우(ToDo)에는 흰 테두리가 먹색 원을 파고들므로 먹색으로 바꾼다.
   let ringColor = color;
@@ -2221,7 +2440,7 @@ function drawNodePie(ctx, cx, cy, R, p, color, border) {
   // vis 가 그려 둔 꽉 찬 원을 덮는다. 남은 흰 부분이 「아직」을 뜻한다.
   ctx.beginPath();
   ctx.arc(cx, cy, R, 0, 2 * Math.PI);
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = blank;
   ctx.fill();
   if (p.done) {
     ctx.beginPath();
@@ -2233,7 +2452,7 @@ function drawNodePie(ctx, cx, cy, R, p, color, border) {
     ctx.lineTo(cx - 0.13 * R, cy + 0.40 * R);
     ctx.lineTo(cx + 0.52 * R, cy - 0.33 * R);
     // 꽉 찬 원 위의 체크는 흰색이다. 다만 원 자체가 흰색이면(ToDo) 그때는 먹색으로.
-    ctx.strokeStyle = ink === color ? '#ffffff' : ink;
+    ctx.strokeStyle = ink === color ? blank : ink;
     ctx.lineWidth = 0.22 * R;
     ctx.stroke();
   } else if (p.x) {
@@ -2253,8 +2472,8 @@ function drawNodePie(ctx, cx, cy, R, p, color, border) {
     ctx.beginPath();
     ctx.moveTo(cx - 0.583 * R, cy);
     ctx.lineTo(cx + 0.583 * R, cy);
-    // 원이 언제나 꽉 차 있으므로 막대는 언제나 흰색이다.
-    ctx.strokeStyle = '#ffffff';
+    // 원이 언제나 꽉 차 있으므로 막대는 언제나 흰색이다(다크 모드에서는 어두운 바탕색).
+    ctx.strokeStyle = blank;
     ctx.lineWidth = 0.40 * R;
     ctx.stroke();
   } else if (p.xx) {
@@ -2412,6 +2631,7 @@ network.on('afterDrawing', function (ctx) {
   const wrap = document.getElementById('legend-wrap');
   if (!wrap) return;
   const box = document.createElement('div');
+  box.className = 'stage-legend';   // 다크 모드 규칙(<style>)이 이 이름으로 잡는다
   box.style.cssText = 'margin-top:10px;padding-top:8px;border-top:1px solid #e6e6e6';
   const h = document.createElement('h3');
   h.textContent = '투고 진도';
@@ -2419,15 +2639,18 @@ network.on('afterDrawing', function (ctx) {
   // 2026-09-13: 파이가 노드 자리로 옮겨 가면서 색의 뜻이 바뀌었다. 채운 정도만 진도이고
   // 색은 논문 등급이므로, 범례 아이콘은 색을 빼고(회색) 모양만 보인다.
   const hint = document.createElement('div');
+  hint.className = 'stage-legend-hint';
   hint.style.cssText = 'font-size:12px;color:#888;margin:-2px 0 5px;line-height:1.4';
   hint.textContent = '모양 = 투고 진도 · 색 = 논문 등급 · 노드 크기는 동일';
   box.appendChild(hint);
   const S = 16, dpr = window.devicePixelRatio || 1;
   // 서버 데이터를 받기 전 NODE_STAGE 는 비어 있다. 범례는 그 시점의 노드 목록 대신
   // 현재 단계표 전체를 써서, 초고·미정·보류도 항상 같은 아이콘으로 안내한다.
+  const paints = [];
   Object.keys(STAGE_PIE).forEach((k) => {
     const stage = STAGE_PIE[k];
     const row = document.createElement('div');
+    row.className = 'stage-legend-row';
     row.style.cssText = 'display:flex;align-items:center;gap:6px;margin:3px 0;font-size:13px;color:#555';
     const cv = document.createElement('canvas');
     cv.width = S * dpr; cv.height = S * dpr;
@@ -2435,14 +2658,17 @@ network.on('afterDrawing', function (ctx) {
     const c = cv.getContext('2d');
     c.scale(dpr, dpr);
     // 노드와 같은 그림(drawNodePie)을 쓴다 — 보류·취소의 빗금까지 같은 모양으로 보이게.
-    // 색은 등급이 정하므로 범례는 회색이다.
-    drawNodePie(c, S / 2, S / 2, S / 2 * 0.86, stage, '#94a3b8');
+    // 색은 등급이 정하므로 범례는 회색이다. 다크 모드를 켜고 끄면 빈 칸 색이 바뀌므로 다시 그린다.
+    const paint = () => { c.clearRect(0, 0, S, S); drawNodePie(c, S / 2, S / 2, S / 2 * 0.86, stage, '#94a3b8'); };
+    paint();
+    paints.push(paint);
     row.appendChild(cv);
     const detail = stage.dot ? ' · 가운데 점' : k === 'submitted' ? ' · 1/4 원' : '';
     row.appendChild(document.createTextNode(stage.label + detail));
     box.appendChild(row);
   });
   wrap.appendChild(box);
+  if (window.CFMS_THEME) window.CFMS_THEME.onChange(() => paints.forEach(paint => paint()));
 })();
 // EDGE_LABEL_LAYOUT_BEGIN
 // Keep every edge caption *on* the arrow it names, turned to run along it.
@@ -2626,9 +2852,11 @@ function _drawDynamicEdgeLabels(ctx) {
     ctx.rotate(best.angle);
     ctx.globalAlpha = 0.96;
     ctx.lineWidth = 4;
-    ctx.strokeStyle = 'rgba(255,255,255,0.94)';
+    // 다크 모드(2026-11-21, theme.js): 어두운 글자 테두리 위의 밝은 회백 글자.
+    const labelDark = !!(window.CFMS_THEME && window.CFMS_THEME.dark);
+    ctx.strokeStyle = labelDark ? 'rgba(26,29,33,0.94)' : 'rgba(255,255,255,0.94)';
     ctx.strokeText(edge.label, 0, 0);
-    ctx.fillStyle = '#3a3a3a';
+    ctx.fillStyle = labelDark ? '#dde1e6' : '#3a3a3a';
     ctx.fillText(edge.label, 0, 0);
     ctx.restore();
   });
