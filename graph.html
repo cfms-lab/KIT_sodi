@@ -706,7 +706,7 @@ RAW_NODES.forEach(n => {
   let c = QUALITY_COLORS[q.grade] || '#999999';
   let border = QUALITY_BORDERS[q.grade] || c;
   if (isDraftStatus(n.id)) { c = withAlpha(c, 0.5); border = withAlpha(border, 0.5); }
- n._quality = q.grade; n._quality_note = q.note; /* ToDo 는 저자 관점이 먼저다 — todo.js 에 있으면 볼트·DB 문장을 덮는다.  빈 줄도 값이라 null(=모름)일 때만 옛 문장으로 떨어진다 (2026-09-21). */ const _todo = window.cfmsTodo ? window.cfmsTodo(n.id, n.label) : null; n._bottleneck = _todo === null ? (REMAINING_BOTTLENECKS[n.id] || '') : _todo; n._project_role = PROJECT_ROLES[n.id] || '';
+ n._quality = q.grade; n._quality_note = q.note; /* ToDo 는 저자 관점이 먼저다 — todo.js(2026-11-21~ 표 todo_lines, 정본은 볼트 todo:)에 있으면 볼트·DB 문장을 덮는다.  빈 줄도 값이라 null(=모름)일 때만 옛 문장으로 떨어진다 (2026-09-21). */ const _todo = window.cfmsTodo ? window.cfmsTodo(n.id, n.label) : null; n._bottleneck = _todo === null ? (REMAINING_BOTTLENECKS[n.id] || '') : _todo; n._project_role = PROJECT_ROLES[n.id] || '';
   if (n.id === 'PFTF_subMarine') n._project_path = 'D:\\__PFTF_Projects(2026)\\PFTF_subMarine_dev';
   n._closed = CLOSED_IDS.has(n.id) || q.grade === 'Closed';
   n._display_label = n.label;
@@ -2725,6 +2725,16 @@ function sharedNodeStage(row) {
     network.redraw();
   } catch (e) { /* 오프라인/미설치 — 내장 데이터로 동작 */ }
 })();
+/* ToDo 한 줄은 todo.js 가 Supabase todo_lines 에서 받아 온다(2026-11-21~, 사용자 지시 — 정본은 볼트 노트 todo: ·
+   대시보드 분리트랙 할일:). 첫 장식은 지난번에 받은 줄(없으면 옛 「남은 병목」 문장)로 그려졌으니, 표를 받으면
+   장식을 다시 돌려 ToDo 칸만 넘기고 열린 노드 패널을 다시 그린다. 색 · 모양은 위 오버라이드가 맡는다. */
+if (window.cfmsTodoReady) window.cfmsTodoReady.then(ok => {
+  if (!ok) return;
+  decorateNodes();
+  nodesDS.update(RAW_NODES.map(n => ({ id: n.id, _bottleneck: n._bottleneck })));
+  const shown = network.getSelectedNodes();
+  if (shown.length === 1 && nodesDS.get(shown[0])) showInfo(shown[0]);
+});
 // GRAPH_POSITION_SYNC_BEGIN — 노드 좌표를 Supabase graph_positions 와 주고받는다.
 // (정본은 layout_findings.py 다. graph.html 을 직접 고치면 다음 재생성 때 사라진다)
 //

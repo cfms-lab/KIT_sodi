@@ -7,7 +7,8 @@
 ## 한 줄 요약
 
 **볼트 노트를 먼저 고치고, SQL 을 만들어 클로드가 Supabase MCP 로 보낸다(사용자는 승인 창에서 허용).**
-화면 글자까지 바꾸려면 저장소 파일(그래프·마인드맵·todo)도 고쳐 푸시한다.
+화면 글자까지 바꾸려면 저장소 파일(그래프·마인드맵)도 고쳐 푸시한다. 「ToDo」 한 줄은 2026-11-21 부터 볼트
+`todo:` 가 정본이고 같은 부분 SQL 에 실린다 — 저장소 파일(todo.js)은 고치지 않는다.
 
 **2026-10-21 부터 쓰기 경로가 바뀌었다.** 그전에는 클로드 셸에 쓰기 자격이 없어 사용자가 SQL 을
 SQL Editor 에 붙여넣었다. 이제 Claude Code 에 Supabase 공식 MCP 서버가 붙어 있다(사용자 범위 `-s user`,
@@ -28,7 +29,7 @@ anon 키로는 못 읽던 `portfolio_rows`(로그인 전용)까지 보인다.
 | `mindmap.html` | 클라우드 문서 `mindmaps`(id `cfms`) 위에 **`research_outputs` kind='node'** 를 덮는다(`mindmap_id` 또는 `id` 로 짝지음) | 노드 상태·메모. ⚠ **트리에 이미 있는 노드만** 덮는다 |
 | `upjuk.html` | **`research_outputs` kind='output'** (업적 행). grade='ToDo' 인 노드 행은 TODO 로 보인다 | 업적 목록·배지(Submit/Accept/…) |
 | `portfolio.html` | **`portfolio_rows`** (로그인 필요). 볼트에서 생성 | 단계 · 저널 · 투고순서 · 완성도 · 다음 게이트 |
-| `todo.js` | 저장소 파일 | 그래프·포트폴리오의 「할 일」 한 줄(DB 값보다 먼저 쓴다) |
+| `todo.js` (graph · portfolio 가 읽는다) | **`todo_lines`** (anon 읽기, 2026-11-21~). 볼트 노트 `todo:` · 대시보드 분리트랙 `할일:` 에서 생성 | 그래프·포트폴리오의 「ToDo」 한 줄(DB 의 병목 · 다음 게이트 문장보다 먼저 쓴다) |
 
 `research_outputs` 한 표가 노드 행과 업적 행을 모두 갖는다(`schema_research_outputs.sql`).
 
@@ -43,13 +44,14 @@ anon 키로는 못 읽던 `portfolio_rows`(로그인 전용)까지 보인다.
 | `stage` | `submitted` | 어휘: published inprint accepted revision2 revision submitted draft undecided blocked cancelled idea (2026-11-15 revision2 = 2차 심사 수정) |
 | `badge` | `"한국섬유공학회지 투고 완료 (2026-10-16, 원고번호 할당중)"` | 그래프 배지로 그대로 뜬다 |
 | `submission` · `next_gate` · `bottleneck` | 투고 사실 · 「원고번호 발급 대기」 · 「심사 대기 …」 | 병목은 그래프 「남은 병목」 |
+| `todo` | `"심사 대기"` | 저자 관점 한 줄 — graph · portfolio 「ToDo」 칸. **공개 읽기**라 리젝 · 심사 경위 · 연락처 · 원고별 주소를 쓰지 않는다(발행기가 막는다). `""` 는 「할 일 없음」, 키를 지우면 화면이 옛 문장(병목 · 다음 게이트)으로 떨어진다 |
 | `paper_completeness` | `1` (+ `_commit` · `_date`) | **투고본은 1** 이 규칙 |
 | `mindmap_id` | 노드 행 키. 없으면 노트 이름으로 새로 만든다 | 이게 있어야 발행 SQL 이 노드 행을 갱신한다 |
 | `papers_ids` | `[262]` 처럼 업적 행 번호 | 진행 중 원고는 UPJUK 노트 없이 프로젝트 노트가 업적 행을 소유한다 |
 
 그리고 `Dashboards\프로젝트현황.md` 의 `const 투고순서 = {…}` 에 **`"{프로젝트}": 1`** —
 나간 원고는 투고순서도 1 이다. 한 노트에 논문이 여럿이면(TSE_SEM, Tomo_Shell2026) 같은 파일의
-`분리트랙` 배열을 고친다.
+`분리트랙` 배열을 고친다 — 트랙의 ToDo 한 줄은 그 항목의 `할일:` 이다(노트의 `todo:` 는 노트 이름 줄 하나뿐).
 
 ### ② 표에 행이 있는지 읽어 본다
 
@@ -121,7 +123,9 @@ node scripts/publish-portfolio.mjs --sql
 node scripts/publish-portfolio.mjs --sql --only SFTF_HeatMethod,SFTF_Holonomy
 ```
 
-사건이 건드린 프로젝트의 포트폴리오 행과 노드 행만 담는다(수 KB). 메타 행과 삭제는 없다.
+사건이 건드린 프로젝트의 포트폴리오 행 · 노드 행 · ToDo 한 줄(`todo_lines`)만 담는다(수 KB). 메타 행과 삭제는 없다.
+ToDo 한 줄만 바꿀 때는 `node scripts/publish-portfolio.mjs --sql --todo-only --only A,B` → `tmp/todo-lines.sql`
+(`--only` 없이 돌리면 전부 올리고 볼트에 없는 줄을 지운다 — 전체 판 `--sql` 도 같다).
 `--only` 에는 포트폴리오 행 id(분리 트랙은 `TSE_SEM1_Bezier` 꼴)나 노트 이름·`mindmap_id` 를 쓰고,
 어디에도 없는 id 는 오타로 보고 멈춘다. 보내기 전에 표의 지금 값과 볼트 값을 대조해, 바뀌는 칸이
 의도한 것뿐인지 본다 — **다른 세션이 같은 노트를 고치는 중이면 그 값도 함께 실린다**
@@ -155,7 +159,8 @@ SQL 만으로 바뀌지 않는 것들이다. 필요하면 고쳐서 커밋·푸�
   `apply{이름}{YYYYMMDD}(data)` 마이그레이션을 넣고 호출부 넷(기본 DATA 체인 · loadDoc · catch 폴백 ·
   importJSON)에 끼운 뒤 `APP_VERSION` 을 올린다. `scripts/check-mindmap-html.mjs` 에 검사를 더한다.
   배포 뒤 로그인한 사용자가 페이지를 열어야 클라우드 문서에 저장된다.
-- **할 일 한 줄** — `todo.js` 에 `"{프로젝트}": "심사 대기"` 같은 한 줄.
+- **할 일 한 줄** — 2026-11-21 부터 저장소 일이 아니다. 볼트 `todo:`(트랙은 `할일:`)를 고치고 ③ 의 부분 SQL 로
+  보낸다. `todo.js` 는 `todo_lines` 를 받아 오는 로더라 손 목록을 다시 넣으면 `scripts/check-todo-js.mjs` 가 멈춘다.
 - 검증: `pwsh -File scripts/publish-research-views.ps1` (푸시 없이). 그다음 커밋과 `git push origin main`.
 
 ## 3. 사건별 값

@@ -42,6 +42,14 @@
 예외: graph3d 가 graph.html 소스를 읽으므로 graph.html 의 `const STAGE_PIE = {…}` 리터럴을 글자까지 같게 고친다 —
 `node scripts/check-stages-js.mjs` 가 다르면 멈춘다. portfolio 범례·툴팁 문구는 볼트 「파이단계」(메타 행)이고 볼트 투고셀() 은 따로다.
 
+## graph · portfolio 「ToDo」 한 줄
+
+2026-11-21 부터 **볼트가 정본**이다 — 노트 frontmatter `todo:`, 분리 트랙은 대시보드 분리트랙 항목의 `할일:`.
+`node scripts/publish-portfolio.mjs --sql --todo-only --only A,B`(또는 투고 반영 때의 `--sql --only` 부분 판)가
+Supabase `todo_lines` 로 올리고, `todo.js` 는 그 표를 받아 오는 로더다 — todo.js 를 고치거나 커밋할 일은 없다.
+표는 **anon 읽기**라 발행기 `공개금지()` 가 리젝 · 심사 경위 · 이메일 · 주소 같은 낱말을 막는다. 키는 노트 · 트랙 이름
+(research_outputs 노드 행 id 와 다르다 — TSE_SEM 트랙 · TSE_TomoSh4/5).
+
 ## 공저자 색 · 훌(그룹) 재편
 
 upjuk 저자 이름 배경(2026-11-13~, 전에는 행 배경)·portfolio 공저자 이름 배경·graph 훌 면색·mindmap 노드 면색은

@@ -419,9 +419,10 @@ function 투고툴팁(row, stage) {
   return row.journalFull ? `${앞}\n${row.journalFull}` : 앞;
 }
 
-/* 저자 관점의 ToDo 한 줄 (todo.js). 없으면 볼트가 발행한 옛 「다음 게이트」 문장으로 떨어진다. */
+/* 저자 관점의 ToDo 한 줄 (todo.js — 2026-11-21~ Supabase todo_lines 에서 받는다, 정본은 볼트 노트 todo: · 대시보드
+   분리트랙 할일:). 없으면 볼트가 발행한 옛 「다음 게이트」 문장으로 떨어진다. */
 const 할일 = row => {
-  /* null 은 「todo.js 에 없다」는 뜻이라 볼트 문장으로 떨어지고, 빈 문자열은
+  /* null 은 「todo_lines 에 없다(또는 아직 못 받았다)」는 뜻이라 볼트 문장으로 떨어지고, 빈 문자열은
      「할 일 없음」이라는 뜻이라 그대로 빈 칸이 된다. */
   const t = window.cfmsTodo ? window.cfmsTodo(row.id, row.name) : null;
   return t === null || t === undefined ? row.gate : t;
@@ -569,6 +570,8 @@ async function showTable(){
   그리기();
   loadLinks();                                   // 본표 뒤에, 실패해도 표에는 영향 없음
 }
+/* ToDo 줄은 표 행과 따로 온다(todo.js). 행을 그린 뒤에 도착하면 한 번 더 그린다 — 로그인 전(행이 없을 때)에는 할 일이 없다. */
+if (window.cfmsTodoReady) window.cfmsTodoReady.then(ok => { if (ok && ROWS.length) 그리기(); });
 
 async function login(){
   const email=document.getElementById('liEmail').value.trim();

@@ -8,6 +8,9 @@
 //   node scripts/publish-portfolio.mjs --sql --only SFTF_HeatMethod,SFTF_Holonomy
 //                                                 그 프로젝트만 담은 부분 SQL(tmp/portfolio-rows-partial.sql).
 //                                                 클로드가 Supabase MCP execute_sql 로 보낼 때 쓴다(2026-10-21~)
+//   node scripts/publish-portfolio.mjs --sql --todo-only [--only a,b]
+//                                                 ToDo 한 줄(todo_lines)만 담은 SQL(tmp/todo-lines.sql). --only 가 없으면
+//                                                 전부 올리고 볼트에 없는 줄은 지운다(2026-11-21~)
 //
 // --sql 은 로그인이 안 될 때의 우회로다. SQL Editor 는 대시보드 세션 자체가 권한이라
 // 이 스크립트가 비밀번호를 알 필요가 없다. 결과는 --push 와 같다(같은 행을 넣고, 볼트에서
@@ -16,6 +19,10 @@
 // 정본은 옵시디언 볼트다. 두 곳에서 읽는다 —
 //   · Projects/*.md 의 frontmatter          (등급·투고·게이트·소개·공저자·완성도)
 //   · Dashboards/프로젝트현황.md 의 dataviewjs (투고순서 맵·분리트랙·투고 단계 해석 규칙)
+//
+// ToDo 한 줄(graph·portfolio 의 「ToDo」 칸)도 같이 올린다(2026-11-21~, 전에는 KIT_sodi todo.js 에 손으로 적었다) —
+//   · 노트: frontmatter `todo:`  · 분리 트랙: 대시보드 분리트랙 항목의 `할일:`
+//   표는 public.todo_lines(schema_todo_lines.sql)이고 **공개 읽기**다 — 아래 공개금지() 가 막는 낱말이 있으면 멈춘다.
 //
 // ⚠️ 표의 **행을 만드는 코드는 저 노트 안에 있다.** 여기에 옮겨 적으면 두 벌이 되어 반드시
 //    어긋나므로, 이 스크립트는 그 dataviewjs 를 **잘라서 그대로 돌린다** — `function 비교(`
@@ -424,7 +431,63 @@ export function buildRows(vaultRoot) {
       },
     });
   }
-  return { rows, meta, nodeFields };
+  /* ToDo 한 줄 (2026-11-21, 사용자 지시 — todo.js 에서 볼트로 옮겼다). 키는 노트 · 트랙 이름이다(todo.js 때와 같은 키 —
+     화면이 대소문자 · 밑줄을 지운 이름으로도 찾는다). 노트는 frontmatter `todo:`, 분리 트랙은 대시보드 분리트랙 항목의
+     `할일:`(dataviewjs 가 row.할일 로 넘긴다). `todo: ""` 는 「할 일 없음」으로 그대로 올린다 — 키가 없을 때만 안 올린다. */
+  const todoLines = [];
+  const addTodo = (id, value, from, mindmapId = null) => {
+    if (value === undefined || value === null) return;
+    const todo = String(value).trim();
+    if (todoLines.some((line) => line.id === id)) throw new Error(`ToDo 한 줄이 두 곳에 있습니다: ${id} (${from})`);
+    const leak = 공개금지(todo);
+    if (leak) throw new Error(`${id} 의 ToDo 에 공개하면 안 되는 낱말 「${leak}」이 있습니다 — ${from} (todo_lines 는 공개 읽기다)`);
+    todoLines.push({ id, todo, mindmap_id: mindmapId });
+  };
+  for (const page of pages) {
+    if (page.type !== "project" || !Object.prototype.hasOwnProperty.call(page, "todo")) continue;
+    addTodo(page.file.name, page.todo, page.file.path, String(page.mindmap_id ?? "").trim() || null);
+  }
+  for (const row of out.행) {
+    if (row.할일 === undefined || row.할일 === null) continue;
+    addTodo(row.이름, row.할일, `${DASHBOARD.split(path.sep).join("/")} 분리트랙`);
+  }
+  todoLines.sort((a, b) => a.id.localeCompare(b.id, "ko"));
+  return { rows, meta, nodeFields, todoLines };
+}
+
+/* ToDo 한 줄은 로그인 없이 읽히는 표로 간다. 공개 화면에 내지 않기로 한 것(심사 경위 · 리젝 · 전략 낱말 · 연락처 ·
+   원고별 주소)이 섞이면 발행을 멈춘다 — 볼트 노트에 있을 때는 괜찮던 말도 여기서는 공개가 된다.
+   전략 낱말은 이 공개 저장소에도 글자로 쓰지 않으려고 \u 이스케이프로 적었다. */
+function 공개금지(text) {
+  const hit = String(text).match(/리젝|reject|desk|\uC0B4\uB77C\uBBF8|심사위원|심사자|reviewer|referee|submission-details|@|https?:\/\//i);
+  return hit ? hit[0] : null;
+}
+
+const sqlText = (value) => `'${String(value).replace(/'/g, "''")}'`;
+// todo_lines 올리기. full 이면 볼트에 없는 줄을 지운다(전체 판 · --todo-only 전체), 아니면 고른 줄만 덮는다.
+function todoSql(lines, full) {
+  if (!lines.length && !full) return [];
+  const out = [
+    "",
+    "-- ToDo 한 줄 — public.todo_lines (graph·portfolio 「ToDo」 칸, 2026-11-21~). 키는 노트·트랙 이름, '' 는 「할 일 없음」.",
+  ];
+  if (lines.length) {
+    out.push(
+      "insert into public.todo_lines (id, todo, updated_at) values",
+      lines.map((line) => `  (${sqlText(line.id)}, ${sqlText(line.todo)}, now())`).join(",\n"),
+      "on conflict (id) do update set todo = excluded.todo, updated_at = now()",
+      "  where public.todo_lines.todo is distinct from excluded.todo;",
+    );
+  }
+  if (full) {
+    out.push(
+      "-- 볼트에서 사라진 줄은 표에서도 지운다(행이 없으면 화면은 옛 문장으로 떨어진다).",
+      lines.length
+        ? `delete from public.todo_lines where id not in (${lines.map((line) => sqlText(line.id)).join(", ")});`
+        : "delete from public.todo_lines;",
+    );
+  }
+  return out;
 }
 
 // ── Supabase ───────────────────────────────────────────────────────────────
@@ -478,7 +541,7 @@ async function api(pathname, accessToken, options = {}) {
 // Supabase SQL Editor 에 그대로 붙여넣을 스크립트. 값은 달러 인용($json$)으로 감싸므로
 // 따옴표·역슬래시·줄바꿈을 따로 이스케이프하지 않는다. 임시 표에 모두 받은 뒤 한 번에
 // upsert 하고, 볼트에 없는 행을 지운다 — --push 와 결과가 같고 여러 번 돌려도 안전하다.
-function toSql(payload, nodeFields) {
+function toSql(payload, nodeFields, todoLines) {
   const values = payload.map((row) => {
     const json = JSON.stringify(row.data);
     if (json.includes("$json$")) {
@@ -544,10 +607,12 @@ function toSql(payload, nodeFields) {
     "  updated_at   = now()",
     "from _nodes n",
     "where r.kind = 'node' and r.mindmap_id = n.mindmap_id;",
+    ...todoSql(todoLines, true),
     "",
     "commit;",
     "",
     "select kind, count(*) from public.portfolio_rows group by kind order by kind;",
+    "select count(*) as todo_lines from public.todo_lines;",
     "select id, stage, grade from public.research_outputs",
     " where kind = 'node' and stage in ('submitted','revision','revision2','accepted','inprint','published')",
     " order by id;",
@@ -560,7 +625,7 @@ function toSql(payload, nodeFields) {
 // 승인 창에서 읽을 수가 없다. 그래서 사건이 건드린 프로젝트의 포트폴리오 행과 노드 행만 담는다.
 // 메타 행과 「볼트에 없는 행 삭제」는 넣지 않는다: 부분 판이 지우면 나머지 행이 다 사라진다.
 // 정렬 순서(sort_index)도 전체 판의 값 그대로라 다른 행과 어긋나지 않는다.
-function toPartialSql(rows, nodes, only) {
+function toPartialSql(rows, nodes, only, todos = []) {
   const rowValues = rows.map((row) => {
     const json = JSON.stringify(row.data);
     if (json.includes("$json$")) throw new Error(`${row.id} 의 값에 $json$ 가 들어 있습니다`);
@@ -576,7 +641,7 @@ function toPartialSql(rows, nodes, only) {
   const lines = [
     "-- portfolio_rows · research_outputs 부분 발행 — scripts/publish-portfolio.mjs --sql --only 가 만든 파일이다.",
     `-- 만든 날: ${new Date().toISOString().slice(0, 10)} · 대상: ${only.join(", ")}`,
-    `-- 포트폴리오 행 ${rows.length}개 · 노드 행 ${nodes.length}개. 메타 행과 삭제는 없다(전체 판은 --sql 만).`,
+    `-- 포트폴리오 행 ${rows.length}개 · 노드 행 ${nodes.length}개 · ToDo 한 줄 ${todos.length}개. 메타 행과 삭제는 없다(전체 판은 --sql 만).`,
     "",
     "begin;",
   ];
@@ -610,6 +675,7 @@ function toPartialSql(rows, nodes, only) {
       "where r.kind = 'node' and r.mindmap_id = n.mindmap_id;",
     );
   }
+  lines.push(...todoSql(todos, false));
   lines.push("", "commit;", "");
   return lines.join("\n");
 }
@@ -619,6 +685,8 @@ async function main() {
   const push = args.includes("--push");
   const sql = args.includes("--sql");
   const dump = args.includes("--dump");
+  const todoOnly = args.includes("--todo-only");
+  if (todoOnly && !sql) throw new Error("--todo-only 는 --sql 과 같이 쓴다");
   // --only a,b — 행 id(포트폴리오) 또는 노트 이름·mindmap_id(노드)로 고른다. 분리 트랙 행
   // (TSE_SEM1_Bezier 등)은 행 id 로, 그 부모 노드는 노트 이름으로 적는다.
   const onlyAt = args.indexOf("--only");
@@ -634,7 +702,7 @@ async function main() {
     throw new Error(`볼트 폴더가 없습니다: ${vaultRoot}`);
   }
 
-  const { rows, meta, nodeFields } = buildRows(vaultRoot);
+  const { rows, meta, nodeFields, todoLines } = buildRows(vaultRoot);
   const payload = [
     { id: "__meta__", kind: "meta", sort_index: -1, data: meta },
     ...rows.map((row, index) => ({ id: row.id, kind: "row", sort_index: index, data: row })),
@@ -644,6 +712,30 @@ async function main() {
   for (const row of rows) byStage[row.stage ?? "-"] = (byStage[row.stage ?? "-"] || 0) + 1;
   console.log(`행 ${rows.length}개 + 메타 1개 (볼트: ${vaultRoot})`);
   console.log("단계:", JSON.stringify(byStage));
+  console.log(`ToDo 한 줄 ${todoLines.length}개 (빈 줄 ${todoLines.filter((line) => line.todo === "").length})`);
+  // ToDo 한 줄은 노트 이름 · 트랙 이름 · mindmap_id 로 고른다.
+  const todoWanted = (want) => todoLines.filter((line) => want.has(line.id) || (line.mindmap_id && want.has(line.mindmap_id)));
+  if (todoOnly) {
+    const picked = only ? todoWanted(new Set(only)) : todoLines;
+    if (only) {
+      const unknown = only.filter((id) => !picked.some((line) => line.id === id || line.mindmap_id === id));
+      if (unknown.length) throw new Error(`--only 에 ToDo 한 줄이 없는 id: ${unknown.join(", ")} (노트에 todo: · 트랙에 할일: 이 있어야 한다)`);
+    }
+    const out = path.join(repoRoot, "tmp", "todo-lines.sql");
+    mkdirSync(path.dirname(out), { recursive: true });
+    writeFileSync(out, [
+      "-- todo_lines 발행 — scripts/publish-portfolio.mjs --sql --todo-only 가 만든 파일이다.",
+      `-- 만든 날: ${new Date().toISOString().slice(0, 10)} · ${only ? `대상: ${only.join(", ")}` : "전부(볼트에 없는 줄은 지운다)"}`,
+      "",
+      "begin;",
+      ...todoSql(picked, !only),
+      "",
+      "commit;",
+      "",
+    ].join("\n"), "utf8");
+    console.log(`${path.relative(repoRoot, out)} — ToDo 한 줄 ${picked.length}개${only ? "" : " (+ 볼트에 없는 줄 삭제)"}`);
+    return;
+  }
 
   if (dump) {
     const out = path.join(repoRoot, "tmp", "portfolio-rows-preview.json");
@@ -656,20 +748,22 @@ async function main() {
     const want = new Set(only);
     const rowsOut = payload.filter((row) => row.kind === "row" && want.has(row.id));
     const nodesOut = nodeFields.filter((node) => want.has(node.name) || want.has(node.mindmap_id));
+    const todosOut = todoWanted(want);
     const unknown = only.filter((id) => !rowsOut.some((row) => row.id === id)
-      && !nodesOut.some((node) => node.name === id || node.mindmap_id === id));
+      && !nodesOut.some((node) => node.name === id || node.mindmap_id === id)
+      && !todosOut.some((line) => line.id === id || line.mindmap_id === id));
     if (unknown.length) throw new Error(`--only 에 없는 id: ${unknown.join(", ")} (행 id·노트 이름·mindmap_id 중 하나여야 한다)`);
     const out = path.join(repoRoot, "tmp", "portfolio-rows-partial.sql");
     mkdirSync(path.dirname(out), { recursive: true });
-    writeFileSync(out, toPartialSql(rowsOut, nodesOut, only), "utf8");
+    writeFileSync(out, toPartialSql(rowsOut, nodesOut, only, todosOut), "utf8");
     const kb = (statSync(out).size / 1024).toFixed(1);
-    console.log(`${path.relative(repoRoot, out)} (${kb}KB) — 포트폴리오 행 ${rowsOut.length} · 노드 행 ${nodesOut.length}`);
+    console.log(`${path.relative(repoRoot, out)} (${kb}KB) — 포트폴리오 행 ${rowsOut.length} · 노드 행 ${nodesOut.length} · ToDo 한 줄 ${todosOut.length}`);
     return;
   }
   if (sql) {
     const out = path.join(repoRoot, "tmp", "portfolio-rows.sql");
     mkdirSync(path.dirname(out), { recursive: true });
-    writeFileSync(out, toSql(payload, nodeFields), "utf8");
+    writeFileSync(out, toSql(payload, nodeFields, todoLines), "utf8");
     const kb = Math.round(statSync(out).size / 1024);
     console.log(`${path.relative(repoRoot, out)} (${kb}KB) 를 만들었습니다.`);
     console.log("Supabase SQL Editor 에 통째로 붙여넣고 Run 하세요. 로그인 정보는 필요 없습니다.");
@@ -702,6 +796,7 @@ async function main() {
     console.log(`볼트에서 사라진 ${stale.length}건 삭제: ${stale.join(", ")}`);
   }
   console.log("끝. portfolio.html 에서 로그인하면 이 값이 보입니다.");
+  console.log("ToDo 한 줄(todo_lines)은 --push 가 올리지 않는다 — --sql --todo-only 로 만든 SQL 을 보낸다.");
 }
 
 main().catch((error) => {
