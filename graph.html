@@ -604,7 +604,7 @@ LEGEND.forEach(item => {
 // === 투고 상태 배지 (draft / submit / revision / accepted / printed) ===
 // 값 형식: "저널,상태[,MM-DD]". draft는 예정 저널이 정해진 노드만 표기.
 // 정본: Projects/{노드ID}.md frontmatter(submission) — graphify-out/status_badges.py 로 재적용 가능.
-const STATUS_BADGES = {"ColdOndol": "미정", "PFTF": "보류(성과 없음 · 원고는 PartialCost)", "PFTF_VisCull_kDop": "IJCST,draft", "PFTF_GFiberCT": "한국복합재료학회지 게재가 (2026-11-11, PAPER-26-080)", "SFTFSoft_GNN": "IJAMT, draft", "SFTF_Clustering": "RPJ 동료심사 중 (2026-11-12 데스크 통과, RPJ-11-2026-0777)", "SFTF_DrapePrior": "TSE 출판 (2026-10-31, 63권 5호)", "SFTF_HeatMethod": "보류(Holonomy 에서 다시 분리 · 실을 원고 없음)", "SFTF_Holonomy": "JCDE 데스크 리젝 (2026-10-25) — 통제 실험 분리, IJMF 재투고 준비", "SFTF_SewerPOC": "미정", "SFTF_UrbanTraffic": "한국재난정보학회논문집(KOSDI) 투고 완료 (2026-09-16, 김우석 교수 측 투고)", "Tomo_DFSVR": "보강 후 투고 · T2 v2 완주(2026-08-22)·분석 완료(2026-08-23), 확증은 두 번 다 NO-GO", "Tomo_SFTF": "TDP 인쇄중 (in print · 권/호·쪽 미배정)", "Tomo_SFTFSoft": "IJAMT 편집자 배정 대기 (2026-11-06 투고, JAMT-D-26-08299)", "cfmsAutoSew": "해외 SCIE,draft", "cfmsCIPC": "TSE 투고 완료 (2026-08-21, 원고번호 26M-08-030)", "cfmsPINNDrape": "**한국섬유공학회지(TSE) 국문 투고본으로 전환**(2026-08-21, 사용자 지정 — TDP 해외 투고는 접었다). 정본 `draft/src/PINNDrape_2_검토용한글.md`, 영문 Maintext 는 `draft/src/_archive/` 로 보관. 빌드 14면(한도 20). 저자 설인환 단독·NRF-2022R1A2C1010072. 구 기록: **TDP 포맷으로 집필 착수**(2026-08-17). G1~G6 종주 완료, 긍정 효과 확보 — 목표 착의 품질 도달 시간 cold 대비 +92~98 %·엔진 대조군 대비 +78~92 %, 예측 비용 3.7~14 ms. 검토본은 TDP 구조 + 한글. 원격 PC 원고는 병합하지 않는다", "TSE_SEM1_Bezier": "한국복합재료학회지 게재가 (2026-11-12, PAPER-26-081)", "TSE_SEM2_Tensor": "한국섬유공학회지 게재가 (2026-10-23, 26M-10-043)", "TSE_SEM3_AutoTune": "보류(2027-03-01 이후 투고 · 한국섬유공학회지)", "TSE_TomoSh4": "한국섬유공학회지 게재가 (2026-11-09, 26M-09-038)", "TSE_TomoSh5": "한국섬유공학회지 게재가 (2026-11-08, 26M-09-036)", "SFTF_DrapeOverprint": "한국섬유공학회지 Rev1 제출 (2026-11-17, 26M-10-047) — 판정 대기", "PartialCost": "TDP,draft", "PFTF_OrientCert": "CAD,draft", "PFTF_AsymTensor": "보류(1편 OrientCert 에 병합 · CAD 한 편으로)", "cfmsDispersityProp": "M&M 심사자 선정 대기 (2026-11-05 투고, MAM-26-327)", "cfmsHMDispersity": "J. Microscopy Under Review (2026-11-05 투고, JMI-26-00455)", "cfmsSXJacobian": "TVC 편집자 검토 중 (2026-11-15 투고, 원고번호 할당중)"};
+const STATUS_BADGES = {"ColdOndol": "미정", "PFTF": "보류(성과 없음 · 원고는 PartialCost)", "PFTF_VisCull_kDop": "IJCST,draft", "PFTF_GFiberCT": "한국복합재료학회지 게재가 (2026-11-11, PAPER-26-080)", "SFTFSoft_GNN": "IJAMT, draft", "SFTF_Clustering": "RPJ 동료심사 중 (2026-11-12 데스크 통과, RPJ-11-2026-0777)", "SFTF_DrapePrior": "TSE 출판 (2026-10-31, 63권 5호)", "SFTF_HeatMethod": "보류(Holonomy 에서 다시 분리 · 실을 원고 없음)", "SFTF_Holonomy": "FnP 편집자 검토 중 (2026-11-03 투고, FIPO-D-26-01939)", "SFTF_SewerPOC": "미정", "SFTF_UrbanTraffic": "한국재난정보학회논문집(KOSDI) 투고 완료 (2026-09-16, 김우석 교수 측 투고)", "Tomo_DFSVR": "보강 후 투고 · T2 v2 완주(2026-08-22)·분석 완료(2026-08-23), 확증은 두 번 다 NO-GO", "Tomo_SFTF": "TDP 인쇄중 (in print · 권/호·쪽 미배정)", "Tomo_SFTFSoft": "IJAMT 편집자 배정 대기 (2026-11-06 투고, JAMT-D-26-08299)", "cfmsAutoSew": "해외 SCIE,draft", "cfmsCIPC": "TSE Rev2 제출 완료 (2026-10-30, 26M-08-030) — 판정 대기", "cfmsPINNDrape": "**한국섬유공학회지(TSE) 국문 투고본으로 전환**(2026-08-21, 사용자 지정 — TDP 해외 투고는 접었다). 정본 `draft/src/PINNDrape_2_검토용한글.md`, 영문 Maintext 는 `draft/src/_archive/` 로 보관. 빌드 14면(한도 20). 저자 설인환 단독·NRF-2022R1A2C1010072. 구 기록: **TDP 포맷으로 집필 착수**(2026-08-17). G1~G6 종주 완료, 긍정 효과 확보 — 목표 착의 품질 도달 시간 cold 대비 +92~98 %·엔진 대조군 대비 +78~92 %, 예측 비용 3.7~14 ms. 검토본은 TDP 구조 + 한글. 원격 PC 원고는 병합하지 않는다", "TSE_SEM1_Bezier": "한국복합재료학회지 게재가 (2026-11-12, PAPER-26-081)", "TSE_SEM2_Tensor": "한국섬유공학회지 게재가 (2026-10-23, 26M-10-043)", "TSE_SEM3_AutoTune": "보류(2027-03-01 이후 투고 · 한국섬유공학회지)", "TSE_TomoSh4": "한국섬유공학회지 게재가 (2026-11-09, 26M-09-038)", "TSE_TomoSh5": "한국섬유공학회지 게재가 (2026-11-08, 26M-09-036)", "SFTF_DrapeOverprint": "한국섬유공학회지 Rev1 제출 (2026-11-17, 26M-10-047) — 판정 대기", "PartialCost": "TDP,draft", "PFTF_OrientCert": "CAD,draft", "PFTF_AsymTensor": "보류(1편 OrientCert 에 병합 · CAD 한 편으로)", "cfmsDispersityProp": "M&M 심사자 선정 대기 (2026-11-05 투고, MAM-26-327)", "cfmsHMDispersity": "J. Microscopy Under Review (2026-11-05 투고, JMI-26-00455)", "cfmsSXJacobian": "TVC 편집자 검토 중 (2026-11-15 투고, 원고번호 할당중)", "cfmsHipDetect": "IJCST 투고 완료 (2026-09-22, 원고번호 IJCST-09-2026-0266)"};
 const STATUS_COLORS = { draft: "#64748b", submit: "#d4a017", revision: "#e06e10", accepted: "#12a150", printed: "#7a3fd1" };
 // Supabase(research_outputs) 오버라이드 뒤 같은 규칙으로 다시 장식할 수 있도록,
 // 장식(배지·등급·테두리)이 손대기 전의 원본을 보존해 둔다. decorateNodes() 참고.
@@ -1652,6 +1652,7 @@ function showInfo(nodeId) {
   }).join('');
   document.getElementById('info-content').innerHTML = `
     <div class="field"><b>${esc(n._display_label || n.label)}</b> ${n._project_path ? `<button type="button" class="vscode-btn" style="margin-left:8px;padding:2px 6px;border:1px solid #888;border-radius:3px;background:#fff;color:#333;font-size:13px;cursor:pointer;vertical-align:middle" data-vscode-path="${esc(n._project_path)}" title="Open project in a new VS Code window">VSCODE</button>` : ""}</div>
+    ${submissionSiteField(nodeId)}
     <div class="field">Type: ${esc(n._project_role || n._file_type || 'unknown')}</div>
    <div class="field">ToDo: ${esc(n._bottleneck || '')}</div>
     ${(typeof COAUTHOR_CANDIDATES === 'object' && COAUTHOR_CANDIDATES[nodeId]) ? `<div class="field">공저 후보: <b>${esc(COAUTHOR_CANDIDATES[nodeId])}</b> <span style="color:#999;font-size:13px">교내 · 미확정 (맨 앞이 1순위, 볼트 coauthor_candidate)</span></div>` : ''}
@@ -1698,6 +1699,81 @@ document.addEventListener('click', e => {
   window.open(uri, '_blank', 'noopener');
 });
 // VSCODE_BUTTON_END
+// SUBMISSION_SITE_BEGIN — 투고 사이트 버튼 (2026-11-21, 사용자 지시). 정본은 layout_findings.py 다.
+// 투고(submitted)부터 인쇄중(inprint)까지인 노드의 Node Info 에서, VSCODE 버튼 줄 바로 아래에
+// 그 저널의 투고 시스템(내 투고 목록 · 로그인 화면)을 새 창으로 여는 버튼을 단다.
+// 저널은 노드 배지(STATUS_BADGES — Supabase 표가 덮는다)의 **머리**에 적힌 저널 이름으로 찾는다.
+// 새 저널에 투고하면 아래 표에 한 줄 더한다 — scripts/check-graph-html.mjs 가 못 찾는 노드를 잡는다.
+// 주소는 저널마다 하나다. 원고별 주소(SNAPP submission-details/… 같은 원고 id)는 공개 파일에 넣지 않는다.
+const SUBMISSION_SITE_STAGES = new Set(['submitted', 'revision', 'revision2', 'accepted', 'inprint']);
+const SUBMISSION_SITES = [
+  { key: 'TSE', journal: '한국섬유공학회지 (Textile Science and Engineering)', names: ['한국섬유공학회지', 'Textile Science and Engineering', 'TSE'],
+    system: 'manuscriptlink', url: 'https://www.manuscriptlink.com/journals/tse' },
+  { key: 'CR', journal: '한국복합재료학회지 (Composites Research)', names: ['한국복합재료학회지', 'Composites Research', 'CR'],
+    system: '저널 홈', url: 'http://www.compositesres.org/', home: true,
+    note: '투고 시스템 주소를 확인하지 못해 저널 홈으로 잇는다 — 공저자 측 투고' },
+  { key: 'KOSDI', journal: '한국재난정보학회논문집', names: ['한국재난정보학회논문집', 'KOSDI'],
+    system: '저널 홈', url: 'https://journal.kosdi.or.kr/', home: true,
+    note: '투고 시스템 주소를 확인하지 못해 저널 홈으로 잇는다 — 공저자 측 투고' },
+  { key: 'RPJ', journal: 'Rapid Prototyping Journal', names: ['Rapid Prototyping Journal', 'RPJ'],
+    system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/rpj' },
+  { key: 'IJCST', journal: 'International Journal of Clothing Science and Technology', names: ['International Journal of Clothing Science and Technology', 'IJCST'],
+    system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/ijcst' },
+  { key: 'TDP', journal: '3D Printing and Additive Manufacturing', names: ['3D Printing and Additive Manufacturing', 'TDP'],
+    system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/3dp' },
+  { key: 'M&M', journal: 'Microscopy and Microanalysis', names: ['Microscopy and Microanalysis', 'M&M'],
+    system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/mam' },
+  { key: 'JCDE', journal: 'Journal of Computational Design and Engineering', names: ['Journal of Computational Design and Engineering', 'JCDE'],
+    system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/jcde' },
+  { key: 'IJAMT', journal: 'The International Journal of Advanced Manufacturing Technology', names: ['The International Journal of Advanced Manufacturing Technology', 'IJAMT'],
+    system: 'Editorial Manager', url: 'https://www.editorialmanager.com/jamt/' },
+  { key: 'FnP', journal: 'Fibers and Polymers', names: ['Fibers and Polymers', 'FnP'],
+    system: 'Editorial Manager', url: 'https://www.editorialmanager.com/fipo/' },
+  { key: 'J. Microscopy', journal: 'Journal of Microscopy', names: ['Journal of Microscopy', 'J. Microscopy'],
+    system: 'Wiley Research Exchange', url: 'https://authors.wiley.com/dashboard' },
+  { key: 'TVC', journal: 'The Visual Computer', names: ['The Visual Computer', 'TVC'],
+    system: 'Springer Nature SNAPP', url: 'https://submission.springernature.com/your-submissions' },
+];
+function submissionSiteFor(nodeId) {
+  const stage = (typeof NODE_STAGE === 'object' && NODE_STAGE[nodeId])
+    || (typeof VAULT_STAGES === 'object' && VAULT_STAGES[nodeId]) || '';
+  if (!SUBMISSION_SITE_STAGES.has(stage)) return null;
+  const badge = String((typeof STATUS_BADGES === 'object' && STATUS_BADGES[nodeId]) || '').trim();
+  // 배지 머리의 저널 이름. 이름 바로 뒤가 글자·숫자면 다른 낱말의 앞토막이라 버린다. 겹치면 긴 이름이 이긴다.
+  let best = null, bestLength = 0;
+  for (const site of SUBMISSION_SITES) {
+    for (const name of site.names) {
+      if (name.length > bestLength && badge.startsWith(name)
+          && !/^[0-9A-Za-z가-힣]/.test(badge.slice(name.length))) {
+        best = site;
+        bestLength = name.length;
+      }
+    }
+  }
+  return best;
+}
+function submissionSiteField(nodeId) {
+  const site = submissionSiteFor(nodeId);
+  if (!site) return '';
+  const label = (site.home ? '저널 홈 · ' : '투고 사이트 · ') + site.key;
+  const tip = site.home ? site.journal + ' — ' + site.note
+    : site.journal + ' 투고 시스템(' + site.system + ')을 새 창으로 엽니다 — 투고 상황 확인';
+  return '<div class="field"><button type="button" class="submission-site-btn" '
+    + 'style="padding:2px 6px;border:1px solid #2f6feb;border-radius:3px;background:#eaf1ff;'
+    + 'color:#1d4ed8;font-size:13px;cursor:pointer;vertical-align:middle" '
+    + 'data-submission-url="' + esc(site.url) + '" title="' + esc(tip) + '">' + esc(label) + '</button> '
+    + '<span style="color:#999;font-size:13px">' + esc(site.system) + '</span></div>';
+}
+document.addEventListener('click', e => {
+  const button = e.target.closest('.submission-site-btn');
+  if (!button) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const url = button.dataset.submissionUrl || '';
+  if (!/^https?:\/\//i.test(url)) return;
+  window.open(url, '_blank', 'noopener');
+});
+// SUBMISSION_SITE_END
 // Track hovered node — hover detection is more reliable than click params
 let hoveredNodeId = null;
 network.on('hoverNode', params => {

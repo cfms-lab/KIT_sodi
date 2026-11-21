@@ -1402,7 +1402,10 @@ if preserve_extended_quality:
             "SFTF_DrapePrior": "TSE 출판 (2026-10-31, 63권 5호)",
             # 2026-09-17: 파일의 원고번호가 26M-08-029(SFTF_DrapePrior 것)로 잘못 적혀 있었다.
             # cfmsCIPC 는 26M-08-030 이다(볼트 badge·표 둘 다 그렇게 적는다).
-            "cfmsCIPC": "TSE 투고 완료 (2026-08-21, 원고번호 26M-08-030)",
+            # 2026-11-21: 2026-10-30 Rev2 제출 — 볼트 badge 와 같은 문구다. 앞 값: 「TSE 투고 완료 (2026-08-21, 원고번호 26M-08-030)」
+            "cfmsCIPC": "TSE Rev2 제출 완료 (2026-10-30, 26M-08-030) — 판정 대기",
+            # 2026-11-21: 파일 배지가 없어 오프라인에서 투고 사이트 버튼이 저널을 못 찾았다 — 볼트 badge 와 같은 문구다.
+            "cfmsHipDetect": "IJCST 투고 완료 (2026-09-22, 원고번호 IJCST-09-2026-0266)",
             # 2026-10-16: 한국섬유공학회지 투고. 원고번호는 접수 승인 메일이 와야 생기므로 TomoSh4 처럼
             # 날짜만 적고, 번호가 오면 고친다.  볼트 badge 와 같은 문구다.
             # 2026-11-17: 1차 심사 수정 — Rev1 제출(26M-10-047, 사용자). 앞 값: 「한국섬유공학회지 투고 완료 (2026-10-16, 원고번호 할당중)」
@@ -1436,7 +1439,8 @@ if preserve_extended_quality:
             # 2026-10-23: 2026-10-22 JCDE 투고(원고번호 JCDE-2026-757)로 볼트 badge 가 바뀌었다 — 같은 문구로 맞춘다.
             # 2026-10-26: 2026-10-25 JCDE 데스크 리젝(심사 없음) — 볼트 badge 와 같은 문구다.
             # 2026-10-27: 볼트 10-26 오후 판(통제 실험 분리) — 볼트 badge 와 같은 문구다.
-            "SFTF_Holonomy": "JCDE 데스크 리젝 (2026-10-25) — 통제 실험 분리, IJMF 재투고 준비",
+            # 2026-11-21: 2026-11-03 FnP 투고 · 11-20 With Editor — 볼트 badge 와 같은 문구다(투고 사이트 버튼이 이 머리로 저널을 찾는다).
+            "SFTF_Holonomy": "FnP 편집자 검토 중 (2026-11-03 투고, FIPO-D-26-01939)",
             # 2026-11-15 The Visual Computer 투고(SNAPP, 원고번호 할당 전). 볼트 badge 와 같은 문구다.
             # 2026-11-17 기술 점검 통과 → With Editor(사용자 확인). 앞 값: 「TVC 투고 완료 (2026-11-15, 원고번호 할당중)」
             "cfmsSXJacobian": "TVC 편집자 검토 중 (2026-11-15 투고, 원고번호 할당중)",
@@ -3775,6 +3779,94 @@ document.addEventListener('click', e => {
 s = re.sub(r"\n// VSCODE_BUTTON_BEGIN.*?// VSCODE_BUTTON_END\n?", "\n", s, flags=re.S)
 s = s.replace("// Track hovered node — hover detection is more reliable than click params",
               vscode_js + "\n// Track hovered node — hover detection is more reliable than click params", 1)
+
+# ── 투고 사이트 버튼 (2026-11-21, 사용자 지시) ───────────────────────────────
+# 투고(submitted)부터 인쇄중(inprint)까지인 노드의 Node Info 에서 VSCODE 버튼 줄 바로 아래에
+# 「투고 사이트」 버튼을 단다. 저널은 노드 배지(STATUS_BADGES) 머리의 저널 이름으로 찾고,
+# 저널 → 투고 시스템 주소 표는 아래 JS 블록 안의 SUBMISSION_SITES 다(새 저널이면 한 줄 더한다 —
+# scripts/check-graph-html.mjs 가 단계는 맞는데 저널을 못 찾는 노드를 잡는다).
+# 위 VSCODE 블록처럼 지우고 다시 넣어 재생성이 멱등하다.
+SUBMISSION_SITE_FIELD = "    ${submissionSiteField(nodeId)}\n"
+_type_marker = "    <div class=\"field\">Type: ${esc(n._project_role || n._file_type || 'unknown')}</div>"
+s = s.replace(SUBMISSION_SITE_FIELD, "")
+s = s.replace(_type_marker, SUBMISSION_SITE_FIELD + _type_marker, 1)
+submission_site_js = r'''// SUBMISSION_SITE_BEGIN — 투고 사이트 버튼 (2026-11-21, 사용자 지시). 정본은 layout_findings.py 다.
+// 투고(submitted)부터 인쇄중(inprint)까지인 노드의 Node Info 에서, VSCODE 버튼 줄 바로 아래에
+// 그 저널의 투고 시스템(내 투고 목록 · 로그인 화면)을 새 창으로 여는 버튼을 단다.
+// 저널은 노드 배지(STATUS_BADGES — Supabase 표가 덮는다)의 **머리**에 적힌 저널 이름으로 찾는다.
+// 새 저널에 투고하면 아래 표에 한 줄 더한다 — scripts/check-graph-html.mjs 가 못 찾는 노드를 잡는다.
+// 주소는 저널마다 하나다. 원고별 주소(SNAPP submission-details/… 같은 원고 id)는 공개 파일에 넣지 않는다.
+const SUBMISSION_SITE_STAGES = new Set(['submitted', 'revision', 'revision2', 'accepted', 'inprint']);
+const SUBMISSION_SITES = [
+  { key: 'TSE', journal: '한국섬유공학회지 (Textile Science and Engineering)', names: ['한국섬유공학회지', 'Textile Science and Engineering', 'TSE'],
+    system: 'manuscriptlink', url: 'https://www.manuscriptlink.com/journals/tse' },
+  { key: 'CR', journal: '한국복합재료학회지 (Composites Research)', names: ['한국복합재료학회지', 'Composites Research', 'CR'],
+    system: '저널 홈', url: 'http://www.compositesres.org/', home: true,
+    note: '투고 시스템 주소를 확인하지 못해 저널 홈으로 잇는다 — 공저자 측 투고' },
+  { key: 'KOSDI', journal: '한국재난정보학회논문집', names: ['한국재난정보학회논문집', 'KOSDI'],
+    system: '저널 홈', url: 'https://journal.kosdi.or.kr/', home: true,
+    note: '투고 시스템 주소를 확인하지 못해 저널 홈으로 잇는다 — 공저자 측 투고' },
+  { key: 'RPJ', journal: 'Rapid Prototyping Journal', names: ['Rapid Prototyping Journal', 'RPJ'],
+    system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/rpj' },
+  { key: 'IJCST', journal: 'International Journal of Clothing Science and Technology', names: ['International Journal of Clothing Science and Technology', 'IJCST'],
+    system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/ijcst' },
+  { key: 'TDP', journal: '3D Printing and Additive Manufacturing', names: ['3D Printing and Additive Manufacturing', 'TDP'],
+    system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/3dp' },
+  { key: 'M&M', journal: 'Microscopy and Microanalysis', names: ['Microscopy and Microanalysis', 'M&M'],
+    system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/mam' },
+  { key: 'JCDE', journal: 'Journal of Computational Design and Engineering', names: ['Journal of Computational Design and Engineering', 'JCDE'],
+    system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/jcde' },
+  { key: 'IJAMT', journal: 'The International Journal of Advanced Manufacturing Technology', names: ['The International Journal of Advanced Manufacturing Technology', 'IJAMT'],
+    system: 'Editorial Manager', url: 'https://www.editorialmanager.com/jamt/' },
+  { key: 'FnP', journal: 'Fibers and Polymers', names: ['Fibers and Polymers', 'FnP'],
+    system: 'Editorial Manager', url: 'https://www.editorialmanager.com/fipo/' },
+  { key: 'J. Microscopy', journal: 'Journal of Microscopy', names: ['Journal of Microscopy', 'J. Microscopy'],
+    system: 'Wiley Research Exchange', url: 'https://authors.wiley.com/dashboard' },
+  { key: 'TVC', journal: 'The Visual Computer', names: ['The Visual Computer', 'TVC'],
+    system: 'Springer Nature SNAPP', url: 'https://submission.springernature.com/your-submissions' },
+];
+function submissionSiteFor(nodeId) {
+  const stage = (typeof NODE_STAGE === 'object' && NODE_STAGE[nodeId])
+    || (typeof VAULT_STAGES === 'object' && VAULT_STAGES[nodeId]) || '';
+  if (!SUBMISSION_SITE_STAGES.has(stage)) return null;
+  const badge = String((typeof STATUS_BADGES === 'object' && STATUS_BADGES[nodeId]) || '').trim();
+  // 배지 머리의 저널 이름. 이름 바로 뒤가 글자·숫자면 다른 낱말의 앞토막이라 버린다. 겹치면 긴 이름이 이긴다.
+  let best = null, bestLength = 0;
+  for (const site of SUBMISSION_SITES) {
+    for (const name of site.names) {
+      if (name.length > bestLength && badge.startsWith(name)
+          && !/^[0-9A-Za-z가-힣]/.test(badge.slice(name.length))) {
+        best = site;
+        bestLength = name.length;
+      }
+    }
+  }
+  return best;
+}
+function submissionSiteField(nodeId) {
+  const site = submissionSiteFor(nodeId);
+  if (!site) return '';
+  const label = (site.home ? '저널 홈 · ' : '투고 사이트 · ') + site.key;
+  const tip = site.home ? site.journal + ' — ' + site.note
+    : site.journal + ' 투고 시스템(' + site.system + ')을 새 창으로 엽니다 — 투고 상황 확인';
+  return '<div class="field"><button type="button" class="submission-site-btn" '
+    + 'style="padding:2px 6px;border:1px solid #2f6feb;border-radius:3px;background:#eaf1ff;'
+    + 'color:#1d4ed8;font-size:13px;cursor:pointer;vertical-align:middle" '
+    + 'data-submission-url="' + esc(site.url) + '" title="' + esc(tip) + '">' + esc(label) + '</button> '
+    + '<span style="color:#999;font-size:13px">' + esc(site.system) + '</span></div>';
+}
+document.addEventListener('click', e => {
+  const button = e.target.closest('.submission-site-btn');
+  if (!button) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const url = button.dataset.submissionUrl || '';
+  if (!/^https?:\/\//i.test(url)) return;
+  window.open(url, '_blank', 'noopener');
+});
+// SUBMISSION_SITE_END'''
+s = re.sub(r"\n// SUBMISSION_SITE_BEGIN.*?// SUBMISSION_SITE_END\n?", "\n", s, flags=re.S)
+s = s.replace("// VSCODE_BUTTON_END\n", "// VSCODE_BUTTON_END\n" + submission_site_js + "\n", 1)
 
 # ── 노드 좌표를 웹에서 바로 저장하기 (2026-09-13) ─────────────────────────────
 # 드래그한 배치를 「위치 복사」 → 파일 → 커밋으로 옮기던 길 대신, 「노드 저장」 한 번으로

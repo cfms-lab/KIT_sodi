@@ -554,6 +554,41 @@ if (html.includes("horizon-cb") || html.includes("showFar")) {
   throw new Error("the removed 원거리(하) toggle is back in graph.html");
 }
 
+// 2026-11-21: 투고 사이트 버튼 — 투고(submitted)~인쇄중(inprint) 노드는 모두 저널의 투고 시스템을 찾아야 한다.
+// 새 저널에 투고하고 layout_findings.py 의 SUBMISSION_SITES 에 한 줄을 안 더하면 여기서 멈춘다.
+{
+  const begin = html.indexOf("// SUBMISSION_SITE_BEGIN");
+  const end = html.indexOf("// SUBMISSION_SITE_END");
+  if (begin < 0 || end < begin) throw new Error("SUBMISSION_SITE block is missing from graph.html");
+  if (!html.includes("// VSCODE_BUTTON_END\n// SUBMISSION_SITE_BEGIN")) {
+    throw new Error("SUBMISSION_SITE block must sit right after the VSCODE button block");
+  }
+  if (!html.includes("    ${submissionSiteField(nodeId)}\n    <div class=\"field\">Type: ")) {
+    throw new Error("submission-site button must be the line right below the title (VSCODE) line in showInfo");
+  }
+  const block = html.slice(begin, end);
+  // 주석이 「submission-details/…」를 낱말로 적고 있으므로 주소 꼴만 본다.
+  if (/https?:\/\/[^\s'"]*submission-details\//.test(block)) throw new Error("per-manuscript SNAPP URL must not be in the public graph.html");
+  const stages = readJsonConstant("VAULT_STAGES", "{");
+  const badges = readJsonConstant("STATUS_BADGES", "{");
+  const api = new Function("document", "esc", "NODE_STAGE", "VAULT_STAGES", "STATUS_BADGES",
+    block + "\nreturn { SUBMISSION_SITE_STAGES, SUBMISSION_SITES, submissionSiteFor, submissionSiteField };",
+  )({ addEventListener() {} }, (value) => String(value), stages, stages, badges);
+  for (const site of api.SUBMISSION_SITES) {
+    if (!/^https?:\/\//.test(site.url)) throw new Error(`SUBMISSION_SITES ${site.key} has a bad url`);
+  }
+  const missing = Object.entries(stages)
+    .filter(([id, stage]) => api.SUBMISSION_SITE_STAGES.has(stage) && !api.submissionSiteFor(id))
+    .map(([id]) => `${id}(${badges[id] || "배지 없음"})`);
+  if (missing.length) {
+    throw new Error(`submitted–inprint nodes whose badge names no known journal — add it to SUBMISSION_SITES in layout_findings.py: ${missing.join(", ")}`);
+  }
+  const extra = Object.entries(stages)
+    .filter(([id, stage]) => !api.SUBMISSION_SITE_STAGES.has(stage) && api.submissionSiteField(id))
+    .map(([id]) => id);
+  if (extra.length) throw new Error(`submission-site button shown outside submitted–inprint: ${extra.join(", ")}`);
+}
+
 console.log(JSON.stringify({
   inlineScripts: inlineScripts.length,
   nodes: nodes.length,
