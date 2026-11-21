@@ -194,12 +194,26 @@
     import { ConvexGeometry } from 'three/addons/geometries/ConvexGeometry.js';
 
     const LAYOUT_SCALE = 60;
-    // z 축은 볼트(Dashboards/프로젝트현황.md)의 논문 완성도다 — 1=완성도 높음이
-    // 꼭대기, 10=낮음이 바닥이고 한 점이 1.0 이다. 값은 graph.html 의
-    // PAPER_COMPLETENESS 로 실려 온다.
-    const COMPLETENESS_BEST = 1;
-    const COMPLETENESS_WORST = 10;
-    const COMPLETENESS_TOP_Z = 9;
+    // z 축은 「투고 진도」다(2026-11-10 사용자 지시) — graph.html 노드 파이와 같은 값이다.
+    // 단계는 graph.html 에 구운 VAULT_STAGES(+ 옛 MINDMAP_STATUS)로 시작해 graph.html 처럼
+    // Supabase research_outputs(kind='node')의 stage 로 덮는다. 높이는 그 단계의 STAGE_PIE.frac 이다 —
+    // 초고(draft, ¼)가 z=0 바닥, 출판(published, 1)이 꼭대기 STAGE_TOP_Z 이고 그 사이는 파이가 찬 만큼
+    // 올라간다(투고 ½ → 3, 심사 수정 → 4.5, 게재확정 → 6, 인쇄중 → 7.5). 원고가 없거나 멈춘 단계
+    // (미정·아이디어·보류·취소)와 단계가 없는 노드는 초고와 같은 바닥에 둔다.
+    // 2026-09-11 ~ 11-10 에는 z 가 볼트의 논문 완성도(PAPER_COMPLETENESS, 1 꼭대기 ↔ 10 바닥)였다.
+    const STAGE_TOP_Z = 9;
+    // graph.html 에서 STAGE_PIE 를 못 읽을 때(옛 파일을 고른 경우 등) 쓰는 같은 값.
+    const FALLBACK_STAGE_PIE = {
+      published: { frac: 1, label: '출판(published)' }, inprint: { frac: 0.875, label: '인쇄중(in print)' },
+      accepted: { frac: 0.75, label: '게재확정(accepted)' }, revision: { frac: 0.625, label: '심사 수정(revision)' },
+      submitted: { frac: 0.5, label: '투고(submitted)' }, draft: { frac: 0.25, label: '초고(draft)' },
+      undecided: { frac: 0, label: '미정(undecided)' }, blocked: { frac: 0, label: '보류(blocked)' },
+      cancelled: { frac: 0, label: '취소(cancelled)' }, idea: { frac: 0, label: '아이디어(idea)' }
+    };
+    // graph.html 의 STAGE_TO_PROG 와 같다 — 표의 단계가 옛 4단계 배지(MINDMAP_STATUS)로 옮겨 적히는 규칙.
+    const STAGE_TO_PROG = {
+      published: 'published', inprint: 'inprint', accepted: 'accepted', revision: 'submitted', submitted: 'submitted'
+    };
     const HULL_INRADIUS = 0.8864518862828913;
     const HULL_PALETTE = [
       '#1c63e3', '#e39c1c', '#e31cc6', '#1ce338',
@@ -294,6 +308,11 @@
     let lastErrorHash = '';
     let toastTimer = 0;
     let pollBusy = false;
+    // 표(research_outputs)의 노드 단계. 처음 한 번과 「다시 읽기」 때만 받는다 — 1.5초 폴링은 graph.html 만 본다.
+    let stageRows = null;
+    let stageRowsFailed = false;
+    let stageRequest = null;
+    let lastData = null;
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     const pointerStart = new THREE.Vector2();
@@ -397,30 +416,67 @@
         ...data,
         hyperedges: variableValue(source, 'hyperedges', false) || [],
         findingDeps: variableValue(source, 'FINDING_DEPS', false) || [],
-        completeness: variableValue(source, 'PAPER_COMPLETENESS', false) || {}
+        stagePie: optionalValue(source, 'STAGE_PIE') || FALLBACK_STAGE_PIE,
+        vaultStages: optionalValue(source, 'VAULT_STAGES') || {},
+        mindmapStatus: optionalValue(source, 'MINDMAP_STATUS') || {},
+        supabase: supabaseConfig(source)
       };
     }
 
-    // 볼트 노트 이름과 그래프 노드 이름은 대소문자가 어긋나기도 한다
-    // (노드 HIPDetect ↔ 노트 HipDetect.md). 소문자로 맞춰 찾는다.
-    function completenessTable(source) {
-      return new Map(Object.entries(source || {}).map(([key, value]) => [key.toLowerCase(), value]));
+    // 단계표는 없거나 못 읽어도 그래프는 그린다 — balancedLiteral 은 주석 속 따옴표를 모른다.
+    function optionalValue(source, name) {
+      try { return variableValue(source, name, false); }
+      catch { return null; }
     }
 
-    // 노드 id 를 먼저 본다 — 트랙이 갈린 논문(cfmsAutoPlace_IJCST)은 노트 하나에
-    // 완성도가 둘이라 id 로만 갈린다. 나머지는 source_file 로 찾힌다.
-    function completenessOf(node, table) {
-      const stem = String(node.source_file || '').replace(/\.md$/i, '');
-      const raw = table.get(String(node.id).toLowerCase())
-        ?? (stem ? table.get(stem.toLowerCase()) : undefined);
-      const value = Number(raw);
-      return Number.isFinite(value) && value >= COMPLETENESS_BEST ? value : null;
+    // Supabase 주소·anon 키는 graph.html 소스에서 읽는다(이 파일에 키를 따로 적지 않는다).
+    // 같은 출처라 graph.html 처럼 localStorage 의 cfms_url·cfms_key 가 있으면 그쪽이 먼저다.
+    function supabaseConfig(source) {
+      let url = /\bBAKED_URL\s*=\s*"([^"]+)"/.exec(source)?.[1] || '';
+      let key = /\bBAKED_KEY\s*=\s*"([^"]+)"/.exec(source)?.[1] || '';
+      try {
+        url = localStorage.getItem('cfms_url') || url;
+        key = localStorage.getItem('cfms_key') || key;
+      } catch { /* 저장소가 막혀 있으면 구운 값 */ }
+      url = url.trim().replace(/\/+$/, '').replace(/\/rest\/v1$/i, '').replace(/\/auth\/v1$/i, '').replace(/\/+$/, '');
+      key = key.trim();
+      return url && key ? { url, key } : null;
     }
 
-    // 완성도가 없는 노드(인프라·통합 저장소 등)는 대시보드와 같은 규칙으로 10 으로 본다.
-    function completenessHeight(value) {
-      const score = Math.min(COMPLETENESS_WORST, Math.max(COMPLETENESS_BEST, value ?? COMPLETENESS_WORST));
-      return (COMPLETENESS_WORST - score) / (COMPLETENESS_WORST - COMPLETENESS_BEST) * COMPLETENESS_TOP_Z;
+    async function fetchStageRows(config) {
+      if (!config) return null;
+      const response = await fetch(`${config.url}/rest/v1/research_outputs?kind=eq.node&select=id,stage`, {
+        headers: { apikey: config.key, Authorization: `Bearer ${config.key}` }, cache: 'no-store'
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const rows = await response.json();
+      return Array.isArray(rows) ? rows : null;
+    }
+
+    // graph.html 노드 파이와 같은 규칙으로 노드마다 단계 키를 정한다 — 구운 VAULT_STAGES·MINDMAP_STATUS 에서
+    // 시작해 표의 행(id 가 그래프 노드 id 인 것만)으로 덮고, STAGE_PIE 에 있는 단계를 먼저, 없으면 MINDMAP_STATUS.
+    function stageKeys(data, ids, rows) {
+      const nodeStage = { ...data.vaultStages };
+      const mindmap = { ...data.mindmapStatus };
+      const known = new Set(ids);
+      for (const row of rows || []) {
+        const id = String(row.id);
+        if (!known.has(id)) continue;
+        const prog = STAGE_TO_PROG[row.stage];
+        if (prog) mindmap[id] = prog;
+        else if (row.stage) delete mindmap[id];
+        if (row.stage) nodeStage[id] = row.stage;
+        else delete nodeStage[id];
+      }
+      return ids.map(id => (data.stagePie[nodeStage[id]] ? nodeStage[id] : mindmap[id]) ?? null);
+    }
+
+    // 초고가 바닥(0), 출판이 꼭대기(STAGE_TOP_Z). 초고보다 낮은 단계와 단계 없음은 바닥에 붙인다.
+    function stageHeight(key, stagePie) {
+      const frac = Number(stagePie[key]?.frac);
+      const floor = Number(stagePie.draft?.frac ?? 0.25);
+      if (!Number.isFinite(frac) || !(floor < 1)) return 0;
+      return Math.min(1, Math.max(0, (frac - floor) / (1 - floor))) * STAGE_TOP_Z;
     }
 
     function colorValue(value, fallback = '#bfc5cf') {
@@ -428,7 +484,7 @@
       catch { return new THREE.Color(fallback); }
     }
 
-    function buildModel(data) {
+    function buildModel(data, rows = null) {
       if (!Array.isArray(data.nodes) || !Array.isArray(data.edges)) throw new Error('노드 또는 edge 데이터가 배열이 아닙니다.');
       const ids = data.nodes.map(node => String(node.id));
       if (new Set(ids).size !== ids.length) throw new Error('중복된 노드 ID가 있습니다.');
@@ -455,12 +511,11 @@
       const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
       const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
       const degrees = neighbors.map(set => set.size);
-      const scores = completenessTable(data.completeness);
-      const completeness = data.nodes.map(node => completenessOf(node, scores));
+      const stages = stageKeys(data, ids, rows);
       const points = xy.map((p, i) => new THREE.Vector3(
-        (p[0] - cx) / LAYOUT_SCALE, -(p[1] - cy) / LAYOUT_SCALE, completenessHeight(completeness[i])));
+        (p[0] - cx) / LAYOUT_SCALE, -(p[1] - cy) / LAYOUT_SCALE, stageHeight(stages[i], data.stagePie)));
       const radii = data.nodes.map(node => Math.max(8, Number(node.size || 13)) / LAYOUT_SCALE);
-      return { ...data, ids, indexById, neighbors, degrees, completeness, points, radii };
+      return { ...data, ids, indexById, neighbors, degrees, stages, points, radii };
     }
 
     function disposeGroup(group) {
@@ -684,9 +739,9 @@
       const heading = document.createElement('h2');
       heading.textContent = String(node.id);
       const body = document.createElement('p');
-      const completeness = model.completeness[index];
-      const completenessText = completeness === null ? '미기재 · 10 취급' : `${completeness}`;
-      body.textContent = `논문 완성도 ${completenessText} · Degree ${model.degrees[index]} · 나감 ${outgoing} · 들어옴 ${incoming} · 양방향 ${bidirectional}${title && title !== node.id ? ` · ${title}` : ''}`;
+      const stage = model.stages[index];
+      const stageText = stage ? (model.stagePie[stage]?.label || stage) : '단계 없음 · 바닥';
+      body.textContent = `투고 진도 ${stageText} · Degree ${model.degrees[index]} · 나감 ${outgoing} · 들어옴 ${incoming} · 양방향 ${bidirectional}${title && title !== node.id ? ` · ${title}` : ''}`;
       detailsEl.append(heading, body);
     }
 
@@ -766,7 +821,7 @@
       nodeGroup.visible = true;
       if (initial) fitCamera();
       updateDetails(-1, new Map());
-      statusEl.textContent = `${model.nodes.length} nodes · ${model.edges.length} directed edges · ${model.hyperedges.length} hyperedges · z = 논문 완성도 (1 위 ↔ 10 바닥)`;
+      statusEl.textContent = `${model.nodes.length} nodes · ${model.edges.length} directed edges · ${model.hyperedges.length} hyperedges · z = 투고 진도 (출판 위 ↔ 초고 바닥)${stageRowsFailed ? ' · 표를 못 읽어 파일에 구운 단계' : ''}`;
     }
 
     function hashText(text) {
@@ -781,12 +836,34 @@
     function loadText(text, announce = false) {
       const hash = hashText(text);
       if (hash === currentHash) return false;
-      const nextModel = buildModel(parseGraphHtml(text));
+      const data = parseGraphHtml(text);
+      const nextModel = buildModel(data, stageRows);
       const initial = !model;
+      lastData = data;
       renderGraph(nextModel, initial);
       currentHash = hash;
       if (announce && !initial) showToast('graph.html 변경을 반영했습니다.');
+      if (!stageRows) refreshStages();
       return true;
+    }
+
+    // 표의 단계를 받아 오면 같은 graph.html 로 높이만 다시 잡는다. 선택한 노드와 카메라는 그대로 둔다.
+    function refreshStages() {
+      if (stageRequest || !lastData) return stageRequest;
+      const config = lastData.supabase;
+      stageRequest = (async () => {
+        try {
+          stageRows = await fetchStageRows(config);
+          stageRowsFailed = !stageRows;
+        } catch {
+          stageRowsFailed = true;
+        }
+        if (!lastData || !model) return;
+        const keep = selectedIndex >= 0 ? model.ids[selectedIndex] : null;
+        renderGraph(buildModel(lastData, stageRows), false);
+        if (keep && model.indexById.has(keep)) selectNode(model.indexById.get(keep));
+      })().finally(() => { stageRequest = null; });
+      return stageRequest;
     }
 
     async function fetchGraph(force = false) {
@@ -800,6 +877,7 @@
         fetched = hashText(text);
         if (force) currentHash = '';
         loadText(text, !force);
+        if (force) refreshStages();   // 「다시 읽기」는 표의 단계도 새로 받는다
         lastErrorHash = '';
       } catch (error) {
         if (fetched) {
