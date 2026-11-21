@@ -32,6 +32,7 @@ anon 키로는 못 읽던 `portfolio_rows`(로그인 전용)까지 보인다.
 | `todo.js` (graph · portfolio 가 읽는다) | **`todo_lines`** (anon 읽기, 2026-11-21~). 볼트 노트 `todo:` · 대시보드 분리트랙 `할일:` 에서 생성 | 그래프·포트폴리오의 「ToDo」 한 줄(DB 의 병목 · 다음 게이트 문장보다 먼저 쓴다) |
 
 `research_outputs` 한 표가 노드 행과 업적 행을 모두 갖는다(`schema_research_outputs.sql`).
+표를 못 읽으면(Supabase 일시 중지 · 장애 · 10초 응답 없음) 화면은 아래 ⑥ 의 **예비값**으로 그리고, 표에 다시 쓰지 않는다(2026-11-21~).
 
 ## 2. 순서
 
@@ -174,6 +175,31 @@ SQL 만으로 바뀌지 않는 것들이다. 필요하면 고쳐서 커밋·푸�
 - **할 일 한 줄** — 2026-11-21 부터 저장소 일이 아니다. 볼트 `todo:`(트랙은 `할일:`)를 고치고 ③ 의 부분 SQL 로
   보낸다. `todo.js` 는 `todo_lines` 를 받아 오는 로더라 손 목록을 다시 넣으면 `scripts/check-todo-js.mjs` 가 멈춘다.
 - 검증: `pwsh -File scripts/publish-research-views.ps1` (푸시 없이). 그다음 커밋과 `git push origin main`.
+
+### ⑥ (가끔) 예비값을 굳힌다
+
+2026-11-21 부터(사용자 지시 — 홈페이지 손일 줄이기 4단계 「파일에 구운 값은 표를 못 읽을 때의 예비값」) 표를 못 읽으면 화면은
+**예비값**으로 그린다. 예비값은 보여 주기만 하고 **표에 다시 쓰지 않는다** — mindmap 은 클라우드 문서를 읽기 전에는 저장하지 않고
+(띠에 「읽기 전용」), graph 「노드 저장」은 공유 배치를 받기 전에는 저장하지 않는다. 그전에는 둘 다 예비값으로 표를 덮어쓸 수 있었다
+(시험해 보니 97개짜리 마인드맵 문서가 50개짜리 기본 관계도로, 공유 배치 52개가 파일 좌표로 덮였다).
+
+| 화면 | 예비값 | 굳히는 법 |
+|---|---|---|
+| graph | 파일에 구운 노드 · 단계 · 소개 · `POS` | 생성기 재생성(볼트에서 굽는다), 좌표는 `node scripts/pull-graph-positions.mjs` |
+| mindmap | `fallback/mindmap-doc.json`(없으면 DEFAULT_DATA + 마이그레이션) | `node scripts/bake-fallbacks.mjs` |
+| upjuk | `fallback/upjuk-published.json` — 출판 업적, 비로그인 화면과 같은 칸(메모 · PDF 이름 · 볼트 노트 이름은 없다) | 〃 |
+| ToDo 한 줄(todo.js) | 지난번에 받은 줄(localStorage), 없으면 `fallback/todo-lines.json` | 〃 |
+| portfolio | 없음 — 로그인 전용 표라 공개 파일에 굽지 않는다 | — |
+
+- 평소에는 할 일이 없다 — 예비값은 조금 낡아도 된다. 투고 반영이 여러 번 쌓였거나 마인드맵을 크게 다듬은 뒤에
+  `node scripts/bake-fallbacks.mjs --check` 로 어긋난 정도를 보고, `node scripts/bake-fallbacks.mjs` 로 굳혀 `fallback/` 를 커밋 · 푸시한다.
+  값이 그대로면 파일을 건드리지 않는다(bakedAt 도 그대로). 세 표는 anon 읽기라 이미 공개된 값이지만 git 이력은 지울 수 없으므로,
+  공개 금지 낱말(리젝 · 심사 경위 · 이메일 · 접수 UUID · 주민번호 꼴 …)이 있으면 아무것도 쓰지 않고 멈춘다 — 표(볼트)에서 먼저 고친다.
+- `fallback/*.json` 은 손으로 고치지 않는다 — `scripts/check-fallbacks.mjs`(검증 스크립트에 들어 있다)가 모양 · 칸 · 낱말과
+  화면 연결(읽기 전용 · 시간 제한)을 본다.
+- 화면 동작은 `node scripts/check-offline.mjs`(크롬 · 인터넷 · 2~4분, `publish-research-views.ps1 -Offline` 이 같이 돌린다)로 본다 —
+  표를 네 가지(정상 · 연결 실패 · 503 · 응답 없음)로 흉내 내고, 예비값으로 그리는지 · 표에 쓰지 않는지 · 정상일 때는 저장되는지 잰다.
+  쓰기 요청은 실제로 보내지 않는다. graph · mindmap 의 저장이나 읽기 코드를 고친 뒤에 돌린다.
 
 ## 3. 사건별 값
 

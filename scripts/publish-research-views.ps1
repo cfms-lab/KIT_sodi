@@ -1,6 +1,8 @@
 ﻿param(
     [string]$VaultPath = "",
-    [switch]$Push
+    [switch]$Push,
+    # 표를 막은 채 헤드리스 크롬으로 화면을 연다(scripts/check-offline.mjs — 크롬 · 인터넷 · 2~4분).
+    [switch]$Offline
 )
 
 $ErrorActionPreference = "Stop"
@@ -36,6 +38,12 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "todo.js validation failed" }
     node scripts/check-table-nodes.mjs
     if ($LASTEXITCODE -ne 0) { throw "table-node validation failed" }
+    node scripts/check-fallbacks.mjs
+    if ($LASTEXITCODE -ne 0) { throw "fallback validation failed" }
+    if ($Offline) {
+        node scripts/check-offline.mjs
+        if ($LASTEXITCODE -ne 0) { throw "offline fallback check failed" }
+    }
     git diff --check
     if ($LASTEXITCODE -ne 0) { throw "git diff --check failed" }
 

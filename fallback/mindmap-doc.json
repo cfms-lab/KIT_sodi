@@ -1,0 +1,1194 @@
+{
+ "bakedAt": "2026-11-21",
+ "source": "mindmaps:cfms",
+ "docUpdatedAt": "2026-11-21T09:40:23.192+00:00",
+ "data": {
+  "root": {
+   "id": "root",
+   "dir": "v",
+   "kind": "closed",
+   "note": "논문 투고 일정",
+   "title": "CFMS 연구실 2026",
+   "children": [
+    {
+     "id": "hull_3dprint",
+     "kind": "group",
+     "title": "3D프린팅",
+     "children": [
+      {
+       "id": "sftf",
+       "url": "https://github.com/cfms-lab/Tomo_SFTF_dev",
+       "kind": "high",
+       "note": "2026-08-12 특허 3건 출원 → 2026-08-13 TDP 제출(3DP-2026-0119) → 2026-09-16 1차 리뷰 → 2026-09-17 수정본 제출(R1) → 2026-10-07 게재확정 → 2026-11-05 온라인 게재(권/호 미정). 2026-08-13 확정된 예외 — Tomo_SFTFSoft·SFTF_Clustering·SFTFSoft_GNN(2026-09-20 부터 SFTF_QEM 도)은 이 논문의 accept 후에 제출한다 — 의 게이트는 2026-10-07 에 열렸다.",
+       "brief": "가장 안정적인 3D 출력 방향 찾기",
+       "title": "Tomo_SFTF",
+       "status": "inprint",
+       "children": [
+        {
+         "id": "ny0tqz74",
+         "url": "https://github.com/cfms-lab/Tomo_SFTFSoft_dev",
+         "kind": "high",
+         "note": "비지도학습",
+         "brief": "슬라이서 지지량을 따르는 미분가능 목적함수",
+         "title": "SFTFsoft",
+         "status": "submitted",
+         "children": [
+          {
+           "id": "nf7nopp2",
+           "url": "https://github.com/cfms-lab/SFTFSoft_GNN_dev",
+           "kind": "high",
+           "note": "IJAMT, thingki10k 지도학습. ??",
+           "brief": "그래프 학습으로 출력 방향 품질 예측",
+           "title": "SFTFFosft_GNN",
+           "status": "draft",
+           "children": [],
+           "collapsed": false,
+           "projectPath": "D:\\__SFTF_Projects(2026)\\SFTFSoft_GNN_dev"
+          }
+         ],
+         "collapsed": false,
+         "projectPath": "D:\\__SFTF_Projects(2026)\\Tomo_SFTFSoft_dev"
+        },
+        {
+         "id": "nafefnc3",
+         "url": "https://github.com/cfms-lab/SFTF_QEM_dev",
+         "kind": "high",
+         "note": "",
+         "brief": "지지비용 계산의 검증 방법 자체 연구",
+         "title": "SFTF_QEM",
+         "status": "draft",
+         "children": [],
+         "collapsed": false,
+         "projectPath": "D:\\__SFTF_Projects(2026)\\SFTF_QEM_dev"
+        },
+        {
+         "id": "tomo_sftf",
+         "url": "https://github.com/cfms-lab/Tomo_SFTFCluster_dev",
+         "kind": "high",
+         "note": "지언",
+         "brief": "면을 묶어 지지 구조 빠르게 분석",
+         "title": "SFTF_Cluster",
+         "status": "submitted",
+         "children": [],
+         "collapsed": false,
+         "projectPath": "D:\\__SFTF_Projects(2026)\\Tomo_SFTFCluster_dev"
+        },
+        {
+         "id": "pftf_submission_lane_20260806",
+         "url": "https://github.com/cfms-lab/PFTF_dev",
+         "kind": "group",
+         "note": "VisCull_kDop → Composite → Ground-node evidence(비투고) → Compression/Mold 중 하나 → PFTF framework. (2026-08-13: #2 VisCull_kDop 은 저자·COI·최종빌드만 남아 지금 보낼 수 있다.)",
+         "title": "PFTF",
+         "status": "draft",
+         "children": [
+          {
+           "id": "n0llvuh1",
+           "url": "https://github.com/cfms-lab/PFTF_PartialCost_dev",
+           "kind": "todo",
+           "note": "2026-10-24 보류 — 프레임워크 자체는 성과가 없었다. 일부 내용을 원고로 따로 준비해 PartialCost 노드로 갈랐다(TDP 예정, 초고).",
+           "brief": "방향 정보를 행렬로 정리한 일반 이론",
+           "title": "PFTF framework",
+           "status": "blocked",
+           "children": [
+            {
+             "id": "n1krev41",
+             "url": "https://github.com/cfms-lab/PFTF_Assembly_dev",
+             "kind": "low",
+             "note": "",
+             "brief": "부품 안 부딪히는 조립 방향 찾기",
+             "title": "PFTF_Assembly",
+             "status": "draft",
+             "children": [],
+             "projectPath": "D:\\__PFTF_Projects(2026)\\_PFTF_applications\\projects\\PFTF_Assembly_dev"
+            },
+            {
+             "id": "n28uhcb7",
+             "url": "https://github.com/cfms-lab/PFTF_FXShock_dev",
+             "kind": "medium",
+             "note": "",
+             "brief": "환율 충격의 자산 위험 영향 분석",
+             "title": "PFTF_FXShock",
+             "status": "draft",
+             "children": [],
+             "projectPath": "D:\\__PFTF_Projects(2026)\\_PFTF_applications\\projects\\PFTF_FXShock_dev"
+            },
+            {
+             "id": "n9udaty3",
+             "url": "https://github.com/cfms-lab/PFTF_Solar_dev",
+             "kind": "low",
+             "note": "",
+             "brief": "태양광 입사 방향으로 발전량 예측",
+             "title": "PFTF_Solar",
+             "status": "draft",
+             "children": [],
+             "projectPath": "D:\\__PFTF_Projects(2026)\\_PFTF_applications\\projects\\PFTF_Solar_dev"
+            },
+            {
+             "id": "nywj24v4",
+             "url": "https://github.com/cfms-lab/PFTF_Terrain_dev",
+             "kind": "low",
+             "note": "",
+             "brief": "지형 방향·경사로 넓은 지역 계산",
+             "title": "PFTF_Terrain",
+             "status": "draft",
+             "children": [],
+             "projectPath": "D:\\__PFTF_Projects(2026)\\PFTF_Terrain_dev"
+            },
+            {
+             "id": "nece2i15",
+             "url": "https://github.com/cfms-lab/PFTF_Radiotherapy_dev",
+             "kind": "low",
+             "note": "",
+             "brief": "종양 겨냥·주변 보호 방사선 방향",
+             "title": "PFTF_Radiotherapry",
+             "status": "draft",
+             "children": [],
+             "projectPath": "D:\\__PFTF_Projects(2026)\\_PFTF_applications\\projects\\PFTF_Radiotherapy_dev"
+            },
+            {
+             "id": "nj8l68c8",
+             "url": "https://github.com/cfms-lab/PFTF_RainNowcast_dev",
+             "kind": "low",
+             "note": "",
+             "brief": "강우 확산 방향 예측한 단시간 예보",
+             "title": "PFTF_RainNowcast",
+             "status": "draft",
+             "children": [],
+             "projectPath": "D:\\__PFTF_Projects(2026)\\_PFTF_applications\\projects\\PFTF_RainNowcast_dev"
+            },
+            {
+             "id": "n2jvi7n6",
+             "url": "https://github.com/cfms-lab/PFTF_Inspection_dev",
+             "kind": "low",
+             "note": "",
+             "brief": "방향·위치로 검사 후보 빠르게 축소",
+             "title": "PFTF_Inspection",
+             "status": "draft",
+             "children": [],
+             "projectPath": "D:\\__PFTF_Projects(2026)\\_PFTF_applications\\projects\\PFTF_Inspection_dev"
+            },
+            {
+             "id": "nqov6ls1",
+             "url": "https://github.com/cfms-lab/PFTF_subMarine_dev",
+             "kind": "low",
+             "note": "",
+             "brief": "수중 센서 방향으로 위치 추정",
+             "title": "PFTF_subMarine",
+             "status": "draft",
+             "children": [],
+             "projectPath": "D:\\__PFTF_Projects(2026)\\PFTF_subMarine_dev"
+            },
+            {
+             "id": "gx_pftf_cnc",
+             "url": "https://github.com/cfms-lab/PFTF_CNC_dev",
+             "kind": "medium",
+             "note": "CNC 공구가 가공할 수 있는 방향을 골라 가공 실패를 줄이는 응용이다. (graph: PFTF에서 파생)",
+             "brief": "CNC 가공 가능한 방향 선택",
+             "title": "PFTF_CNC",
+             "status": "draft",
+             "projectPath": "D:\\__PFTF_Projects(2026)\\_PFTF_applications\\projects\\PFTF_CNC_dev"
+            },
+            {
+             "id": "gx_pftf_assetshock",
+             "url": "https://github.com/cfms-lab/PFTF_AssetShock_dev",
+             "kind": "low",
+             "note": "큰 경제 충격이 여러 자산에 미치는 영향을 비교해 위험을 관리하는 응용이다. FXShock과 형제. (graph: PFTF에서 파생)",
+             "brief": "경제 충격의 자산별 위험 비교",
+             "title": "PFTF_AssetShock",
+             "status": "draft",
+             "projectPath": "D:\\__PFTF_Projects(2026)\\_PFTF_applications\\projects\\PFTF_AssetShock_dev"
+            },
+            {
+             "id": "PartialCost",
+             "url": "https://github.com/cfms-lab/PFTF_PartialCost_dev",
+             "kind": "medium",
+             "note": "PFTF 저장소에서 갈라진 원고(2026-10-24). TDP 단독 투고 준비 — 원고는 2026-10-19 에 닫혔고 미투고.",
+             "brief": "조각 출력 후보의 슬라이서 검증 시간 줄이기",
+             "title": "PartialCost",
+             "status": "draft",
+             "projectPath": "D:\\__PFTF_Projects(2026)\\PFTF_PartialCost_dev"
+            }
+           ],
+           "collapsed": true,
+           "projectPath": "D:\\__PFTF_Projects(2026)\\PFTF_PartialCost_dev"
+          }
+         ],
+         "collapsed": true,
+         "projectPath": "D:\\__PFTF_Projects(2026)\\PFTF_dev"
+        }
+       ],
+       "collapsed": false,
+       "projectPath": "D:\\__SFTF_Projects(2026)\\Tomo_SFTF_dev"
+      }
+     ],
+     "collapsed": false
+    },
+    {
+     "id": "hull_physics_ai",
+     "kind": "group",
+     "title": "Physics-AI",
+     "children": [
+      {
+       "id": "nkbfa3m1",
+       "url": "https://github.com/cfms-lab/SFTF_DynamicTargetSearch_dev",
+       "kind": "todo",
+       "note": "",
+       "brief": "이동 센서 종합해 목표·탐색 경로 추정",
+       "title": "SFTF_DynamicTargetSearch",
+       "status": "blocked",
+       "children": [
+        {
+         "id": "nvospyb8",
+         "kind": "todo",
+         "note": "",
+         "title": "Earthquake",
+         "status": "draft",
+         "children": [
+          {
+           "id": "nzq80ck2",
+           "kind": "todo",
+           "note": "",
+           "title": "상수관망 누수·오염원",
+           "status": "draft",
+           "children": []
+          },
+          {
+           "id": "npgr4bf3",
+           "kind": "todo",
+           "note": "",
+           "title": "배전망 고장구간",
+           "status": "draft",
+           "children": []
+          },
+          {
+           "id": "nls55g54",
+           "kind": "todo",
+           "note": "",
+           "title": "화학공정 고장",
+           "status": "draft",
+           "children": []
+          },
+          {
+           "id": "nafvte35",
+           "kind": "todo",
+           "note": "",
+           "title": "RF 혼신원",
+           "status": "draft",
+           "children": []
+          },
+          {
+           "id": "nwltegz6",
+           "kind": "todo",
+           "note": "",
+           "title": "반도체 fab",
+           "status": "draft",
+           "children": []
+          },
+          {
+           "id": "ncuyw687",
+           "kind": "todo",
+           "note": "",
+           "title": "실제 산업 배관 누출",
+           "status": "draft",
+           "children": []
+          }
+         ],
+         "collapsed": true
+        },
+        {
+         "id": "n7hixqe5",
+         "dir": "v",
+         "url": "https://github.com/cfms-lab/SFTF_ActiveOverprint_dev",
+         "kind": "todo",
+         "note": "",
+         "brief": "관측으로 표면 찾아 안전하게 덧출력",
+         "title": "SFTF_ActiveOverprint",
+         "status": "blocked",
+         "children": [
+          {
+           "id": "SFTF_DrapeOverprint",
+           "url": "https://github.com/cfms-lab/SFTF_DrapeOverprint_dev",
+           "kind": "low",
+           "brief": "옷 주름 가림을 재관측으로 풀어 덧출력",
+           "title": "SFTF_DrapeOverprint",
+           "status": "submitted",
+           "projectPath": "D:\\__SFTF_Projects(2026)\\SFTF_DrapeOverprint_dev"
+          },
+          {
+           "id": "nkj1hir1",
+           "kind": "closed",
+           "note": "",
+           "title": "새과제:SFTF+로컬AI+3D프린팅?",
+           "status": "draft",
+           "children": []
+          },
+          {
+           "id": "nr8ssdt1",
+           "kind": "closed",
+           "note": "",
+           "title": "의복조작 로봇학습의 태스크생성?",
+           "status": "draft",
+           "children": []
+          }
+         ],
+         "collapsed": false,
+         "projectPath": "D:\\__SFTF_Projects(2026)\\SFTF_ActiveOverprint_dev"
+        }
+       ],
+       "collapsed": false,
+       "projectPath": "D:\\__SFTF_Projects(2026)\\SFTF_DynamicTargetSearch_dev"
+      }
+     ],
+     "collapsed": false
+    },
+    {
+     "id": "hull_rendering",
+     "kind": "group",
+     "title": "Rendering",
+     "children": [
+      {
+       "id": "nkytwti1",
+       "url": "https://github.com/cfms-lab/Tomo_DFSVR_dev",
+       "kind": "medium",
+       "note": "SFTFSoft//Tomo",
+       "brief": "미분 가능한 지지 계산으로 설계 자동 개선",
+       "title": "Tomo_DFSVR",
+       "status": "draft",
+       "children": [
+        {
+         "id": "nu3n7ge9",
+         "kind": "todo",
+         "note": "",
+         "brief": "교차 후보 줄여 DFSVR 계산 가속",
+         "title": "DFSVR_VisCull",
+         "status": "blocked",
+         "children": [
+          {
+           "id": "n6odcyc1",
+           "url": "https://github.com/cfms-lab/SFTFSoft_DFSVR_dev",
+           "kind": "medium",
+           "note": "SFTFsoft + DFSVR",
+           "title": "SFTFsoft_DFSVR",
+           "status": "blocked",
+           "children": [
+            {
+             "id": "nda9ax91",
+             "kind": "todo",
+             "note": "",
+             "brief": "GNN 제안과 DFSVR 정밀화 결합",
+             "title": "SFTFSoft_GNN_DFSVR",
+             "status": "blocked",
+             "children": []
+            }
+           ],
+           "collapsed": false,
+           "projectPath": "D:\\__SFTF_Projects(2026)\\SFTFSoft_DFSVR_dev"
+          }
+         ],
+         "collapsed": true
+        }
+       ],
+       "collapsed": false,
+       "projectPath": "D:\\__SFTF_Projects(2026)\\Tomo_DFSVR_dev"
+      },
+      {
+       "id": "nh2ivjs1",
+       "url": "https://github.com/cfms-lab/PFTF_VisCull_kDop_dev",
+       "kind": "medium",
+       "note": "C&G 제출 패키지 폐쇄. 저자·소속·COI와 최종 빌드 후 선행 투고.",
+       "brief": "안 보이는 후보 걸러 3D 계산 절감",
+       "title": "PFTF_VisCull_kDop",
+       "status": "blocked",
+       "children": [],
+       "collapsed": false,
+       "projectPath": "D:\\__PFTF_Projects(2026)\\PFTF_VisCull_kDop_dev"
+      }
+     ],
+     "collapsed": false
+    },
+    {
+     "id": "hull_drape",
+     "kind": "group",
+     "title": "Drape",
+     "children": [
+      {
+       "id": "cfmsdrape",
+       "url": "https://github.com/cfms-lab/cfmsMiindo_dev",
+       "kind": "none",
+       "note": "의복 시뮬레이션/CAD",
+       "title": "미인도 프로젝트",
+       "children": [
+        {
+         "id": "nd2n7m56",
+         "kind": "group",
+         "note": "PatternSoft 기반 UI",
+         "title": "cfmsCAD",
+         "status": "draft",
+         "children": [
+          {
+           "id": "ncdfshf2",
+           "kind": "todo",
+           "note": "",
+           "title": "2D: PatternSoft (Tauri)",
+           "status": "draft",
+           "children": [
+            {
+             "id": "n70jecp6",
+             "kind": "todo",
+             "note": "",
+             "title": "3D: Polyscope",
+             "status": "draft",
+             "children": []
+            }
+           ],
+           "collapsed": false
+          },
+          {
+           "id": "nfnasgx3",
+           "kind": "todo",
+           "note": "",
+           "title": "file: NBS",
+           "status": "draft",
+           "children": [
+            {
+             "id": "ngy82l24",
+             "kind": "todo",
+             "note": "",
+             "title": "SCAD .zip",
+             "status": "draft",
+             "children": [
+              {
+               "id": "nojkiqe5",
+               "kind": "todo",
+               "note": "",
+               "title": "Clo3D .zprj",
+               "status": "draft",
+               "children": []
+              }
+             ],
+             "collapsed": false
+            }
+           ],
+           "collapsed": false
+          }
+         ],
+         "collapsed": true
+        },
+        {
+         "id": "nytwc202",
+         "kind": "group",
+         "note": "SizeKorea 치수 기반",
+         "title": "cfmsBody",
+         "status": "draft",
+         "children": [
+          {
+           "id": "n02iwyk1",
+           "kind": "todo",
+           "note": "",
+           "title": "MakeHuman130",
+           "status": "draft",
+           "children": [
+            {
+             "id": "ne7gjyo3",
+             "kind": "todo",
+             "note": "",
+             "title": "ToDo: MetaHuman",
+             "status": "draft",
+             "children": []
+            }
+           ],
+           "collapsed": false
+          }
+         ],
+         "collapsed": true
+        },
+        {
+         "id": "nptj5211",
+         "url": "https://github.com/cfms-lab/cfmsMiindo_dev",
+         "kind": "none",
+         "note": "",
+         "title": "cfmsDrape",
+         "status": "draft",
+         "children": [
+          {
+           "id": "njkskwe4",
+           "url": "https://github.com/cfms-lab/SFTF_DrapePrior_dev",
+           "kind": "low",
+           "note": "섬유공학회지 63권 5호. 2026-08 투고 → 2026-09-17 게재확정 → 2026-10-31 발행.",
+           "brief": "옷감 접촉 예측해 천 시뮬레이션 가속",
+           "title": "SFTF_DrapePrior",
+           "status": "published",
+           "children": [
+            {
+             "id": "n2dzarb3",
+             "url": "https://github.com/cfms-lab/cfmsCIPC_dev",
+             "kind": "low",
+             "note": "",
+             "brief": "옷감 관통 여부 기준 엔진과 벤치마크",
+             "title": "cfmsCIPC",
+             "status": "submitted",
+             "children": [
+              {
+               "id": "nzk1z3i1",
+               "kind": "closed",
+               "note": "+cfmsBlockPrecond",
+               "title": "Contact Tensor",
+               "status": "cancelled",
+               "children": [],
+               "collapsed": false,
+               "projectPath": "D:\\__VSCode_Projects\\cfmsContactTensor_dev"
+              }
+             ],
+             "collapsed": true,
+             "projectPath": "D:\\__VSCode_Projects\\cfmsCIPC_dev"
+            }
+           ],
+           "collapsed": false,
+           "projectPath": "D:\\__CFMS_Projects\\SFTF_DrapePrior_dev"
+          },
+          {
+           "id": "cfmsSXJacobian",
+           "url": "https://github.com/cfms-lab/cfmsSXJacobian_dev",
+           "kind": "high",
+           "note": "암시적 의복 시뮬레이션에서 굽힘 미분의 두 어림(길이를 상수로 둔 미분 · 블록 대칭 Jacobian)이 만드는 공유 모서리의 가짜 힘과 수치 끌림을, 조건 함수 한 줄에서 생성한 정확 · Gauss–Newton 미분과 견줘 식과 측정으로 밝힌 원고다(2026-11-12 착수, 2026-11-15 The Visual Computer 투고). 바탕은 힘 · Jacobian · SoA 코드를 C++ 로 만드는 생성기이고, 생성 커널은 cfmsDrape 엔진에 들어갔다.",
+           "brief": "굽힘 미분 어림이 만드는 가짜 모서리 힘·수치 끌림",
+           "title": "cfmsSXJacobian",
+           "status": "submitted",
+           "projectPath": "D:\\__CFMS_Projects\\cfmsSXJacobian_dev"
+          }
+         ],
+         "collapsed": false,
+         "projectPath": "D:\\__VSCode_Projects\\cfmsMiindo_dev\\drape"
+        },
+        {
+         "id": "cfmsAutoPlace_JCDE",
+         "dir": "v",
+         "url": "https://github.com/cfms-lab/cfmsAutoPlace2026_dev",
+         "kind": "medium",
+         "note": "cfmsAutoPlace2026_dev의 IJCST 패턴 논문 트랙.",
+         "brief": "IJCST 패턴 관점의 라벨 없는 패턴 배치·조립 유효성 검증",
+         "title": "cfmsAutoPlace_JCDE",
+         "status": "blocked",
+         "children": [],
+         "collapsed": false,
+         "projectPath": "D:\\__CFMS_Projects\\cfmsAutoPlace2026_dev"
+        }
+       ],
+       "collapsed": true,
+       "projectPath": "D:\\__VSCode_Projects\\cfmsMiindo_dev"
+      },
+      {
+       "id": "nf18t2n5",
+       "url": "https://github.com/cfms-lab/cfmsPINNDrape_dev",
+       "kind": "low",
+       "note": "그럴싸함. 의복추가 필요.",
+       "title": "cfmsPINNDrape",
+       "status": "blocked",
+       "children": [],
+       "collapsed": false,
+       "projectPath": "D:\\__VSCode_Projects\\cfmsPINNDrape_dev"
+      },
+      {
+       "id": "gx_pftf_drapeprior_viscull_kdop",
+       "url": "https://github.com/cfms-lab/PFTF_DrapePrior_VisCull_kDop_dev",
+       "kind": "none",
+       "note": "옷감의 좋은 시작 상태와 안전한 충돌 필터를 결합해 천 계산을 빠르게 하려는 새 연구선이다. (graph: SFTF_DrapePrior 보완 + PFTF_VisCull_kDop 확장)",
+       "brief": "드레이프 예측과 충돌 필터 결합 가속",
+       "title": "PFTF_DrapePrior_VisCull_kDop",
+       "status": "blocked",
+       "projectPath": "D:\\__PFTF_Projects(2026)\\PFTF_DrapePrior_VisCull_kDop_dev"
+      }
+     ],
+     "collapsed": false
+    },
+    {
+     "id": "nkrb7xj2",
+     "kind": "group",
+     "note": "",
+     "title": "이희란 교수님방",
+     "status": "",
+     "children": [
+      {
+       "id": "nowmyrt1",
+       "url": "https://github.com/cfms-lab/Tomo_Shell2026-dev",
+       "kind": "low",
+       "note": "draft2/3 폴더. 지언",
+       "title": "TomoSh4",
+       "status": "accepted",
+       "children": [
+        {
+         "id": "ny81ju21",
+         "url": "https://github.com/cfms-lab/Tomo_Shell2026-dev",
+         "kind": "low",
+         "note": "마네킨 특징점 찾기 개선",
+         "title": "TomoSh5",
+         "status": "accepted",
+         "children": [],
+         "projectPath": "D:\\__SFTF_Projects(2026)\\Tomo_Shell2026-dev"
+        }
+       ],
+       "collapsed": false,
+       "projectPath": "D:\\__SFTF_Projects(2026)\\Tomo_Shell2026-dev"
+      },
+      {
+       "id": "HIPDetect",
+       "url": "https://github.com/cfms-lab/cfmsHipDetect_dev",
+       "kind": "medium",
+       "note": "cfmsPINNCAD 에서 갈라져 나온 독립 논문. 평탄 구간 중앙 추정량이 LOSO 잔차 RMS 1.285 → 0.358 cm 로 9명 중 8명에서 표준 landmark 에 더 가깝고(부호검정 p 0.0195), 대조군이 더 평평해 ill-conditioning 이 발표된 한 규칙의 흠이 아니라 극값 기반 추출이라는 방식의 성질임을 보인다. IJCST 원고 3종·그림 5개·커버레터 완비, **2026-09-22 투고 완료**. held-out 0건·메시 11개(피험자 10명, 한 조사)가 남은 심사 위험.",
+       "brief": "엉덩이높이 기준점 — 극값은 못 찾고 평탄 구간 중앙은 찾는다",
+       "title": "cfmsHipDetect",
+       "status": "submitted",
+       "children": [
+        {
+         "id": "nokpy3z1",
+         "url": "https://github.com/cfms-lab/PFTF_Compression_dev",
+         "kind": "medium",
+         "note": "실제 상완밴드 의복압 측정과 독립 3D 검증을 닫으면 정량 보정축으로 선행 투고.",
+         "brief": "압박 의류의 압력을 방향별로 예측",
+         "title": "PFTF_Compression",
+         "status": "draft",
+         "children": [
+          {
+           "id": "ngi2vmc1",
+           "url": "https://github.com/cfms-lab/cfmsDrapeSCAN_dev",
+           "kind": "todo",
+           "note": "Gate 0 GO. 실 스캔 데이터·마네킹 파일럿 전이며 cfmsDrape/cfmsMiindo를 핵심 실행 기반으로 사용한다.",
+           "brief": "고정형·핸드헬드 스캔 패치를 물리 정합으로 결합하는 인체 계측 연구선",
+           "title": "cfmsDrapeSCAN",
+           "status": "blocked",
+           "children": [],
+           "projectPath": "D:\\__VSCode_Projects\\cfmsDrapeSCAN_dev"
+          }
+         ],
+         "collapsed": false,
+         "projectPath": "D:\\__PFTF_Projects(2026)\\PFTF_Compression_dev"
+        }
+       ],
+       "collapsed": false,
+       "projectPath": "D:\\__CFMS_Projects\\cfmsHipDetect_dev"
+      },
+      {
+       "id": "cfmsAutoPlace_IJCST",
+       "url": "https://github.com/cfms-lab/cfmsAutoPlace2026_dev",
+       "kind": "medium",
+       "note": "cfmsAutoPlace2026_dev의 CAD 논문 트랙.",
+       "brief": "의복 CAD 관점의 패널 신체 부위·전역 조립·초기 배치 추정",
+       "title": "cfmsAutoPlace_IJCST",
+       "status": "blocked",
+       "children": [
+        {
+         "id": "nq1owe91",
+         "url": "https://github.com/cfms-lab/cfmsAutoSew2026_dev",
+         "kind": "low",
+         "note": "1-click 반자동봉제. 드레이프 엉망임.",
+         "title": "cfmsAutoSew",
+         "status": "blocked",
+         "children": [],
+         "collapsed": false,
+         "projectPath": "D:\\__VSCode_Projects\\cfmsAutoSew2026_dev"
+        }
+       ],
+       "collapsed": false,
+       "projectPath": "D:\\__CFMS_Projects\\cfmsAutoPlace2026_dev"
+      },
+      {
+       "id": "nio1pg21",
+       "kind": "todo",
+       "note": "",
+       "title": "cfmsDrapeInverse",
+       "status": "draft",
+       "children": [],
+       "collapsed": false
+      }
+     ],
+     "collapsed": false
+    },
+    {
+     "id": "nffg4ou5",
+     "kind": "group",
+     "note": "",
+     "title": "은종현 교수님방",
+     "status": "",
+     "children": [
+      {
+       "id": "nc593kj6",
+       "url": "https://github.com/cfms-lab/cfmsDispersityKNN_Dev",
+       "kind": "low",
+       "note": "선빈. 2026-08",
+       "title": "cfmsDispersityKNN",
+       "status": "published",
+       "children": [
+        {
+         "id": "cfmsDispersityProp",
+         "url": "https://github.com/cfms-lab/cfmsDispersityProp_dev",
+         "kind": "high",
+         "note": "Microscopy and Microanalysis 투고(2026-11-05, MAM-26-327). 현미경 사진의 입자 분산도를 반복 가능하게 재는 절차 논문.",
+         "brief": "분산도 값을 반복 가능하게 재는 절차",
+         "title": "cfmsDispersityProp",
+         "status": "submitted",
+         "children": [
+          {
+           "id": "cfmsHMDispersity",
+           "url": "https://github.com/cfms-lab/cfmsHMDispersity_dev",
+           "kind": "high",
+           "note": "Journal of Microscopy 투고(2026-11-05, JMI-26-00455). 입자 분산 상태를 국소 질서와 공간 상관으로 보고하는 절차 논문.",
+           "brief": "조화함수 기반 다중척도 분산도",
+           "title": "cfmsHMDispersity",
+           "status": "submitted",
+           "projectPath": "D:\\__KIT_projects\\cfmsHMDispersity_dev"
+          }
+         ],
+         "collapsed": false,
+         "projectPath": "D:\\__KIT_projects\\cfmsDispersityProp_dev"
+        }
+       ],
+       "collapsed": false,
+       "projectPath": "D:\\__KIT_projects\\cfmsDispersityKNN_Dev"
+      },
+      {
+       "id": "PFTF_OrientCert",
+       "url": "https://github.com/cfms-lab/PFTF_OrientCert_dev",
+       "kind": "medium",
+       "note": "2026-11-01 통합편 — 옛 1편 AsymTensor(층 분할 탐색)와 2편 인증을 한 편으로. Computer-Aided Design 예정, 저자 박명진 · 은종현 · 설인환*",
+       "brief": "배향 점수 전역 최솟값의 인증(층 분할 탐색 포함)",
+       "title": "PFTF_OrientCert",
+       "status": "draft",
+       "projectPath": "D:\\__PFTF_Projects(2026)\\PFTF_OrientCert_dev"
+      },
+      {
+       "id": "nuzx6yz7",
+       "url": "https://github.com/cfms-lab/TSE_SEM2026_dev",
+       "kind": "low",
+       "note": "한국복합재료학회지 투고 2026-09-22 (은종현 교수 측 투고, 박명진·은종현*·설인환*, 접수번호 S-26-0085) → 1차 수정후 게재 → 2026-11-12 수정본 → 2026-11-12 게재가(원고번호 PAPER-26-081). 최종본 제출 남음.",
+       "title": "TSE_SEM1_Bezier",
+       "status": "accepted",
+       "children": [
+        {
+         "id": "n9ccnpv1",
+         "url": "https://github.com/cfms-lab/TSE_SEM2026_dev",
+         "kind": "low",
+         "note": "한국섬유공학회지 투고 2026-10-09 (학문후속세대논문상 트랙, 박명진·은종현*·설인환) → 2026-10-22 수정본(26M-10-043) → 2026-10-23 게재가. 최종본 제출 남음.",
+         "title": "TSE_SEM2_Tensor",
+         "status": "accepted",
+         "children": [
+          {
+           "id": "nggbas52",
+           "url": "https://github.com/cfms-lab/TSE_SEM2026_dev",
+           "kind": "low",
+           "note": "2027-04월호(교내과제결과물)",
+           "title": "TSE_SEM3_AutoTune",
+           "status": "draft",
+           "children": [],
+           "projectPath": "D:\\__KIT_projects\\TSE_SEM2026_dev\\draft3_AutoTune"
+          }
+         ],
+         "collapsed": false,
+         "projectPath": "D:\\__KIT_projects\\TSE_SEM2026_dev\\draft2_Tensor"
+        }
+       ],
+       "collapsed": false,
+       "projectPath": "D:\\__KIT_projects\\TSE_SEM2026_dev\\draft1_Bezier"
+      },
+      {
+       "id": "nzyk4gd6",
+       "url": "https://github.com/cfms-lab/PFTF_GFiberCT_dev",
+       "kind": "low",
+       "note": "두 겹 점데이터 응용분야?",
+       "brief": "떨어진 두 표면 분리로 위상 오류 감소",
+       "title": "PFTF_GFiberCT",
+       "status": "accepted",
+       "children": [],
+       "collapsed": false,
+       "projectPath": "D:\\__PFTF_Projects(2026)\\PFTF_GFiberCT_dev"
+      },
+      {
+       "id": "SFTF_Holonomy",
+       "url": "https://github.com/cfms-lab/SFTF_Holonomy_dev",
+       "kind": "high",
+       "note": "JCDE·IJMF 를 거쳐 Fibers and Polymers 에 투고했다(2026-11-03, FIPO-D-26-01939). 적합 파라미터 0개로 치수 기입된 반구 성형 실측 29점을 MAE 0.57° 로 맞힌다.",
+       "brief": "전단각은 망이 둘러싼 총 Gauss 곡률이라는 항등식",
+       "title": "SFTF_Holonomy",
+       "status": "submitted",
+       "children": [
+        {
+         "id": "nxt5kwi1",
+         "url": "https://github.com/cfms-lab/SFTF_Composite_dev",
+         "kind": "high",
+         "note": "게이트+상쇄 방지+라우팅 positive flagship. 공식 double-dome CAD와 독립 holdout을 닫고 투고/preprint.",
+         "brief": "복합재 섬유 방향 고려한 제작 방향",
+         "title": "SFTF_Composite",
+         "status": "draft",
+         "children": [],
+         "collapsed": false,
+         "projectPath": "D:\\__SFTF_Projects(2026)\\SFTF_Composite_dev"
+        }
+       ],
+       "collapsed": false,
+       "projectPath": "D:\\__SFTF_Projects(2026)\\SFTF_Holonomy_dev"
+      }
+     ],
+     "collapsed": false
+    },
+    {
+     "id": "nu2cia21",
+     "kind": "group",
+     "note": "",
+     "title": "건축/토목",
+     "status": "",
+     "children": [
+      {
+       "id": "nv1x2vl2",
+       "url": "https://github.com/cfms-lab/SFTF_UrbanTraffic_dev",
+       "kind": "low",
+       "note": "",
+       "brief": "도시 차량 흐름 방향으로 병목 탐지",
+       "title": "UrbanTraffic",
+       "status": "submitted",
+       "children": [
+        {
+         "id": "n01wecm2",
+         "url": "https://github.com/cfms-lab/SFTF_SewerPOC_dev",
+         "kind": "low",
+         "note": "토목?",
+         "brief": "하수관망 흐름 방향으로 관망 해석",
+         "title": "SewerPOC",
+         "status": "draft",
+         "children": [
+          {
+           "id": "nub29i31",
+           "url": "https://github.com/cfms-lab/ColdOndol_dev",
+           "kind": "low",
+           "note": "",
+           "brief": "온돌 냉방 중 숨은 에어컨 검출 한계",
+           "title": "ColdOndol1",
+           "status": "draft",
+           "children": [
+            {
+             "id": "n8d1t0y2",
+             "url": "https://github.com/cfms-lab/ColdOndol_dev",
+             "kind": "low",
+             "note": "",
+             "brief": "부하·이슬점만으로 냉방 배분 최적화",
+             "title": "ColdOndol2-Positioning",
+             "status": "draft",
+             "children": [
+              {
+               "id": "nhii2611",
+               "kind": "low",
+               "note": "",
+               "title": "ColdOndol3_Material",
+               "status": "draft",
+               "children": []
+              }
+             ],
+             "collapsed": false,
+             "projectPath": "D:\\__PFTF_Projects(2026)\\ColdOndol_dev\\docs"
+            }
+           ],
+           "collapsed": true,
+           "projectPath": "D:\\__PFTF_Projects(2026)\\ColdOndol_dev"
+          }
+         ],
+         "collapsed": true,
+         "projectPath": "D:\\__SFTF_Projects(2026)\\SFTF_SewerPOC_dev"
+        }
+       ],
+       "collapsed": false,
+       "projectPath": "D:\\__SFTF_Projects(2026)\\_SFTF_applications\\projects\\SFTF_UrbanTraffic_dev"
+      }
+     ],
+     "collapsed": false
+    },
+    {
+     "id": "jeon_room",
+     "kind": "group",
+     "note": "공저 후보 단계 — 볼트 coauthor_candidate",
+     "title": "전석진 교수님방",
+     "status": "",
+     "children": [
+      {
+       "id": "Jeon_DLPOrient",
+       "url": "https://github.com/cfms-lab/Jeon_DLPOrient_dev",
+       "kind": "todo",
+       "note": "값싸게 매긴 3D 프린팅 배향 순위가 실제 출력물의 물성 순위와 맞는지 재는 검증선. 착수 게이트 통과, 실측 대조 전.",
+       "brief": "배향 순위를 실물 출력물로 검증",
+       "title": "Jeon_DLPOrient",
+       "status": "blocked",
+       "projectPath": "D:\\__KIT_projects\\Jeon_DLPOrient_dev"
+      }
+     ],
+     "collapsed": false
+    },
+    {
+     "id": "n1078rc1",
+     "kind": "group",
+     "note": "",
+     "title": "방대석 교수님방",
+     "status": "published",
+     "children": [
+      {
+       "id": "pftf_mold_submission",
+       "url": "https://github.com/cfms-lab/PFTF_Mold_dev",
+       "kind": "medium",
+       "note": "solids4foam/OpenFOAM 독립 검증과 미분가능 melt-front 게이트가 닫혔다. Compression을 대체할 수 있는 정량 보정축.",
+       "brief": "금형 부품 수축량 예측해 오차 감소",
+       "title": "PFTF_Mold",
+       "status": "draft",
+       "children": [
+        {
+         "id": "n8t2x7d2",
+         "url": "https://github.com/cfms-lab/SFTF_InjMold_dev",
+         "kind": "medium",
+         "note": "",
+         "brief": "사출 금형 흐름으로 결함 적은 설계",
+         "title": "InjectionMold",
+         "status": "draft",
+         "children": [],
+         "collapsed": false,
+         "projectPath": "D:\\__SFTF_Projects(2026)\\SFTF_InjMold_dev"
+        }
+       ],
+       "collapsed": false,
+       "projectPath": "D:\\__PFTF_Projects(2026)\\_PFTF_applications\\projects\\PFTF_Mold_dev"
+      }
+     ],
+     "collapsed": false
+    },
+    {
+     "id": "np282z71",
+     "kind": "group",
+     "note": "",
+     "title": "기타",
+     "status": "published",
+     "children": [
+      {
+       "id": "nt767xg6",
+       "kind": "group",
+       "note": "",
+       "title": "전기/전자",
+       "children": [
+        {
+         "id": "nd8ctbq4",
+         "url": "https://github.com/cfms-lab/SFTF_PDNElectric_dev",
+         "kind": "low",
+         "note": "",
+         "brief": "전원망 전압 불안정 위치 탐지",
+         "title": "PDNElectric",
+         "status": "draft",
+         "children": [
+          {
+           "id": "n8q2k963",
+           "url": "https://github.com/cfms-lab/SFTF_ThermalChip_dev",
+           "kind": "medium",
+           "note": "",
+           "brief": "칩 열 배출 방향 찾아 과열 감소",
+           "title": "ThermalChip",
+           "status": "draft",
+           "children": [
+            {
+             "id": "nca3mrq1",
+             "url": "https://github.com/cfms-lab/SFTF_BatteryThermal_dev",
+             "kind": "low",
+             "note": "",
+             "brief": "배터리 열 집중부 찾아 냉각 설계",
+             "title": "BatteryThermal",
+             "status": "draft",
+             "children": [],
+             "projectPath": "D:\\__SFTF_Projects(2026)\\_SFTF_applications\\projects\\SFTF_BatteryThermal_dev"
+            }
+           ],
+           "collapsed": false,
+           "projectPath": "D:\\__SFTF_Projects(2026)\\_SFTF_applications\\projects\\SFTF_ThermalChip_dev"
+          }
+         ],
+         "collapsed": false,
+         "projectPath": "D:\\__SFTF_Projects(2026)\\_SFTF_applications\\projects\\SFTF_PDNElectric_dev"
+        }
+       ],
+       "collapsed": false
+      },
+      {
+       "id": "n89bqgy7",
+       "kind": "group",
+       "note": "",
+       "title": "공장 설계",
+       "children": [
+        {
+         "id": "no1b3vw4",
+         "url": "https://github.com/cfms-lab/SFTF_WarehouseAGV_dev",
+         "kind": "low",
+         "note": "",
+         "brief": "창고 로봇 경로 최적화로 운반 단축",
+         "title": "WarehouseAGV",
+         "status": "draft",
+         "children": [
+          {
+           "id": "nbarkbz3",
+           "url": "https://github.com/cfms-lab/SFTF_DataCenterTraffic_dev",
+           "kind": "low",
+           "note": "",
+           "brief": "데이터센터 작업 흐름으로 지연 감소",
+           "title": "DataCenterTraffic",
+           "status": "draft",
+           "children": [],
+           "projectPath": "D:\\__SFTF_Projects(2026)\\_SFTF_applications\\projects\\SFTF_DataCenterTraffic_dev"
+          }
+         ],
+         "collapsed": false,
+         "projectPath": "D:\\__SFTF_Projects(2026)\\_SFTF_applications\\projects\\SFTF_WarehouseAGV_dev"
+        }
+       ],
+       "collapsed": false
+      }
+     ],
+     "collapsed": true
+    }
+   ],
+   "collapsed": false
+  },
+  "links": [
+   {
+    "to": "n2dzarb3",
+    "from": "nptj5211",
+    "type": "engine",
+    "label": "measured by"
+   },
+   {
+    "to": "njkskwe4",
+    "from": "nptj5211",
+    "type": "engine",
+    "label": "integrated M1"
+   },
+   {
+    "to": "nf18t2n5",
+    "from": "nptj5211",
+    "type": "engine",
+    "label": "warm-start hook"
+   },
+   {
+    "to": "nokpy3z1",
+    "from": "nptj5211",
+    "type": "engine",
+    "label": "contact solver"
+   },
+   {
+    "to": "nxt5kwi1",
+    "from": "nptj5211",
+    "type": "engine",
+    "label": "contact solver"
+   },
+   {
+    "to": "cfmsAutoPlace_JCDE",
+    "from": "nptj5211",
+    "type": "engine",
+    "label": "CAD 물리 검증"
+   },
+   {
+    "to": "cfmsAutoPlace_IJCST",
+    "from": "nptj5211",
+    "type": "engine",
+    "label": "패턴 물리 검증"
+   },
+   {
+    "to": "tomo_sftf",
+    "from": "sftf",
+    "type": "engine",
+    "label": "메시 분할"
+   },
+   {
+    "to": "nf18t2n5",
+    "from": "nq1owe91",
+    "type": "engine",
+    "label": "초기배치 이완"
+   },
+   {
+    "to": "Jeon_DLPOrient",
+    "from": "nafefnc3",
+    "type": "engine",
+    "label": "순위 검증"
+   },
+   {
+    "to": "Jeon_DLPOrient",
+    "from": "ny0tqz74",
+    "type": "engine",
+    "label": "배향 순위"
+   },
+   {
+    "to": "cfmsDispersityProp",
+    "from": "nc593kj6",
+    "type": "engine",
+    "label": "측정 절차"
+   },
+   {
+    "to": "nkytwti1",
+    "from": "ny0tqz74",
+    "type": "engine",
+    "label": "계보"
+   },
+   {
+    "to": "gx_pftf_drapeprior_viscull_kdop",
+    "from": "nh2ivjs1",
+    "type": "engine",
+    "label": "계보"
+   },
+   {
+    "to": "nio1pg21",
+    "from": "tomo_sftf",
+    "type": "engine",
+    "label": "계보"
+   },
+   {
+    "to": "PFTF_OrientCert",
+    "from": "nafefnc3",
+    "type": "engine",
+    "label": "지지 점수 시험"
+   }
+  ],
+  "title": "CFMS 프로젝트 관계도 2026",
+  "showRel": false,
+  "version": 1,
+  "dedupVersion": "2026-08-11",
+  "jeonRoomVersion": "2026-09-19",
+  "linkFillVersion": "2026-08-20c",
+  "graphMetaVersion": "2026-08-11b",
+  "graphNodesVersion": "2026-08-11b",
+  "orientCertVersion": "2026-10-24",
+  "sxJacobianVersion": "2026-11-14",
+  "hullRegroupVersion": "2026-10-31",
+  "partialCostVersion": "2026-10-24",
+  "vaultGradesVersion": "2026-09-01c",
+  "vaultStagesVersion": "2026-09-22",
+  "hmDispersityVersion": "2026-09-23c",
+  "tomoShTracksVersion": "2026-09-21b",
+  "bezierSeedFixVersion": "2026-10-23",
+  "holonomySplitVersion": "2026-09-07",
+  "leeRoomGatherVersion": "2026-09-11",
+  "linkDirectionVersion": "2026-09-07",
+  "statusCleanupVersion": "2026-08-22",
+  "bezierAcceptedVersion": "2026-11-12",
+  "choMoldWarpDICVersion": "2026-09-22",
+  "drapeOverprintVersion": "2026-11-21",
+  "gfiberCtRenameVersion": "2026-09-11",
+  "hipDetectMergeVersion": "2026-10-23",
+  "hipDetectSplitVersion": "2026-09-10",
+  "submissionPlanVersion": "2026-08-13",
+  "tensorAcceptedVersion": "2026-10-23",
+  "autoTunePathFixVersion": "2026-10-23",
+  "tensorSubmittedVersion": "2026-10-09",
+  "tomoSh4AcceptedVersion": "2026-11-09",
+  "tomoSh5AcceptedVersion": "2026-11-08",
+  "asymTensorRetireVersion": "2026-11-01",
+  "dispersityGradesVersion": "2026-09-25",
+  "drapeEngineLinksVersion": "2026-08-28",
+  "gfiberCtAcceptedVersion": "2026-11-11",
+  "tomoSftfAcceptedVersion": "2026-10-07",
+  "choMoldWarpRetireVersion": "2026-10-27",
+  "eunRoomAsymTensorVersion": "2026-09-16",
+  "tomoSftfPublishedVersion": "2026-11-05",
+  "drapeCompositeLinkVersion": "2026-08-28",
+  "dispersityKnnRenameVersion": "2026-09-24",
+  "drapePriorPublishedVersion": "2026-10-31",
+  "dispersityPropRenameVersion": "2026-09-19b",
+  "researchOptimizeRetireVersion": "2026-09-18"
+ }
+}

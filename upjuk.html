@@ -335,13 +335,27 @@ async function api(path,opts={}){
   const txt=await res.text(); return txt?JSON.parse(txt):null;
 }
 
+/* ===== 예비값 (2026-11-21, 사용자 지시 — 4단계 「파일에 구운 값은 표를 못 읽을 때의 예비값」) =====
+   업적 표를 못 읽으면(장애 · 일시 중지 · 10초 응답 없음) scripts/bake-fallbacks.mjs 가 굳혀 둔 fallback/upjuk-published.json
+   (출판 업적만, 비로그인 화면과 같은 칸 — 메모 · PDF 이름은 없다)을 보여 준다. 이 페이지는 표에 쓰지 않으므로 예비값도 보기만 한다. */
+const LOAD_TIMEOUT_MS=10000;   // 업적 10초 · 노드 5초 — 응답 없는 표 앞에서 예비 목록까지 길어야 15초
+function withTimeout(p,ms,what){ let t; return Promise.race([p,new Promise((_,no)=>{ t=setTimeout(()=>no(new Error(what+' 응답 없음 ('+Math.round(ms/1000)+'초)')),ms); })]).finally(()=>clearTimeout(t)); }
+async function loadFallbackPapers(){
+  try{
+    const res=await withTimeout(fetch('fallback/upjuk-published.json',{cache:'no-cache'}),LOAD_TIMEOUT_MS,'fallback/upjuk-published.json');
+    if(!res.ok) return null;
+    const j=await res.json();
+    return j&&Array.isArray(j.rows)&&j.rows.length?j:null;
+  }catch(e){ return null; }
+}
+
 /* ===== 데이터 로드 ===== */
 async function reload(){ await loadNodes(); await loadPapers(); }
 // graph.html / mindmap.html 과 공유하는 프로젝트 노드. grade='ToDo' 인 것을
 // TODO 카테고리로 보여준다. 테이블이 아직 없어도 논문 기능은 그대로 동작한다.
 async function loadNodes(){
   // 2026-09-12: project_nodes 대신 research_outputs 의 kind='node'. 같은 표의 다른 필터다.
-  try{ NODES=await api('/rest/v1/research_outputs?kind=eq.node&select=*&order=id',{headers:authHeaders(true)})||[]; }
+  try{ NODES=await withTimeout(api('/rest/v1/research_outputs?kind=eq.node&select=*&order=id',{headers:authHeaders(true)}),LOAD_TIMEOUT_MS/2,'research_outputs')||[]; }   // 노드는 ToDo 분류 · 프로젝트 목록용이라 절반만 기다린다
   catch(e){ NODES=[]; }
 }
 /* 2026-10-16 사용자 지시: 비로그인 방문자에게서 감추는 것은 ToDo 하나다(draft 업적은 보인다).
@@ -368,8 +382,8 @@ async function loadPapers(){
        화면에서 한 번 더 거른다. stage 가 빈 행은 출판으로 친다(파이와 같은 규칙). ⚠️ 표의 anon 읽기 정책은 그대로라
        API 를 직접 부르면 여전히 보인다 — 막으려면 RLS 를 바꿔야 한다. */
     const publishedOnly=isLoggedIn()?'':'&or=(stage.eq.published,stage.is.null)';
-    const data=await api('/rest/v1/research_outputs?kind=eq.output&select=*'+publishedOnly,
-      {headers:authHeaders(true)});
+    const data=await withTimeout(api('/rest/v1/research_outputs?kind=eq.output&select=*'+publishedOnly,
+      {headers:authHeaders(true)}),LOAD_TIMEOUT_MS,'research_outputs');
     HAS_PROJECT_COL=true;                     // research_outputs 는 project_id 를 늘 가진다
     PAPERS=data.map(normalizePaper);
     PAPERS=PAPERS.filter(p=>!HIDDEN_IDS.has(p.ID)&&!HIDDEN_CATEGS.has(p.CATEG));   // 감춘 기록·분류 (위 HIDDEN_*)
@@ -377,6 +391,14 @@ async function loadPapers(){
     document.getElementById("banner").style.display="none";
     initUI();
   }catch(e){
+    /* 예비값 — 굳혀 둔 출판 업적 판(위 loadFallbackPapers). 감춘 기록 · 분류와 「출판된 것만」 규칙은 표에서 읽을 때와 같다. */
+    const fb=await loadFallbackPapers();
+    if(fb){
+      PAPERS=fb.rows.map(normalizePaper).filter(p=>!HIDDEN_IDS.has(p.ID)&&!HIDDEN_CATEGS.has(p.CATEG)&&(p.STAGE||'published')==='published');
+      showBanner("업적 표를 읽지 못해 "+fb.bakedAt+" 판 예비 목록(출판된 업적)을 보여 줍니다. 새로고침하면 다시 읽습니다. ("+e.message.slice(0,80)+")");
+      initUI();
+      return;
+    }
     showBanner("데이터를 불러오지 못했습니다. research_outputs 표가 있는지 확인하세요. ("+e.message.slice(0,120)+")");
     document.getElementById("countInfo").textContent="";
   }

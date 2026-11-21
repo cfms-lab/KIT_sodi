@@ -2906,21 +2906,36 @@ if (window.cfmsTodoReady) window.cfmsTodoReady.then(ok => {
     return moved;
   }
 
+  // 공유 배치를 받았나 — 못 받았으면 화면의 좌표는 파일의 POS(예비값)다. 예비값은 보여 주기만 하고 표에 쓰지 않는다
+  // (2026-11-21, 사용자 지시 — 4단계). 응답이 없는 표는 10초까지만 기다린다.
+  let loaded = false;
   async function load() {
     try {
-      const res = await fetch(REST + '?select=id,x,y', { headers: { apikey: key, Authorization: 'Bearer ' + key } });
-      if (!res.ok) return;                    // 표가 없거나 권한이 없다 — 파일의 POS 로 그린다
+      const res = await Promise.race([
+        fetch(REST + '?select=id,x,y', { headers: { apikey: key, Authorization: 'Bearer ' + key } }),
+        new Promise((_, no) => setTimeout(() => no(new Error('graph_positions 응답 없음')), 10000)),
+      ]);
+      if (!res.ok) return false;              // 표가 없거나 권한이 없다 — 파일의 POS 로 그린다
       const rows = await res.json();
-      if (!Array.isArray(rows) || !rows.length) return;
+      if (!Array.isArray(rows)) return false;
+      loaded = true;
+      if (!rows.length) return true;
       rows.forEach(r => { if (NODE_BY_ID[r.id]) SHARED[r.id] = { x: r.x, y: r.y }; });
       if (applyShared(false)) network.redraw();
       const mine = Object.keys(savedPos).length;
       say('공유 배치 ' + rows.length + '개' + (mine ? (' · 내 미저장 ' + mine + '개') : ''));
-    } catch (e) { /* 오프라인 — 조용히 파일 값으로 */ }
+      return true;
+    } catch (e) { return false; /* 오프라인 — 조용히 파일 값으로 */ }
   }
 
   async function save() {
     if (!loggedIn()) { askLogin(); return; }
+    // 공유 배치를 못 받은 채 저장하면 끌지 않은 노드까지 파일 좌표로 표를 덮는다 — 먼저 다시 받아 보고, 못 받으면 멈춘다.
+    if (!loaded) say('공유 배치를 다시 받는 중…');
+    if (!loaded && !(await load())) {
+      say('공유 배치를 받지 못해 저장하지 않았습니다 — 지금 저장하면 다른 노드까지 파일 좌표로 덮어씁니다. 새로고침 뒤 다시 해 주세요.', false);
+      return;
+    }
     const ids = RAW_NODES.map(n => n.id);
     const all = network.getPositions(ids);
     const rows = ids.filter(id => all[id]).map(id => ({

@@ -58,6 +58,13 @@ Supabase `todo_lines` 로 올리고, `todo.js` 는 그 표를 받아 오는 로�
 문서 `dismissedTableNodes`(그 전 것은 `TABLE_NODE_SEED_DISMISSED`)가 기억한다. 생성기 `HIDDEN_NODE_IDS` 노드에 부모 칸이 있으면
 발행기가 멈춘다. 절차는 [docs/homepage-update-runbook.md](docs/homepage-update-runbook.md) ⑤ 「새 노드」, 표 칸은 `schema_node_parent.sql`.
 
+## 예비값 — 표를 못 읽을 때
+
+2026-11-21 부터 graph · mindmap · upjuk · ToDo 줄은 표(Supabase)를 못 읽으면(장애 · 일시 중지 · 10초 응답 없음) **예비값**으로 그린다 —
+graph 는 파일에 구운 값, 나머지는 `fallback/*.json`. 예비값은 표에 다시 쓰지 않는다(mindmap 은 읽기 전용, graph 「노드 저장」은 공유 배치를
+받기 전에는 멈춘다). 예비값을 지금 표로 굳히는 일은 가끔 `node scripts/bake-fallbacks.mjs`(`--check` 로 먼저 본다) 뒤 `fallback/` 커밋이고,
+손으로 고치지 않는다. 화면 시험은 `node scripts/check-offline.mjs`(크롬). 절차는 [docs/homepage-update-runbook.md](docs/homepage-update-runbook.md) ⑥.
+
 ## 공저자 색 · 훌(그룹) 재편
 
 upjuk 저자 이름 배경(2026-11-13~, 전에는 행 배경)·portfolio 공저자 이름 배경·graph 훌 면색·mindmap 노드 면색은

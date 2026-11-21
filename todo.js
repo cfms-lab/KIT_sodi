@@ -14,8 +14,10 @@
  * 키는 노트 · 트랙 이름이다. 값은 한 줄이고, 빈 문자열("")은 「할 일 없음」이다.
  *
  * 받는 순서 — 지난번에 받은 줄(localStorage)을 먼저 깔고, 표를 다시 받아 덮는다. 받으면 `cfms-todo` 이벤트를
- * 쏘고 `window.cfmsTodoReady` 가 true 로 풀린다(실패하면 false — 그때는 지난번 줄, 그것도 없으면 옛 문장이다).
- * 화면은 그 뒤에 ToDo 칸을 다시 그린다.
+ * 쏘고 `window.cfmsTodoReady` 가 true 로 풀린다. 표를 못 읽으면(장애 · 일시 중지 · 10초 응답 없음) 지난번 줄을
+ * 그대로 쓰고 false 로 풀린다. 지난번 줄도 없으면 굳혀 둔 예비 줄 fallback/todo-lines.json(scripts/bake-fallbacks.mjs
+ * 가 쓴다 — 2026-11-21 4단계 「파일에 구운 값은 표를 못 읽을 때의 예비값」)을 깔고 "fallback" 으로 풀린다. 그것도
+ * 없으면 옛 문장이다. 화면은 풀린 값이 참이면 ToDo 칸을 다시 그린다.
  */
 (function () {
   const TODO = {};
@@ -70,8 +72,27 @@
   const url = normUrl(lsGet("cfms_url") || BAKED_URL);
   const key = (lsGet("cfms_key") || BAKED_KEY).trim();
 
+  /* 응답이 없는 표(일시 중지된 Supabase 등)를 끝없이 기다리지 않는다. 가드는 window.CFMS_TABLE_TIMEOUT_MS 로 줄여 시험한다. */
+  const TIMEOUT_MS = Number(window.CFMS_TABLE_TIMEOUT_MS) || 10000;
+  const timeout = (promise, what) => new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(what + " 응답 없음")), TIMEOUT_MS);
+    promise.then(v => { clearTimeout(timer); resolve(v); }, e => { clearTimeout(timer); reject(e); });
+  });
+  /* 예비 줄은 표도 지난번 줄도 없을 때만 깐다 — 지난번 줄이 있으면 그쪽이 대개 더 새롭고, 표에서 지운 줄이 되살아나면 안 된다. */
+  function fallback() {
+    if (known || typeof fetch !== "function") return Promise.resolve(false);
+    return timeout(fetch("fallback/todo-lines.json"), "fallback/todo-lines.json")
+      .then(res => { if (!res.ok) throw new Error("fallback " + res.status); return res.json(); })
+      .then(data => {
+        if (!data || !Array.isArray(data.rows) || !data.rows.length) return false;
+        fill(data.rows);
+        return "fallback";
+      })
+      .catch(() => false);
+  }
+
   window.cfmsTodoReady = (typeof fetch === "function"
-    ? fetch(url + "/rest/v1/todo_lines?select=id,todo", { headers: { apikey: key, Authorization: "Bearer " + key } })
+    ? timeout(fetch(url + "/rest/v1/todo_lines?select=id,todo", { headers: { apikey: key, Authorization: "Bearer " + key } }), "todo_lines")
     : Promise.reject(new Error("fetch 없음")))
     .then(res => { if (!res.ok) throw new Error("todo_lines " + res.status); return res.json(); })
     .then(rows => {
@@ -81,5 +102,5 @@
       try { window.dispatchEvent(new CustomEvent("cfms-todo", { detail: { count: rows.length } })); } catch (e) {}
       return true;
     })
-    .catch(e => { try { console.warn("todo.js: ToDo 줄을 받지 못했다 —", e && e.message); } catch (_) {} return false; });
+    .catch(e => { try { console.warn("todo.js: ToDo 줄을 받지 못했다 —", e && e.message); } catch (_) {} return fallback(); });
 })();

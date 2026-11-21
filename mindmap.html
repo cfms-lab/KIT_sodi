@@ -177,7 +177,7 @@
 <script src="stages.js"></script>
 <script>
 /* ====================== 버전 (배포 확인용) ====================== */
-const APP_VERSION='v2026-11-21-table-nodes';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
+const APP_VERSION='v2026-11-21-fallback';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
 
 /* ====================== 기본 데이터 (첫 실행 시드) ====================== */
 const DEFAULT_DATA = /*DATA_START*/{"version":1,"title":"CFMS 프로젝트 관계도 2026","showRel":true,"root":{"id":"root","title":"CFMS 연구실 2026","kind":"root","note":"두 워크스페이스의 세부 프로젝트 관계도","children":[{"id":"sftf","title":"__SFTF_Projects(2026)","kind":"group","note":"3D 프린팅 Support Flow Tensor Field 연구군 (D:\\__SFTF_Projects(2026))","children":[{"id":"tomo_sftf","title":"Tomo_SFTF_dev","kind":"core","status":"active","note":"SFTF 본체: 빌드방향 후보 생성(coarse-to-refine) + TOMO_CPU/GPU 엔진(DLL). 표준 템플릿의 기원."},{"id":"clustering","title":"SFTF_Clustering_dev","kind":"app","status":"active","note":"면별 SFTF 특징 → 출판지향 메쉬 분할(clustering). 한국섬유공학회지 투고."},{"id":"derivative","title":"SFTF_Derivative_dev","kind":"app","status":"active","note":"미분가능 SFTF 손실항 + GNN + 경사기반 빌드방향 최적화. TOMO 교차검증."},{"id":"composite","title":"SFTF_Composite_dev","kind":"app","status":"stub","note":"복합재 적용 (신규 스캐폴드)."},{"id":"injmold","title":"SFTF_InjMold_dev","kind":"app","status":"stub","note":"사출성형 적용 (신규 스캐폴드)."}]},{"id":"vscode","title":"__VSCode_Projects","kind":"group","note":"의복 CAD·영상계측·랩 웹앱·인프라 (D:\\__VSCode_Projects)","children":[{"id":"cadsuite","title":"의복 CAD 스위트","kind":"subgroup","note":"Clo3D 오픈소스 대안","children":[{"id":"cfmscad","title":"cfmsCAD2026_dev","kind":"app","status":"active","note":"3D 의복 CAD 에디터 (UI/패턴)."},{"id":"cfmsdrape","title":"cfmsDrape2026_dev","kind":"app","status":"active","note":"암시적 옷감 드레이프 솔버(DLL). SCAD/GarmentCode 입력, 인체 충돌·자기충돌."},{"id":"cfmssew","title":"cfmsSew2026_dev","kind":"app","status":"active","note":"2D 패턴 봉제대응 자동인식(휴리스틱→GNN). CAD/Drape에 병합 예정."},{"id":"cfmsshared","title":"cfmsShared2026_dev","kind":"infra","status":"infra","note":"CAD↔Drape 인터페이스 단일진실(contract/messages) 공유 git 채널."}]},{"id":"measure","title":"영상 계측","kind":"subgroup","children":[{"id":"dispersity","title":"cfmsDispersityKNN_Dev","kind":"app","status":"active","note":"광학현미경 입자 분산도 정량화(정적 kNN 에너지). C++Builder(Baraff 클로스심) 포팅."},{"id":"sem","title":"TSE_SEM2026_dev","kind":"app","status":"active","note":"SEM 섬유 영상 정량화(반지름·배향·기공) + metaball 3D 재구성."}]},{"id":"webapps","title":"랩 웹앱 (cfms-lab/KIT_sodi · Supabase)","kind":"subgroup","children":[{"id":"upjuk","title":"논문관리 (upjuk)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/upjuk.html","note":"업적 리스트 CRUD + PDF. draft는 RLS로 비로그인 숨김."},{"id":"timetable","title":"수업시간표 (TimeTable)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/timetable.html","note":"학기별 시간표 드래그 편성."},{"id":"jobgis","title":"취업현황 (JobGIS)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/jobgis.html","note":"졸업생 취업처 지도."},{"id":"mindmap","title":"이 관계도 (Mindmap)","kind":"web","status":"active","note":"프로젝트 관계도 (이 페이지, 로그인 전용)."}]},{"id":"infra","title":"인프라/템플릿","kind":"subgroup","children":[{"id":"template","title":"__vscode_AI_template","kind":"infra","status":"infra","note":"표준 프로젝트 템플릿(코드+논문, uv/xelatex/훅). 모든 *_dev의 기반. Tomo_SFTF에서 기원."},{"id":"hooks","title":"__클로드코드_훅설정","kind":"infra","status":"infra","note":"Claude Code 전역 훅 설정."}]}]}]},"links":[{"from":"tomo_sftf","to":"clustering","label":"코어 분리"},{"from":"tomo_sftf","to":"derivative","label":"코어 재사용"},{"from":"tomo_sftf","to":"composite","label":"파생"},{"from":"tomo_sftf","to":"injmold","label":"파생"},{"from":"clustering","to":"derivative","label":"코드 재사용"},{"from":"tomo_sftf","to":"template","label":"템플릿 기원"},{"from":"cfmsshared","to":"cfmscad","label":"contract"},{"from":"cfmsshared","to":"cfmsdrape","label":"contract"},{"from":"cfmssew","to":"cfmscad","label":"병합 예정"},{"from":"cfmssew","to":"cfmsdrape","label":"병합 예정"},{"from":"derivative","to":"cfmsdrape","label":"드레이프 응용 연계"},{"from":"dispersity","to":"cfmsdrape","label":"클로스심 계보"}]}/*DATA_END*/;
@@ -2424,15 +2424,36 @@ async function overlayFromTable(){
 
 /* ====================== 클라우드 저장/불러오기 ====================== */
 const DOC_ID='cfms';
+/* 예비값 (2026-11-21, 사용자 지시 — 4단계 「파일에 구운 값은 표를 못 읽을 때의 예비값」). 클라우드 문서를 못 읽으면(장애 ·
+   일시 중지 · 10초 응답 없음) scripts/bake-fallbacks.mjs 가 굳혀 둔 fallback/mindmap-doc.json 을, 그것도 없으면 기본 관계도
+   (DEFAULT_DATA + 마이그레이션)를 보여 준다. 예비 관계도는 **읽기 전용**이다 — 그대로 저장하면 손으로 다듬은 클라우드 문서를
+   옛 판으로 덮어쓴다(시험해 보니 97개짜리 문서가 50개짜리 기본 관계도로 덮였다). 다시 읽는 데 성공해야 저장한다.
+   LOAD_SEQ — 세션이 끊겨 api() 가 logout() 을 부르면 읽기가 둘 겹친다. 나중에 시작한 읽기만 화면을 바꾼다. */
+let DOC_LOADED=false, DOC_SOURCE='default', READONLY_WARNED=false, LOAD_SEQ=0;
+const LOAD_TIMEOUT_MS=10000;
+function withTimeout(p,ms,what){ let t; return Promise.race([p,new Promise((_,no)=>{ t=setTimeout(()=>no(new Error(what+' 응답 없음 ('+Math.round(ms/1000)+'초)')),ms); })]).finally(()=>clearTimeout(t)); }
+async function loadFallbackDoc(){
+  try{
+    const res=await withTimeout(fetch('fallback/mindmap-doc.json',{cache:'no-cache'}),LOAD_TIMEOUT_MS,'fallback/mindmap-doc.json');
+    if(!res.ok) return null;
+    const j=await res.json();
+    return j&&j.data&&j.data.root&&validate(j.data).ok?j:null;
+  }catch(e){ return null; }
+}
 function setSaveState(t){ const e=document.getElementById('saveState'); if(e) e.textContent=t; }
 let saveTimer;
 function scheduleSave(){ setSaveState('편집 중…'); clearTimeout(saveTimer); saveTimer=setTimeout(()=>saveDoc(true),1200); }
 async function loadDoc(){
+  const seq=++LOAD_SEQ;
+  DOC_LOADED=false;
   try{
-    const rows=await api('/rest/v1/mindmaps?id=eq.'+DOC_ID+'&select=data',{headers:authHeaders(true)});
+    const rows=await withTimeout(api('/rest/v1/mindmaps?id=eq.'+DOC_ID+'&select=data',{headers:authHeaders(true)}),LOAD_TIMEOUT_MS,'mindmaps');
+    if(seq!==LOAD_SEQ) return;
     let created=false;
     if(rows&&rows.length&&rows[0].data){ DATA=rows[0].data; }
-    else { DATA=JSON.parse(JSON.stringify(DEFAULT_DATA)); created=true; toast('기본 관계도를 클라우드에 생성했습니다.'); }
+    /* 문서가 비어 보이면 권한 · 장애일 때가 많다 — 예전처럼 기본 관계도로 조용히 덮지 않고, 로그인한 사람에게 물은 뒤에만 만든다. */
+    else if(isLoggedIn()&&confirm('클라우드에 관계도 문서가 없습니다. 기본 관계도로 새로 만들까요?')){ DATA=JSON.parse(JSON.stringify(DEFAULT_DATA)); created=true; toast('기본 관계도를 클라우드에 생성했습니다.'); }
+    else throw new Error('클라우드 관계도 문서가 비어 있습니다');
     const planMigrated=applySubmissionPlan20260806(DATA);
     const graphMigrated=applyGraphNodes20260811(DATA);
     const dedupMigrated=applyDedup20260811(DATA);
@@ -2476,21 +2497,39 @@ async function loadDoc(){
     const sxJacobianMigrated=applySXJacobian20261114(DATA);
     const drapeOverprintMigrated=applyDrapeOverprint20261121(DATA);
     const kindsMigrated=normalizeKinds(DATA);
+    DOC_LOADED=true; DOC_SOURCE='cloud'; READONLY_WARNED=false;
+    { const okBanner=document.getElementById('banner'); if(okBanner) okBanner.style.display='none'; }
     showRel=DATA.showRel!==false; document.getElementById('relBtn').textContent='관계선 '+(showRel?'✓':'✕');
     sel=null; render(); renderEdit(); fitView(); setSaveState('');
     if(created||planMigrated||graphMigrated||dedupMigrated||metaMigrated||linkMigrated||statusMigrated||drapeMigrated||gradesMigrated||directionMigrated||holonomyMigrated||hipDetectMigrated||leeRoomMigrated||gfiberCtMigrated||eunRoomMigrated||researchOptimizeMigrated||jeonRoomMigrated||dispersityPropMigrated||tomoShMigrated||vaultStagesMigrated||choMoldWarpMigrated||hmDispersityMigrated||dispersityKnnMigrated||dispersityGradesMigrated||tomoSftfAcceptedMigrated||drapePriorPublishedMigrated||tensorSubmittedMigrated||hipDetectMergeMigrated||tensorAcceptedMigrated||bezierSeedMigrated||autoTunePathMigrated||partialCostMigrated||orientCertMigrated||choMoldWarpRetireMigrated||hullRegroupMigrated||asymTensorRetireMigrated||tomoSftfPublishedMigrated||tomoSh5AcceptedMigrated||tomoSh4AcceptedMigrated||gfiberCtAcceptedMigrated||bezierAcceptedMigrated||sxJacobianMigrated||drapeOverprintMigrated||kindsMigrated) await saveDoc(true);
   }catch(e){
+    if(seq!==LOAD_SEQ) return;
     const b=document.getElementById('banner'); b.style.display='block';
     if(/relation|does not exist|42P01|PGRST205|404/i.test(e.message))
       b.textContent='mindmaps 테이블이 없습니다. Supabase에서 enable_rls_mindmaps.sql 을 먼저 실행하세요.';
     else if(!isLoggedIn() && /401|403|PGRST301|permission denied/i.test(e.message))
       b.textContent='공개 열람 권한이 없습니다. Supabase에서 enable_rls_mindmaps.sql 을 다시 실행해 anon SELECT 정책을 적용하세요.';
     else b.textContent='데이터를 불러오지 못했습니다: '+e.message.slice(0,140);
+    /* 예비값 — 이 페이지에서 아직 클라우드 문서를 한 번도 못 읽었으면(기본 관계도 상태) 굳혀 둔 판으로 바꾼다.
+       한 번 읽은 뒤 다시 읽기만 실패했으면 화면의 문서를 그대로 둔다. 어느 쪽이든 다시 읽을 때까지 저장하지 않는다. */
+    if(DOC_SOURCE==='default'){
+      const fb=await loadFallbackDoc();
+      if(seq!==LOAD_SEQ) return;
+      if(fb){ DATA=fb.data; DOC_SOURCE='fallback'; b.textContent+=' — '+fb.bakedAt+' 판 예비 관계도를 보여 줍니다.'; }
+    }
+    b.textContent+=' 읽기 전용입니다(고친 내용은 저장되지 않습니다). 새로고침하면 다시 읽습니다.';
     applyJeonRoom20260919(DATA); applyDispersityPropRename20260919(DATA); applyTomoShTracks20260921(DATA); applyVaultStages20260922(DATA); applyChoMoldWarpDIC20260922(DATA); applyHMDispersity20260923(DATA); applyDispersityKNNRename20260924(DATA); applyDispersityGrades20260925(DATA); applySubmissionPlan20260806(DATA); applyGraphNodes20260811(DATA); applyDedup20260811(DATA); applyGraphMeta20260811(DATA); applyLinkFill20260820(DATA); applyStatusCleanup20260822(DATA); applyDrapeEngineLinks20260827(DATA); applyVaultGrades20260901(DATA); applyLinkDirection20260907(DATA); applyHolonomySplit20260907(DATA); applyHipDetectSplit20260910(DATA); applyLeeRoomGather20260911(DATA); applyGFiberCTRename20260911(DATA); applyEunRoomAsymTensor20260916(DATA); applyResearchOptimizeRetire20260918(DATA); applyTomoSftfAccepted20261007(DATA); applyDrapePriorPublished20261031(DATA); applyTensorSubmitted20261009(DATA); applyHipDetectMerge20261023(DATA); applyTensorAccepted20261023(DATA); applyBezierSeedFix20261023(DATA); applyAutoTunePathFix20261023(DATA); applyPartialCost20261024(DATA); applyOrientCert20261024(DATA); applyChoMoldWarpRetire20261027(DATA); applyHullRegroup20261031(DATA); applyAsymTensorRetire20261101(DATA); applyTomoSftfPublished20261105(DATA); applyTomoSh5Accepted20261108(DATA); applyTomoSh4Accepted20261109(DATA); applyGFiberCTAccepted20261111(DATA); applyBezierAccepted20261112(DATA); applySXJacobian20261114(DATA); applyDrapeOverprint20261121(DATA); normalizeKinds(DATA); sel=null; render(); renderEdit(); fitView(); setSaveState('');  // 실패해도 빈 화면 대신 기본 관계도를 보여준다
   }
 }
 async function saveDoc(silent){
   if(!isLoggedIn()) return;
+  /* 예비 관계도(클라우드 문서를 못 읽은 상태)는 저장하지 않는다 — 손으로 다듬은 클라우드 문서를 옛 판으로 덮어쓰게 된다. */
+  if(!DOC_LOADED){
+    setSaveState('저장 안 함 — 예비 관계도');
+    if(!silent||!READONLY_WARNED) toast('클라우드 관계도를 읽지 못한 상태라 저장하지 않습니다 — 새로고침해 다시 읽어 주세요.');
+    READONLY_WARNED=true;
+    return;
+  }
   setSaveState('저장 중…');
   try{
     await api('/rest/v1/mindmaps',{method:'POST',

@@ -7,6 +7,8 @@
 //      대소문자 · 밑줄을 지운 이름으로도 찾는다. 받기 전에는 지난번에 받은 줄(localStorage)을 쓴다.
 //   ③ graph.html · portfolio.html 은 todo.js 를 읽고, 표를 받으면 ToDo 칸을 다시 그린다.
 //   ④ 발행기의 공개 금지 낱말 검사(공개금지)가 살아 있다 — todo_lines 는 로그인 없이 읽힌다.
+//   ⑤ 표를 못 읽고(장애 · 응답 없음) 지난번 줄도 없으면 굳혀 둔 예비 줄 fallback/todo-lines.json 을 깐다(2026-11-21 4단계).
+//      지난번 줄이 있으면 예비 줄을 받지 않는다. 예비 파일 자체의 검사는 check-fallbacks.mjs 가 한다.
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 
@@ -30,18 +32,26 @@ for (const name of ["BAKED_URL", "BAKED_KEY"]) {
 }
 
 // ② 조회 규칙 — 가짜 fetch · localStorage 로 돌린다.
-function load({ rows, status = 200, cache = null }) {
+function load({ rows, status = 200, cache = null, fallback = null, hang = false }) {
   const store = cache ? { cfms_todo_lines: JSON.stringify(cache) } : {};
   const events = [];
   const requests = [];
-  const window = { dispatchEvent: (event) => events.push(event) };
+  const window = { dispatchEvent: (event) => events.push(event), CFMS_TABLE_TIMEOUT_MS: 30 };
   const ctx = {
     window,
+    setTimeout,
+    clearTimeout,
     console: { warn() {} },
     CustomEvent: function (type, init) { this.type = type; this.detail = init && init.detail; },
     localStorage: { getItem: (k) => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = v; } },
     fetch: (url, init) => {
       requests.push({ url, init });
+      if (url === "fallback/todo-lines.json") {
+        return Promise.resolve(fallback
+          ? { ok: true, status: 200, json: () => Promise.resolve({ bakedAt: "2026-11-21", source: "todo_lines", rows: fallback }) }
+          : { ok: false, status: 404, json: () => Promise.resolve(null) });
+      }
+      if (hang) return new Promise(() => {});
       return Promise.resolve({ ok: status >= 200 && status < 300, status, json: () => Promise.resolve(rows) });
     },
   };
@@ -94,6 +104,33 @@ const expect = (got, want, what) => {
   expect(t.window.cfmsTodo("Gone_Project"), "옛 줄", "cached line before refresh");
   await t.window.cfmsTodoReady;
   expect(t.window.cfmsTodo("Gone_Project"), null, "line deleted from the table must disappear after refresh");
+}
+{
+  // ⑤ 표도 지난번 줄도 없으면 예비 줄 — "fallback" 으로 풀리고(화면이 다시 그린다), cfms-todo 이벤트는 없다.
+  const t = load({ rows: { message: "no" }, status: 503, fallback: [{ id: "PFTF_Mold", todo: "예비 줄" }, { id: "SFTF_DrapePrior", todo: "" }] });
+  expect(await t.window.cfmsTodoReady, "fallback", "cfmsTodoReady when only the baked fallback could be read");
+  expect(t.window.cfmsTodo("pftf_mold"), "예비 줄", "baked fallback line");
+  expect(t.window.cfmsTodo("SFTF_DrapePrior"), "", "empty baked line stays empty");
+  if (t.events.length) throw new Error("todo.js must not dispatch cfms-todo for the baked fallback");
+}
+{
+  // 응답이 없는 표는 기다리다(가드는 30ms) 예비 줄로.
+  const t = load({ hang: true, fallback: [{ id: "PFTF_Mold", todo: "예비 줄" }] });
+  expect(await t.window.cfmsTodoReady, "fallback", "cfmsTodoReady when todo_lines never answers");
+  expect(t.window.cfmsTodo("PFTF_Mold"), "예비 줄", "baked fallback line after a timeout");
+}
+{
+  // 지난번 줄이 있으면 예비 줄을 받지 않는다 — 표에서 지운 줄이 예비 줄로 되살아나면 안 된다.
+  const t = load({ rows: {}, status: 503, cache: { rows: [{ id: "PFTF_Mold", todo: "지난번 줄" }] }, fallback: [{ id: "Gone_Project", todo: "옛 줄" }] });
+  expect(await t.window.cfmsTodoReady, false, "cfmsTodoReady with a cache and a failed table");
+  expect(t.window.cfmsTodo("Gone_Project"), null, "baked line must not be used when a cache exists");
+  if (t.requests.some((r) => r.url === "fallback/todo-lines.json")) throw new Error("todo.js must not fetch the fallback when it already has cached lines");
+}
+{
+  // 예비 파일도 없으면 false — 화면은 옛 문장으로.
+  const t = load({ rows: {}, status: 503 });
+  expect(await t.window.cfmsTodoReady, false, "cfmsTodoReady with no table, no cache, no fallback");
+  expect(t.window.cfmsTodo("PFTF_Mold"), null, "nothing known without table, cache or fallback");
 }
 
 // ③ 두 화면.
