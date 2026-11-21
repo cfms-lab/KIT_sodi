@@ -1066,7 +1066,53 @@ for (const [kind, grade] of Object.entries(kindGrades)) {
   const ink = graphPieInk(graphFill[grade], graphBorder[grade]);
   if (iconColors.progInk(kind) !== ink) throw new Error(`mindmap progress icon for ${kind} is ${iconColors.progInk(kind)}, graph draws ${ink}`);
 }
-if (!html.includes("progIcon(n.status, 22, titleY-4.5, progInk(n.kind),")) throw new Error("mindmap node icons must use the grade colour (progInk)");
+if (!html.includes("progIcon(nodeStage(n), 22, titleY-4.5, progInk(n.kind),")) throw new Error("mindmap node icons must use the grade colour (progInk) and the table stage (nodeStage)");
+
+// 2026-11-21 (사용자 지시 — 투고 현황 아이콘 현행화): 진도 아이콘 어휘·모양 = graph.html STAGE_PIE.
+// 한쪽에만 단계가 늘거나 모양(채움·점·⛔·✕)이 갈라지면 여기서 잡는다.
+const graphStagePie = runInNewContext(`(${sourceOf(graphForIcons, /const STAGE_PIE = \{[\s\S]*?\n\};/, "graph.html STAGE_PIE").replace(/^const STAGE_PIE = /, "").replace(/;$/, "")})`);
+const progressSrc = sourceOf(html, /const PROGRESS=\{[\s\S]*?\n\};/, "mindmap.html PROGRESS");
+const legacySrc = sourceOf(html, /const LEGACY_STATUS=\{[^\n]*\};/, "mindmap.html LEGACY_STATUS");
+const stageSrc = sourceOf(html, /const TABLE_STAGE=new Map\(\);[\s\S]*?const isPaperNode=[^\n]*\n/, "mindmap.html TABLE_STAGE … isPaperNode");
+const hasProgSrc = sourceOf(html, /function hasProg\(n\)\{[\s\S]*?\n\}/, "mindmap.html hasProg");
+const mm = runInNewContext(`${progressSrc}\n${legacySrc}\nconst progStatus=st=>LEGACY_STATUS[st]||st;\n${stageSrc}\n${hasProgSrc}\n({PROGRESS, progStatus, TABLE_STAGE, PAPER_NODE_IDS, nodeStage, hasProg});`);
+const shapeOf = (s) => s.done ? "done" : s.xx ? "xx" : s.x ? "x" : s.dot ? "dot"
+  : (s.fill ?? s.frac) ? `pie:${Number(s.fill ?? s.frac).toFixed(4)}` : "empty";
+for (const [stage, pie] of Object.entries(graphStagePie)) {
+  const mine = mm.PROGRESS[mm.progStatus(stage)];
+  if (!mine) throw new Error(`mindmap has no progress icon for graph stage ${stage}`);
+  if (shapeOf(mine) !== shapeOf(pie)) throw new Error(`mindmap icon for ${stage} is ${shapeOf(mine)}, graph draws ${shapeOf(pie)}`);
+  if (!pie.done && !pie.x && !pie.xx && (pie.frac || 0) > 0 && mine.frac !== pie.frac) throw new Error(`mindmap frac for ${stage} is ${mine.frac}, graph ${pie.frac}`);
+}
+for (const stage of Object.keys(mm.PROGRESS)) {
+  if (!graphStagePie[stage]) throw new Error(`mindmap draws ${stage} but graph STAGE_PIE has no such stage`);
+}
+// 초고·미정·취소는 논문 노드에만, 투고 뒤 단계는 늘. 아이콘 단계는 접지 않은 표 단계다.
+mm.PAPER_NODE_IDS.add("PartialCost");
+mm.TABLE_STAGE.set("n2dzarb3", "revision2");
+mm.TABLE_STAGE.set("nptj5211", "undecided");
+mm.TABLE_STAGE.set("ideaPaper", "idea");
+mm.PAPER_NODE_IDS.add("nptj5211");
+mm.PAPER_NODE_IDS.add("ideaPaper");
+const gateCases = [
+  [{ id: "ncdfshf2", kind: "todo", status: "draft" }, false, "draft"],          // 부품 노드(볼트 노트 없음)
+  [{ id: "PartialCost", kind: "medium", status: "draft" }, true, "draft"],      // 논문 노드
+  [{ id: "nggbas52", kind: "medium", status: "draft" }, true, "draft"],         // 손 SQL 트랙(SEM3)
+  [{ id: "n2dzarb3", kind: "high", status: "submitted" }, true, "revision2"],   // status 는 접혀도 아이콘은 2차 수정
+  [{ id: "nptj5211", kind: "none", status: "draft" }, true, "undecided"],       // 미정은 빈 원
+  [{ id: "ideaPaper", kind: "todo", status: "draft" }, true, "undecided"],      // idea 는 미정 모양
+  [{ id: "loose", kind: "todo", status: "submitted" }, true, "submitted"],      // 표 없이도 투고 뒤 단계는 그린다
+  [{ id: "nzk1z3i1x", kind: "todo", status: "cancelled" }, false, "cancelled"], // 논문 아닌 취소는 그리지 않는다
+  [{ id: "grp", kind: "group", status: "published" }, false, "published"],     // 그룹은 늘 뺀다
+];
+for (const [node, want, stage] of gateCases) {
+  if (mm.nodeStage(node) !== stage) throw new Error(`nodeStage(${node.id}) is ${mm.nodeStage(node)}, expected ${stage}`);
+  if (mm.hasProg(node) !== want) throw new Error(`hasProg(${node.id}) is ${mm.hasProg(node)}, expected ${want}`);
+}
+if (!html.includes("if(r.stage)TABLE_STAGE.set(node.id,r.stage); else TABLE_STAGE.delete(node.id);")
+  || !html.includes("if(r.vault_note)PAPER_NODE_IDS.add(node.id);")) {
+  throw new Error("overlayFromTable must record the table stage and vault-backed paper nodes for the icons");
+}
 if (/PROG_GREEN|PROG_YELLOW|PROG_RED|progColor/.test(html)) throw new Error("mindmap.html still has stage colours for progress icons");
 
 const sampleValidation = context.__validate(sample);
