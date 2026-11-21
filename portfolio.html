@@ -137,6 +137,8 @@
 </style>
 <!-- 저자 관점의 ToDo 한 줄. 이 파일이 DB 값보다 먼저다 (2026-09-21). -->
 <script src="todo.js"></script>
+<!-- 투고 단계 어휘 · 파이 모양 · 깜빡임 · 투고 사이트 목록. 네 화면(graph · mindmap · portfolio · upjuk)이 같이 읽는다 (2026-11-21). -->
+<script src="stages.js"></script>
 </head>
 <body>
 <header>
@@ -359,56 +361,27 @@ const 파이색 = g => QUALITY_PIE[g] || "#94a3b8";
    다르다(graph.html 은 14 → 34). viewBox 는 그대로라 안의 기하는 변하지 않는다. */
 const PIE_MIN = 14, PIE_MAX = 28;
 
-/* 깜빡임 주기 (2026-09-19, 사용자 요청 — 진도가 나아갈수록 더 빨리 깜빡인다).
-   크기와 같은 frac 사다리를 타되 **반대 방향**이다: frac 0 이 2400ms, 출판(frac 1)이
-   800ms. 제일 빠른 것이 1.25Hz 로, 초당 3회를 넘기지 않는다(WCAG 2.3.1 광과민성 기준).
-   graph.html·mindmap.html 도 같은 식을 쓴다 — 세 화면이 같은 박자로 뛴다. */
-const BLINK_T_SLOW = 2400, BLINK_T_FAST = 800;
-const 깜빡임주기 = frac => BLINK_T_SLOW - (BLINK_T_SLOW - BLINK_T_FAST) * (frac || 0);
-/* 깜빡이는 단계는 **저널 손에 가 있고 아직 결판이 안 난** 셋뿐이다 (2026-09-19, 사용자
-   지시 — 전부 깜빡이니 정신이 없다). 쓰는 중(초고)과 끝난 것(출판)은 가만히 둔다.
-   미정·보류·취소·아이디어도 마찬가지다. 인쇄중은 사용자가 든 목록에 없어 함께 빼 두었다. */
-const BLINK_STAGES = new Set(['submitted', 'revision', 'revision2', 'accepted']);
-
-/* 2026-11-15 (사용자): 1차 심사 수정(revision)은 1/3, 2차 심사 수정(revision2)은 2/3 파이다. 투고 1/4 처럼 모양은
-   화면에서 정하므로 메타 행이 옛 값이어도 이 채움으로 그린다. 크기·깜빡임은 frac 그대로(1차 0.625 · 2차 0.6875).
-   revision2 는 볼트 프로젝트현황 「파이단계」에 같은 날 생겼다 — 메타 행이 아직 모르면 아래 보충 값을 쓴다. */
-const 채움고정 = { submitted: 0.25, revision: 1 / 3, revision2: 2 / 3 };
-const 단계보충 = { revision2: { frac: 0.6875, fill: 2 / 3, color: "#eab308", label: "2차 심사 수정" } };
-const 단계정보 = id => (META.stages && META.stages[id]) || 단계보충[id];
+/* 단계 어휘 · 모양 · 깜빡임은 stages.js 가 정본이다 (2026-11-21, 사용자 지시 — 네 화면이 같이 읽는다).
+   전에는 여기에 깜빡임 단계 · 주기와 채움(투고 1/4 · 1차 1/3 · 2차 2/3)을 따로 박고, 메타 행이 revision2 를
+   모를 때의 보충 값까지 두었다. 이제 모양 · frac · 박자는 stages.js 에서, **문구는 볼트 메타 행**(META.stages 의
+   label — 「투고 완료」 · 「초고 · 게재지 확정」처럼 볼트 대시보드의 말)에서 온다. 메타 행이 모르는 단계는
+   stages.js 의 이름으로 떨어진다. stages.js 가 안 불리면(파일 누락) 파이를 그리지 않는다 — 표는 그대로다. */
+const 단계 = window.CFMS_STAGES || null;
+function 단계정보(id) {
+  const 모양 = 단계 && 단계.info(id), 메타 = META.stages && META.stages[id];
+  if (!모양 && !메타) return null;
+  return Object.assign({}, 모양 || 메타, { label: (메타 && 메타.label) || (모양 && 모양.label) || String(id) });
+}
 
 function 파이(stage, color) {
   const s = 단계정보(stage);
-  if (!s) return "";
-  const r = 6, cx = 8, cy = 8, c = color || s.color;
+  if (!s || !단계) return "";
   const 크기 = PIE_MIN + (PIE_MAX - PIE_MIN) * (s.frac || 0);
-  let 안 = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c}" stroke-width="1.6"/>`;
-  if (s.done) {
-    안 = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>`
-       + `<path d="M${cx - 2.9},${cy + 0.2} l2.1,2.2 l3.9,-4.4" fill="none" stroke="#fff"`
-       + ` stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`;
-  } else if (s.xx) {
-    안 += `<path d="M${cx - 3.2},${cy + 3.2} L${cx + 3.2},${cy - 3.2}" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`
-        + `<path d="M${cx - 3.2},${cy - 3.2} L${cx + 3.2},${cy + 3.2}" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`;
-  } else if (s.x) {
-    // 보류는 ⛔ — 꽉 찬 원에 흰 가로 막대다 (2026-09-18, 사용자 지시).
-    // 빗금 한 획이던 때는 취소의 X 와 한 획 차이라 14px 아이콘에서 둘이 구별되지 않았다.
-    안 = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>`
-       + `<path d="M${cx - 3.5},${cy} L${cx + 3.5},${cy}" fill="none" stroke="#fff"`
-       + ` stroke-width="2.4" stroke-linecap="round"/>`;
-  } else if (stage === 'draft' || s.dot) {
-    // 초고는 빈 원 가운데 점이다 (2026-11-13, 사용자 지시 — 전에는 1/4 파이였다).
-    안 += `<circle cx="${cx}" cy="${cy}" r="1.8" fill="${c}"/>`;
-  } else if (s.frac > 0) {
-    // 모양은 화면에서 정하므로 메타 행 갱신 전에도 투고는 1/4 · 1차 심사 수정 1/3 · 2차 2/3 이다. 크기·깜빡임은 frac 그대로.
-    const f = 채움고정[stage] ?? s.fill ?? s.frac, a = 2 * Math.PI * f;
-    const ex = cx + r * Math.sin(a), ey = cy - r * Math.cos(a), big = f > 0.5 ? 1 : 0;
-    안 += `<path d="M${cx},${cy} L${cx},${cy - r} A${r},${r} 0 ${big} 1 ${ex},${ey} Z" fill="${c}"/>`;
-  }
+  const 안 = 단계.pieSvg(s, { color: color || s.color });
   // 깜빡임은 CSS 가 한다. 여기서는 깜빡일 단계에만 클래스와 주기를 실어 준다 — 스위치가
   // 꺼져 있으면 .blink-on 이 없어 animation-name 이 붙지 않으므로 이 값은 쓰이지 않는다.
-  const 깜빡 = BLINK_STAGES.has(stage)
-    ? ` class="pie-anim" style="flex:0 0 auto;animation-duration:${깜빡임주기(s.done ? 1 : s.frac)}ms"`
+  const 깜빡 = 단계.blinks(stage)
+    ? ` class="pie-anim" style="flex:0 0 auto;animation-duration:${단계.blinkPeriod(s)}ms"`
     : ' style="flex:0 0 auto"';
   return `<svg${깜빡} viewBox="0 0 16 16" width="${크기}" height="${크기}">${안}</svg>`;
 }

@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { runInNewContext } from "node:vm";
 
 const html = readFileSync(new URL("../graph.html", import.meta.url), "utf8");
 
@@ -555,7 +556,7 @@ if (html.includes("horizon-cb") || html.includes("showFar")) {
 }
 
 // 2026-11-21: 투고 사이트 버튼 — 투고(submitted)~인쇄중(inprint) 노드는 모두 저널의 투고 시스템을 찾아야 한다.
-// 새 저널에 투고하고 layout_findings.py 의 SUBMISSION_SITES 에 한 줄을 안 더하면 여기서 멈춘다.
+// 새 저널에 투고하고 stages.js 의 SUBMISSION_SITES 에 한 줄을 안 더하면 여기서 멈춘다(2026-11-21 에 layout_findings.py 에서 옮겼다).
 {
   const begin = html.indexOf("// SUBMISSION_SITE_BEGIN");
   const end = html.indexOf("// SUBMISSION_SITE_END");
@@ -571,9 +572,19 @@ if (html.includes("horizon-cb") || html.includes("showFar")) {
   if (/https?:\/\/[^\s'"]*submission-details\//.test(block)) throw new Error("per-manuscript SNAPP URL must not be in the public graph.html");
   const stages = readJsonConstant("VAULT_STAGES", "{");
   const badges = readJsonConstant("STATUS_BADGES", "{");
-  const api = new Function("document", "esc", "NODE_STAGE", "VAULT_STAGES", "STATUS_BADGES",
-    block + "\nreturn { SUBMISSION_SITE_STAGES, SUBMISSION_SITES, submissionSiteFor, submissionSiteField };",
-  )({ addEventListener() {} }, (value) => String(value), stages, stages, badges);
+  if (/SUBMISSION_SITES\s*=/.test(block)) throw new Error("SUBMISSION_SITES must live in stages.js, not in graph.html");
+  if (!html.includes('<script src="stages.js"></script>')) throw new Error("graph.html must load stages.js");
+  const shared = {};
+  runInNewContext(readFileSync(new URL("../stages.js", import.meta.url), "utf8"), shared);
+  const sharedStages = shared.CFMS_STAGES;
+  if (!sharedStages) throw new Error("stages.js did not define CFMS_STAGES");
+  const api = {
+    SUBMISSION_SITE_STAGES: sharedStages.SUBMISSION_SITE_STAGES,
+    SUBMISSION_SITES: sharedStages.SUBMISSION_SITES,
+    ...new Function("window", "document", "esc", "NODE_STAGE", "VAULT_STAGES", "STATUS_BADGES",
+      block + "\nreturn { submissionSiteFor, submissionSiteField };",
+    )({ CFMS_STAGES: sharedStages }, { addEventListener() {} }, (value) => String(value), stages, stages, badges),
+  };
   for (const site of api.SUBMISSION_SITES) {
     if (!/^https?:\/\//.test(site.url)) throw new Error(`SUBMISSION_SITES ${site.key} has a bad url`);
   }
@@ -581,7 +592,7 @@ if (html.includes("horizon-cb") || html.includes("showFar")) {
     .filter(([id, stage]) => api.SUBMISSION_SITE_STAGES.has(stage) && !api.submissionSiteFor(id))
     .map(([id]) => `${id}(${badges[id] || "배지 없음"})`);
   if (missing.length) {
-    throw new Error(`submitted–inprint nodes whose badge names no known journal — add it to SUBMISSION_SITES in layout_findings.py: ${missing.join(", ")}`);
+    throw new Error(`submitted–inprint nodes whose badge names no known journal — add it to SUBMISSION_SITES in stages.js: ${missing.join(", ")}`);
   }
   const extra = Object.entries(stages)
     .filter(([id, stage]) => !api.SUBMISSION_SITE_STAGES.has(stage) && api.submissionSiteField(id))

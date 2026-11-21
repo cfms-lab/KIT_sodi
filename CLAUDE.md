@@ -35,6 +35,13 @@
   `-Push` 는 html 외 파일이 바뀌면 중단하므로, 좌표 작업은 커밋과 `git push origin main`
   을 직접 한다.
 
+## 투고 단계 어휘 · 파이 모양 · 깜빡임 · 투고 사이트
+
+2026-11-21 부터 **`stages.js` 한 곳**이다 — graph·mindmap·portfolio·upjuk 이 `<script src="stages.js">` 로 같이 읽는다.
+단계를 더하거나 모양·박자를 바꾸거나 새 저널의 투고 시스템 주소(`SUBMISSION_SITES`)를 더할 때는 이 파일을 고친다(재생성 불필요).
+예외: graph3d 가 graph.html 소스를 읽으므로 graph.html 의 `const STAGE_PIE = {…}` 리터럴을 글자까지 같게 고친다 —
+`node scripts/check-stages-js.mjs` 가 다르면 멈춘다. portfolio 범례·툴팁 문구는 볼트 「파이단계」(메타 행)이고 볼트 투고셀() 은 따로다.
+
 ## 공저자 색 · 훌(그룹) 재편
 
 upjuk 저자 이름 배경(2026-11-13~, 전에는 행 배경)·portfolio 공저자 이름 배경·graph 훌 면색·mindmap 노드 면색은

@@ -30,6 +30,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "mindmap.html validation failed" }
     node scripts/check-portfolio-html.mjs
     if ($LASTEXITCODE -ne 0) { throw "portfolio.html validation failed" }
+    node scripts/check-stages-js.mjs
+    if ($LASTEXITCODE -ne 0) { throw "stages.js validation failed" }
     git diff --check
     if ($LASTEXITCODE -ne 0) { throw "git diff --check failed" }
 

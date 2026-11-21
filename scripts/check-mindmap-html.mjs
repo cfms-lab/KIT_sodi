@@ -1113,28 +1113,52 @@ const sourceOf = (source, pattern, what) => {
   if (!found) throw new Error(`cannot find ${what}`);
   return found[0];
 };
-const graphPieInk = runInNewContext(`(${sourceOf(graphForIcons, /function pieInk\(fill, border\) \{[\s\S]*?\n\}/, "graph.html pieInk")})`);
+// 2026-11-21: 아이콘 규칙(단계표 · pieInk · 깜빡임 · SVG 기하)은 stages.js 한 곳이다 — graph · portfolio · upjuk 도 같은 파일을 읽는다.
+if (!html.includes('<script src="stages.js"></script>')) throw new Error("mindmap.html must load stages.js");
+if (/const BLINK_STAGES=|const BLINK_T_SLOW=|const PROGRESS=\{/.test(html)) throw new Error("mindmap.html has its own stage table or blink rules again — they live in stages.js");
+const sharedStagesContext = {};
+runInNewContext(readFileSync(new URL("../stages.js", import.meta.url), "utf8"), sharedStagesContext);
+const SHARED_STAGES = sharedStagesContext.CFMS_STAGES;
+if (!SHARED_STAGES) throw new Error("stages.js did not define CFMS_STAGES");
 const iconColors = runInNewContext(
-  `const INK="#0b0b0b";${sourceOf(html, /const KIND=\{[\s\S]*?\n\};/, "mindmap.html KIND")}\n${sourceOf(html, /function progInk\(kind\)\{[\s\S]*?\n\}/, "mindmap.html progInk")}\n({KIND, progInk});`,
+  `const INK="#0b0b0b";const STAGES=globalThis.__S;${sourceOf(html, /const KIND=\{[\s\S]*?\n\};/, "mindmap.html KIND")}\n${sourceOf(html, /function progInk\(kind\)\{[\s\S]*?\n\}/, "mindmap.html progInk")}\n({KIND, progInk});`,
+  { __S: SHARED_STAGES },
 );
 const kindGrades = { group: "그룹", none: "등급 없음", high: "상", medium: "중", low: "하", todo: "ToDo", closed: "Closed" };
 for (const [kind, grade] of Object.entries(kindGrades)) {
   const entry = iconColors.KIND[kind];
   if (entry.fill !== graphFill[grade]) throw new Error(`mindmap KIND.${kind}.fill ${entry.fill} differs from graph ${grade} ${graphFill[grade]}`);
   if (entry.stroke !== graphBorder[grade]) throw new Error(`mindmap KIND.${kind}.stroke ${entry.stroke} differs from graph ${grade} ${graphBorder[grade]}`);
-  const ink = graphPieInk(graphFill[grade], graphBorder[grade]);
+  const ink = SHARED_STAGES.pieInk(graphFill[grade], graphBorder[grade]);
   if (iconColors.progInk(kind) !== ink) throw new Error(`mindmap progress icon for ${kind} is ${iconColors.progInk(kind)}, graph draws ${ink}`);
 }
 if (!html.includes("progIcon(nodeStage(n), 22, titleY-4.5, progInk(n.kind),")) throw new Error("mindmap node icons must use the grade colour (progInk) and the table stage (nodeStage)");
 
-// 2026-11-21 (사용자 지시 — 투고 현황 아이콘 현행화): 진도 아이콘 어휘·모양 = graph.html STAGE_PIE.
-// 한쪽에만 단계가 늘거나 모양(채움·점·⛔·✕)이 갈라지면 여기서 잡는다.
-const graphStagePie = runInNewContext(`(${sourceOf(graphForIcons, /const STAGE_PIE = \{[\s\S]*?\n\};/, "graph.html STAGE_PIE").replace(/^const STAGE_PIE = /, "").replace(/;$/, "")})`);
-const progressSrc = sourceOf(html, /const PROGRESS=\{[\s\S]*?\n\};/, "mindmap.html PROGRESS");
+// 2026-11-21 (사용자 지시 — 투고 현황 아이콘 현행화): 진도 아이콘 어휘·모양 = stages.js 의 PIE(graph 노드 파이와 같은 표).
+// PROGRESS 는 그 표를 옮긴 것이다 — 옮기다 단계가 빠지거나 모양(채움·점·⛔·✕)이 갈라지면 여기서 잡는다.
+const graphStagePie = SHARED_STAGES.PIE;
+const progressSrc = sourceOf(html, /const PROGRESS=\(function\(\)\{[\s\S]*?\n\}\)\(\);/, "mindmap.html PROGRESS");
 const legacySrc = sourceOf(html, /const LEGACY_STATUS=\{[^\n]*\};/, "mindmap.html LEGACY_STATUS");
 const stageSrc = sourceOf(html, /const TABLE_STAGE=new Map\(\);[\s\S]*?const isPaperNode=[^\n]*\n/, "mindmap.html TABLE_STAGE … isPaperNode");
 const hasProgSrc = sourceOf(html, /function hasProg\(n\)\{[\s\S]*?\n\}/, "mindmap.html hasProg");
-const mm = runInNewContext(`${progressSrc}\n${legacySrc}\nconst progStatus=st=>LEGACY_STATUS[st]||st;\n${stageSrc}\n${hasProgSrc}\n({PROGRESS, progStatus, TABLE_STAGE, PAPER_NODE_IDS, nodeStage, hasProg});`);
+const progRadiusSrc = sourceOf(html, /const PROG_R_MAX=[\s\S]*?function progRadius\(status\)\{[\s\S]*?\n\}/, "mindmap.html PROG_R_* … progRadius");
+const progIconSrc = sourceOf(html, /function progIcon\(status, cx, cy, color, checkColor, outline\)\{[\s\S]*?\n\}/, "mindmap.html progIcon");
+const mm = runInNewContext(`const STAGES=globalThis.__S;\n${legacySrc}\nconst progStatus=st=>LEGACY_STATUS[st]||st;\n${progressSrc}\n${stageSrc}\n${hasProgSrc}\n${progRadiusSrc}\n${progIconSrc}\n({PROGRESS, progStatus, TABLE_STAGE, PAPER_NODE_IDS, nodeStage, hasProg, progRadius, progIcon});`,
+  { __S: SHARED_STAGES });
+// 범례 순서 = 진도가 낮은 것부터(같은 진도는 stages.js 순서 — 미정 · 보류 · 취소), idea 는 미정으로 접혀 따로 없다.
+const wantLegend = "undecided,blocked,cancelled,draft,submitted,revision,revision2,accepted,inprint,published";
+if (Object.keys(mm.PROGRESS).join(",") !== wantLegend) throw new Error(`mindmap PROGRESS order is ${Object.keys(mm.PROGRESS).join(",")}, expected ${wantLegend}`);
+// 노드 아이콘: 깜빡이는 단계만 pie-anim 이고, 주기는 stages.js 다. 크기 사다리(출판 9 · 보류 4 · 투고 4.5)는 그대로다.
+for (const stage of Object.keys(mm.PROGRESS)) {
+  const icon = mm.progIcon(stage, 22, 10, "#e02020", "#ffffff", "#ffffff");
+  if (!icon.startsWith("<g") || !icon.includes('fill="#e02020"') && !icon.includes('stroke="#e02020"')) throw new Error(`mindmap icon for ${stage} is not drawn: ${icon}`);
+  const blinking = icon.startsWith('<g class="pie-anim"');
+  if (blinking !== SHARED_STAGES.blinks(stage)) throw new Error(`mindmap icon for ${stage} blink=${blinking}, stages.js says ${SHARED_STAGES.blinks(stage)}`);
+  if (blinking && !icon.includes(`animation-duration:${SHARED_STAGES.blinkPeriod(stage)}ms`)) throw new Error(`mindmap blink period for ${stage} differs from stages.js`);
+}
+if (mm.progRadius("published") !== 9 || mm.progRadius("blocked") !== 4 || mm.progRadius("submitted") !== 4.5 || mm.progRadius("draft") !== 4) throw new Error("mindmap icon size ladder changed");
+if (mm.progIcon("submit", 0, 0, "#000", "#fff") !== mm.progIcon("submitted", 0, 0, "#000", "#fff")) throw new Error("legacy 'submit' must draw like submitted");
+if (mm.progIcon("idea", 0, 0, "#000", "#fff") !== mm.progIcon("undecided", 0, 0, "#000", "#fff")) throw new Error("idea must draw like undecided in the mindmap");
 const shapeOf = (s) => s.done ? "done" : s.xx ? "xx" : s.x ? "x" : s.dot ? "dot"
   : (s.fill ?? s.frac) ? `pie:${Number(s.fill ?? s.frac).toFixed(4)}` : "empty";
 for (const [stage, pie] of Object.entries(graphStagePie)) {

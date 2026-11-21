@@ -183,7 +183,8 @@ SQL 만으로 바뀌지 않는 것들이다. 필요하면 고쳐서 커밋·푸�
   `node scripts/publish-research-outputs.mjs --push --allow-new` 로 넣는다(볼트 `Rules/새업적_등록절차.md`).
   진행 중 원고는 이 길이 아니라 위의 `p…` + `papers_ids` 다.
 - 볼트 `Projects/*.md` 와 `Dashboards/프로젝트현황.md` 는 사용자가 커밋한다.
-- **처음 보는 저널에 투고하면** `layout_findings.py` 의 `SUBMISSION_SITES` 에 한 줄(key·badge 첫머리 이름·투고 시스템 주소)을 더하고 재생성한다. graph NODE INFO 의 「투고 사이트」 버튼(submitted~inprint)이 badge 첫머리로 저널을 찾는데, 못 찾으면 `check-graph-html.mjs` 가 멈춘다. 주소는 원고별(submission-details UUID 등)이 아닌 저널 공통 로그인 주소만 쓴다(2026-11-21~).
+- **처음 보는 저널에 투고하면** `stages.js` 의 `SUBMISSION_SITES` 에 한 줄(key·badge 첫머리 이름·투고 시스템 주소)을 더한다 — 재생성은 필요 없다(2026-11-21 에 `layout_findings.py` 에서 옮겼다). graph NODE INFO 의 「투고 사이트」 버튼(submitted~inprint)이 badge 첫머리로 저널을 찾는데, 못 찾으면 `check-graph-html.mjs` 가 멈춘다. 주소는 원고별(submission-details UUID 등)이 아닌 저널 공통 로그인 주소만 쓴다(2026-11-21~).
+- **단계 어휘·파이 모양·깜빡임을 바꿀 때는 `stages.js` 한 곳이다**(2026-11-21~ — graph·mindmap·portfolio·upjuk 이 같이 읽는다). 예외 하나: graph3d 가 graph.html 소스를 읽으므로 graph.html 의 `const STAGE_PIE = {…}` 리터럴을 글자까지 같게 고친다(`node scripts/check-stages-js.mjs` 가 다르면 멈춘다). portfolio 범례·툴팁의 문구와 순서는 볼트 프로젝트현황 「파이단계」(메타 행)이고, 볼트 대시보드의 투고셀() 도 따로 고친다.
 - **PDF 파일은 클로드가 못 올린다.** `pdfs` 버킷은 비공개이고 RLS 가 `authenticated` 만 받는데, MCP 는 `--features=database` 라 SQL 만 된다. `pdf` 칸에 파일 이름을 넣고 사본을 프로젝트 폴더에 그 이름으로 둔 뒤, 사용자가 upjuk 「PDF 업로드」로 그 파일을 고른다. 파일 이름으로 짝을 짓고 저장 키는 `{papers_id}.pdf` 다. 올라갔는지는 `select name from storage.objects where bucket_id='pdfs' and name='{papers_id}.pdf'` 로 본다.
 - 출판사 게재본은 이 비공개 버킷까지만 둔다. Sage 는 게재본의 온라인 게시를 금지하고, 개인 웹·기관 저장소에는 accepted version 만 허용한다. IIS 가 떠 있는 `D:\IIS_Home` 아래(`UPJUK/PDF`, `KIT_sodi/tmp` 포함)에도 사본을 두지 않는다.
 - MCP 의 `execute_sql` 은 RLS 를 거치지 않는 관리 권한으로 돈다(SQL Editor 와 같다). 그래서 `delete`·

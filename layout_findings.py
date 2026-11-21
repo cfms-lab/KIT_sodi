@@ -3785,65 +3785,26 @@ s = s.replace("// Track hovered node — hover detection is more reliable than c
 # ── 투고 사이트 버튼 (2026-11-21, 사용자 지시) ───────────────────────────────
 # 투고(submitted)부터 인쇄중(inprint)까지인 노드의 Node Info 에서 VSCODE 버튼 줄 바로 아래에
 # 「투고 사이트」 버튼을 단다. 저널은 노드 배지(STATUS_BADGES) 머리의 저널 이름으로 찾고,
-# 저널 → 투고 시스템 주소 표는 아래 JS 블록 안의 SUBMISSION_SITES 다(새 저널이면 한 줄 더한다 —
-# scripts/check-graph-html.mjs 가 단계는 맞는데 저널을 못 찾는 노드를 잡는다).
+# 저널 → 투고 시스템 주소 표(SUBMISSION_SITES)와 찾는 규칙은 2026-11-21 부터 stages.js 다(새 저널이면 거기에
+# 한 줄 더한다 — 재생성은 필요 없다. scripts/check-graph-html.mjs 가 단계는 맞는데 저널을 못 찾는 노드를 잡는다).
 # 위 VSCODE 블록처럼 지우고 다시 넣어 재생성이 멱등하다.
 SUBMISSION_SITE_FIELD = "    ${submissionSiteField(nodeId)}\n"
 _type_marker = "    <div class=\"field\">Type: ${esc(n._project_role || n._file_type || 'unknown')}</div>"
 s = s.replace(SUBMISSION_SITE_FIELD, "")
 s = s.replace(_type_marker, SUBMISSION_SITE_FIELD + _type_marker, 1)
-submission_site_js = r'''// SUBMISSION_SITE_BEGIN — 투고 사이트 버튼 (2026-11-21, 사용자 지시). 정본은 layout_findings.py 다.
+submission_site_js = r'''// SUBMISSION_SITE_BEGIN — 투고 사이트 버튼 (2026-11-21, 사용자 지시). 버튼은 layout_findings.py 가 정본이다.
 // 투고(submitted)부터 인쇄중(inprint)까지인 노드의 Node Info 에서, VSCODE 버튼 줄 바로 아래에
 // 그 저널의 투고 시스템(내 투고 목록 · 로그인 화면)을 새 창으로 여는 버튼을 단다.
 // 저널은 노드 배지(STATUS_BADGES — Supabase 표가 덮는다)의 **머리**에 적힌 저널 이름으로 찾는다.
-// 새 저널에 투고하면 아래 표에 한 줄 더한다 — scripts/check-graph-html.mjs 가 못 찾는 노드를 잡는다.
-// 주소는 저널마다 하나다. 원고별 주소(SNAPP submission-details/… 같은 원고 id)는 공개 파일에 넣지 않는다.
-const SUBMISSION_SITE_STAGES = new Set(['submitted', 'revision', 'revision2', 'accepted', 'inprint']);
-const SUBMISSION_SITES = [
-  { key: 'TSE', journal: '한국섬유공학회지 (Textile Science and Engineering)', names: ['한국섬유공학회지', 'Textile Science and Engineering', 'TSE'],
-    system: 'manuscriptlink', url: 'https://www.manuscriptlink.com/journals/tse' },
-  { key: 'CR', journal: '한국복합재료학회지 (Composites Research)', names: ['한국복합재료학회지', 'Composites Research', 'CR'],
-    system: '저널 홈', url: 'http://www.compositesres.org/', home: true,
-    note: '투고 시스템 주소를 확인하지 못해 저널 홈으로 잇는다 — 공저자 측 투고' },
-  { key: 'KOSDI', journal: '한국재난정보학회논문집', names: ['한국재난정보학회논문집', 'KOSDI'],
-    system: '저널 홈', url: 'https://journal.kosdi.or.kr/', home: true,
-    note: '투고 시스템 주소를 확인하지 못해 저널 홈으로 잇는다 — 공저자 측 투고' },
-  { key: 'RPJ', journal: 'Rapid Prototyping Journal', names: ['Rapid Prototyping Journal', 'RPJ'],
-    system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/rpj' },
-  { key: 'IJCST', journal: 'International Journal of Clothing Science and Technology', names: ['International Journal of Clothing Science and Technology', 'IJCST'],
-    system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/ijcst' },
-  { key: 'TDP', journal: '3D Printing and Additive Manufacturing', names: ['3D Printing and Additive Manufacturing', 'TDP'],
-    system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/3dp' },
-  { key: 'M&M', journal: 'Microscopy and Microanalysis', names: ['Microscopy and Microanalysis', 'M&M'],
-    system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/mam' },
-  { key: 'JCDE', journal: 'Journal of Computational Design and Engineering', names: ['Journal of Computational Design and Engineering', 'JCDE'],
-    system: 'ScholarOne', url: 'https://mc.manuscriptcentral.com/jcde' },
-  { key: 'IJAMT', journal: 'The International Journal of Advanced Manufacturing Technology', names: ['The International Journal of Advanced Manufacturing Technology', 'IJAMT'],
-    system: 'Editorial Manager', url: 'https://www.editorialmanager.com/jamt/' },
-  { key: 'FnP', journal: 'Fibers and Polymers', names: ['Fibers and Polymers', 'FnP'],
-    system: 'Editorial Manager', url: 'https://www.editorialmanager.com/fipo/' },
-  { key: 'J. Microscopy', journal: 'Journal of Microscopy', names: ['Journal of Microscopy', 'J. Microscopy'],
-    system: 'Wiley Research Exchange', url: 'https://authors.wiley.com/dashboard' },
-  { key: 'TVC', journal: 'The Visual Computer', names: ['The Visual Computer', 'TVC'],
-    system: 'Springer Nature SNAPP', url: 'https://submission.springernature.com/your-submissions' },
-];
+// 저널 → 투고 시스템 주소 표(SUBMISSION_SITES)와 찾는 규칙은 stages.js 다(2026-11-21~ — 네 화면이 같이 읽는 단계 파일).
+// 새 저널에 투고하면 그 표에 한 줄 더한다 — scripts/check-graph-html.mjs 가 못 찾는 노드를 잡는다.
+// 주소는 저널마다 하나다. 원고별 주소(원고 id 가 든 주소)는 공개 파일에 넣지 않는다.
 function submissionSiteFor(nodeId) {
+  if (!window.CFMS_STAGES) return null;
   const stage = (typeof NODE_STAGE === 'object' && NODE_STAGE[nodeId])
     || (typeof VAULT_STAGES === 'object' && VAULT_STAGES[nodeId]) || '';
-  if (!SUBMISSION_SITE_STAGES.has(stage)) return null;
-  const badge = String((typeof STATUS_BADGES === 'object' && STATUS_BADGES[nodeId]) || '').trim();
-  // 배지 머리의 저널 이름. 이름 바로 뒤가 글자·숫자면 다른 낱말의 앞토막이라 버린다. 겹치면 긴 이름이 이긴다.
-  let best = null, bestLength = 0;
-  for (const site of SUBMISSION_SITES) {
-    for (const name of site.names) {
-      if (name.length > bestLength && badge.startsWith(name)
-          && !/^[0-9A-Za-z가-힣]/.test(badge.slice(name.length))) {
-        best = site;
-        bestLength = name.length;
-      }
-    }
-  }
-  return best;
+  const badge = (typeof STATUS_BADGES === 'object' && STATUS_BADGES[nodeId]) || '';
+  return window.CFMS_STAGES.submissionSite(stage, badge);
 }
 function submissionSiteField(nodeId) {
   const site = submissionSiteFor(nodeId);

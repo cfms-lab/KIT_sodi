@@ -210,6 +210,8 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- 투고 단계 어휘 · 파이 모양 · 깜빡임 · 투고 사이트 목록. 네 화면(graph · mindmap · portfolio · upjuk)이 같이 읽는다 (2026-11-21). -->
+<script src="stages.js"></script>
 <script>
 /* ===== 카테고리 ===== */
 const CATEG_ORDER=["IJ","DJ","IC","DC","IL","PT","AW","PB","ETC","TODO"];
@@ -232,24 +234,10 @@ const HIDDEN_CATEGS=new Set(["bridge"]);
 const SHOW_TODO_NODES=false;
 
 /* ===== 투고 진도 파이 · 깜빡임 (2026-09-22, 사용자 지시) =====
-   graph.html 의 STAGE_PIE, portfolio.html 의 파이()·깜빡임과 같은 규칙이다 — 세 화면이 같은
-   그림·같은 박자를 쓴다. 단계 어휘는 research_outputs.stage(볼트의 통합 단계 어휘)다. */
-const STAGE_PIE={
-  published:{frac:1,done:true,label:'출판(published)'},
-  inprint:{frac:0.875,label:'인쇄중(in print)'},
-  accepted:{frac:0.75,label:'게재확정(accepted)'},
-  /* 2026-11-15 (사용자): 1차 심사 수정 1/3 · 2차 심사 수정(revision2) 2/3 파이. 크기·깜빡임은 frac, 채움은 fill. */
-  revision2:{frac:0.6875,fill:2/3,label:'2차 심사 수정(revision2)'},
-  revision:{frac:0.625,fill:1/3,label:'1차 심사 수정(revision)'},
-  /* 2026-11-13 (사용자 최종 지시): 초고는 빈 원 가운데 점, 투고만 1/4 파이로 그린다.
-     나머지 단계와 크기·깜빡임은 그대로이고, 그리는 채움만 fill(없으면 frac)이 정한다. */
-  submitted:{frac:0.5,fill:0.25,label:'투고(submitted)'},
-  draft:{frac:0.25,dot:true,label:'초고(draft)'},
-  undecided:{frac:0,label:'미정(undecided)'},
-  blocked:{frac:0,x:true,label:'보류(blocked)'},
-  cancelled:{frac:0,xx:true,label:'취소(cancelled)'},
-  idea:{frac:0,label:'아이디어(idea)'},
-};
+   graph.html · portfolio.html · mindmap.html 과 같은 그림 · 같은 박자다. 단계 어휘는 research_outputs.stage
+   (볼트의 통합 단계 어휘)다. 2026-11-21: 단계표 · 모양 · 깜빡임은 stages.js 가 정본이다 — 여기 따로 두던
+   STAGE_PIE · 깜빡임 단계 · 주기를 걷어 냈다. 툴팁의 이름은 짧은 쪽(「미정(undecided)」)이다. */
+const 단계=window.CFMS_STAGES||null;
 /* 색 = 논문 등급. graph.html QUALITY_COLORS · portfolio.html QUALITY_PIE 와 같은 원색이다.
    연결된 프로젝트가 없으면 회색이다. (2026-10-31 부터 행 배경은 등급이 아니라 공저 교수 색이다.) */
 const QUALITY_PIE={"상":"#e02020","중":"#f28e2b","하":"#2a78d6","ToDo":"#9ca3af","Closed":"#6b7280","그룹":"#c8c8c8","등급 없음":"#94a3b8"};
@@ -257,43 +245,22 @@ const 파이색=g=>QUALITY_PIE[g]||"#94a3b8";
 /* 크기 사다리는 frac 을 그대로 탄다(portfolio 14~28, graph 14~34). 여기는 글줄 안에 놓이므로
    12~20 으로 줄였다 — 비율은 같고 픽셀만 다르다. */
 const PIE_MIN=12,PIE_MAX=20;
-const BLINK_T_SLOW=2400,BLINK_T_FAST=800;
-const 깜빡임주기=frac=>BLINK_T_SLOW-(BLINK_T_SLOW-BLINK_T_FAST)*(frac||0);
-const BLINK_STAGES=new Set(['submitted','revision','revision2','accepted']);   // 저널 손에 가 있고 결판이 안 난 셋만 깜빡인다
 function 파이(stage,color){
-  const s=STAGE_PIE[stage];
+  const s=단계&&단계.info(stage);
   if(!s)return "";
-  const r=6,cx=8,cy=8,c=color||"#94a3b8";
   const 크기=PIE_MIN+(PIE_MAX-PIE_MIN)*(s.frac||0);
-  let 안=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c}" stroke-width="1.6"/>`;
-  if(s.done){
-    안=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>`
-      +`<path d="M${cx-2.9},${cy+0.2} l2.1,2.2 l3.9,-4.4" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`;
-  }else if(s.xx){
-    안+=`<path d="M${cx-3.2},${cy+3.2} L${cx+3.2},${cy-3.2}" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`
-      +`<path d="M${cx-3.2},${cy-3.2} L${cx+3.2},${cy+3.2}" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`;
-  }else if(s.x){
-    // 보류는 ⛔ — 꽉 찬 원에 흰 가로 막대 (graph·portfolio 와 같다)
-    안=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>`
-      +`<path d="M${cx-3.5},${cy} L${cx+3.5},${cy}" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>`;
-  }else if(s.dot){
-    안+=`<circle cx="${cx}" cy="${cy}" r="1.8" fill="${c}"/>`;   // 초고: 빈 원 가운데 점 (2026-11-13)
-  }else if(s.frac>0){
-    const f=s.fill??s.frac,a=2*Math.PI*f;
-    const ex=cx+r*Math.sin(a),ey=cy-r*Math.cos(a),big=f>0.5?1:0;
-    안+=`<path d="M${cx},${cy} L${cx},${cy-r} A${r},${r} 0 ${big} 1 ${ex},${ey} Z" fill="${c}"/>`;
-  }
+  const 안=단계.pieSvg(s,{color:color||"#94a3b8"});
   // 깜빡임은 CSS 가 한다. 깜빡일 단계에만 클래스와 주기를 실어 주고, 스위치가 꺼져 있으면
   // body 에 .blink-on 이 없어 animation-name 이 붙지 않는다.
-  const 깜빡=BLINK_STAGES.has(stage)?` class="pie-anim" style="animation-duration:${깜빡임주기(s.frac)}ms"`:"";
+  const 깜빡=단계.blinks(stage)?` class="pie-anim" style="animation-duration:${단계.blinkPeriod(s)}ms"`:"";
   return `<svg${깜빡} viewBox="0 0 16 16" width="${크기}" height="${크기}">${안}</svg>`;
 }
 /* 논문 한 줄의 파이. 단계는 research_outputs.stage(없으면 출판), 색은 연결된 프로젝트 노드의 등급. */
 function stagePie(p){
   const stage=p.STAGE||'published';
-  const s=STAGE_PIE[stage]; if(!s)return "";
+  if(!단계||!단계.info(stage))return "";
   const n=nodeById(p.PROJECT_ID);
-  const tip=s.label+(n&&n.grade?` · 등급 ${n.grade}`:"");
+  const tip=단계.shortLabel(stage)+(n&&n.grade?` · 등급 ${n.grade}`:"");
   return `<span class="pie" title="${esc(tip)}">${파이(stage,n?파이색(n.grade):"#94a3b8")}</span>`;
 }
 /* 깜빡임 스위치 — 기본 켜짐, 선택은 이 브라우저에만 남는다(portfolio·graph 와 같은 방식). */
