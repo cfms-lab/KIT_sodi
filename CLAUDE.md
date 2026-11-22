@@ -39,6 +39,8 @@
 
 2026-11-21 부터 **`stages.js` 한 곳**이다 — graph·mindmap·portfolio·upjuk 이 `<script src="stages.js">` 로 같이 읽는다.
 단계를 더하거나 모양·박자를 바꾸거나 새 저널의 투고 시스템 주소(`SUBMISSION_SITES`)를 더할 때는 이 파일을 고친다(재생성 불필요).
+깜빡임 켜기/끄기도 2026-11-22 부터 이 파일의 공용 스위치 하나다(`blinkEnabled` · `setBlink` · `onBlinkChange`, localStorage `cfms_blink` —
+다크 모드처럼 네 화면 · 탭 공용, 기본 켜짐). 화면별 키를 다시 두면 `check-stages-js.mjs` 가 멈춘다.
 예외: graph3d 가 graph.html 소스를 읽으므로 graph.html 의 `const STAGE_PIE = {…}` 리터럴을 글자까지 같게 고친다 —
 `node scripts/check-stages-js.mjs` 가 다르면 멈춘다. portfolio 범례·툴팁 문구는 볼트 「파이단계」(메타 행)이고 볼트 투고셀() 은 따로다.
 SFTF 7편 지도(볼트 노트 + artifact)의 파이는 표를 못 읽으므로 `node scripts/sync-sftf-map.mjs` 로 다시 그리고 artifact 에 `stages.js` ·

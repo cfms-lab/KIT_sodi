@@ -339,7 +339,6 @@ async function loadLinks(){
 /* 완성도 필터. 토글은 이 브라우저에만 기억하고(다른 사람 화면을 바꾸지 않는다),
    기본값은 꺼짐 — 투고를 눈앞에 둔 원고만 보이는 쪽이다. */
 const SHOW_ALL_KEY = "cfms_portfolio_show_all_v1";
-const BLINK_KEY = "cfms_portfolio_blink_v1";
 function 적용완성도필터(){
   ROWS = 완성도포함 ? ALL_ROWS.slice()
     : ALL_ROWS.filter(r=>!(typeof r.completeness==='number' && r.completeness>=완성도_상한));
@@ -686,14 +685,18 @@ showAll.addEventListener('change', () => {
 /* 진도 깜빡임 토글 — 기본은 켜짐(사용자가 요청한 기능이다). 선택은 이 브라우저에만 남는다.
    실제 깜빡임은 CSS 가 하고, 여기서는 body 의 .blink-on 만 켰다 껐다 한다. 움직임을 줄여
    달라고 한 이용자에게는 스위치와 무관하게 CSS 쪽에서 막는다. */
+/* 2026-11-22 (사용자 지시): 켜고 끄는 값은 stages.js 의 공용 스위치(cfms_blink)다 — graph · mindmap · upjuk 과 한 값이고,
+   다른 탭에서 바꿔도 따라온다. 전에는 이 화면만의 키였다. 기본은 켜짐. */
 const blinkBox = document.getElementById('blink');
-const 깜빡임켬 = lsGet(BLINK_KEY) !== '0';   // 기본 켜짐 — 끄면 그 선택만 남는다
-blinkBox.checked = 깜빡임켬;
-document.body.classList.toggle('blink-on', 깜빡임켬);
+function 깜빡임적용(on){
+  blinkBox.checked = on;
+  document.body.classList.toggle('blink-on', on);
+}
+깜빡임적용(단계 ? 단계.blinkEnabled() : true);
 blinkBox.addEventListener('change', () => {
-  lsSet(BLINK_KEY, blinkBox.checked ? '1' : '0');
-  document.body.classList.toggle('blink-on', blinkBox.checked);
+  if (단계) 단계.setBlink(blinkBox.checked); else 깜빡임적용(blinkBox.checked);
 });
+if (단계) 단계.onBlinkChange(깜빡임적용);
 
 if(isLoggedIn()) showTable(); else showGate();
 </script>

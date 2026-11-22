@@ -6,6 +6,7 @@
  *
  *   PIE               단계 어휘(볼트의 통합 단계 — research_outputs.stage)와 파이 모양 · 이름
  *   BLINK_STAGES …    깜빡이는 단계와 주기
+ *   blinkEnabled …    깜빡임 켜기/끄기 — 네 화면 공용 값(localStorage cfms_blink, 2026-11-22~)
  *   pieInk            흰 등급색(ToDo)을 테두리 색으로 바꾸는 규칙
  *   pieSvg            SVG 파이 하나(portfolio · upjuk · mindmap). graph 는 캔버스라 drawNodePie 가 같은 PIE 를 읽어 그린다.
  *   SUBMISSION_SITES  저널 → 투고 시스템 주소(graph Node Info 의 「투고 사이트」 버튼)
@@ -70,6 +71,54 @@
     const s = info(stage);
     const frac = s ? (s.done ? 1 : (s.x || s.xx ? 0 : (s.frac || 0))) : 0;
     return BLINK_T_SLOW - (BLINK_T_SLOW - BLINK_T_FAST) * frac;
+  }
+
+  /* 깜빡임 스위치 — 네 화면이 한 값을 쓴다 (2026-11-22, 사용자 지시 「다크 모드처럼 전역으로」).
+     graph · portfolio · upjuk 의 체크박스와 mindmap 의 「깜빡임」 버튼이 이 값 하나를 읽고 쓴다. 다크 모드(theme.js 의
+     cfms_theme)와 같은 방식이다 — 같은 사이트의 localStorage 한 칸(cfms_blink, '1' | '0')이고, 한 화면에서 바꾸면
+     열려 있는 다른 탭도 storage 이벤트로 바로 따라온다. 기본은 켜짐(사용자 지시, 2026-09-19).
+     전에는 화면마다 키가 따로였다(OLD_BLINK_KEYS) — 그래서 한 화면에서 끈 것이 다른 화면에 안 옮겨 갔다. 옛 값은
+     옮기지 않고(넷이 서로 달랐을 수 있어 고를 근거가 없다) 이 파일이 처음 불릴 때 지운다.
+     localStorage 를 못 쓰는 브라우저(쿠키 · 사이트 데이터 차단)에서는 그 페이지 안에서만 기억한다.
+     WCAG 2.2.2(멈출 수 있을 것)는 이 스위치가, 2.3.1(초당 3회)은 위 사다리가 맡는다. */
+  const BLINK_PREF_KEY = 'cfms_blink';
+  const OLD_BLINK_KEYS = Object.freeze(['graphify_graph_blink_v1', 'cfms_mindmap_blink_v1', 'cfms_portfolio_blink_v1', 'cfms_upjuk_blink_v1']);
+  const store = () => { try { return root.localStorage || null; } catch (e) { return null; } };
+  let blinkMemo = true;
+  function blinkEnabled() {
+    const ls = store();
+    if (ls) {
+      try {
+        const v = ls.getItem(BLINK_PREF_KEY);
+        return v === null ? true : v !== '0';
+      } catch (e) { /* 아래 기억값 */ }
+    }
+    return blinkMemo;
+  }
+  const blinkListeners = [];
+  let blinkLast = blinkEnabled();
+  function tellBlink(on, why) {
+    if (on === blinkLast) return;
+    blinkLast = on;
+    blinkListeners.slice().forEach((fn) => { try { fn(on, why); } catch (e) { /* 한 화면의 오류가 다른 구독을 막지 않게 */ } });
+  }
+  function setBlink(on) {
+    const next = !!on;
+    blinkMemo = next;
+    const ls = store();
+    if (ls) { try { ls.setItem(BLINK_PREF_KEY, next ? '1' : '0'); } catch (e) { /* 기억값만 */ } }
+    tellBlink(next, 'user');
+  }
+  // fn(on, why) — why 는 'user'(이 탭에서 바꿈) | 'storage'(다른 탭에서 바꿈). 같은 탭의 다른 스위치도 이걸로 맞춘다.
+  function onBlinkChange(fn) { if (typeof fn === 'function') blinkListeners.push(fn); }
+  {
+    const ls = store();
+    if (ls) OLD_BLINK_KEYS.forEach((k) => { try { ls.removeItem(k); } catch (e) { /* 없어도 그만 */ } });
+  }
+  if (typeof root.addEventListener === 'function') {
+    root.addEventListener('storage', (e) => {
+      if (e.key === BLINK_PREF_KEY || e.key === null) tellBlink(blinkEnabled(), 'storage');
+    });
   }
 
   /* 진도 자국을 그릴 색 (2026-09-14). 파이는 흰 바탕에 등급 색으로 자국을 내는데, ToDo 등급의 색은
@@ -182,6 +231,7 @@
   root.CFMS_STAGES = Object.freeze({
     PIE, ORDER, ALIAS, key, info, shortLabel,
     BLINK_STAGES, BLINK_T_SLOW, BLINK_T_FAST, blinks, blinkPeriod,
+    BLINK_PREF_KEY, OLD_BLINK_KEYS, blinkEnabled, setBlink, onBlinkChange,
     pieInk, pieSvg,
     SUBMISSION_SITE_STAGES, SUBMISSION_SITES, submissionSite,
   });

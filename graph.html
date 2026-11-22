@@ -2526,16 +2526,16 @@ function drawNodePie(ctx, cx, cy, R, p, color, border) {
    초당 열 번 남짓이다. 그래프가 숨어 있으면(인접행렬 뷰) 그리지 않고 일정만 이어 간다.
    2026-11-21: 어느 단계가 깜빡이는지(저널 손에 가 있고 결판이 안 난 것)와 주기는 stages.js 다 —
    네 화면이 같은 박자로 뛴다. stages.js 가 안 불리면 깜빡이지 않는다. */
-const BLINK_KEY = 'graphify_graph_blink_v1';
 const BLINK_STAGES = SHARED_STAGES ? SHARED_STAGES.BLINK_STAGES : new Set();
 function blinkPeriod(stage) {
   return SHARED_STAGES ? SHARED_STAGES.blinkPeriod(stage) : 2400;
 }
 /* 기본은 켜짐이다(사용자 지시). 끄고 싶은 사람은 스위치로 끄고 그 선택이 이 브라우저에
    남는다 — WCAG 2.2.2 가 요구하는 「멈출 수 있을 것」은 그 스위치가 만족시키고, 2.3.1 의
-   초당 3회 기준은 제일 빠른 주기가 1.25Hz 라 넘지 않는다. */
-let blinkOn = true;
-try { if (localStorage.getItem(BLINK_KEY) === '0') blinkOn = false; } catch (e) {}
+   초당 3회 기준은 제일 빠른 주기가 1.25Hz 라 넘지 않는다.
+   2026-11-22 (사용자 지시): 켜고 끄는 값은 stages.js 의 공용 스위치(cfms_blink)다 — mindmap · portfolio · upjuk 과
+   한 값이고, 다른 탭에서 바꿔도 따라온다. 전에는 이 화면만의 키였다. */
+let blinkOn = SHARED_STAGES ? SHARED_STAGES.blinkEnabled() : true;
 function blinkShowing(key, stage) {
   if (!blinkOn || !BLINK_STAGES.has(key)) return true;
   const T = blinkPeriod(stage);
@@ -2564,15 +2564,21 @@ function scheduleBlink() {
 }
 (function installBlinkToggle() {
   const cb = document.getElementById('blink-cb');
-  if (!cb) return;
-  cb.checked = blinkOn;
-  cb.addEventListener('change', () => {
-    blinkOn = cb.checked;
-    try { localStorage.setItem(BLINK_KEY, blinkOn ? '1' : '0'); } catch (e) {}
+  const apply = (on) => {
+    blinkOn = on;
+    if (cb) cb.checked = on;
     clearTimeout(blinkTimer);
     network.redraw();                // 끄면 전부 다시 보이게, 켜면 즉시 박자를 타게
     scheduleBlink();
-  });
+  };
+  if (cb) {
+    cb.checked = blinkOn;
+    cb.addEventListener('change', () => {
+      if (SHARED_STAGES) SHARED_STAGES.setBlink(cb.checked); else apply(cb.checked);
+    });
+  }
+  // 이 탭의 체크박스든 다른 탭(다른 화면)의 스위치든 공용 값이 바뀌면 여기로 온다.
+  if (SHARED_STAGES) SHARED_STAGES.onBlinkChange(apply);
 })();
 scheduleBlink();
 

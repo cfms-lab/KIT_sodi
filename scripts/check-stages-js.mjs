@@ -44,6 +44,40 @@ for (const key of S.ORDER) {
   if (S.blinks(key) && 1000 / period > 3) throw new Error(`stage ${key} blinks more than three times a second`);
 }
 if (S.blinks("draft") || S.blinks("published") || !S.blinks("submitted") || !S.blinks("submit")) throw new Error("blink stage set changed unexpectedly");
+// 깜빡임 스위치 (2026-11-22): 네 화면이 localStorage 한 칸(cfms_blink)을 같이 쓴다. 기본 켜짐 · 옛 화면별 키는 지운다 ·
+// 바꾸면 같은 탭의 구독이 불린다 · 다른 탭의 storage 이벤트를 따른다 · localStorage 가 막혀도 페이지 안에서는 기억한다.
+{
+  if (S.BLINK_PREF_KEY !== "cfms_blink") throw new Error("blink switch key changed — every page reads cfms_blink");
+  const fakeStore = (seed = {}) => {
+    const m = new Map(Object.entries(seed));
+    return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k), m };
+  };
+  const boot = (ctx) => { runInNewContext(source, ctx); return ctx.CFMS_STAGES; };
+  // 기본 켜짐, 옛 키 정리
+  const ls = fakeStore(Object.fromEntries(S.OLD_BLINK_KEYS.map((k) => [k, "0"])));
+  const handlers = [];
+  const B = boot({ localStorage: ls, addEventListener: (type, fn) => { if (type === "storage") handlers.push(fn); } });
+  if (!B.blinkEnabled()) throw new Error("blink switch must default to on");
+  if (S.OLD_BLINK_KEYS.some((k) => ls.m.has(k))) throw new Error("old per-page blink keys must be removed");
+  if (!handlers.length) throw new Error("blink switch must follow other tabs (storage event)");
+  // 같은 탭: setBlink → 저장 + 구독 호출, 같은 값이면 다시 부르지 않는다
+  const heard = [];
+  B.onBlinkChange((on, why) => heard.push(`${on}:${why}`));
+  B.setBlink(false);
+  B.setBlink(false);
+  if (ls.m.get("cfms_blink") !== "0" || B.blinkEnabled() || heard.join() !== "false:user") throw new Error(`setBlink(false) wrong: ${heard}`);
+  // 다른 탭이 켰다
+  ls.setItem("cfms_blink", "1");
+  handlers.forEach((fn) => fn({ key: "cfms_blink" }));
+  handlers.forEach((fn) => fn({ key: "cfms_theme" }));       // 다른 키는 무시
+  if (!B.blinkEnabled() || heard.join() !== "false:user,true:storage") throw new Error(`storage sync wrong: ${heard}`);
+  // localStorage 가 막힌 브라우저: 던져도 죽지 않고 페이지 안에서 기억한다
+  const blocked = { getItem() { throw new Error("blocked"); }, setItem() { throw new Error("blocked"); }, removeItem() { throw new Error("blocked"); } };
+  const C = boot({ localStorage: blocked });
+  if (!C.blinkEnabled()) throw new Error("blocked storage must still default to on");
+  C.setBlink(false);
+  if (C.blinkEnabled()) throw new Error("blocked storage must remember the choice in the page");
+}
 // pieInk: 흰 ToDo 는 테두리 색으로, 나머지는 그대로.
 if (S.pieInk("#ffffff", "#0b0b0b") !== "#0b0b0b" || S.pieInk("#e02020", "#7a0000") !== "#e02020") throw new Error("pieInk rule changed");
 // pieSvg: 단계마다 그림이 나오고 모양이 표시대로다(r=6 기하).
@@ -100,6 +134,12 @@ for (const [name, banned] of Object.entries(pages)) {
   const firstInline = html.search(/<script>/);
   if (firstInline >= 0 && firstInline < tag) throw new Error(`${name} loads stages.js after an inline script that needs it`);
   for (const re of banned) if (re.test(html)) throw new Error(`${name} has its own copy again (${re}) — the rule lives in stages.js`);
+  // 깜빡임 켜기/끄기는 공용 스위치 하나다(2026-11-22) — 화면별 키를 다시 두면 그 화면만 따로 움직인다.
+  for (const old of S.OLD_BLINK_KEYS) if (html.includes(old)) throw new Error(`${name} uses its own blink key ${old} again — use CFMS_STAGES.blinkEnabled/setBlink`);
+  if (/\bBLINK_KEY\b/.test(html)) throw new Error(`${name} has its own BLINK_KEY again — the blink switch lives in stages.js`);
+  for (const call of [".blinkEnabled(", ".setBlink(", ".onBlinkChange("]) {
+    if (!html.includes(call)) throw new Error(`${name} must use the shared blink switch (${call.slice(1, -1)})`);
+  }
 }
 
 // graph3d.html 은 graph.html 소스에서 `const STAGE_PIE = {…}` 를 꺼내 노드 높이를 정한다(stages.js 는 안 읽는다).
@@ -127,6 +167,7 @@ for (const [name, banned] of Object.entries(pages)) {
 console.log(JSON.stringify({
   stages: S.ORDER.length,
   blinking: [...S.BLINK_STAGES].join(","),
+  blinkSwitch: S.BLINK_PREF_KEY,
   submissionSites: S.SUBMISSION_SITES.length,
   pages: Object.keys(pages).length,
 }));

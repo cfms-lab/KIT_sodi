@@ -330,13 +330,15 @@ function stagePie(p){
   const tip=단계.shortLabel(stage)+(n&&n.grade?` · 등급 ${n.grade}`:"");
   return `<span class="pie" title="${esc(tip)}">${파이(stage,n?파이색(n.grade):"#94a3b8")}</span>`;
 }
-/* 깜빡임 스위치 — 기본 켜짐, 선택은 이 브라우저에만 남는다(portfolio·graph 와 같은 방식). */
-const BLINK_KEY="cfms_upjuk_blink_v1";
+/* 깜빡임 스위치 — 기본 켜짐, 선택은 이 브라우저에만 남는다.
+   2026-11-22 (사용자 지시): 값은 stages.js 의 공용 스위치(cfms_blink)다 — graph · mindmap · portfolio 와 한 값이고,
+   다른 탭에서 바꿔도 따라온다. 전에는 이 화면만의 키였다. */
 (function(){
   const cb=document.getElementById("blink"); if(!cb)return;
-  let on=true; try{ if(localStorage.getItem(BLINK_KEY)==='0') on=false; }catch(e){}
-  cb.checked=on; document.body.classList.toggle("blink-on",on);
-  cb.addEventListener("change",()=>{ try{localStorage.setItem(BLINK_KEY,cb.checked?'1':'0');}catch(e){} document.body.classList.toggle("blink-on",cb.checked); });
+  const apply=on=>{ cb.checked=on; document.body.classList.toggle("blink-on",on); };
+  apply(단계?단계.blinkEnabled():true);
+  cb.addEventListener("change",()=>{ if(단계) 단계.setBlink(cb.checked); else apply(cb.checked); });
+  if(단계) 단계.onBlinkChange(apply);
 })();
 
 /* ===== 저자(드물게 변경 → 내장) =====

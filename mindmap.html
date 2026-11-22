@@ -2429,19 +2429,20 @@ function toggleRel(){ showRel=!showRel; DATA.showRel=showRel; document.getElemen
 /* 진도 깜빡임 토글 — 기본은 켜짐(사용자가 요청한 기능이다). 선택은 이 브라우저에만 남는다
    (DATA 가 아니라 localStorage 다 — 보기 취향이지 문서 내용이 아니므로 클라우드에 올리지
    않는다). 실제 깜빡임은 CSS 가 하고 여기서는 .blink-on 만 켰다 껐다 한다. */
-const BLINK_KEY='cfms_mindmap_blink_v1';
 // 기본은 켜짐이다(사용자 지시). 끄면 그 선택만 이 브라우저에 남는다.
-let blinkOn = (function(){ try{ return localStorage.getItem(BLINK_KEY)!=='0'; }catch(e){ return true; } })();
+// 2026-11-22 (사용자 지시): 켜고 끄는 값은 stages.js 의 공용 스위치(cfms_blink)다 — graph · portfolio · upjuk 과 한 값이고,
+// 다른 탭에서 바꿔도 따라온다. 전에는 이 지도만의 키라 혼자 따로 움직였다.
+let blinkOn = STAGES ? STAGES.blinkEnabled() : true;
 function applyBlink(){
   document.body.classList.toggle('blink-on', blinkOn);
   const b=document.getElementById('blinkBtn');
   if(b) b.textContent='깜빡임 '+(blinkOn?'✓':'✕');
 }
 function toggleBlink(){
-  blinkOn=!blinkOn;
-  try{ localStorage.setItem(BLINK_KEY, blinkOn?'1':'0'); }catch(e){}
-  applyBlink();
+  if(STAGES) STAGES.setBlink(!blinkOn);   // 아래 onBlinkChange 가 blinkOn 을 바꾸고 다시 칠한다
+  else { blinkOn=!blinkOn; applyBlink(); }
 }
+if(STAGES) STAGES.onBlinkChange(on=>{ blinkOn=on; applyBlink(); });
 applyBlink();
 /* 다크 모드 (2026-11-21): 체크박스 · 다른 탭 · 6시/18시 · 인쇄로 테마가 바뀌면 SVG(노드 · 관계선)와 범례만 다시 그린다 —
    나머지는 CSS 다. 편집 패널은 다시 그리지 않는다(입력 중인 칸의 포커스를 지키려고 패널 색은 CSS 로만 칠했다). */
