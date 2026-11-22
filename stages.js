@@ -155,6 +155,9 @@
       system: 'Wiley Research Exchange', url: 'https://authors.wiley.com/dashboard' },
     { key: 'TVC', journal: 'The Visual Computer', names: ['The Visual Computer', 'TVC'],
       system: 'Springer Nature SNAPP', url: 'https://submission.springernature.com/your-submissions' },
+    // 2026-11-22 SFTF_Holonomy 투고. 약어는 ISO 「Appl. Compos. Mater.」 — 「ACM」은 Advanced Composite Materials(T&F)와 겹쳐 쓰지 않는다.
+    { key: 'Appl. Compos. Mater.', journal: 'Applied Composite Materials', names: ['Applied Composite Materials', 'Appl. Compos. Mater.'],
+      system: 'Springer Nature SNAPP', url: 'https://submission.springernature.com/your-submissions' },
   ];
   SUBMISSION_SITES.forEach((site) => { Object.freeze(site.names); Object.freeze(site); });
   Object.freeze(SUBMISSION_SITES);

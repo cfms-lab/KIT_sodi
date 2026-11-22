@@ -766,7 +766,8 @@ QUALITY_ROWS = [
      # 2026-10-26: 2026-10-25 JCDE 결과 — 「심사 대기」를 걷었다. 등급 上 은 재판정 전이라 그대로(볼트 grade 와 같다).
      # 2026-10-27: 볼트 10-26 오후 판 — 합쳤던 HeatMethod 의 통제 실험을 다시 뺐다.
      # 2026-11-21: 공개 문구 정리(사용자) — graph.html 소스에 그대로 구워지므로 투고 경위를 줄이고 지금 게재지(FnP)로 맞췄다.  표의 grade_note 가 화면에서는 이 값을 덮는다.
-     "전단각 항등식 논문 트랙; 적합 0개로 반구 실측 29점 MAE 0.57°. JCDE·IJMF 를 거쳐 2026-11-03 Fibers and Polymers 에 투고(FIPO-D-26-01939)"),
+     # 2026-11-22: 지금 게재지를 Applied Composite Materials 로(볼트 mindmap_note 와 같은 「…를 거쳐」 틀).
+     "전단각 항등식 논문 트랙; 적합 0개로 반구 실측 29점 MAE 0.57°. JCDE·IJMF·Fibers and Polymers 를 거쳐 2026-11-22 Applied Composite Materials 에 투고"),
     ("cfmsPINNDrape", "cfmsPINNDrape", "하", "PINN 기반 드레이프 실험"),
     ("cfmsDrape", "cfmsDrape", "등급 없음", "드레이프 엔진 기반 저장소; 독립 논문 등급 미적용"),
     ("cfmsMiindo", "cfmsMiindo", "등급 없음", "의복 CAD·드레이프 모노레포; 독립 논문 등급 미적용"),
@@ -1447,7 +1448,8 @@ if preserve_extended_quality:
             # 2026-10-26: 2026-10-25 JCDE 결과 — 볼트 badge 와 같은 문구다.
             # 2026-10-27: 볼트 10-26 오후 판(통제 실험 분리) — 볼트 badge 와 같은 문구다.
             # 2026-11-21: 2026-11-03 FnP 투고 · 11-20 With Editor — 볼트 badge 와 같은 문구다(투고 사이트 버튼이 이 머리로 저널을 찾는다).
-            "SFTF_Holonomy": "FnP 편집자 검토 중 (2026-11-03 투고, FIPO-D-26-01939)",
+            # 2026-11-22: FnP 결정 뒤 같은 날 Applied Composite Materials 투고(SNAPP) — 볼트 badge 와 같은 문구다. 약어는 ISO(「ACM」은 다른 저널과 겹친다).
+            "SFTF_Holonomy": "Appl. Compos. Mater. 투고 완료 (2026-11-22, 원고번호 할당중)",
             # 2026-11-15 The Visual Computer 투고(SNAPP, 원고번호 할당 전). 볼트 badge 와 같은 문구다.
             # 2026-11-17 기술 점검 통과 → With Editor(사용자 확인). 앞 값: 「TVC 투고 완료 (2026-11-15, 원고번호 할당중)」
             "cfmsSXJacobian": "TVC 편집자 검토 중 (2026-11-15 투고, 원고번호 할당중)",
