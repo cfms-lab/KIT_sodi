@@ -140,6 +140,8 @@ for (const [name, banned] of Object.entries(pages)) {
   for (const call of [".blinkEnabled(", ".setBlink(", ".onBlinkChange("]) {
     if (!html.includes(call)) throw new Error(`${name} must use the shared blink switch (${call.slice(1, -1)})`);
   }
+  // 스위치 이름표도 네 화면이 같은 「깜빡임」이다(2026-11-22, 사용자 지시 — portfolio · upjuk 은 전에 「진도 깜빡임」이었다).
+  if (/>\s*진도 깜빡임/.test(html)) throw new Error(`${name} labels the blink switch 「진도 깜빡임」 again — the four pages say 「깜빡임」`);
 }
 
 // graph3d.html 은 graph.html 소스에서 `const STAGE_PIE = {…}` 를 꺼내 노드 높이를 정한다(stages.js 는 안 읽는다).
