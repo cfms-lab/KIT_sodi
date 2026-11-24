@@ -5,6 +5,7 @@
 // 대부분 「없어야 할 것이 없는가」를 본다. 데이터 자체는 Supabase portfolio_rows 에 있고
 // RLS 가 지킨다(schema_portfolio_rows.sql).
 import { readFileSync } from "node:fs";
+import { runInNewContext } from "node:vm";
 
 const html = readFileSync(new URL("../portfolio.html", import.meta.url), "utf8");
 if (/^(<<<<<<<|=======|>>>>>>>)/m.test(html)) {
@@ -55,9 +56,31 @@ for (const field of ["순서", "완성도", "등급", "공저자키", "투고"])
   if (!html.includes(field)) throw new Error(`portfolio.html lost the BLANK_FIELD entry for ${field}`);
 }
 
+// ⑤ 투고 사이트 (2026-11-24, 사용자 지시) — 투고~인쇄중 행의 「투고」 칸 파이를 누르면 그 저널의 투고 시스템이
+//    새 창으로 열린다. 저널 → 주소 표와 찾는 규칙은 stages.js 하나다(graph 의 Node Info 버튼과 같은 표).
+//    이 화면은 배지가 아니라 저널 약어(journalShort, 볼트 「저널 메모」)로 찾으므로, 표의 각 줄이 제 약어(key)로
+//    찾혀야 한다 — 새 줄의 key 를 names 에 빠뜨리면 graph 에서는 되고 여기서는 안 되는 저널이 생긴다.
+if (!/단계\.submissionSite\(/.test(html)) throw new Error("portfolio.html must find submission sites with CFMS_STAGES.submissionSite (stages.js)");
+if (!/<a class="site-link" href="\$\{esc\(site\.url\)\}" target="_blank" rel="noopener"/.test(html)) {
+  throw new Error("portfolio.html submission-site pie must be an escaped new-window link (target=_blank rel=noopener)");
+}
+if (!/closest\("[^"]*a\.site-link[^"]*"\)\) return;/.test(html)) {
+  throw new Error("portfolio.html row click must skip the submission-site pie (else the row toggles open)");
+}
+const stagesContext = {};
+runInNewContext(readFileSync(new URL("../stages.js", import.meta.url), "utf8"), stagesContext);
+const STAGES = stagesContext.CFMS_STAGES;
+for (const site of STAGES.SUBMISSION_SITES) {
+  if (STAGES.submissionSite("submitted", site.key) !== site) {
+    throw new Error(`stages.js SUBMISSION_SITES 「${site.key}」 is not found by its own key — portfolio looks journals up by that abbreviation`);
+  }
+}
+if (STAGES.submissionSite("draft", "TSE") !== null) throw new Error("submission sites must stay limited to submitted~inprint");
+
 console.log(JSON.stringify({
   inlineScripts: scripts.length,
   bakedRows: 0,
   loginGate: true,
   source: "supabase:portfolio_rows (RLS, authenticated only)",
+  submissionSitePie: STAGES.SUBMISSION_SITES.length,
 }));

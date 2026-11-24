@@ -120,6 +120,11 @@
   .chip{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
   .dot{width:10px;height:10px;border-radius:2px;border:1px solid rgba(15,23,42,.35);flex:0 0 auto}
   .journal{display:inline-flex;align-items:center;gap:5px}
+  /* 투고 사이트 (2026-11-24, 사용자 지시) — 투고~인쇄중 행은 「투고」 칸 파이를 누르면 그 저널의 투고 시스템이
+     새 창으로 열린다(graph Node Info 의 「투고 사이트」 버튼과 같은 일). 누를 수 있는 파이에만 손가락 커서와 고리가 뜬다. */
+  .site-link{display:inline-flex;flex:0 0 auto;border-radius:50%;cursor:pointer;outline-offset:1px}
+  .site-link:hover{box-shadow:0 0 0 2px #93c5fd}
+  .site-link:focus-visible{outline:2px solid #2563eb}
   /* 투고 사다리의 화살표만 흐리게 — 저널 약어는 본문 색·크기 그대로 둔다.
      2026-09-20: 2·3순위를 작은 글씨 둘째 줄로 뒀더니 잘 안 보인다는 사용자 지적에
      「약어 → 약어 → 약어」 한 줄로 바꿨다. */
@@ -179,6 +184,8 @@
   html[data-theme="dark"] .vscode-btn:hover{background:#1f3550;border-color:#4d79b3;color:var(--dk-link)}
   html[data-theme="dark"] .dot{border-color:rgba(221,225,230,.45)}
   html[data-theme="dark"] .jarrow{color:var(--dk-faint)}
+  html[data-theme="dark"] .site-link:hover{box-shadow:0 0 0 2px #4d79b3}
+  html[data-theme="dark"] .site-link:focus-visible{outline-color:var(--dk-link)}
   html[data-theme="dark"] .toast{background:#3b424b;color:var(--dk-strong);border:1px solid var(--dk-border);box-shadow:var(--dk-shadow)}
 </style>
 <!-- 저자 관점의 ToDo 한 줄. 이 파일이 DB 값보다 먼저다 (2026-09-21). -->
@@ -471,6 +478,32 @@ function 투고툴팁(row, stage) {
   return row.journalFull ? `${앞}\n${row.journalFull}` : 앞;
 }
 
+/* 투고 사이트 (2026-11-24, 사용자 지시) — graph Node Info 의 「투고 사이트」 버튼을 여기서는 「투고」 칸 파이에 단다.
+   투고(submitted)부터 인쇄중(inprint)까지인 행만이고, 저널 → 투고 시스템 표와 찾는 규칙은 stages.js(SUBMISSION_SITES ·
+   submissionSite)다 — graph 와 한 표다. graph 는 노드 배지 머리로 찾지만 이 표의 행에는 배지가 없어서 저널 약어 →
+   전체 이름 → 「투고」칸 이름 순으로 넣어 본다(사다리가 있는 행은 약어가 지금 투고한 1순위다).
+   못 찾으면(표에 없는 저널) 파이는 예전처럼 그림일 뿐이다 — 새 저널에 투고하면 stages.js 에 한 줄 더한다.
+   주소는 저널마다 하나인 공통 주소다(원고별 주소는 stages.js 에 넣지 않는다). */
+function 투고사이트(row) {
+  if (!단계 || typeof 단계.submissionSite !== "function") return null;
+  for (const name of [row.journalShort, row.journalFull, row.journal]) {
+    const site = name ? 단계.submissionSite(row.stage, name) : null;
+    if (site && /^https?:\/\//i.test(site.url)) return site;
+  }
+  return null;
+}
+function 파이칸(row, stage) {
+  const 그림 = 파이(row.stage, 파이색(row.grade));
+  const site = 그림 ? 투고사이트(row) : null;
+  if (!site) return 그림;
+  const 이름 = (site.home ? "저널 홈 · " : "투고 사이트 · ") + site.key;
+  const 하는일 = site.home
+    ? `누르면 ${site.journal} 저널 홈을 새 창으로 엽니다 — ${site.note}`
+    : `누르면 ${site.journal} 투고 시스템(${site.system})을 새 창으로 엽니다 — 투고 상황 확인`;
+  return `<a class="site-link" href="${esc(site.url)}" target="_blank" rel="noopener"`
+    + ` title="${esc(투고툴팁(row, stage) + "\n" + 하는일)}" aria-label="${esc(이름)}">${그림}</a>`;
+}
+
 /* 저자 관점의 ToDo 한 줄 (todo.js — 2026-11-21~ Supabase todo_lines 에서 받는다, 정본은 볼트 노트 todo: · 대시보드
    분리트랙 할일:). 없으면 볼트가 발행한 옛 「다음 게이트」 문장으로 떨어진다. */
 const 할일 = row => {
@@ -494,14 +527,14 @@ function 행그리기(row) {
     + `<td class="num">${esc(row.completeness)}</td>`
     + `<td><span class="chip"><span class="dot" style="background:${QUALITY_COLORS[row.grade] || "var(--q-none)"}"></span>${esc(row.grade)}</span></td>`
     + `<td class="c-co">${공저자칸(row.coauthor)}</td>`
-    + `<td><span class="journal" title="${esc(투고툴팁(row, stage))}">${파이(row.stage, 파이색(row.grade))}<span>${투고사슬(row)}</span></span></td>`
+    + `<td><span class="journal" title="${esc(투고툴팁(row, stage))}">${파이칸(row, stage)}<span>${투고사슬(row)}</span></span></td>`
     + `<td><div class="clamp" title="${esc(할일(row))}">${esc(할일(row))}</div></td>`
     + `<td class="c-intro"><div class="clamp" title="${esc(row.intro)}">${esc(row.intro)}</div></td>`;
   // 긴 서술 두 열은 3줄에서 자른다. 줄을 누르면 그 행만 펼친다.
-  // ↗·VS 는 여기서 걸러 낸다 — 이 핸들러가 tbody 의 위임 핸들러보다 먼저 버블을 받으므로
+  // ↗·VS·투고 사이트 파이는 여기서 걸러 낸다 — 이 핸들러가 tbody 의 위임 핸들러보다 먼저 버블을 받으므로
   // 저쪽에서 stopPropagation 을 해도 이미 늦다(그래서 링크를 눌러도 행이 펼쳐졌다).
   tr.addEventListener("click", (event) => {
-    if (event.target.closest("a.repo, .vscode-btn")) return;
+    if (event.target.closest("a.repo, .vscode-btn, a.site-link")) return;
     tr.classList.toggle("open");
   });
   return tr;
