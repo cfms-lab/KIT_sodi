@@ -80,6 +80,11 @@
      프로젝트의 논문 등급(연결이 없으면 회색). 기하는 portfolio.html 의 파이() 그대로다. */
   .pie{display:inline-flex;align-items:center;vertical-align:middle;margin-right:6px}
   .pie svg{display:block}
+  /* 투고 사이트 (2026-11-24, 사용자 지시) — 투고~인쇄중 논문의 파이를 누르면 그 저널의 투고 시스템이 새 창으로 열린다
+     (graph Node Info 버튼 · portfolio 「투고」 칸 파이와 같은 일). 누를 수 있는 파이에만 손가락 커서와 고리가 뜬다. */
+  .site-link{border-radius:50%;cursor:pointer;outline-offset:1px;text-decoration:none}
+  .site-link:hover{box-shadow:0 0 0 2px #93c5fd}
+  .site-link:focus-visible{outline:2px solid #2563eb}
   .toolbar label.chk{flex-direction:row;align-items:center;gap:5px;font-size:12px;color:#475569;cursor:pointer;user-select:none;padding-bottom:7px}
   /* 진도 깜빡임 — portfolio.html 과 같은 CSS 다. 주기는 파이마다 animation-duration 으로 박힌다.
      제일 빠른 것이 800ms = 1.25Hz 로 WCAG 2.3.1(초당 3회) 아래이고, 툴바 스위치로 멈출 수 있다. */
@@ -142,6 +147,8 @@
   html[data-theme="dark"] .paper .num{color:var(--dk-faint)}
   html[data-theme="dark"] .title{color:var(--dk-link)}
   html[data-theme="dark"] .doitxt{color:var(--dk-link)}
+  html[data-theme="dark"] .site-link:hover{box-shadow:0 0 0 2px #4d79b3}
+  html[data-theme="dark"] .site-link:focus-visible{outline-color:var(--dk-link)}
   html[data-theme="dark"] .funding{color:var(--dk-green)}
   html[data-theme="dark"] .doi{color:var(--dk-link);border-color:var(--dk-link)}
   html[data-theme="dark"] .pdf{color:var(--dk-red);background:var(--dk-raised);border-color:var(--dk-red)}
@@ -328,7 +335,29 @@ function stagePie(p){
   if(!단계||!단계.info(stage))return "";
   const n=nodeById(p.PROJECT_ID);
   const tip=단계.shortLabel(stage)+(n&&n.grade?` · 등급 ${n.grade}`:"");
-  return `<span class="pie" title="${esc(tip)}">${파이(stage,n?파이색(n.grade):"#94a3b8")}</span>`;
+  const 그림=파이(stage,n?파이색(n.grade):"#94a3b8");
+  const site=투고사이트(p,stage,n);
+  if(!site)return `<span class="pie" title="${esc(tip)}">${그림}</span>`;
+  const 이름=(site.home?"저널 홈 · ":"투고 사이트 · ")+site.key;
+  const 하는일=site.home
+    ?`누르면 ${site.journal} 저널 홈을 새 창으로 엽니다 — ${site.note}`
+    :`누르면 ${site.journal} 투고 시스템(${site.system})을 새 창으로 엽니다 — 투고 상황 확인`;
+  return `<a class="pie site-link" href="${esc(site.url)}" target="_blank" rel="noopener"`
+    +` title="${esc(tip+"\n"+하는일)}" aria-label="${esc(이름)}">${그림}</a>`;
+}
+/* 투고 사이트 (2026-11-24, 사용자 지시) — graph Node Info 의 「투고 사이트」 버튼 · portfolio 「투고」 칸 파이와 같은 일을
+   이 화면의 파이에 단다. 투고(submitted)부터 인쇄중(inprint)까지인 논문만이고, 저널 → 투고 시스템 표와 찾는 규칙은
+   stages.js(SUBMISSION_SITES · submissionSite)다 — 세 화면이 한 표다. 논문 행의 저널 칸(journal_name)으로 먼저 찾고,
+   못 찾으면 연결된 프로젝트 노드의 배지 머리로 찾는다(graph 와 같은 길 — 「International Journal of Advanced
+   Manufacturing Technology」처럼 표의 이름과 조금 다르게 적힌 저널). 둘 다 못 찾으면 파이는 예전처럼 그림일 뿐이다.
+   비로그인 화면은 출판 논문만 보이므로 링크가 붙지 않는다. 주소는 저널 공통 주소다(원고별 주소는 넣지 않는다). */
+function 투고사이트(p,stage,n){
+  if(!단계||typeof 단계.submissionSite!=="function")return null;
+  for(const name of [p.JOURNAL_NAME,n&&n.badge]){
+    const site=name?단계.submissionSite(stage,name):null;
+    if(site&&/^https?:\/\//i.test(site.url))return site;
+  }
+  return null;
 }
 /* 깜빡임 스위치 — 기본 켜짐, 선택은 이 브라우저에만 남는다.
    2026-11-22 (사용자 지시): 값은 stages.js 의 공용 스위치(cfms_blink)다 — graph · mindmap · portfolio 와 한 값이고,

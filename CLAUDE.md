@@ -38,7 +38,7 @@
 ## 투고 단계 어휘 · 파이 모양 · 깜빡임 · 투고 사이트
 
 2026-11-21 부터 **`stages.js` 한 곳**이다 — graph·mindmap·portfolio·upjuk 이 `<script src="stages.js">` 로 같이 읽는다.
-단계를 더하거나 모양·박자를 바꾸거나 새 저널의 투고 시스템 주소(`SUBMISSION_SITES` — graph Node Info 버튼과 portfolio 「투고」 칸 파이가 같이 쓴다, 2026-11-24~)를 더할 때는 이 파일을 고친다(재생성 불필요).
+단계를 더하거나 모양·박자를 바꾸거나 새 저널의 투고 시스템 주소(`SUBMISSION_SITES` — graph Node Info 버튼 · portfolio 「투고」 칸 파이 · upjuk 파이가 같이 쓴다, 2026-11-24~)를 더할 때는 이 파일을 고친다(재생성 불필요).
 깜빡임 켜기/끄기도 2026-11-22 부터 이 파일의 공용 스위치 하나다(`blinkEnabled` · `setBlink` · `onBlinkChange`, localStorage `cfms_blink` —
 다크 모드처럼 네 화면 · 탭 공용, 기본 켜짐). 화면별 키를 다시 두면 `check-stages-js.mjs` 가 멈춘다.
 예외: graph3d 가 graph.html 소스를 읽으므로 graph.html 의 `const STAGE_PIE = {…}` 리터럴을 글자까지 같게 고친다 —

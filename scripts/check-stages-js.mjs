@@ -144,6 +144,17 @@ for (const [name, banned] of Object.entries(pages)) {
   if (/>\s*진도 깜빡임/.test(html)) throw new Error(`${name} labels the blink switch 「진도 깜빡임」 again — the four pages say 「깜빡임」`);
 }
 
+// 투고 사이트 (2026-11-24, 사용자 지시) — graph 의 Node Info 버튼과 같은 표(SUBMISSION_SITES)로 portfolio 「투고」 칸 파이와
+// upjuk 파이도 그 저널의 투고 시스템을 새 창으로 연다. 화면에 주소를 따로 박지 않고 submissionSite 로 찾는지,
+// 링크가 이스케이프된 새 창 링크인지 본다(portfolio 의 행 클릭 예외는 check-portfolio-html.mjs 가 본다).
+for (const name of ["portfolio.html", "upjuk.html"]) {
+  const html = read(name);
+  if (!/\.submissionSite\(/.test(html)) throw new Error(`${name} must find submission sites with CFMS_STAGES.submissionSite`);
+  if (!/<a class="(?:pie )?site-link" href="\$\{esc\(site\.url\)\}" target="_blank" rel="noopener"/.test(html)) {
+    throw new Error(`${name} submission-site pie must be an escaped new-window link (target=_blank rel=noopener)`);
+  }
+}
+
 // graph3d.html 은 graph.html 소스에서 `const STAGE_PIE = {…}` 를 꺼내 노드 높이를 정한다(stages.js 는 안 읽는다).
 // 그 리터럴이 stages.js 의 PIE 와 키 순서 · 값 · 이름까지 같아야 한다. graph3d 의 괄호 짝 찾기는 주석 속 따옴표를
 // 모르므로 리터럴 안에는 주석이 없어야 한다.
