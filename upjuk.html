@@ -589,13 +589,19 @@ function authorEng(n){const p=PEOPLE.find(x=>x.NAME===n);return p?{f:p.ENGNAME_F
 function searchPapers(f){const eng=f.author!=="ALL"?authorEng(f.author):{f:"",s:"",l:""};
   let res=PAPERS.filter(p=>{const y=evalYear(p);if(y<f.from||y>f.to)return false;if(f.categ!=="ALL"&&p.CATEG!==f.categ)return false;
     return checkName(p.AUTHORS,f.author,eng.f,eng.s,eng.l);});
-  /* 줄 순서 = 평가연도 → 공저 교수 묶음 → 최신순 (2026-11-06, 사용자 지시 — 같은 색 줄을 모아 보기 편하게).
-     평가연도를 맨 앞에 두어 연도 구분선이 깨지지 않는다. 묶음 순서는 AUTHOR_COLORS 의 역순이고 흰 줄이 맨 앞이다
-     (흰 줄 → 김우석 → 은종현 → 이희란. 같은 날 사용자 지시로 뒤집었다). */
-  const group=new Map(res.map(p=>[p,coauthorKey(p)]));
-  const byGroup=(a,b)=>{const x=group.get(a),y=group.get(b);return x<y?1:x>y?-1:0;};
-  res.sort((a,b)=>evalYear(b)-evalYear(a)||byGroup(a,b)||b.P_YEAR-a.P_YEAR||b.P_MONTH-a.P_MONTH||b.P_DAY-a.P_DAY||(a.JOURNAL_NAME||"").localeCompare(b.JOURNAL_NAME||""));
+  /* 줄 순서 = 투고 진도 → 최신순 (2026-11-25, 사용자 지시 — 출판이 맨 위, 진도가 같으면 최근 날짜가 위).
+     진도 순서는 stages.js 의 ORDER(출판 → 인쇄중 → 게재확정 → 2차 수정 → 1차 수정 → 투고 → 초고 …)다.
+     같은 진도 안은 날짜 내림차순이라 평가연도도 내림차순으로 이어지고, 구분선은 renderList 가 단계 · 평가연도로 긋는다.
+     전에는 평가연도 → 공저 교수 묶음 → 최신순이었다(11-06) — 미출판 업적이 2026 · 2027 평가연도에 몰려
+     2027 초고가 맨 위에 오고 2026 안에서도 출판과 투고가 섞였다. 비로그인은 출판만 보이므로 날짜순 그대로다. */
+  res.sort((a,b)=>진도순위(a)-진도순위(b)||b.P_YEAR-a.P_YEAR||b.P_MONTH-a.P_MONTH||b.P_DAY-a.P_DAY||(a.JOURNAL_NAME||"").localeCompare(b.JOURNAL_NAME||""));
   return res;}
+/* 투고 진도 순위: stages.js ORDER 의 자리(0 = 출판). 모르는 단계는 맨 뒤, stages.js 를 못 읽으면 모두 같다(날짜순). */
+function 진도순위(p){
+  if(!단계||!단계.ORDER)return 0;
+  const i=단계.ORDER.indexOf(단계.key(p.STAGE||'published'));
+  return i<0?단계.ORDER.length:i;
+}
 function doSearch(){const f=getFilters();renderList(searchPapers(f),f);}
 function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 /* 인라인 onclick 안에 넣을 **문자열 인자**를 따옴표까지 붙여서 만든다.
@@ -620,7 +626,12 @@ function renderList(res,f){
     todos.forEach((n,j)=>{html+=renderTodoNode(n,j+1);});
   }
   let py=null,i=1;
-  for(const p of res){const y=evalYear(p);if(py!==y){html+=`<div class="yearsep"><span class="y">평가연도 ${y} (${y}.3~${y+1}.2)</span><span class="ln"></span></div>`;py=y;}html+=renderPaper(p,i++);}
+  /* 구분선: 출판은 예전처럼 평가연도만, 그 밖의 단계는 「단계 · 평가연도」(2026-11-25 — 진도순이라 같은 평가연도가
+     단계마다 다시 나오므로 이름표로 가른다). */
+  for(const p of res){const y=evalYear(p),stage=단계?단계.key(p.STAGE||'published'):'published',k=stage+"|"+y;
+    if(py!==k){const 단계이름=stage==='published'?"":((단계&&단계.shortLabel(stage))||stage)+" · ";
+      html+=`<div class="yearsep"><span class="y">${esc(단계이름)}평가연도 ${y} (${y}.3~${y+1}.2)</span><span class="ln"></span></div>`;py=k;}
+    html+=renderPaper(p,i++);}
   area.innerHTML=html;
 }
 // 프로젝트 ToDo 노드 한 줄. 논문이 아니므로 저자·저널 대신 소개(brief)·메모를 보여주고,
@@ -648,13 +659,11 @@ const AUTHOR_COLORS=[
   {NAME:"은종현",COLOR:"var(--au-eun)"},
   {NAME:"김우석",COLOR:"var(--au-kim)"},
 ];
-/* 이 줄에 든 공저 교수의 AUTHOR_COLORS 번호들. 색칠과 줄 순서가 같은 판정을 쓴다. */
+/* 이 줄에 든 공저 교수의 AUTHOR_COLORS 번호들. 이름 색칠이 쓴다(2026-11-25 까지는 줄 순서도 이 판정을 썼다). */
 function authorHits(p){
   return AUTHOR_COLORS.map((a,i)=>{const e=authorEng(a.NAME);return checkName(p.AUTHORS,a.NAME,e.f,e.s,e.l)?i:-1;}).filter(i=>i>=0);
 }
 function authorColors(p){return authorHits(p).map(i=>AUTHOR_COLORS[i].COLOR);}
-/* 줄 순서 열쇠(글자 역순 비교): 없음 "~"(맨 앞) · 김우석 "2" · 은종현 "1" · 이희란+은종현 "01" · 이희란 "0". */
-function coauthorKey(p){return authorHits(p).join("")||"~";}
 /* 저자 칸 HTML. 저자 문자열을 쉼표·and·&·;·/ 로 나눈 저자 하나하나에 checkName 을 다시 대어, 공저 교수인
    저자의 이름(뒤의 교신 표시 *·† 는 빼고)을 <span class="au-name"> 으로 감싼다. 구분자와 나머지 글자는 그대로다.
    한 저자 조각만 보면 앞 저자 이름이 성 앞 토큰으로 섞이지 않아 줄 전체 판정(authorHits)과 같은 교수가 잡힌다

@@ -10,7 +10,7 @@
 
 | 화면 | 값이 있는 곳 | 무엇을 칠하나 | 판정 기준 |
 |---|---|---|---|
-| `upjuk.html` | `:root` 의 `--au-lee` `--au-eun` `--au-kim` · `AUTHOR_COLORS` · `authorsHtml()` | 저자 칸의 **그 교수 이름 글자 배경**(11-13~, 그 전 10-31~11-12 는 줄 전체 배경 `rowPaint()`)과 **줄 순서**(평가연도 안에서 `AUTHOR_COLORS` 역순, 흰 줄이 맨 앞, 묶음 안은 최신순. 11-06) | 저자 칸에 교수 이름이 있나(저자 필터와 같은 `checkName`) |
+| `upjuk.html` | `:root` 의 `--au-lee` `--au-eun` `--au-kim` · `AUTHOR_COLORS` · `authorsHtml()` | 저자 칸의 **그 교수 이름 글자 배경**(11-13~, 그 전 10-31~11-12 는 줄 전체 배경 `rowPaint()`). 줄 순서는 11-25 부터 공저 교수와 상관없이 투고 진도 → 최신순(`진도순위`)이다(11-06~11-24 는 평가연도 안에서 `AUTHOR_COLORS` 역순 묶음) | 저자 칸에 교수 이름이 있나(저자 필터와 같은 `checkName`) |
 | `portfolio.html` | 같은 `--au-lee` `--au-eun` `--au-kim` · `.au-name` · `공저교수색` · `공저자칸()` | 공저자 칸의 **이희란·은종현·김우석 이름 글자 배경**(11-13~) | `esc()` 로 HTML 이스케이프한 뒤 세 한글 이름만 찾아 칠한다. `(후보)` 등 나머지 글자는 그대로 |
 | `graph.html` | `layout_findings.py` `HYPEREDGES` 의 `fill`(면) · `color`(테두리·점선) · `labelColor` → 재생성이 `const hyperedges` 한 줄에 굽는다 | 훌(hyperedge)의 면·테두리·라벨 | 훌 구성원 목록(`nodes`) |
 | `mindmap.html` | `GROUP_FILLS`(렌더) · `HULL_GROUPS`(재편 마이그레이션) | 노드 **면색 = 최상위 가지**, **테두리 = 등급(KIND)** | 노드가 속한 최상위 가지. 가지는 id 로 먼저, 없으면 제목 정규식 |
@@ -48,7 +48,7 @@
    같은 성의 다른 저자(「Sung min Kim」·「Jae Ryoung Kim」)가 안 잡히는지 확인한다.
 3. 색까지 주려면 `:root` 에 `--au-xxx`, `AUTHOR_COLORS` 에 `{NAME:"…",COLOR:"var(--au-xxx)"}` 한 줄. 둘 이상이
    같이 쓴 줄은 `authorsHtml` 이 이름마다 제 색을 칠한다(저자 문자열을 `,`·`and`·`&`·`;`·`/` 로 나눈 조각마다
-   `checkName`, 교신 표시 `*`·`†` 는 칠하지 않는다). 배열의 역순이 줄 순서다(`coauthorKey`) — 넣는 자리를 정해서 넣는다.
+   `checkName`, 교신 표시 `*`·`†` 는 칠하지 않는다). 배열 순서는 색 판정 번호일 뿐 줄 순서와는 상관없다(11-25 부터 줄 순서는 투고 진도 → 최신순).
 4. 검증은 브라우저 없이도 된다 — `<script>` 를 node `vm` 에서 돌려(`document`·`localStorage`·`fetch` 를 빈 객체로
    흉내) `authorsHtml({AUTHORS:"…"})` 를 표의 실제 저자 문자열 **전부**로 찍어, 칠한 교수 집합이 `authorHits`(줄 전체 판정 =
    저자 필터)와 같은지 본다(11-13: 269줄 중 38줄 칠함, 어긋남 0). 10-31 에 쓴 스크립트의 요지:
