@@ -197,7 +197,7 @@
 <header>
   <a class="home" href="index.html">← 홈</a>
   <h1>포트폴리오 한눈에</h1>
-  <span class="sub">등급 순 · 투고 · ToDo</span>
+  <span class="sub">투고 진도 순 · 등급 · ToDo</span>
   <span class="stamp" id="stamp" title="이 표를 볼트에서 발행한 날짜"></span>
   <div class="hdr-end">
     <nav class="links">
@@ -322,6 +322,36 @@ async function loadRows(){
   적용완성도필터();
 }
 
+/* 행 날짜 — upjuk 의 업적 행(research_outputs kind=output)의 날짜다 (2026-11-25, 사용자 지시: 「투고」 열을 upjuk 과 같은
+   「투고 진도 → 최신순」으로). 업적 날짜는 마지막 행동(투고 · 채택 · 수정본) 날짜이고 출판한 것은 게재일, 초고는 계획일 가안이다.
+   짝짓기: 업적 제목 머리의 「(행 이름)」 — 분리 트랙(TSE_TomoSh4 · TSE_SEM1_Bezier …)도 여기서 잡힌다 — 이 없으면 project_id.
+   한 행에 업적이 여럿이면(출판한 앞 편 + 지금 원고) 그 행 단계와 같은 단계인 업적 중 최근 것, 없으면 전부 중 최근 것이다.
+   못 읽거나 업적이 없는 행은 날짜 없음(같은 진도 안에서 맨 아래, 그 안은 저널 · 이름순). 볼트 표에는 이 날짜가 없다. */
+let 업적날짜 = new Map();      // 행 이름 → [{stage, d}]  (d = 20261125 꼴)
+async function loadDates(){
+  const 새 = new Map();
+  try{
+    const outs=await api('/rest/v1/research_outputs?kind=eq.output&select=stage,project_id,title,p_year,p_month,p_day',
+      {headers:{apikey:CFG.key,Authorization:"Bearer "+SESSION.access_token}}) || [];
+    for(const o of outs){
+      const m=/^\s*\(([A-Za-z][\w-]*)\)/.exec(o.title||"");
+      const 이름=m ? m[1] : o.project_id;
+      const y=+o.p_year||0;
+      if(!이름||!y) continue;
+      const d=y*10000+(+o.p_month||0)*100+(+o.p_day||0);
+      if(!새.has(이름)) 새.set(이름,[]);
+      새.get(이름).push({stage:o.stage||"published", d});
+    }
+  }catch(e){ /* 날짜 없이 진도 · 저널순으로 간다 */ }
+  업적날짜 = 새;
+}
+function 행날짜(row){
+  const 목록 = 업적날짜.get(row.id) || [];
+  const 같은단계 = 목록.filter(e => e.stage === row.stage);
+  return (같은단계.length ? 같은단계 : 목록).reduce((m, e) => Math.max(m, e.d), 0);
+}
+const 날짜글 = d => `${Math.floor(d / 10000)}-${String(Math.floor(d / 100) % 100).padStart(2, "0")}-${String(d % 100).padStart(2, "0")}`;
+
 /* 지도·문서 링크 — portfolio_links 표(authenticated 만 읽는다). 표를 못 읽어도 본표는 그대로 둔다;
    링크가 없는 것은 오류가 아니다. 주소를 이 파일에 적지 않는 이유는 맨 위 주석과 같다 (2026-11-03). */
 async function loadLinks(){
@@ -363,7 +393,10 @@ const BLANK_FIELD = {순서:"order", 완성도:"completeness", 등급:"grade", �
 /* ── 정렬 — 볼트 dataviewjs 의 정렬기·비교() 를 그대로 옮긴 것이다 ──────────
    저쪽을 고치면 이쪽도 같이 고친다(발행해도 따라오지 않는 유일한 부분이다).
    미기입(—)은 방향과 무관하게 늘 맨 아래에 남고, 게재 완료 행은 「투고순서」·「논문
-   완성도」 두 열에서 방향과 무관하게 맨 위에 모인다. */
+   완성도」 두 열에서 방향과 무관하게 맨 위에 모인다.
+   예외 둘 (2026-11-25, 사용자 지시 — upjuk 과 같은 순서): 「투고」 열(5)은 진도가 같으면 저널 이름이 아니라
+   업적 날짜(행날짜)가 최근인 것이 위이고, 처음 여는 기본 열이 「논문 완성도」(2)가 아니라 「투고」(5)다.
+   볼트 표에는 업적 날짜가 없어 이 둘은 이쪽에만 있다. */
 const 수 = v => (Number.isFinite(v) ? v : Infinity);
 const 정렬기 = {
   0: (a, b) => 한글순(a.name, b.name),
@@ -371,13 +404,16 @@ const 정렬기 = {
   2: (a, b) => 수(a.completenessKey) - 수(b.completenessKey) || 한글순(a.name, b.name),
   3: (a, b) => a.bucket - b.bucket || 한글순(a.workspace, b.workspace) || 한글순(a.name, b.name),
   4: (a, b) => 한글순(a.coauthorKey, b.coauthorKey) || 한글순(a.name, b.name),
-  // 같은 단계 안에서는 **보이는 이름**(약어)의 가나다순이다 — 긴 이름으로 줄을 세우면
-  // 화면에 TSE·CR 이 보이는데 순서는 한국섬유공학회지·한국복합재료학회지 기준이 된다.
-  5: (a, b) => 수(a.stageRank) - 수(b.stageRank) || 한글순(투고이름(a), 투고이름(b)) || 한글순(a.name, b.name),
+  // 투고 진도(출판이 위) → 업적 날짜 최신순(2026-11-25~, upjuk 과 같은 순서) → **보이는 이름**(약어)의 가나다순.
+  // 마지막 열쇠가 긴 이름이 아닌 이유: 화면에 TSE·CR 이 보이는데 순서는 한국섬유공학회지·한국복합재료학회지 기준이 된다.
+  5: (a, b) => 수(a.stageRank) - 수(b.stageRank) || 행날짜(b) - 행날짜(a) || 한글순(투고이름(a), 투고이름(b)) || 한글순(a.name, b.name),
 };
 
-const SORT_KEY = "cfms_portfolio_sort_v1";
-let 현재열 = 2;      // 볼트 노트의 기본값과 같다
+/* v1 → v2 (2026-11-25): 기본 열을 「투고」로 바꾸면서 전에 저장한 열 선택을 한 번 비운다 — 그대로 두면
+   예전에 다른 열을 눌러 본 브라우저에는 새 기본 순서가 나타나지 않는다. */
+const SORT_KEY = "cfms_portfolio_sort_v2";
+try { localStorage.removeItem("cfms_portfolio_sort_v1"); } catch (e) {}
+let 현재열 = 5;      // 「투고」 — 투고 진도 → 최신순 (볼트 노트의 기본값은 「논문 완성도」 2)
 let 역순 = false;
 try {
   const saved = JSON.parse(lsGet(SORT_KEY) || "null");
@@ -472,7 +508,9 @@ function 투고사슬(row) {
 
 /* 셀 툴팁. 약어가 무엇의 줄임인지 전체 이름으로 풀어 준다 — 사다리면 순위별로, 아니면 한 줄로. */
 function 투고툴팁(row, stage) {
-  const 앞 = (stage ? stage.label : "") + (row.grade ? ` · 등급 ${row.grade}` : "");
+  const d = 행날짜(row);
+  const 앞 = (stage ? stage.label : "") + (row.grade ? ` · 등급 ${row.grade}` : "")
+    + (d ? ` · ${날짜글(d)}${row.stage === "draft" ? "(계획)" : ""}` : "");   // 「투고」 열 정렬이 쓰는 업적 날짜
   const chain = row.journalChain || [];
   if (chain.length >= 2) return 앞 + "\n" + chain.map((c, i) => `${i + 1}순위 ${c.full}`).join(" · ");
   return row.journalFull ? `${앞}\n${row.journalFull}` : 앞;
@@ -638,7 +676,7 @@ async function showTable(){
   const stamp=document.getElementById('stamp');
   stamp.textContent='읽는 중…';
   try{
-    await loadRows();
+    await Promise.all([loadRows(), loadDates()]);   // 날짜는 「투고」 열 정렬이 쓴다 — 실패해도 throw 하지 않는다
   }catch(e){
     stamp.textContent='';
     if(/portfolio_rows|PGRST205|schema cache|42P01/i.test(e.message)){
