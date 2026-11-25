@@ -207,6 +207,11 @@
     // 2026-11-22 SFTF_Holonomy 투고. 약어는 ISO 「Appl. Compos. Mater.」 — 「ACM」은 Advanced Composite Materials(T&F)와 겹쳐 쓰지 않는다.
     { key: 'Appl. Compos. Mater.', journal: 'Applied Composite Materials', names: ['Applied Composite Materials', 'Appl. Compos. Mater.'],
       system: 'Springer Nature SNAPP', url: 'https://submission.springernature.com/your-submissions' },
+    // 2026-11-25 SFTF_Holonomy 투고(Applied Composite Materials 다음). 약어는 볼트 저널 메모의 ISO 약어 「J. Text. Inst.」(portfolio 가 이 약어로 찾는다).
+    // 투고는 ScholarOne 이 아니라 T&F 의 새 포털이고, 주소는 저자 대시보드다(사용자가 준 주소 — 원고별 번호가 들지 않은 공통 주소).
+    { key: 'J. Text. Inst.', journal: 'The Journal of The Textile Institute',
+      names: ['The Journal of The Textile Institute', 'Journal of the Textile Institute', 'J. Text. Inst.', 'JTI'],
+      system: 'Taylor & Francis Research Portal', url: 'https://rp.tandfonline.com/dashboard/' },
   ];
   SUBMISSION_SITES.forEach((site) => { Object.freeze(site.names); Object.freeze(site); });
   Object.freeze(SUBMISSION_SITES);
