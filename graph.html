@@ -1212,6 +1212,32 @@ network.once('stabilizationIterationsDone', () => {
   network.setOptions({ physics: { enabled: false } });
 });
 
+// === 휠 (2026-11-26, 사용자 지시 — mindmap 과 같은 규칙) =================
+// 휠 = 위아래 스크롤, Shift+휠 = 좌우, Ctrl+휠 = 확대/축소(마우스 자리 기준). vis 기본은 휠이 곧 확대/축소라
+// 캔버스 바깥 #graph 에서 capture 로 먼저 잡고 vis 로는 넘기지 않는다(zoomView 는 켜 둔다 — 터치스크린의
+// 두 손가락 확대는 vis 가 그대로 한다). 터치패드 핀치는 브라우저가 ctrlKey 를 붙인 wheel 로 보내 Ctrl+휠을 탄다.
+// 확대 배율은 휠 한 칸(약 100px)에 1.1배, 범위는 vis 휠 확대와 같은 자리에서 0.02~10 으로 묶는다.
+container.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  const cv = container.querySelector('canvas') || container;
+  const r = cv.getBoundingClientRect();
+  const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? r.height : 1;   // 줄 · 쪽 단위(Firefox 등)를 픽셀로
+  let dx = e.deltaX * unit, dy = e.deltaY * unit;
+  const scale = network.getScale();
+  if (e.ctrlKey || e.metaKey) {
+    const p = { x: e.clientX - r.left, y: e.clientY - r.top };
+    const c = network.DOMtoCanvas(p);
+    const f = Math.max(1 / 1.5, Math.min(1.5, Math.pow(1.1, -dy / 100)));
+    const ns = Math.max(0.02, Math.min(10, scale * f));
+    network.moveTo({ scale: ns, position: { x: c.x - (p.x - r.width / 2) / ns, y: c.y - (p.y - r.height / 2) / ns } });
+    return;
+  }
+  if (e.shiftKey && !dx) { dx = dy; dy = 0; }   // Shift+휠을 가로로 바꿔 주지 않는 브라우저
+  const v = network.getViewPosition();
+  network.moveTo({ scale, position: { x: v.x + dx / scale, y: v.y + dy / scale } });
+}, { capture: true, passive: false });
+
 // === 배치 모드 =========================================================
 // 이 그래프는 사이클이 없는 DAG(32 노드 / 33 개발목표 엣지)이다.
 // 자유 배치는 PFTF·Tomo_SFTF 두 허브의 스포크가 서로를 가로질러
