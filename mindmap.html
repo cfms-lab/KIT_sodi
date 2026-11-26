@@ -191,7 +191,7 @@
   <aside class="panel" id="panel">
     <div class="panelhdr"><h3>노드 편집</h3>
       <button class="btn sm panelclose" onclick="togglePanel(false)">✕ 닫기</button></div>
-    <div id="editArea"><p class="muted">노드를 클릭해 선택하세요. 빈 곳 드래그=화면 이동, 휠=확대/축소.<br>
+    <div id="editArea"><p class="muted">노드를 클릭해 선택하세요. 빈 곳 드래그 · 휠=화면 이동(Shift+휠=좌우), Ctrl+휠=확대/축소.<br>
       노드를 <b>드래그해 다른 노드에 놓으면</b> 그 노드의 자식으로 이동합니다.</p></div>
 
     <div class="sec" data-editonly>
@@ -235,7 +235,7 @@
 <script src="stages.js"></script>
 <script>
 /* ====================== 버전 (배포 확인용) ====================== */
-const APP_VERSION='v2026-11-21-dark';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
+const APP_VERSION='v2026-11-26-wheel';   // 파일을 고칠 때마다 이 값을 올리면, 화면 태그로 최신본 여부를 바로 확인할 수 있습니다.
 
 /* ====================== 기본 데이터 (첫 실행 시드) ====================== */
 const DEFAULT_DATA = /*DATA_START*/{"version":1,"title":"CFMS 프로젝트 관계도 2026","showRel":true,"root":{"id":"root","title":"CFMS 연구실 2026","kind":"root","note":"두 워크스페이스의 세부 프로젝트 관계도","children":[{"id":"sftf","title":"__SFTF_Projects(2026)","kind":"group","note":"3D 프린팅 Support Flow Tensor Field 연구군 (D:\\__SFTF_Projects(2026))","children":[{"id":"tomo_sftf","title":"Tomo_SFTF_dev","kind":"core","status":"active","note":"SFTF 본체: 빌드방향 후보 생성(coarse-to-refine) + TOMO_CPU/GPU 엔진(DLL). 표준 템플릿의 기원."},{"id":"clustering","title":"SFTF_Clustering_dev","kind":"app","status":"active","note":"면별 SFTF 특징 → 출판지향 메쉬 분할(clustering). 한국섬유공학회지 투고."},{"id":"derivative","title":"SFTF_Derivative_dev","kind":"app","status":"active","note":"미분가능 SFTF 손실항 + GNN + 경사기반 빌드방향 최적화. TOMO 교차검증."},{"id":"composite","title":"SFTF_Composite_dev","kind":"app","status":"stub","note":"복합재 적용 (신규 스캐폴드)."},{"id":"injmold","title":"SFTF_InjMold_dev","kind":"app","status":"stub","note":"사출성형 적용 (신규 스캐폴드)."}]},{"id":"vscode","title":"__VSCode_Projects","kind":"group","note":"의복 CAD·영상계측·랩 웹앱·인프라 (D:\\__VSCode_Projects)","children":[{"id":"cadsuite","title":"의복 CAD 스위트","kind":"subgroup","note":"Clo3D 오픈소스 대안","children":[{"id":"cfmscad","title":"cfmsCAD2026_dev","kind":"app","status":"active","note":"3D 의복 CAD 에디터 (UI/패턴)."},{"id":"cfmsdrape","title":"cfmsDrape2026_dev","kind":"app","status":"active","note":"암시적 옷감 드레이프 솔버(DLL). SCAD/GarmentCode 입력, 인체 충돌·자기충돌."},{"id":"cfmssew","title":"cfmsSew2026_dev","kind":"app","status":"active","note":"2D 패턴 봉제대응 자동인식(휴리스틱→GNN). CAD/Drape에 병합 예정."},{"id":"cfmsshared","title":"cfmsShared2026_dev","kind":"infra","status":"infra","note":"CAD↔Drape 인터페이스 단일진실(contract/messages) 공유 git 채널."}]},{"id":"measure","title":"영상 계측","kind":"subgroup","children":[{"id":"dispersity","title":"cfmsDispersityKNN_Dev","kind":"app","status":"active","note":"광학현미경 입자 분산도 정량화(정적 kNN 에너지). C++Builder(Baraff 클로스심) 포팅."},{"id":"sem","title":"TSE_SEM2026_dev","kind":"app","status":"active","note":"SEM 섬유 영상 정량화(반지름·배향·기공) + metaball 3D 재구성."}]},{"id":"webapps","title":"랩 웹앱 (cfms-lab/KIT_sodi · Supabase)","kind":"subgroup","children":[{"id":"upjuk","title":"논문관리 (upjuk)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/upjuk.html","note":"업적 리스트 CRUD + PDF. draft는 RLS로 비로그인 숨김."},{"id":"timetable","title":"수업시간표 (TimeTable)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/timetable.html","note":"학기별 시간표 드래그 편성."},{"id":"jobgis","title":"취업현황 (JobGIS)","kind":"web","status":"active","url":"https://cfms-lab.github.io/KIT_sodi/jobgis.html","note":"졸업생 취업처 지도."},{"id":"mindmap","title":"이 관계도 (Mindmap)","kind":"web","status":"active","note":"프로젝트 관계도 (이 페이지, 로그인 전용)."}]},{"id":"infra","title":"인프라/템플릿","kind":"subgroup","children":[{"id":"template","title":"__vscode_AI_template","kind":"infra","status":"infra","note":"표준 프로젝트 템플릿(코드+논문, uv/xelatex/훅). 모든 *_dev의 기반. Tomo_SFTF에서 기원."},{"id":"hooks","title":"__클로드코드_훅설정","kind":"infra","status":"infra","note":"Claude Code 전역 훅 설정."}]}]}]},"links":[{"from":"tomo_sftf","to":"clustering","label":"코어 분리"},{"from":"tomo_sftf","to":"derivative","label":"코어 재사용"},{"from":"tomo_sftf","to":"composite","label":"파생"},{"from":"tomo_sftf","to":"injmold","label":"파생"},{"from":"clustering","to":"derivative","label":"코드 재사용"},{"from":"tomo_sftf","to":"template","label":"템플릿 기원"},{"from":"cfmsshared","to":"cfmscad","label":"contract"},{"from":"cfmsshared","to":"cfmsdrape","label":"contract"},{"from":"cfmssew","to":"cfmscad","label":"병합 예정"},{"from":"cfmssew","to":"cfmsdrape","label":"병합 예정"},{"from":"derivative","to":"cfmsdrape","label":"드레이프 응용 연계"},{"from":"dispersity","to":"cfmsdrape","label":"클로스심 계보"}]}/*DATA_END*/;
@@ -2303,10 +2303,17 @@ document.addEventListener('click', e=>{
 });
 
 /* ====================== 편집 패널 ====================== */
+// 선택 없음일 때의 안내. 처음 HTML(#editArea)과 같은 문구이고, 노드 끌어 옮기기 줄은 편집 권한이 있을 때만이다.
+function editHintHtml(){
+  return '<p class="muted">노드를 클릭해 선택하세요. 빈 곳 드래그 · 휠=화면 이동(Shift+휠=좌우), Ctrl+휠=확대/축소.'
+    +(canEdit()?'<br>\n      노드를 <b>드래그해 다른 노드에 놓으면</b> 그 노드의 자식으로 이동합니다.':'')+'</p>';
+}
 function selectNode(id){ sel=id; render(); renderEdit(); updatePanelBtn(); }
 function renderEdit(){
   const area=document.getElementById('editArea');
-  if(!sel){ area.innerHTML='<p class="muted">노드를 클릭해 선택하세요.</p>'; return; }
+  // 선택이 없을 때는 처음 HTML 의 안내(드래그 · 휠 · Ctrl+휠)를 그대로 보여 준다 — 전에는 여기서 첫 줄만 남겨
+  // 휠 안내가 화면에 나온 적이 없었다(2026-11-26, 휠 = 스크롤 · Ctrl+휠 = 확대로 바꾸며 되살림).
+  if(!sel){ area.innerHTML=editHintHtml(); return; }
   const n=findNode(DATA.root, sel); if(!n){ sel=null; return renderEdit(); }
   if(!canEdit()){                                   // 열람 모드: 내용만 보여주고 편집 폼은 만들지 않는다
     area.innerHTML=`<h4 style="margin:0 0 6px">${esc(n.title)}</h4>
@@ -2858,11 +2865,22 @@ function bindCanvas(){
     }
     drag=null; cv.classList.remove('drag');
   });
+  /* 휠 (2026-11-26, 사용자 지시): 휠 = 위아래 스크롤, Shift+휠 = 좌우 스크롤, Ctrl+휠 = 확대/축소(마우스 자리 기준).
+     전에는 휠이 곧 확대/축소였다. 터치패드 두 손가락 스크롤은 deltaX · deltaY 로, 오므리기(핀치)는 브라우저가
+     ctrlKey 를 붙인 wheel 로 보내므로 같은 규칙을 탄다. preventDefault 는 늘 한다 — Ctrl+휠이 브라우저 확대로 새지 않게. */
   cv.addEventListener('wheel', e=>{ e.preventDefault();
     closeInlineEdit(true);
-    const r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
-    const f=e.deltaY<0?1.1:1/1.1, ns=Math.max(.2,Math.min(2.5,view.s*f));
-    view.tx=mx-(mx-view.tx)*(ns/view.s); view.ty=my-(my-view.ty)*(ns/view.s); view.s=ns; applyView();
+    const unit=e.deltaMode===1?16:e.deltaMode===2?cv.clientHeight:1;   // 줄 · 쪽 단위(Firefox 등)를 픽셀로
+    let dx=e.deltaX*unit, dy=e.deltaY*unit;
+    if(e.ctrlKey||e.metaKey){
+      const r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+      // 휠 한 칸(약 100px)에 1.1배 — 예전 배율과 같고, 핀치의 잔 이벤트는 그만큼 잘게 확대된다.
+      const f=Math.max(1/1.5,Math.min(1.5,Math.pow(1.1,-dy/100))), ns=Math.max(.2,Math.min(2.5,view.s*f));
+      view.tx=mx-(mx-view.tx)*(ns/view.s); view.ty=my-(my-view.ty)*(ns/view.s); view.s=ns; applyView();
+      return;
+    }
+    if(e.shiftKey&&!dx){ dx=dy; dy=0; }   // Shift+휠을 가로로 바꿔 주지 않는 브라우저
+    view.tx-=dx; view.ty-=dy; applyView();
   }, {passive:false});
   document.getElementById('search').addEventListener('input', ()=>{
     const q=document.getElementById('search').value.trim().toLowerCase();
